@@ -1,0 +1,60 @@
+datasource db {
+  provider = "sqlite"
+}
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/client"
+}
+
+model Business {
+  id            String         @id @default(uuid())
+  name          String
+  slug          String         @unique
+  ownerName     String
+  category      String
+  teamSize      String
+  country       String
+  currency      String
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  services      Service[]
+  professionals Professional[]
+  appointments  Appointment[]
+}
+
+model Service {
+  id           String        @id @default(uuid())
+  businessId   String
+  business     Business      @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  name         String
+  duration     Int           // en minutos
+  price        Float
+  createdAt    DateTime      @default(now())
+  appointments Appointment[]
+}
+
+model Professional {
+  id           String        @id @default(uuid())
+  businessId   String
+  business     Business      @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  name         String
+  avatar       String?
+  createdAt    DateTime      @default(now())
+  appointments Appointment[]
+}
+
+model Appointment {
+  id             String       @id @default(uuid())
+  businessId     String
+  business       Business     @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  serviceId      String
+  service        Service      @relation(fields: [serviceId], references: [id])
+  professionalId String
+  professional   Professional @relation(fields: [professionalId], references: [id])
+  clientName     String
+  clientWhatsApp String
+  dateTime       DateTime     // Fecha y hora reservada
+  status         String       @default("CONFIRMED")
+  createdAt      DateTime     @default(now())
+}
