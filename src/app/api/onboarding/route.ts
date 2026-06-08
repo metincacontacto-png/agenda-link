@@ -1,27 +1,67 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 
+const RESERVED_SLUGS = ["admin", "api", "public", "auth", "static", "login", "register", "success"];
+
 export async function POST(request: Request) {
   try {
     const body = await request.json();
     const { name, ownerName, category, teamSize, country, serviceName, serviceDuration, servicePrice } = body;
 
-    if (!name || !ownerName || !category || !teamSize || !country || !serviceName || !serviceDuration || !servicePrice) {
+    // Verificar presencia de campos requeridos (permitiendo precios en 0)
+    if (
+      !name ||
+      !ownerName ||
+      !category ||
+      !teamSize ||
+      !country ||
+      !serviceName ||
+      serviceDuration === undefined ||
+      servicePrice === undefined ||
+      servicePrice === ""
+    ) {
       return NextResponse.json({ error: "Faltan campos obligatorios" }, { status: 400 });
     }
 
-    // Generar slug único del negocio
+    // Validar precio y duración
+    const parsedPrice = parseFloat(servicePrice);
+    const parsedDuration = parseInt(serviceDuration, 10);
+    if (isNaN(parsedPrice) || parsedPrice < 0 || isNaN(parsedDuration) || parsedDuration <= 0) {
+      return NextResponse.json({ error: "Precio o duración inválidos" }, { status: 400 });
+    }
+
+    // Generar slug único del negocio (removiendo acentos en español)
     let slug = name
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "") // Remueve tildes de forma segura
       .toLowerCase()
       .trim()
-      .replace(/[^\w\s-]/g, "")
+      .replace(/[^\w\s-]/g, "") // Remueve caracteres especiales
       .replace(/[\s_]+/g, "-")
       .replace(/^-+|-+$/g, "");
 
-    // Si el slug existe, añadir sufijo aleatorio
-    const existing = await prisma.business.findUnique({ where: { slug } });
-    if (existing) {
-      slug = `${slug}-${Math.floor(1000 + Math.random() * 9000)}`;
+    // Evitar slug vacío
+    if (!slug) {
+      slug = "negocio";
+    }
+
+    // Evitar slugs reservados
+    if (RESERVED_SLUGS.includes(slug)) {
+      slug = `${slug}-negocio`;
+    }
+
+    // Loop de unicidad para evitar colisiones
+    let finalSlug = slug;
+    let collision = true;
+    let attempts = 0;
+    while (collision && attempts < 100) {
+      const existing = await prisma.business.findUnique({ where: { slug: finalSlug } });
+      if (existing) {
+        finalSlug = `${slug}-${Math.floor(1000 + Math.random() * 9000)}`;
+        attempts++;
+      } else {
+        collision = false;
+      }
     }
 
     // Determinar la moneda por país
@@ -31,7 +71,7 @@ export async function POST(request: Request) {
     const business = await prisma.business.create({
       data: {
         name,
-        slug,
+        slug: finalSlug,
         ownerName,
         category,
         teamSize,
@@ -40,8 +80,8 @@ export async function POST(request: Request) {
         services: {
           create: {
             name: serviceName,
-            duration: parseInt(serviceDuration, 10),
-            price: parseFloat(servicePrice),
+            duration: parsedDuration,
+            price: parsedPrice,
           },
         },
         professionals: {

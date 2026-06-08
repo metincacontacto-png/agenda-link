@@ -52,11 +52,46 @@ export default function OnboardingPage() {
     }
   };
 
+  const fallbackCopyText = (text: string) => {
+    try {
+      const textArea = document.createElement("textarea");
+      textArea.value = text;
+      textArea.style.top = "0";
+      textArea.style.left = "0";
+      textArea.style.position = "fixed";
+      textArea.style.opacity = "0";
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      const successful = document.execCommand("copy");
+      document.body.removeChild(textArea);
+      if (successful) {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      } else {
+        alert("No se pudo copiar automáticamente. Por favor, selecciona y copia el link manualmente.");
+      }
+    } catch (err) {
+      console.error("Fallback de copia falló:", err);
+      alert("No se pudo copiar automáticamente. Por favor, selecciona y copia el link manualmente.");
+    }
+  };
+
   const copyLink = () => {
     const url = `${window.location.origin}/${slug}`;
-    navigator.clipboard.writeText(url);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    if (typeof navigator !== "undefined" && navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(url)
+        .then(() => {
+          setCopied(true);
+          setTimeout(() => setCopied(false), 2000);
+        })
+        .catch((err) => {
+          console.error("Error al copiar usando navigator.clipboard:", err);
+          fallbackCopyText(url);
+        });
+    } else {
+      fallbackCopyText(url);
+    }
   };
 
   return (
@@ -75,7 +110,7 @@ export default function OnboardingPage() {
         )}
 
         {step === 1 && (
-          <div>
+          <form onSubmit={(e) => { e.preventDefault(); if (formData.name && formData.ownerName) nextStep(); }}>
             <div className={styles.formGroup}>
               <label className={styles.label}>Nombre de tu Negocio</label>
               <input
@@ -85,6 +120,7 @@ export default function OnboardingPage() {
                 onChange={handleChange}
                 placeholder="Ej. Peluquería Bella Vista"
                 className={styles.input}
+                required
               />
             </div>
             <div className={styles.formGroup}>
@@ -96,6 +132,7 @@ export default function OnboardingPage() {
                 onChange={handleChange}
                 placeholder="Ej. Juan Pérez"
                 className={styles.input}
+                required
               />
             </div>
             <div className={styles.formGroup}>
@@ -125,18 +162,18 @@ export default function OnboardingPage() {
             </div>
             <div className={styles.buttonRow}>
               <button
+                type="submit"
                 disabled={!formData.name || !formData.ownerName}
-                onClick={nextStep}
                 className={`${styles.btn} ${styles.btnPrimary}`}
               >
                 Siguiente
               </button>
             </div>
-          </div>
+          </form>
         )}
 
         {step === 2 && (
-          <div>
+          <form onSubmit={(e) => { e.preventDefault(); if (formData.serviceName && formData.servicePrice && !loading) handleSubmit(); }}>
             <h2 style={{ fontSize: "16px", marginBottom: "20px", textAlign: "center" }}>Agrega tu primer servicio</h2>
             <div className={styles.formGroup}>
               <label className={styles.label}>Nombre del Servicio</label>
@@ -147,6 +184,7 @@ export default function OnboardingPage() {
                 onChange={handleChange}
                 placeholder="Ej. Corte de Cabello Caballero"
                 className={styles.input}
+                required
               />
             </div>
             <div className={styles.formGroup}>
@@ -168,21 +206,22 @@ export default function OnboardingPage() {
                 onChange={handleChange}
                 placeholder="Ej. 15000"
                 className={styles.input}
+                required
               />
             </div>
             <div className={styles.buttonRow}>
-              <button onClick={prevStep} className={`${styles.btn} ${styles.btnSecondary}`}>
+              <button type="button" onClick={prevStep} className={`${styles.btn} ${styles.btnSecondary}`}>
                 Atrás
               </button>
               <button
+                type="submit"
                 disabled={!formData.serviceName || !formData.servicePrice || loading}
-                onClick={handleSubmit}
                 className={`${styles.btn} ${styles.btnPrimary}`}
               >
                 {loading ? "Creando..." : "Completar Onboarding"}
               </button>
             </div>
-          </div>
+          </form>
         )}
 
         {step === 3 && (

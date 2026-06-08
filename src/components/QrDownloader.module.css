@@ -1,0 +1,207 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+}
+
+.canvasContainer {
+  background: #ffffff;
+  padding: 16px;
+  border-radius: var(--radius-card);
+  border: 1px solid var(--card-border);
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: var(--shadow-subtle);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.canvasContainer:hover {
+  transform: scale(1.02);
+  box-shadow: var(--shadow-active);
+}
+
+.printBtn {
+  width: 100%;
+  max-width: 320px;
+  padding: 14px 24px;
+  border-radius: var(--radius-pill);
+  border: none;
+  background-color: var(--foreground);
+  color: var(--background);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: var(--shadow-subtle);
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.printBtn:hover {
+  background-color: var(--primary);
+  color: var(--primary-text);
+  box-shadow: var(--shadow-active);
+  transform: translateY(-1px);
+}
+
+.printBtn:active {
+  transform: translateY(0);
+}
+
+.printArea {
+  display: none;
+}
+
+/* Estilos de Impresión */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 0;
+  }
+
+  html, body {
+    background: #ffffff !important;
+    color: #000000 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    height: auto !important;
+    min-height: 0 !important;
+  }
+
+  /* Ocultar absolutamente todo en la página */
+  body * {
+    visibility: hidden;
+    height: 0;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+  }
+
+  /* Mostrar únicamente el área de impresión y sus hijos */
+  .printArea, .printArea * {
+    visibility: visible;
+    height: auto;
+    overflow: visible;
+  }
+
+  .printArea {
+    display: block !important;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    background: #ffffff;
+    padding: 0;
+    margin: 0;
+  }
+
+  /* Página 1: Cartel de Vitrina A4 */
+  .pageA4 {
+    width: 210mm;
+    height: 297mm;
+    padding: 25mm;
+    box-sizing: border-box;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    page-break-after: always;
+    break-after: page;
+    text-align: center;
+    background: #ffffff;
+  }
+
+  .pageA4 h1 {
+    font-size: 38px;
+    margin-bottom: 20px;
+    font-weight: 800;
+    color: #1d1d1f;
+    letter-spacing: -1px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+
+  .pageA4 p {
+    font-size: 18px;
+    color: #515154;
+    margin-top: 20px;
+    margin-bottom: 8px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+
+  .pageA4 .qrWrapper {
+    margin: 40px 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #ffffff;
+    padding: 20px;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 24px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+  }
+
+  .pageA4 .brandUrl {
+    font-size: 24px;
+    font-weight: 700;
+    color: #0071e3;
+    margin-top: 16px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    letter-spacing: -0.5px;
+  }
+
+  /* Página 2: Tarjeta de Presentación (85x55mm) */
+  .pageCard {
+    width: 85mm;
+    height: 55mm;
+    border: 1px dashed #c7c7cc;
+    border-radius: 8px;
+    padding: 6mm;
+    box-sizing: border-box;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    text-align: left;
+    page-break-after: avoid;
+    break-after: avoid;
+    margin: 20mm auto 0 auto; /* Centrar en la segunda página */
+    background: #ffffff;
+  }
+
+  .cardText {
+    flex: 1;
+    padding-right: 4mm;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .cardText h2 {
+    font-size: 15px;
+    margin-bottom: 6px;
+    font-weight: 800;
+    color: #1d1d1f;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    letter-spacing: -0.5px;
+  }
+
+  .cardText p {
+    font-size: 10px;
+    color: #86868b;
+    line-height: 1.3;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+
+  .cardText span {
+    font-size: 10px;
+    font-weight: 700;
+    color: #0071e3;
+    display: block;
+    margin-top: 8px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+}
