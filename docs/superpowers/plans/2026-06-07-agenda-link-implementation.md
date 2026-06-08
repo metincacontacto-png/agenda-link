@@ -1002,7 +1002,7 @@ Expected: Commit realizado con éxito.
 - Create: `src/components/Calendar.tsx`
 - Create: `src/components/Calendar.module.css`
 
-- [ ] **Step 1: Crear API de Disponibilidad de Horas**
+- [x] **Step 1: Crear API de Disponibilidad de Horas**
 
 Crear `src/app/api/availability/route.ts`. Retornará los slots horarios fijos (ej: 09:00 a 18:00) y filtrará aquellos ya agendados para ese día en el negocio:
 
@@ -1070,7 +1070,7 @@ export async function GET(request: Request) {
 }
 ```
 
-- [ ] **Step 2: Crear API de Creación de Citas**
+- [x] **Step 2: Crear API de Creación de Citas**
 
 Crear `src/app/api/appointments/route.ts`:
 
@@ -1118,7 +1118,7 @@ export async function POST(request: Request) {
 }
 ```
 
-- [ ] **Step 3: Crear Componente e Interfaz de Calendario Estilo Apple**
+- [x] **Step 3: Crear Componente e Interfaz de Calendario Estilo Apple**
 
 Crear `src/components/Calendar.module.css`:
 
@@ -1290,7 +1290,7 @@ export default function Calendar({ selectedDate, onSelectDate, selectedTime, onS
 }
 ```
 
-- [ ] **Step 4: Implementar estilos de la Página del Negocio**
+- [x] **Step 4: Implementar estilos de la Página del Negocio**
 
 Crear `src/app/[slug]/page.module.css`:
 
@@ -1453,7 +1453,7 @@ Crear `src/app/[slug]/page.module.css`:
 }
 ```
 
-- [ ] **Step 5: Implementar la Vista Pública de Reservas**
+- [x] **Step 5: Implementar la Vista Pública de Reservas**
 
 Crear `src/app/[slug]/page.tsx` para cargar el negocio e interconectar los selectores:
 
@@ -1704,7 +1704,7 @@ return NextResponse.json({
 });
 ```
 
-- [ ] **Step 6: Crear un componente temporal OtpModal para compilar**
+- [x] **Step 6: Crear un componente temporal OtpModal para compilar**
 
 Crear `src/components/OtpModal.tsx` con estructura mock:
 
@@ -1730,12 +1730,12 @@ export default function OtpModal({ onClose, onSuccess }: Props) {
 }
 ```
 
-- [ ] **Step 7: Probar compilación del agendamiento dinámico**
+- [x] **Step 7: Probar compilación del agendamiento dinámico**
 
 Run: `npm run build`
 Expected: Compilación sin errores.
 
-- [ ] **Step 8: Realizar Commit**
+- [x] **Step 8: Realizar Commit**
 
 Run: `git add . && git commit -m "feat: implement booking slots api and client dynamic page"`
 Expected: Commit realizado con éxito.
@@ -1748,7 +1748,7 @@ Expected: Commit realizado con éxito.
 - Modify: `src/components/OtpModal.tsx`
 - Create: `src/components/OtpModal.module.css`
 
-- [ ] **Step 1: Escribir los estilos para el Modal OTP estilo Apple**
+- [x] **Step 1: Escribir los estilos para el Modal OTP estilo Apple**
 
 Crear `src/components/OtpModal.module.css`:
 
@@ -1859,7 +1859,7 @@ Crear `src/components/OtpModal.module.css`:
 }
 ```
 
-- [ ] **Step 2: Implementar el Modal OTP interactivo paso a paso**
+- [x] **Step 2: Implementar el Modal OTP interactivo paso a paso**
 
 Modificar `src/components/OtpModal.tsx` para guiar al usuario por la simulación de WhatsApp OTP. Requiere ingresar nombre y teléfono, y luego simula el envío del código. Se le indica ingresar el código `1234` para continuar con éxito:
 
@@ -2006,12 +2006,12 @@ export default function OtpModal({ onClose, onSuccess }: Props) {
 }
 ```
 
-- [ ] **Step 3: Probar compilación con el modal OTP interactivo**
+- [x] **Step 3: Probar compilación con el modal OTP interactivo**
 
 Run: `npm run build`
 Expected: Compilación sin errores.
 
-- [ ] **Step 4: Realizar Commit**
+- [x] **Step 4: Realizar Commit**
 
 Run: `git add . && git commit -m "feat: complete interactive whatsapp otp validation component"`
 Expected: Commit realizado con éxito.
@@ -2024,7 +2024,7 @@ Expected: Commit realizado con éxito.
 - Create: `src/app/[slug]/success/page.tsx`
 - Create: `src/app/admin/[slug]/page.tsx`
 
-- [ ] **Step 1: Crear la Página de Éxito de Reserva**
+- [x] **Step 1: Crear la Página de Éxito de Reserva**
 
 Crear `src/app/[slug]/success/page.tsx`. Mostrará el resumen de la cita obtenida desde la base de datos (Server Component):
 
@@ -2135,7 +2135,7 @@ Crear `src/app/[slug]/success/success.module.css` (Vacío o con estructura bási
 /* Estilos vacíos, la página usa inline styles para robustez */
 ```
 
-- [ ] **Step 2: Crear el Dashboard del Administrador**
+- [x] **Step 2: Crear el Dashboard del Administrador**
 
 Crear `src/app/admin/[slug]/page.tsx` para listar las citas agendadas:
 
@@ -2250,12 +2250,12 @@ export default async function AdminDashboard({ params }: { params: { slug: strin
 }
 ```
 
-- [ ] **Step 3: Probar compilación del dashboard y vistas de éxito**
+- [x] **Step 3: Probar compilación del dashboard y vistas de éxito**
 
 Run: `npm run build`
 Expected: Compilación total exitosa sin errores de typescript o componentes.
 
-- [ ] **Step 4: Realizar Commit**
+- [x] **Step 4: Realizar Commit**
 
 Run: `git add . && git commit -m "feat: implement success page and simple admin dashboard to view appointments"`
 Expected: Commit realizado con éxito.
