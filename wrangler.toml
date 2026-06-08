@@ -1,0 +1,10 @@
+name = "agenda-link"
+compatibility_date = "2024-05-02"
+compatibility_flags = ["nodejs_compat"]
+
+pages_build_output_dir = ".next"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "agenda-link-db"
+database_id = "cc3d3e2c-ce4c-46f5-b25e-b3e71a3fb611"
