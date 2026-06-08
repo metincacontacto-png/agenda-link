@@ -98,7 +98,7 @@ export async function POST(request: Request) {
     });
 
     return NextResponse.json({ success: true, slug: business.slug, business });
-  } catch (error: any) {
+  } catch (error) {
     console.error("Error en onboarding:", error);
     return NextResponse.json({ error: "Error interno del servidor" }, { status: 500 });
   }

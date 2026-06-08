@@ -72,6 +72,7 @@ export default function QrDownloader({ slug, businessName }: Props) {
           <p>Escanea para agendar tu cita al instante</p>
           <div className={styles.qrWrapper}>
             {qrDataUrl && (
+              /* eslint-disable-next-line @next/next/no-img-element */
               <img
                 src={qrDataUrl}
                 alt="Código QR"
@@ -94,6 +95,7 @@ export default function QrDownloader({ slug, businessName }: Props) {
           </div>
           <div>
             {qrDataUrl && (
+              /* eslint-disable-next-line @next/next/no-img-element */
               <img
                 src={qrDataUrl}
                 alt="Código QR"

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import Link from "next/link";
 import styles from "./page.module.css";
 import Calendar from "@/components/Calendar";
 import OtpModal from "@/components/OtpModal";
@@ -81,6 +82,7 @@ export default function BookingPage({ params }: { params: Promise<{ slug: string
     }
 
     loadData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [slug, selectedDate]);
 
   const handleBookClick = () => {
@@ -147,7 +149,7 @@ export default function BookingPage({ params }: { params: Promise<{ slug: string
           <p style={{ color: "var(--text-secondary)", fontSize: "14px" }}>
             El enlace que ingresaste no corresponde a un negocio registrado.
           </p>
-          <a href="/" className={styles.btn}>Ir al Registro</a>
+          <Link href="/" className={styles.btn}>Ir al Registro</Link>
         </div>
       </main>
     );

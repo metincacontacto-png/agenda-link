@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import styles from "./Calendar.module.css";
 
 interface Props {
@@ -13,9 +13,7 @@ interface Props {
 }
 
 export default function Calendar({ selectedDate, onSelectDate, selectedTime, onSelectTime, slots }: Props) {
-  const [days, setDays] = useState<{ dateStr: string; dayName: string; dayNum: number }[]>([]);
-
-  useEffect(() => {
+  const days = React.useMemo(() => {
     const list = [];
     const today = new Date();
     for (let i = 0; i < 7; i++) {
@@ -31,11 +29,14 @@ export default function Calendar({ selectedDate, onSelectDate, selectedTime, onS
       const dayNum = d.getDate();
       list.push({ dateStr, dayName, dayNum });
     }
-    setDays(list);
-    if (!selectedDate && list.length > 0) {
-      onSelectDate(list[0].dateStr);
+    return list;
+  }, []);
+
+  useEffect(() => {
+    if (!selectedDate && days.length > 0) {
+      onSelectDate(days[0].dateStr);
     }
-  }, [selectedDate, onSelectDate]);
+  }, [selectedDate, onSelectDate, days]);
 
   return (
     <div className={styles.container}>
