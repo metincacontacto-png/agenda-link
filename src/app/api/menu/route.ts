@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { uploadBase64ToR2, deleteFromR2 } from "@/lib/r2";
 
 export async function GET(request: Request) {
   try {
@@ -25,7 +26,7 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { slug, name, price, description, category } = body;
+    const { slug, name, price, description, category, imageUrl } = body;
     if (!slug || !name || price === undefined || !category) {
       return NextResponse.json({ error: "Datos incompletos" }, { status: 400 });
     }
@@ -33,6 +34,7 @@ export async function POST(request: Request) {
     if (!business) {
       return NextResponse.json({ error: "Negocio no encontrado" }, { status: 404 });
     }
+    const finalImageUrl = await uploadBase64ToR2(imageUrl, `menu_${slug}`);
     const menuItem = await prisma.menuItem.create({
       data: {
         businessId: business.id,
@@ -40,6 +42,7 @@ export async function POST(request: Request) {
         price: parseFloat(price),
         description: description || null,
         category,
+        imageUrl: finalImageUrl || null,
       },
     });
     return NextResponse.json({ success: true, menuItem });
@@ -55,6 +58,10 @@ export async function DELETE(request: Request) {
     const id = searchParams.get("id");
     if (!id) {
       return NextResponse.json({ error: "Falta el parámetro id" }, { status: 400 });
+    }
+    const menuItem = await prisma.menuItem.findUnique({ where: { id } });
+    if (menuItem?.imageUrl) {
+      await deleteFromR2(menuItem.imageUrl);
     }
     await prisma.menuItem.delete({ where: { id } });
     return NextResponse.json({ success: true });

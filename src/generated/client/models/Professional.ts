@@ -371,10 +371,6 @@ export type ProfessionalUncheckedUpdateManyWithoutBusinessNestedInput = {
   deleteMany?: Prisma.ProfessionalScalarWhereInput | Prisma.ProfessionalScalarWhereInput[]
 }
 
-export type NullableStringFieldUpdateOperationsInput = {
-  set?: string | null
-}
-
 export type ProfessionalCreateNestedOneWithoutAppointmentsInput = {
   create?: Prisma.XOR<Prisma.ProfessionalCreateWithoutAppointmentsInput, Prisma.ProfessionalUncheckedCreateWithoutAppointmentsInput>
   connectOrCreate?: Prisma.ProfessionalCreateOrConnectWithoutAppointmentsInput

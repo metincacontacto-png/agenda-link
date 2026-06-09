@@ -81,6 +81,17 @@ export const BusinessScalarFieldEnum = {
   teamSize: 'teamSize',
   country: 'country',
   currency: 'currency',
+  logoUrl: 'logoUrl',
+  landingTitle: 'landingTitle',
+  landingSubtitle: 'landingSubtitle',
+  landingAbout: 'landingAbout',
+  landingCoverUrl: 'landingCoverUrl',
+  landingSecondaryCoverUrl: 'landingSecondaryCoverUrl',
+  landingPhone: 'landingPhone',
+  landingAddress: 'landingAddress',
+  landingHours: 'landingHours',
+  landingFeaturesJson: 'landingFeaturesJson',
+  landingTestimonialsJson: 'landingTestimonialsJson',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -94,6 +105,7 @@ export const ServiceScalarFieldEnum = {
   name: 'name',
   duration: 'duration',
   price: 'price',
+  imageUrl: 'imageUrl',
   createdAt: 'createdAt'
 } as const
 
@@ -129,6 +141,7 @@ export const MenuItemScalarFieldEnum = {
   description: 'description',
   price: 'price',
   category: 'category',
+  imageUrl: 'imageUrl',
   createdAt: 'createdAt'
 } as const
 

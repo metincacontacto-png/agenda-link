@@ -194,3 +194,337 @@
 .btn:hover {
   background-color: var(--primary-hover);
 }
+
+/* --- PUBLIC LANDING PAGE STYLES --- */
+.landingContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  animation: landingFadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes landingFadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.landingHero {
+  height: 190px;
+  border-radius: var(--radius-card);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--card-border);
+  box-shadow: var(--shadow-subtle);
+}
+
+.landingHeroOverlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.2) 100%);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: flex-start;
+  text-align: left;
+  box-sizing: border-box;
+}
+
+.landingLogo {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #ffffff;
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 15px;
+  margin-bottom: 10px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+}
+
+.landingHeroTitle {
+  font-size: 19px;
+  font-weight: 800;
+  color: #ffffff;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.4);
+  line-height: 1.25;
+}
+
+.landingHeroSubtitle {
+  font-size: 11.5px;
+  color: rgba(255,255,255,0.9);
+  margin-top: 4px;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+  line-height: 1.4;
+}
+
+.landingActiveBadge {
+  font-size: 9.5px;
+  font-weight: bold;
+  color: #34c759;
+  background: rgba(52, 199, 89, 0.18);
+  border: 1px solid rgba(52, 199, 89, 0.25);
+  padding: 3px 8px;
+  border-radius: 99px;
+  margin-top: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.pulseDot {
+  width: 5px;
+  height: 5px;
+  background-color: #34c759;
+  border-radius: 50%;
+  box-shadow: 0 0 0 0 rgba(52, 199, 89, 0.7);
+  animation: badgePulse 1.8s infinite;
+}
+
+@keyframes badgePulse {
+  0% { transform: scale(0.9); box-shadow: 0 0 0 0 rgba(52, 199, 89, 0.5); }
+  70% { transform: scale(1); box-shadow: 0 0 0 4px rgba(52, 199, 89, 0); }
+  100% { transform: scale(0.9); box-shadow: 0 0 0 0 rgba(52, 199, 89, 0); }
+}
+
+.quickContactGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.contactPill {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: var(--card-bg);
+  backdrop-filter: var(--backdrop-blur);
+  -webkit-backdrop-filter: var(--backdrop-blur);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-input);
+  box-shadow: var(--shadow-subtle);
+  box-sizing: border-box;
+}
+
+.contactIcon {
+  font-size: 18px;
+}
+
+.contactText {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  gap: 1px;
+}
+
+.contactLabel {
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.contactValue {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+.landingSection {
+  background: var(--card-bg);
+  backdrop-filter: var(--backdrop-blur);
+  -webkit-backdrop-filter: var(--backdrop-blur);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-card);
+  padding: 20px;
+  box-shadow: var(--shadow-subtle);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.landingSectionTitle {
+  font-size: 14.5px;
+  font-weight: 800;
+  color: var(--foreground);
+  text-align: left;
+  border-left: 3px solid var(--primary);
+  padding-left: 8px;
+  margin-bottom: 2px;
+}
+
+.aboutText {
+  font-size: 13px;
+  color: var(--foreground);
+  line-height: 1.5;
+  text-align: left;
+}
+
+.landingServiceCard {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  background: rgba(0, 0, 0, 0.02);
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  border-radius: 12px;
+}
+
+.featuresList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.featureIconWrapper {
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  background: rgba(0, 102, 255, 0.05);
+  border: 1px solid rgba(0, 102, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--primary);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.flatBlueIcon {
+  width: 20px;
+  height: 20px;
+  color: var(--primary);
+  stroke: var(--primary);
+}
+
+.featureItem {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  transition: all 0.25s ease;
+}
+
+.featureItem:hover .featureIconWrapper {
+  background: rgba(0, 102, 255, 0.1);
+  transform: scale(1.08);
+}
+
+.featureTitle {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--foreground);
+}
+
+.featureDesc {
+  font-size: 11px;
+  color: var(--text-secondary);
+  margin-top: 1px;
+  line-height: 1.35;
+}
+
+.testimonialsGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.testimonialCard {
+  padding: 12px 14px;
+  background: rgba(0, 0, 0, 0.02);
+  border: 1px solid rgba(0, 0, 0, 0.03);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+.testimonialText {
+  font-size: 11.5px;
+  font-style: italic;
+  color: var(--foreground);
+  line-height: 1.4;
+}
+
+.floatingCTA {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: var(--backdrop-blur);
+  -webkit-backdrop-filter: var(--backdrop-blur);
+  border-top: 1px solid var(--card-border);
+  padding: 16px;
+  display: flex;
+  justify-content: center;
+  z-index: 15;
+}
+
+.ctaBtn {
+  width: 100%;
+  max-width: 440px;
+  padding: 14px;
+  border-radius: var(--radius-pill);
+  border: none;
+  background: var(--primary);
+  color: #ffffff;
+  font-size: 14.5px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 102, 255, 0.15);
+  transition: all 0.2s ease;
+}
+
+.ctaBtn:hover {
+  background: var(--primary-hover);
+}
+
+.backHeaderBtn {
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: 16px;
+}
+
+.landingSecondaryBanner {
+  height: 90px;
+  border-radius: var(--radius-card);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--card-border);
+  box-shadow: var(--shadow-subtle);
+  margin-top: 10px;
+}
+
+.landingSecondaryBannerOverlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+.landingSecondaryBannerText {
+  font-size: 13px;
+  font-weight: 800;
+  color: #ffffff;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+  text-align: center;
+}
+

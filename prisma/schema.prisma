@@ -17,6 +17,17 @@ model Business {
   teamSize      String
   country       String
   currency      String
+  logoUrl                 String?
+  landingTitle            String?
+  landingSubtitle         String?
+  landingAbout            String?
+  landingCoverUrl         String?
+  landingSecondaryCoverUrl String?
+  landingPhone            String?
+  landingAddress          String?
+  landingHours            String?
+  landingFeaturesJson     String?
+  landingTestimonialsJson String?
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
   services      Service[]
@@ -33,6 +44,7 @@ model Service {
   name         String
   duration     Int           // en minutos
   price        Float
+  imageUrl     String?
   createdAt    DateTime      @default(now())
   appointments Appointment[]
 }
@@ -65,6 +77,7 @@ model MenuItem {
   description String?
   price       Float
   category    String   // "Entradas", "Fondos", "Postres", "Bebidas"
+  imageUrl    String?
   createdAt   DateTime @default(now())
 }
 

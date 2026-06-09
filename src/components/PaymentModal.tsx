@@ -20,9 +20,9 @@ export default function PaymentModal({ amount, formattedAmount, onClose, onSucce
   const [paid, setPaid] = useState(false);
 
   const handleCardNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let val = e.target.value.replace(/\D/g, "");
+    const val = e.target.value.replace(/\D/g, "");
     if (val.length > 16) return;
-    let formatted = val.replace(/(\d{4})(?=\d)/g, "$1 ");
+    const formatted = val.replace(/(\d{4})(?=\d)/g, "$1 ");
     setCardNumber(formatted);
   };
 
@@ -36,7 +36,7 @@ export default function PaymentModal({ amount, formattedAmount, onClose, onSucce
   };
 
   const handleCvvChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let val = e.target.value.replace(/\D/g, "");
+    const val = e.target.value.replace(/\D/g, "");
     if (val.length > 3) return;
     setCvv(val);
   };

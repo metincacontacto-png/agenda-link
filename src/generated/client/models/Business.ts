@@ -33,6 +33,17 @@ export type BusinessMinAggregateOutputType = {
   teamSize: string | null
   country: string | null
   currency: string | null
+  logoUrl: string | null
+  landingTitle: string | null
+  landingSubtitle: string | null
+  landingAbout: string | null
+  landingCoverUrl: string | null
+  landingSecondaryCoverUrl: string | null
+  landingPhone: string | null
+  landingAddress: string | null
+  landingHours: string | null
+  landingFeaturesJson: string | null
+  landingTestimonialsJson: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -46,6 +57,17 @@ export type BusinessMaxAggregateOutputType = {
   teamSize: string | null
   country: string | null
   currency: string | null
+  logoUrl: string | null
+  landingTitle: string | null
+  landingSubtitle: string | null
+  landingAbout: string | null
+  landingCoverUrl: string | null
+  landingSecondaryCoverUrl: string | null
+  landingPhone: string | null
+  landingAddress: string | null
+  landingHours: string | null
+  landingFeaturesJson: string | null
+  landingTestimonialsJson: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -59,6 +81,17 @@ export type BusinessCountAggregateOutputType = {
   teamSize: number
   country: number
   currency: number
+  logoUrl: number
+  landingTitle: number
+  landingSubtitle: number
+  landingAbout: number
+  landingCoverUrl: number
+  landingSecondaryCoverUrl: number
+  landingPhone: number
+  landingAddress: number
+  landingHours: number
+  landingFeaturesJson: number
+  landingTestimonialsJson: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -74,6 +107,17 @@ export type BusinessMinAggregateInputType = {
   teamSize?: true
   country?: true
   currency?: true
+  logoUrl?: true
+  landingTitle?: true
+  landingSubtitle?: true
+  landingAbout?: true
+  landingCoverUrl?: true
+  landingSecondaryCoverUrl?: true
+  landingPhone?: true
+  landingAddress?: true
+  landingHours?: true
+  landingFeaturesJson?: true
+  landingTestimonialsJson?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -87,6 +131,17 @@ export type BusinessMaxAggregateInputType = {
   teamSize?: true
   country?: true
   currency?: true
+  logoUrl?: true
+  landingTitle?: true
+  landingSubtitle?: true
+  landingAbout?: true
+  landingCoverUrl?: true
+  landingSecondaryCoverUrl?: true
+  landingPhone?: true
+  landingAddress?: true
+  landingHours?: true
+  landingFeaturesJson?: true
+  landingTestimonialsJson?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -100,6 +155,17 @@ export type BusinessCountAggregateInputType = {
   teamSize?: true
   country?: true
   currency?: true
+  logoUrl?: true
+  landingTitle?: true
+  landingSubtitle?: true
+  landingAbout?: true
+  landingCoverUrl?: true
+  landingSecondaryCoverUrl?: true
+  landingPhone?: true
+  landingAddress?: true
+  landingHours?: true
+  landingFeaturesJson?: true
+  landingTestimonialsJson?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -186,6 +252,17 @@ export type BusinessGroupByOutputType = {
   teamSize: string
   country: string
   currency: string
+  logoUrl: string | null
+  landingTitle: string | null
+  landingSubtitle: string | null
+  landingAbout: string | null
+  landingCoverUrl: string | null
+  landingSecondaryCoverUrl: string | null
+  landingPhone: string | null
+  landingAddress: string | null
+  landingHours: string | null
+  landingFeaturesJson: string | null
+  landingTestimonialsJson: string | null
   createdAt: Date
   updatedAt: Date
   _count: BusinessCountAggregateOutputType | null
@@ -220,6 +297,17 @@ export type BusinessWhereInput = {
   teamSize?: Prisma.StringFilter<"Business"> | string
   country?: Prisma.StringFilter<"Business"> | string
   currency?: Prisma.StringFilter<"Business"> | string
+  logoUrl?: Prisma.StringNullableFilter<"Business"> | string | null
+  landingTitle?: Prisma.StringNullableFilter<"Business"> | string | null
+  landingSubtitle?: Prisma.StringNullableFilter<"Business"> | string | null
+  landingAbout?: Prisma.StringNullableFilter<"Business"> | string | null
+  landingCoverUrl?: Prisma.StringNullableFilter<"Business"> | string | null
+  landingSecondaryCoverUrl?: Prisma.StringNullableFilter<"Business"> | string | null
+  landingPhone?: Prisma.StringNullableFilter<"Business"> | string | null
+  landingAddress?: Prisma.StringNullableFilter<"Business"> | string | null
+  landingHours?: Prisma.StringNullableFilter<"Business"> | string | null
+  landingFeaturesJson?: Prisma.StringNullableFilter<"Business"> | string | null
+  landingTestimonialsJson?: Prisma.StringNullableFilter<"Business"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Business"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Business"> | Date | string
   services?: Prisma.ServiceListRelationFilter
@@ -238,6 +326,17 @@ export type BusinessOrderByWithRelationInput = {
   teamSize?: Prisma.SortOrder
   country?: Prisma.SortOrder
   currency?: Prisma.SortOrder
+  logoUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  landingTitle?: Prisma.SortOrderInput | Prisma.SortOrder
+  landingSubtitle?: Prisma.SortOrderInput | Prisma.SortOrder
+  landingAbout?: Prisma.SortOrderInput | Prisma.SortOrder
+  landingCoverUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  landingSecondaryCoverUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  landingPhone?: Prisma.SortOrderInput | Prisma.SortOrder
+  landingAddress?: Prisma.SortOrderInput | Prisma.SortOrder
+  landingHours?: Prisma.SortOrderInput | Prisma.SortOrder
+  landingFeaturesJson?: Prisma.SortOrderInput | Prisma.SortOrder
+  landingTestimonialsJson?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   services?: Prisma.ServiceOrderByRelationAggregateInput
@@ -259,6 +358,17 @@ export type BusinessWhereUniqueInput = Prisma.AtLeast<{
   teamSize?: Prisma.StringFilter<"Business"> | string
   country?: Prisma.StringFilter<"Business"> | string
   currency?: Prisma.StringFilter<"Business"> | string
+  logoUrl?: Prisma.StringNullableFilter<"Business"> | string | null
+  landingTitle?: Prisma.StringNullableFilter<"Business"> | string | null
+  landingSubtitle?: Prisma.StringNullableFilter<"Business"> | string | null
+  landingAbout?: Prisma.StringNullableFilter<"Business"> | string | null
+  landingCoverUrl?: Prisma.StringNullableFilter<"Business"> | string | null
+  landingSecondaryCoverUrl?: Prisma.StringNullableFilter<"Business"> | string | null
+  landingPhone?: Prisma.StringNullableFilter<"Business"> | string | null
+  landingAddress?: Prisma.StringNullableFilter<"Business"> | string | null
+  landingHours?: Prisma.StringNullableFilter<"Business"> | string | null
+  landingFeaturesJson?: Prisma.StringNullableFilter<"Business"> | string | null
+  landingTestimonialsJson?: Prisma.StringNullableFilter<"Business"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Business"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Business"> | Date | string
   services?: Prisma.ServiceListRelationFilter
@@ -277,6 +387,17 @@ export type BusinessOrderByWithAggregationInput = {
   teamSize?: Prisma.SortOrder
   country?: Prisma.SortOrder
   currency?: Prisma.SortOrder
+  logoUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  landingTitle?: Prisma.SortOrderInput | Prisma.SortOrder
+  landingSubtitle?: Prisma.SortOrderInput | Prisma.SortOrder
+  landingAbout?: Prisma.SortOrderInput | Prisma.SortOrder
+  landingCoverUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  landingSecondaryCoverUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  landingPhone?: Prisma.SortOrderInput | Prisma.SortOrder
+  landingAddress?: Prisma.SortOrderInput | Prisma.SortOrder
+  landingHours?: Prisma.SortOrderInput | Prisma.SortOrder
+  landingFeaturesJson?: Prisma.SortOrderInput | Prisma.SortOrder
+  landingTestimonialsJson?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.BusinessCountOrderByAggregateInput
@@ -296,6 +417,17 @@ export type BusinessScalarWhereWithAggregatesInput = {
   teamSize?: Prisma.StringWithAggregatesFilter<"Business"> | string
   country?: Prisma.StringWithAggregatesFilter<"Business"> | string
   currency?: Prisma.StringWithAggregatesFilter<"Business"> | string
+  logoUrl?: Prisma.StringNullableWithAggregatesFilter<"Business"> | string | null
+  landingTitle?: Prisma.StringNullableWithAggregatesFilter<"Business"> | string | null
+  landingSubtitle?: Prisma.StringNullableWithAggregatesFilter<"Business"> | string | null
+  landingAbout?: Prisma.StringNullableWithAggregatesFilter<"Business"> | string | null
+  landingCoverUrl?: Prisma.StringNullableWithAggregatesFilter<"Business"> | string | null
+  landingSecondaryCoverUrl?: Prisma.StringNullableWithAggregatesFilter<"Business"> | string | null
+  landingPhone?: Prisma.StringNullableWithAggregatesFilter<"Business"> | string | null
+  landingAddress?: Prisma.StringNullableWithAggregatesFilter<"Business"> | string | null
+  landingHours?: Prisma.StringNullableWithAggregatesFilter<"Business"> | string | null
+  landingFeaturesJson?: Prisma.StringNullableWithAggregatesFilter<"Business"> | string | null
+  landingTestimonialsJson?: Prisma.StringNullableWithAggregatesFilter<"Business"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Business"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Business"> | Date | string
 }
@@ -309,6 +441,17 @@ export type BusinessCreateInput = {
   teamSize: string
   country: string
   currency: string
+  logoUrl?: string | null
+  landingTitle?: string | null
+  landingSubtitle?: string | null
+  landingAbout?: string | null
+  landingCoverUrl?: string | null
+  landingSecondaryCoverUrl?: string | null
+  landingPhone?: string | null
+  landingAddress?: string | null
+  landingHours?: string | null
+  landingFeaturesJson?: string | null
+  landingTestimonialsJson?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   services?: Prisma.ServiceCreateNestedManyWithoutBusinessInput
@@ -327,6 +470,17 @@ export type BusinessUncheckedCreateInput = {
   teamSize: string
   country: string
   currency: string
+  logoUrl?: string | null
+  landingTitle?: string | null
+  landingSubtitle?: string | null
+  landingAbout?: string | null
+  landingCoverUrl?: string | null
+  landingSecondaryCoverUrl?: string | null
+  landingPhone?: string | null
+  landingAddress?: string | null
+  landingHours?: string | null
+  landingFeaturesJson?: string | null
+  landingTestimonialsJson?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   services?: Prisma.ServiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -345,6 +499,17 @@ export type BusinessUpdateInput = {
   teamSize?: Prisma.StringFieldUpdateOperationsInput | string
   country?: Prisma.StringFieldUpdateOperationsInput | string
   currency?: Prisma.StringFieldUpdateOperationsInput | string
+  logoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingSubtitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingAbout?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingCoverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingSecondaryCoverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingHours?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingFeaturesJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingTestimonialsJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   services?: Prisma.ServiceUpdateManyWithoutBusinessNestedInput
@@ -363,6 +528,17 @@ export type BusinessUncheckedUpdateInput = {
   teamSize?: Prisma.StringFieldUpdateOperationsInput | string
   country?: Prisma.StringFieldUpdateOperationsInput | string
   currency?: Prisma.StringFieldUpdateOperationsInput | string
+  logoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingSubtitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingAbout?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingCoverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingSecondaryCoverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingHours?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingFeaturesJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingTestimonialsJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   services?: Prisma.ServiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -381,6 +557,17 @@ export type BusinessCreateManyInput = {
   teamSize: string
   country: string
   currency: string
+  logoUrl?: string | null
+  landingTitle?: string | null
+  landingSubtitle?: string | null
+  landingAbout?: string | null
+  landingCoverUrl?: string | null
+  landingSecondaryCoverUrl?: string | null
+  landingPhone?: string | null
+  landingAddress?: string | null
+  landingHours?: string | null
+  landingFeaturesJson?: string | null
+  landingTestimonialsJson?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -394,6 +581,17 @@ export type BusinessUpdateManyMutationInput = {
   teamSize?: Prisma.StringFieldUpdateOperationsInput | string
   country?: Prisma.StringFieldUpdateOperationsInput | string
   currency?: Prisma.StringFieldUpdateOperationsInput | string
+  logoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingSubtitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingAbout?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingCoverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingSecondaryCoverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingHours?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingFeaturesJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingTestimonialsJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -407,6 +605,17 @@ export type BusinessUncheckedUpdateManyInput = {
   teamSize?: Prisma.StringFieldUpdateOperationsInput | string
   country?: Prisma.StringFieldUpdateOperationsInput | string
   currency?: Prisma.StringFieldUpdateOperationsInput | string
+  logoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingSubtitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingAbout?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingCoverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingSecondaryCoverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingHours?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingFeaturesJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingTestimonialsJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -420,6 +629,17 @@ export type BusinessCountOrderByAggregateInput = {
   teamSize?: Prisma.SortOrder
   country?: Prisma.SortOrder
   currency?: Prisma.SortOrder
+  logoUrl?: Prisma.SortOrder
+  landingTitle?: Prisma.SortOrder
+  landingSubtitle?: Prisma.SortOrder
+  landingAbout?: Prisma.SortOrder
+  landingCoverUrl?: Prisma.SortOrder
+  landingSecondaryCoverUrl?: Prisma.SortOrder
+  landingPhone?: Prisma.SortOrder
+  landingAddress?: Prisma.SortOrder
+  landingHours?: Prisma.SortOrder
+  landingFeaturesJson?: Prisma.SortOrder
+  landingTestimonialsJson?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -433,6 +653,17 @@ export type BusinessMaxOrderByAggregateInput = {
   teamSize?: Prisma.SortOrder
   country?: Prisma.SortOrder
   currency?: Prisma.SortOrder
+  logoUrl?: Prisma.SortOrder
+  landingTitle?: Prisma.SortOrder
+  landingSubtitle?: Prisma.SortOrder
+  landingAbout?: Prisma.SortOrder
+  landingCoverUrl?: Prisma.SortOrder
+  landingSecondaryCoverUrl?: Prisma.SortOrder
+  landingPhone?: Prisma.SortOrder
+  landingAddress?: Prisma.SortOrder
+  landingHours?: Prisma.SortOrder
+  landingFeaturesJson?: Prisma.SortOrder
+  landingTestimonialsJson?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -446,6 +677,17 @@ export type BusinessMinOrderByAggregateInput = {
   teamSize?: Prisma.SortOrder
   country?: Prisma.SortOrder
   currency?: Prisma.SortOrder
+  logoUrl?: Prisma.SortOrder
+  landingTitle?: Prisma.SortOrder
+  landingSubtitle?: Prisma.SortOrder
+  landingAbout?: Prisma.SortOrder
+  landingCoverUrl?: Prisma.SortOrder
+  landingSecondaryCoverUrl?: Prisma.SortOrder
+  landingPhone?: Prisma.SortOrder
+  landingAddress?: Prisma.SortOrder
+  landingHours?: Prisma.SortOrder
+  landingFeaturesJson?: Prisma.SortOrder
+  landingTestimonialsJson?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -457,6 +699,10 @@ export type BusinessScalarRelationFilter = {
 
 export type StringFieldUpdateOperationsInput = {
   set?: string
+}
+
+export type NullableStringFieldUpdateOperationsInput = {
+  set?: string | null
 }
 
 export type DateTimeFieldUpdateOperationsInput = {
@@ -542,6 +788,17 @@ export type BusinessCreateWithoutServicesInput = {
   teamSize: string
   country: string
   currency: string
+  logoUrl?: string | null
+  landingTitle?: string | null
+  landingSubtitle?: string | null
+  landingAbout?: string | null
+  landingCoverUrl?: string | null
+  landingSecondaryCoverUrl?: string | null
+  landingPhone?: string | null
+  landingAddress?: string | null
+  landingHours?: string | null
+  landingFeaturesJson?: string | null
+  landingTestimonialsJson?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   professionals?: Prisma.ProfessionalCreateNestedManyWithoutBusinessInput
@@ -559,6 +816,17 @@ export type BusinessUncheckedCreateWithoutServicesInput = {
   teamSize: string
   country: string
   currency: string
+  logoUrl?: string | null
+  landingTitle?: string | null
+  landingSubtitle?: string | null
+  landingAbout?: string | null
+  landingCoverUrl?: string | null
+  landingSecondaryCoverUrl?: string | null
+  landingPhone?: string | null
+  landingAddress?: string | null
+  landingHours?: string | null
+  landingFeaturesJson?: string | null
+  landingTestimonialsJson?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   professionals?: Prisma.ProfessionalUncheckedCreateNestedManyWithoutBusinessInput
@@ -592,6 +860,17 @@ export type BusinessUpdateWithoutServicesInput = {
   teamSize?: Prisma.StringFieldUpdateOperationsInput | string
   country?: Prisma.StringFieldUpdateOperationsInput | string
   currency?: Prisma.StringFieldUpdateOperationsInput | string
+  logoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingSubtitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingAbout?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingCoverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingSecondaryCoverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingHours?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingFeaturesJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingTestimonialsJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   professionals?: Prisma.ProfessionalUpdateManyWithoutBusinessNestedInput
@@ -609,6 +888,17 @@ export type BusinessUncheckedUpdateWithoutServicesInput = {
   teamSize?: Prisma.StringFieldUpdateOperationsInput | string
   country?: Prisma.StringFieldUpdateOperationsInput | string
   currency?: Prisma.StringFieldUpdateOperationsInput | string
+  logoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingSubtitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingAbout?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingCoverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingSecondaryCoverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingHours?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingFeaturesJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingTestimonialsJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   professionals?: Prisma.ProfessionalUncheckedUpdateManyWithoutBusinessNestedInput
@@ -626,6 +916,17 @@ export type BusinessCreateWithoutProfessionalsInput = {
   teamSize: string
   country: string
   currency: string
+  logoUrl?: string | null
+  landingTitle?: string | null
+  landingSubtitle?: string | null
+  landingAbout?: string | null
+  landingCoverUrl?: string | null
+  landingSecondaryCoverUrl?: string | null
+  landingPhone?: string | null
+  landingAddress?: string | null
+  landingHours?: string | null
+  landingFeaturesJson?: string | null
+  landingTestimonialsJson?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   services?: Prisma.ServiceCreateNestedManyWithoutBusinessInput
@@ -643,6 +944,17 @@ export type BusinessUncheckedCreateWithoutProfessionalsInput = {
   teamSize: string
   country: string
   currency: string
+  logoUrl?: string | null
+  landingTitle?: string | null
+  landingSubtitle?: string | null
+  landingAbout?: string | null
+  landingCoverUrl?: string | null
+  landingSecondaryCoverUrl?: string | null
+  landingPhone?: string | null
+  landingAddress?: string | null
+  landingHours?: string | null
+  landingFeaturesJson?: string | null
+  landingTestimonialsJson?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   services?: Prisma.ServiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -676,6 +988,17 @@ export type BusinessUpdateWithoutProfessionalsInput = {
   teamSize?: Prisma.StringFieldUpdateOperationsInput | string
   country?: Prisma.StringFieldUpdateOperationsInput | string
   currency?: Prisma.StringFieldUpdateOperationsInput | string
+  logoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingSubtitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingAbout?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingCoverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingSecondaryCoverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingHours?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingFeaturesJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingTestimonialsJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   services?: Prisma.ServiceUpdateManyWithoutBusinessNestedInput
@@ -693,6 +1016,17 @@ export type BusinessUncheckedUpdateWithoutProfessionalsInput = {
   teamSize?: Prisma.StringFieldUpdateOperationsInput | string
   country?: Prisma.StringFieldUpdateOperationsInput | string
   currency?: Prisma.StringFieldUpdateOperationsInput | string
+  logoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingSubtitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingAbout?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingCoverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingSecondaryCoverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingHours?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingFeaturesJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingTestimonialsJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   services?: Prisma.ServiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -710,6 +1044,17 @@ export type BusinessCreateWithoutTablesInput = {
   teamSize: string
   country: string
   currency: string
+  logoUrl?: string | null
+  landingTitle?: string | null
+  landingSubtitle?: string | null
+  landingAbout?: string | null
+  landingCoverUrl?: string | null
+  landingSecondaryCoverUrl?: string | null
+  landingPhone?: string | null
+  landingAddress?: string | null
+  landingHours?: string | null
+  landingFeaturesJson?: string | null
+  landingTestimonialsJson?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   services?: Prisma.ServiceCreateNestedManyWithoutBusinessInput
@@ -727,6 +1072,17 @@ export type BusinessUncheckedCreateWithoutTablesInput = {
   teamSize: string
   country: string
   currency: string
+  logoUrl?: string | null
+  landingTitle?: string | null
+  landingSubtitle?: string | null
+  landingAbout?: string | null
+  landingCoverUrl?: string | null
+  landingSecondaryCoverUrl?: string | null
+  landingPhone?: string | null
+  landingAddress?: string | null
+  landingHours?: string | null
+  landingFeaturesJson?: string | null
+  landingTestimonialsJson?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   services?: Prisma.ServiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -760,6 +1116,17 @@ export type BusinessUpdateWithoutTablesInput = {
   teamSize?: Prisma.StringFieldUpdateOperationsInput | string
   country?: Prisma.StringFieldUpdateOperationsInput | string
   currency?: Prisma.StringFieldUpdateOperationsInput | string
+  logoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingSubtitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingAbout?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingCoverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingSecondaryCoverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingHours?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingFeaturesJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingTestimonialsJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   services?: Prisma.ServiceUpdateManyWithoutBusinessNestedInput
@@ -777,6 +1144,17 @@ export type BusinessUncheckedUpdateWithoutTablesInput = {
   teamSize?: Prisma.StringFieldUpdateOperationsInput | string
   country?: Prisma.StringFieldUpdateOperationsInput | string
   currency?: Prisma.StringFieldUpdateOperationsInput | string
+  logoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingSubtitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingAbout?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingCoverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingSecondaryCoverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingHours?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingFeaturesJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingTestimonialsJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   services?: Prisma.ServiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -794,6 +1172,17 @@ export type BusinessCreateWithoutMenuItemsInput = {
   teamSize: string
   country: string
   currency: string
+  logoUrl?: string | null
+  landingTitle?: string | null
+  landingSubtitle?: string | null
+  landingAbout?: string | null
+  landingCoverUrl?: string | null
+  landingSecondaryCoverUrl?: string | null
+  landingPhone?: string | null
+  landingAddress?: string | null
+  landingHours?: string | null
+  landingFeaturesJson?: string | null
+  landingTestimonialsJson?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   services?: Prisma.ServiceCreateNestedManyWithoutBusinessInput
@@ -811,6 +1200,17 @@ export type BusinessUncheckedCreateWithoutMenuItemsInput = {
   teamSize: string
   country: string
   currency: string
+  logoUrl?: string | null
+  landingTitle?: string | null
+  landingSubtitle?: string | null
+  landingAbout?: string | null
+  landingCoverUrl?: string | null
+  landingSecondaryCoverUrl?: string | null
+  landingPhone?: string | null
+  landingAddress?: string | null
+  landingHours?: string | null
+  landingFeaturesJson?: string | null
+  landingTestimonialsJson?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   services?: Prisma.ServiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -844,6 +1244,17 @@ export type BusinessUpdateWithoutMenuItemsInput = {
   teamSize?: Prisma.StringFieldUpdateOperationsInput | string
   country?: Prisma.StringFieldUpdateOperationsInput | string
   currency?: Prisma.StringFieldUpdateOperationsInput | string
+  logoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingSubtitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingAbout?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingCoverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingSecondaryCoverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingHours?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingFeaturesJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingTestimonialsJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   services?: Prisma.ServiceUpdateManyWithoutBusinessNestedInput
@@ -861,6 +1272,17 @@ export type BusinessUncheckedUpdateWithoutMenuItemsInput = {
   teamSize?: Prisma.StringFieldUpdateOperationsInput | string
   country?: Prisma.StringFieldUpdateOperationsInput | string
   currency?: Prisma.StringFieldUpdateOperationsInput | string
+  logoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingSubtitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingAbout?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingCoverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingSecondaryCoverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingHours?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingFeaturesJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingTestimonialsJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   services?: Prisma.ServiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -878,6 +1300,17 @@ export type BusinessCreateWithoutAppointmentsInput = {
   teamSize: string
   country: string
   currency: string
+  logoUrl?: string | null
+  landingTitle?: string | null
+  landingSubtitle?: string | null
+  landingAbout?: string | null
+  landingCoverUrl?: string | null
+  landingSecondaryCoverUrl?: string | null
+  landingPhone?: string | null
+  landingAddress?: string | null
+  landingHours?: string | null
+  landingFeaturesJson?: string | null
+  landingTestimonialsJson?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   services?: Prisma.ServiceCreateNestedManyWithoutBusinessInput
@@ -895,6 +1328,17 @@ export type BusinessUncheckedCreateWithoutAppointmentsInput = {
   teamSize: string
   country: string
   currency: string
+  logoUrl?: string | null
+  landingTitle?: string | null
+  landingSubtitle?: string | null
+  landingAbout?: string | null
+  landingCoverUrl?: string | null
+  landingSecondaryCoverUrl?: string | null
+  landingPhone?: string | null
+  landingAddress?: string | null
+  landingHours?: string | null
+  landingFeaturesJson?: string | null
+  landingTestimonialsJson?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   services?: Prisma.ServiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -928,6 +1372,17 @@ export type BusinessUpdateWithoutAppointmentsInput = {
   teamSize?: Prisma.StringFieldUpdateOperationsInput | string
   country?: Prisma.StringFieldUpdateOperationsInput | string
   currency?: Prisma.StringFieldUpdateOperationsInput | string
+  logoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingSubtitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingAbout?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingCoverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingSecondaryCoverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingHours?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingFeaturesJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingTestimonialsJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   services?: Prisma.ServiceUpdateManyWithoutBusinessNestedInput
@@ -945,6 +1400,17 @@ export type BusinessUncheckedUpdateWithoutAppointmentsInput = {
   teamSize?: Prisma.StringFieldUpdateOperationsInput | string
   country?: Prisma.StringFieldUpdateOperationsInput | string
   currency?: Prisma.StringFieldUpdateOperationsInput | string
+  logoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingSubtitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingAbout?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingCoverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingSecondaryCoverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingHours?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingFeaturesJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landingTestimonialsJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   services?: Prisma.ServiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -1029,6 +1495,17 @@ export type BusinessSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   teamSize?: boolean
   country?: boolean
   currency?: boolean
+  logoUrl?: boolean
+  landingTitle?: boolean
+  landingSubtitle?: boolean
+  landingAbout?: boolean
+  landingCoverUrl?: boolean
+  landingSecondaryCoverUrl?: boolean
+  landingPhone?: boolean
+  landingAddress?: boolean
+  landingHours?: boolean
+  landingFeaturesJson?: boolean
+  landingTestimonialsJson?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   services?: boolean | Prisma.Business$servicesArgs<ExtArgs>
@@ -1048,6 +1525,17 @@ export type BusinessSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exte
   teamSize?: boolean
   country?: boolean
   currency?: boolean
+  logoUrl?: boolean
+  landingTitle?: boolean
+  landingSubtitle?: boolean
+  landingAbout?: boolean
+  landingCoverUrl?: boolean
+  landingSecondaryCoverUrl?: boolean
+  landingPhone?: boolean
+  landingAddress?: boolean
+  landingHours?: boolean
+  landingFeaturesJson?: boolean
+  landingTestimonialsJson?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["business"]>
@@ -1061,6 +1549,17 @@ export type BusinessSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exte
   teamSize?: boolean
   country?: boolean
   currency?: boolean
+  logoUrl?: boolean
+  landingTitle?: boolean
+  landingSubtitle?: boolean
+  landingAbout?: boolean
+  landingCoverUrl?: boolean
+  landingSecondaryCoverUrl?: boolean
+  landingPhone?: boolean
+  landingAddress?: boolean
+  landingHours?: boolean
+  landingFeaturesJson?: boolean
+  landingTestimonialsJson?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["business"]>
@@ -1074,11 +1573,22 @@ export type BusinessSelectScalar = {
   teamSize?: boolean
   country?: boolean
   currency?: boolean
+  logoUrl?: boolean
+  landingTitle?: boolean
+  landingSubtitle?: boolean
+  landingAbout?: boolean
+  landingCoverUrl?: boolean
+  landingSecondaryCoverUrl?: boolean
+  landingPhone?: boolean
+  landingAddress?: boolean
+  landingHours?: boolean
+  landingFeaturesJson?: boolean
+  landingTestimonialsJson?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type BusinessOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "slug" | "ownerName" | "category" | "teamSize" | "country" | "currency" | "createdAt" | "updatedAt", ExtArgs["result"]["business"]>
+export type BusinessOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "slug" | "ownerName" | "category" | "teamSize" | "country" | "currency" | "logoUrl" | "landingTitle" | "landingSubtitle" | "landingAbout" | "landingCoverUrl" | "landingSecondaryCoverUrl" | "landingPhone" | "landingAddress" | "landingHours" | "landingFeaturesJson" | "landingTestimonialsJson" | "createdAt" | "updatedAt", ExtArgs["result"]["business"]>
 export type BusinessInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   services?: boolean | Prisma.Business$servicesArgs<ExtArgs>
   professionals?: boolean | Prisma.Business$professionalsArgs<ExtArgs>
@@ -1108,6 +1618,17 @@ export type $BusinessPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     teamSize: string
     country: string
     currency: string
+    logoUrl: string | null
+    landingTitle: string | null
+    landingSubtitle: string | null
+    landingAbout: string | null
+    landingCoverUrl: string | null
+    landingSecondaryCoverUrl: string | null
+    landingPhone: string | null
+    landingAddress: string | null
+    landingHours: string | null
+    landingFeaturesJson: string | null
+    landingTestimonialsJson: string | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["business"]>
@@ -1546,6 +2067,17 @@ export interface BusinessFieldRefs {
   readonly teamSize: Prisma.FieldRef<"Business", 'String'>
   readonly country: Prisma.FieldRef<"Business", 'String'>
   readonly currency: Prisma.FieldRef<"Business", 'String'>
+  readonly logoUrl: Prisma.FieldRef<"Business", 'String'>
+  readonly landingTitle: Prisma.FieldRef<"Business", 'String'>
+  readonly landingSubtitle: Prisma.FieldRef<"Business", 'String'>
+  readonly landingAbout: Prisma.FieldRef<"Business", 'String'>
+  readonly landingCoverUrl: Prisma.FieldRef<"Business", 'String'>
+  readonly landingSecondaryCoverUrl: Prisma.FieldRef<"Business", 'String'>
+  readonly landingPhone: Prisma.FieldRef<"Business", 'String'>
+  readonly landingAddress: Prisma.FieldRef<"Business", 'String'>
+  readonly landingHours: Prisma.FieldRef<"Business", 'String'>
+  readonly landingFeaturesJson: Prisma.FieldRef<"Business", 'String'>
+  readonly landingTestimonialsJson: Prisma.FieldRef<"Business", 'String'>
   readonly createdAt: Prisma.FieldRef<"Business", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Business", 'DateTime'>
 }

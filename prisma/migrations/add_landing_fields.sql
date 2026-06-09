@@ -1,0 +1,9 @@
+ALTER TABLE "Business" ADD COLUMN "landingTitle" TEXT;
+ALTER TABLE "Business" ADD COLUMN "landingSubtitle" TEXT;
+ALTER TABLE "Business" ADD COLUMN "landingAbout" TEXT;
+ALTER TABLE "Business" ADD COLUMN "landingCoverUrl" TEXT;
+ALTER TABLE "Business" ADD COLUMN "landingPhone" TEXT;
+ALTER TABLE "Business" ADD COLUMN "landingAddress" TEXT;
+ALTER TABLE "Business" ADD COLUMN "landingHours" TEXT;
+ALTER TABLE "Business" ADD COLUMN "landingFeaturesJson" TEXT;
+ALTER TABLE "Business" ADD COLUMN "landingTestimonialsJson" TEXT;

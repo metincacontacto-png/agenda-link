@@ -8,3 +8,7 @@ pages_build_output_dir = ".next"
 binding = "DB"
 database_name = "agenda-link-db"
 database_id = "cc3d3e2c-ce4c-46f5-b25e-b3e71a3fb611"
+
+[[r2_buckets]]
+binding = "BUCKET"
+bucket_name = "agenda-link-uploads"
