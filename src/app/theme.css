@@ -5,13 +5,13 @@
   --foreground: #1d1d1f;
   --card-bg: rgba(255, 255, 255, 0.85);
   --card-border: rgba(0, 0, 0, 0.05);
-  --primary: #7f00ff;
-  --primary-hover: #8f22ff;
+  --primary: #0066ff;
+  --primary-hover: #0052cc;
   --primary-text: #ffffff;
   --text-secondary: #86868b;
   --input-bg: rgba(0, 0, 0, 0.02);
   --input-border: rgba(0, 0, 0, 0.08);
-  --input-focus: #7f00ff;
+  --input-focus: #0066ff;
   --success: #34c759;
   --danger: #ff3b30;
   --radius-pill: 9999px;
@@ -20,5 +20,5 @@
   --shadow-subtle: 0 8px 24px 0 rgba(0, 0, 0, 0.04);
   --shadow-active: 0 12px 32px 0 rgba(0, 0, 0, 0.08);
   --backdrop-blur: blur(20px);
-  --brand-gradient: linear-gradient(135deg, #7f00ff 0%, #ff007f 50%, #0072ff 100%);
+  --brand-gradient: linear-gradient(135deg, #0052cc 0%, #00c6ff 50%, #0070f3 100%);
 }

@@ -36,7 +36,7 @@
   background: var(--primary);
   border-color: var(--primary);
   color: var(--primary-text);
-  box-shadow: 0 4px 12px rgba(127, 0, 255, 0.25);
+  box-shadow: 0 4px 12px rgba(0, 102, 255, 0.25);
 }
 
 .dayName {

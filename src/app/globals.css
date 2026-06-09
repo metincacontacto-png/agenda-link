@@ -9,6 +9,8 @@
 body {
   font-family: var(--font-sans);
   background-color: var(--background);
+  background-image: radial-gradient(rgba(0, 102, 255, 0.035) 1px, transparent 1px);
+  background-size: 24px 24px;
   color: var(--foreground);
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;

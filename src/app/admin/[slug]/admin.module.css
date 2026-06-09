@@ -60,9 +60,9 @@
 }
 
 .navItemActive {
-  background: rgba(127, 0, 255, 0.08);
+  background: rgba(0, 102, 255, 0.08);
   color: var(--primary);
-  box-shadow: 0 2px 8px rgba(127, 0, 255, 0.05);
+  box-shadow: 0 2px 8px rgba(0, 102, 255, 0.05);
 }
 
 .contentArea {
@@ -238,7 +238,7 @@
 }
 
 .appointmentBlock {
-  background: rgba(127, 0, 255, 0.06);
+  background: rgba(0, 102, 255, 0.06);
   border-left: 3px solid var(--primary);
   border-radius: 6px;
   padding: 6px 8px;
@@ -255,9 +255,9 @@
 }
 
 .appointmentBlock:hover {
-  background: rgba(127, 0, 255, 0.1);
+  background: rgba(0, 102, 255, 0.1);
   transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(127,0,255,0.1);
+  box-shadow: 0 4px 8px rgba(0,102,255,0.1);
 }
 
 .appointmentBlockPaid {
@@ -592,7 +592,7 @@
 
 .menuItemCard:hover {
   box-shadow: 0 4px 12px rgba(0,0,0,0.02);
-  border-color: rgba(127, 0, 255, 0.15);
+  border-color: rgba(0, 102, 255, 0.15);
 }
 
 .menuItemInfo {

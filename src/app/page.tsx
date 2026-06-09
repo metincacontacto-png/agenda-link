@@ -141,8 +141,8 @@ export default function LandingAndOnboardingPage() {
     <div className={styles.landingWrapper}>
       {/* 1. Cabecera */}
       <header className={styles.header}>
-        <div style={{ display: "flex", alignItems: "center", gap: "10px", cursor: "pointer" }} onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>
-          <span className={styles.logo} style={{ marginBottom: 0 }}>AgendaLink</span>
+        <div style={{ display: "flex", alignItems: "center", cursor: "pointer" }} onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>
+          <img src="/logo.png" alt="AgendaLink Logo" style={{ height: "30px", width: "auto" }} />
         </div>
         <nav className={styles.headerNav}>
           <button className={styles.headerLink} onClick={() => scrollToSection("features")}>Funcionalidades</button>
@@ -157,6 +157,9 @@ export default function LandingAndOnboardingPage() {
       {/* 2. Hero Section */}
       <section className={styles.heroSection}>
         <div className={styles.heroContent}>
+          <div className={styles.techBadge}>
+            <span>⚡️</span> AgendaLink 2.0 • Plataforma Inteligente
+          </div>
           <h1 className={styles.heroTitle}>
             Un solo link.<br />
             <span style={{ background: "var(--brand-gradient)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
@@ -188,13 +191,13 @@ export default function LandingAndOnboardingPage() {
           {/* Teléfono */}
           <div className={styles.phoneMockup}>
             <div className={styles.phoneScreen}>
-              <div style={{ width: "32px", height: "32px", borderRadius: "50%", background: "#7f00ff", color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "11px", fontWeight: "bold", margin: "0 auto 8px auto" }}>AL</div>
+              <div style={{ width: "32px", height: "32px", borderRadius: "50%", background: "#0066ff", color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "11px", fontWeight: "bold", margin: "0 auto 8px auto" }}>AL</div>
               <div style={{ fontSize: "12px", fontWeight: "800", textAlign: "center" }}>Estudio Demo</div>
               <div style={{ fontSize: "9px", color: "gray", textAlign: "center", marginBottom: "14px" }}>Otros</div>
               
-              <div style={{ border: "1px solid #7f00ff", borderRadius: "8px", padding: "8px", background: "rgba(127, 0, 255, 0.03)", display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
+              <div style={{ border: "1px solid #0066ff", borderRadius: "8px", padding: "8px", background: "rgba(0, 102, 255, 0.03)", display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
                 <span style={{ fontSize: "10px", fontWeight: "bold" }}>Corte Caballo</span>
-                <span style={{ fontSize: "10px", fontWeight: "bold", color: "#7f00ff" }}>$15.000</span>
+                <span style={{ fontSize: "10px", fontWeight: "bold", color: "#0066ff" }}>$15.000</span>
               </div>
               <div style={{ border: "1px solid rgba(0,0,0,0.06)", borderRadius: "8px", padding: "8px", background: "white", display: "flex", justifyContent: "space-between", alignItems: "center", opacity: 0.6 }}>
                 <span style={{ fontSize: "10px" }}>Perfilado Barba</span>
@@ -217,7 +220,7 @@ export default function LandingAndOnboardingPage() {
             <div className={styles.macScreen}>
               <div style={{ display: "flex", justifyContent: "space-between", fontSize: "9px", borderBottom: "1px solid #eee", paddingBottom: "4px", marginBottom: "4px" }}>
                 <span style={{ fontWeight: "bold" }}>Agenda Semanal</span>
-                <span style={{ color: "#7f00ff", fontWeight: "bold" }}>Giovanni Repetto</span>
+                <span style={{ color: "#0066ff", fontWeight: "bold" }}>Giovanni Repetto</span>
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: "3px" }}>
                 <div style={{ display: "flex", gap: "4px" }}>
@@ -228,7 +231,7 @@ export default function LandingAndOnboardingPage() {
                 </div>
                 <div style={{ display: "flex", gap: "4px" }}>
                   <span style={{ fontSize: "8px", width: "22px", color: "gray" }}>10:00</span>
-                  <div style={{ flex: 1, background: "rgba(127, 0, 255, 0.08)", borderLeft: "2px solid #7f00ff", padding: "2px 4px", borderRadius: "3px", fontSize: "8px", textAlign: "left" }}>
+                  <div style={{ flex: 1, background: "rgba(0, 102, 255, 0.08)", borderLeft: "2px solid #0066ff", padding: "2px 4px", borderRadius: "3px", fontSize: "8px", textAlign: "left" }}>
                     <strong>María Gómez</strong> · Manicure
                   </div>
                 </div>
