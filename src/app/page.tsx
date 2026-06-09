@@ -28,6 +28,7 @@ export default function LandingAndOnboardingPage() {
   const [loading, setLoading] = useState(false);
   const [slug, setSlug] = useState("");
   const [copied, setCopied] = useState(false);
+  const [segmentsOpen, setSegmentsOpen] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -137,6 +138,28 @@ export default function LandingAndOnboardingPage() {
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
   };
 
+  const handleSegmentClick = (categoryVal: string) => {
+    setSegmentsOpen(false);
+    if (categoryVal === "Restaurante") {
+      setFormData((prev) => ({
+        ...prev,
+        category: "Restaurante",
+        serviceName: "Reserva de Mesa",
+        serviceDuration: "120",
+        servicePrice: "0",
+      }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        category: categoryVal,
+        serviceName: prev.serviceName === "Reserva de Mesa" ? "" : prev.serviceName,
+        servicePrice: prev.servicePrice === "0" ? "" : prev.servicePrice,
+      }));
+    }
+    scrollToSection("registro");
+  };
+
+
   return (
     <div className={styles.landingWrapper}>
       {/* Background Glowing Orbs */}
@@ -150,6 +173,114 @@ export default function LandingAndOnboardingPage() {
           <img src="/logo.png" alt="AgendaLink Logo" style={{ height: "30px", width: "auto" }} />
         </div>
         <nav className={styles.headerNav}>
+          <div
+            className={styles.dropdownContainer}
+            onMouseEnter={() => setSegmentsOpen(true)}
+            onMouseLeave={() => setSegmentsOpen(false)}
+          >
+            <button className={`${styles.headerLink} ${segmentsOpen ? styles.headerLinkActive : ""}`}>
+              Negocios <span className={styles.caret}>{segmentsOpen ? "▲" : "▼"}</span>
+            </button>
+            
+            {segmentsOpen && (
+              <div className={styles.dropdownMenu}>
+                <div className={styles.dropdownColumn}>
+                  <div className={styles.columnTitle}>Estética y Belleza</div>
+                  <div className={styles.columnItems}>
+                    <div className={styles.columnItem} onClick={() => handleSegmentClick("Peluquería")}>
+                      <svg className={styles.columnIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="6" cy="6" r="3" />
+                        <circle cx="6" cy="18" r="3" />
+                        <line x1="9.8" y1="8.2" x2="21" y2="19.4" />
+                        <line x1="9.8" y1="15.8" x2="21" y2="4.6" />
+                      </svg>
+                      <span>Salones de belleza</span>
+                    </div>
+                    <div className={styles.columnItem} onClick={() => handleSegmentClick("Peluquería")}>
+                      <svg className={styles.columnIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M2 12s3-4 5-4c2 0 3 2 5 4 2-2 3-4 5-4 2 0 5 4 5 4-2 4-5 4-7 2-2 2-4 2-6 0-2 2-5 2-7-2Z" />
+                      </svg>
+                      <span>Barberías</span>
+                    </div>
+                    <div className={styles.columnItem} onClick={() => handleSegmentClick("Peluquería")}>
+                      <svg className={styles.columnIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M12 3c-1.2 3.4-3 6-6 8.5 3 2.5 4.8 5.1 6 8.5 1.2-3.4 3-6 6-8.5-3-2.5-4.8-5.1-6-8.5Z" />
+                      </svg>
+                      <span>Spas y Estética</span>
+                    </div>
+                    <div className={styles.columnItem} onClick={() => handleSegmentClick("Peluquería")}>
+                      <svg className={styles.columnIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M12 2a4 4 0 0 0-4 4v12a4 4 0 0 0 8 0V6a4 4 0 0 0-4-4Zm0 10a2 2 0 1 1 0-4 2 2 0 0 1 0 4Z" />
+                      </svg>
+                      <span>Manicure y Pedicure</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className={styles.dropdownColumn}>
+                  <div className={styles.columnTitle}>Salud y Bienestar</div>
+                  <div className={styles.columnItems}>
+                    <div className={styles.columnItem} onClick={() => handleSegmentClick("Salud")}>
+                      <svg className={styles.columnIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M19 10h-5V5a1 1 0 0 0-1-1h-2a1 1 0 0 0-1 1v5H5a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h5v5a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1v-5h5a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1Z" />
+                      </svg>
+                      <span>Centros médicos</span>
+                    </div>
+                    <div className={styles.columnItem} onClick={() => handleSegmentClick("Salud")}>
+                      <svg className={styles.columnIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+                      </svg>
+                      <span>Kinesiología</span>
+                    </div>
+                    <div className={styles.columnItem} onClick={() => handleSegmentClick("Fitness")}>
+                      <svg className={styles.columnIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M6.5 6.5h11M6.5 17.5h11M18 5v14M6 5v14M3 8v8M21 8v8" />
+                      </svg>
+                      <span>Centros deportivos</span>
+                    </div>
+                    <div className={styles.columnItem} onClick={() => handleSegmentClick("Salud")}>
+                      <svg className={styles.columnIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10Z"/><path d="M12 2v4M12 2c0 2-2 3-4 3" />
+                      </svg>
+                      <span>Nutricionistas</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className={styles.dropdownColumn}>
+                  <div className={styles.columnTitle}>Gastronomía</div>
+                  <div className={styles.columnItems}>
+                    <div className={styles.columnItem} onClick={() => handleSegmentClick("Restaurante")}>
+                      <svg className={styles.columnIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M18 2v20M21 2v4a3 3 0 0 1-3 3M8 2v10M12 2v10M4 2v6a4 4 0 0 0 8 0V2" />
+                      </svg>
+                      <span>Restaurantes</span>
+                    </div>
+                    <div className={styles.columnItem} onClick={() => handleSegmentClick("Restaurante")}>
+                      <svg className={styles.columnIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M17 8h1a3 3 0 0 1 3 3v1a3 3 0 0 1-3 3h-1M2 6h15v8a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V6ZM6 2v4M10 2v4" />
+                      </svg>
+                      <span>Cafeterías</span>
+                    </div>
+                    <div className={styles.columnItem} onClick={() => handleSegmentClick("Restaurante")}>
+                      <svg className={styles.columnIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M20 21v-8a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8M4 16h16M12 5V2M12 11c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3Z" />
+                      </svg>
+                      <span>Pastelerías</span>
+                    </div>
+                    <div className={styles.columnItem} onClick={() => handleSegmentClick("Restaurante")}>
+                      <svg className={styles.columnIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M12 12 2 3h20L12 12Zm0 0v10M8 22h8" />
+                      </svg>
+                      <span>Bares y Pubs</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <button className={styles.headerLink} onClick={() => handleSegmentClick("Restaurante")}>Restaurantes</button>
           <button className={styles.headerLink} onClick={() => scrollToSection("features")}>Funcionalidades</button>
           <button className={styles.headerLink} onClick={() => scrollToSection("pricing")}>Precios</button>
         </nav>
