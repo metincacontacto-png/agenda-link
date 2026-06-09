@@ -251,25 +251,51 @@ export default function LandingAndOnboardingPage() {
         <h2 className={styles.sectionHeading}>La plataforma más rápida y simple para agendar</h2>
         <div className={styles.featuresGrid}>
           <div className={styles.featureCard}>
-            <div className={styles.featureIcon}>⚡️</div>
+            <div className={styles.featureIconWrapper}>
+              <svg className={styles.flatBlueIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+              </svg>
+            </div>
             <h3 className={styles.featureTitle}>Reserva en 4 clics</h3>
             <p className={styles.featureText}>
               Sin contraseñas, sin descargar nada, sin recordar cuentas. Tus clientes entran a tu link, eligen el servicio, pagan y confirman de inmediato.
             </p>
+            <div className={styles.featureImageContainer}>
+              <img src="/booking_mockup.png" alt="Reserva en 4 clics" className={styles.featureImage} />
+            </div>
           </div>
+
           <div className={styles.featureCard}>
-            <div className={styles.featureIcon}>💬</div>
+            <div className={styles.featureIconWrapper}>
+              <svg className={styles.flatBlueIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+              </svg>
+            </div>
             <h3 className={styles.featureTitle}>Asistentes Linki IA</h3>
             <p className={styles.featureText}>
               Secretary responde en WhatsApp 24/7 para agendar citas; Marketing reactiva clientes inactivos de forma automática y Business te asesora estratégicamente.
             </p>
+            <div className={styles.featureImageContainer}>
+              <img src="/whatsapp_mockup.png" alt="Asistentes Linki IA" className={styles.featureImage} />
+            </div>
           </div>
+
           <div className={styles.featureCard}>
-            <div className={styles.featureIcon}>🖨️</div>
+            <div className={styles.featureIconWrapper}>
+              <svg className={styles.flatBlueIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="3" width="7" height="7" />
+                <rect x="14" y="3" width="7" height="7" />
+                <rect x="14" y="14" width="7" height="7" />
+                <rect x="3" y="14" width="7" height="7" />
+              </svg>
+            </div>
             <h3 className={styles.featureTitle}>QR e Imprenta listos</h3>
             <p className={styles.featureText}>
               Te generamos un cartel A4 listo para pegar en tu vitrina y tarjetas de presentación con código QR para que tus clientes agenden al instante.
             </p>
+            <div className={styles.featureImageContainer}>
+              <img src="/qr_mockup.png" alt="QR e Imprenta listos" className={styles.featureImage} />
+            </div>
           </div>
         </div>
       </section>
