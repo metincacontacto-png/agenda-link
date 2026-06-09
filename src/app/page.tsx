@@ -139,6 +139,11 @@ export default function LandingAndOnboardingPage() {
 
   return (
     <div className={styles.landingWrapper}>
+      {/* Background Glowing Orbs */}
+      <div className={styles.glowOrb1} />
+      <div className={styles.glowOrb2} />
+      <div className={styles.glowOrb3} />
+
       {/* 1. Cabecera */}
       <header className={styles.header}>
         <div style={{ display: "flex", alignItems: "center", cursor: "pointer" }} onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>

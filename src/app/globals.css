@@ -13,6 +13,8 @@ body {
   background-size: 24px 24px;
   color: var(--foreground);
   min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   line-height: 1.5;
@@ -25,16 +27,23 @@ a {
 
 /* Glassmorphism utility card */
 .glassCard {
-  background: var(--card-bg);
-  backdrop-filter: var(--backdrop-blur);
-  -webkit-backdrop-filter: var(--backdrop-blur);
-  border: 1px solid var(--card-border);
-  border-radius: var(--radius-card);
-  box-shadow: var(--shadow-subtle);
-  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(0, 102, 255, 0.06);
+  border-radius: 24px;
+  box-shadow: 
+    0 4px 6px -1px rgba(0, 0, 0, 0.01),
+    0 10px 30px -3px rgba(0, 102, 255, 0.03),
+    0 0 1px 0 rgba(0, 102, 255, 0.1) inset;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .glassCard:hover {
-  box-shadow: var(--shadow-active);
-  border-color: rgba(0, 0, 0, 0.15);
+  box-shadow: 
+    0 10px 15px -3px rgba(0, 0, 0, 0.02),
+    0 20px 40px -4px rgba(0, 102, 255, 0.06),
+    0 0 1px 0 rgba(0, 102, 255, 0.2) inset;
+  border-color: rgba(0, 102, 255, 0.15);
+  transform: translateY(-2px);
 }

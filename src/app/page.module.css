@@ -5,17 +5,24 @@
 }
 
 .card {
-  background: var(--card-bg);
-  border: 1px solid var(--card-border);
-  border-radius: var(--radius-card);
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(0, 102, 255, 0.06);
+  border-radius: 24px;
   padding: 36px;
-  box-shadow: var(--shadow-subtle);
-  backdrop-filter: var(--backdrop-blur);
-  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  box-shadow: 
+    0 4px 6px -1px rgba(0, 0, 0, 0.01),
+    0 10px 30px -3px rgba(0, 102, 255, 0.03),
+    0 0 1px 0 rgba(0, 102, 255, 0.1) inset;
+  backdrop-filter: blur(20px);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .card:hover {
-  box-shadow: var(--shadow-active);
+  box-shadow: 
+    0 10px 15px -3px rgba(0, 0, 0, 0.02),
+    0 20px 40px -4px rgba(0, 102, 255, 0.06),
+    0 0 1px 0 rgba(0, 102, 255, 0.2) inset;
+  border-color: rgba(0, 102, 255, 0.12);
 }
 
 .header {
@@ -349,15 +356,21 @@
   width: 200px;
   height: 380px;
   background: white;
-  border: 8px solid #1d1d1f;
+  border: 8px solid #09090b;
   border-radius: 36px;
-  box-shadow: var(--shadow-active);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08), 0 0 1px 1px rgba(0, 102, 255, 0.1);
   position: absolute;
   left: 10px;
   z-index: 2;
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.phoneMockup:hover {
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: 0 24px 48px rgba(0, 102, 255, 0.12);
 }
 
 .phoneScreen {
@@ -366,15 +379,28 @@
   display: flex;
   flex-direction: column;
   background: #fafafa;
+  position: relative;
+}
+
+.phoneScreen::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(115deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0) 60%);
+  pointer-events: none;
+  z-index: 15;
 }
 
 .macMockup {
   width: 340px;
   height: 240px;
   background: white;
-  border: 1px solid #d2d2d7;
+  border: 1px solid rgba(0, 102, 255, 0.12);
   border-radius: 12px;
-  box-shadow: var(--shadow-subtle);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04), 0 0 1px 1px rgba(0, 102, 255, 0.05);
   position: absolute;
   right: 10px;
   bottom: 20px;
@@ -382,6 +408,12 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.macMockup:hover {
+  transform: translateY(-4px) scale(1.015);
+  box-shadow: 0 16px 36px rgba(0, 102, 255, 0.08);
 }
 
 .macHeader {
@@ -434,18 +466,25 @@
 }
 
 .featureCard {
-  background: var(--card-bg);
-  border: 1px solid var(--card-border);
-  border-radius: var(--radius-card);
+  background: rgba(255, 255, 255, 0.75);
+  border: 1px solid rgba(0, 102, 255, 0.05);
+  border-radius: 20px;
   padding: 32px;
   text-align: left;
-  box-shadow: var(--shadow-subtle);
-  transition: transform 0.2s;
+  box-shadow: 
+    0 4px 6px -1px rgba(0, 0, 0, 0.01),
+    0 10px 20px -3px rgba(0, 102, 255, 0.02),
+    0 0 1px 0 rgba(0, 102, 255, 0.08) inset;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .featureCard:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-active);
+  transform: translateY(-4px);
+  border-color: rgba(0, 102, 255, 0.12);
+  box-shadow: 
+    0 10px 15px -3px rgba(0, 0, 0, 0.02),
+    0 20px 30px -4px rgba(0, 102, 255, 0.05),
+    0 0 1px 0 rgba(0, 102, 255, 0.15) inset;
 }
 
 .featureIcon {
@@ -487,19 +526,44 @@
 }
 
 .pricingCard {
-  background: var(--card-bg);
-  border: 1px solid var(--card-border);
-  border-radius: var(--radius-card);
+  background: rgba(255, 255, 255, 0.75);
+  border: 1px solid rgba(0, 102, 255, 0.05);
+  border-radius: 24px;
   padding: 32px;
   display: flex;
   flex-direction: column;
   text-align: left;
   position: relative;
-  box-shadow: var(--shadow-subtle);
+  box-shadow: 
+    0 4px 6px -1px rgba(0, 0, 0, 0.01),
+    0 10px 20px -3px rgba(0, 102, 255, 0.02),
+    0 0 1px 0 rgba(0, 102, 255, 0.08) inset;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.pricingCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 
+    0 10px 15px -3px rgba(0, 0, 0, 0.02),
+    0 20px 30px -4px rgba(0, 102, 255, 0.05),
+    0 0 1px 0 rgba(0, 102, 255, 0.15) inset;
 }
 
 .pricingCardPopular {
-  border-color: var(--primary);
+  border-color: rgba(0, 102, 255, 0.35);
+  background: rgba(255, 255, 255, 0.85);
+  box-shadow: 
+    0 4px 6px -1px rgba(0, 0, 0, 0.01),
+    0 12px 24px -3px rgba(0, 102, 255, 0.05),
+    0 0 1px 0 rgba(0, 102, 255, 0.25) inset;
+}
+
+.pricingCardPopular:hover {
+  border-color: rgba(0, 102, 255, 0.45);
+  box-shadow: 
+    0 10px 15px -3px rgba(0, 0, 0, 0.02),
+    0 24px 40px -4px rgba(0, 102, 255, 0.08),
+    0 0 1px 0 rgba(0, 102, 255, 0.35) inset;
 }
 
 .popularBadge {
@@ -573,16 +637,55 @@
 
 .planBtnPrimary {
   background: var(--primary);
-  color: white;
-  border: none;
+  color: white !important;
+  border: 1px solid var(--primary);
 }
 
 .planBtnPrimary:hover {
   background: var(--primary-hover);
+  border-color: var(--primary-hover);
+  color: white !important;
 }
 
 /* Container de registro */
 .registerSection {
   padding: 80px 0;
   border-top: 1px solid var(--card-border);
+}
+
+/* Glow Orbs */
+.glowOrb1 {
+  position: absolute;
+  width: 700px;
+  height: 700px;
+  background: radial-gradient(circle, rgba(0, 102, 255, 0.045) 0%, rgba(0, 198, 255, 0.02) 50%, transparent 70%);
+  filter: blur(100px);
+  z-index: -1;
+  top: -150px;
+  right: -200px;
+  pointer-events: none;
+}
+
+.glowOrb2 {
+  position: absolute;
+  width: 800px;
+  height: 800px;
+  background: radial-gradient(circle, rgba(0, 198, 255, 0.04) 0%, rgba(0, 102, 255, 0.025) 50%, transparent 70%);
+  filter: blur(120px);
+  z-index: -1;
+  top: 800px;
+  left: -300px;
+  pointer-events: none;
+}
+
+.glowOrb3 {
+  position: absolute;
+  width: 700px;
+  height: 700px;
+  background: radial-gradient(circle, rgba(0, 102, 255, 0.04) 0%, rgba(0, 198, 255, 0.02) 50%, transparent 70%);
+  filter: blur(100px);
+  z-index: -1;
+  bottom: 100px;
+  right: -200px;
+  pointer-events: none;
 }
