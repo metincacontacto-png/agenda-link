@@ -1,7 +1,440 @@
+# Landing Page de AgendaLink Implementation Plan
+
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+
+**Goal:** Crear una landing page profesional, minimalista y al estilo Apple para AgendaLink, integrando el flujo de onboarding existente en la misma página y mostrando mockups de las interfaces de cliente y administración sin usar imágenes externas pesadas.
+
+**Architecture:** Modificación de `src/app/page.tsx` para incorporar navegación en el header, sección Hero con entrada de slug interactiva, maquetas visuales construidas en CSS, tarjetas de beneficios y planes de suscripción, integrando de forma fluida el onboarding en una sección inferior `#registro` con scroll suave.
+
+**Tech Stack:** Next.js 16 (App Router), Vanilla CSS Modules, qrcode.
+
+---
+
+### Task 1: Estilos de la Landing Page en page.module.css
+
+**Files:**
+- Modify: `src/app/page.module.css`
+
+- [ ] **Step 1: Escribir las clases de estilos para la landing page en page.module.css**
+
+Modificar `src/app/page.module.css` para añadir estilos del header, hero, mockups CSS, tarjetas de beneficios, planes de precios y contenedor de registro:
+
+```css
+.landingWrapper {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 0;
+  border-bottom: 1px solid var(--card-border);
+}
+
+.headerNav {
+  display: flex;
+  gap: 24px;
+}
+
+.headerLink {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: color 0.2s;
+  background: none;
+  border: none;
+}
+
+.headerLink:hover {
+  color: var(--foreground);
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.heroSection {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 40px;
+  align-items: center;
+  padding: 80px 0;
+}
+
+@media (max-width: 768px) {
+  .heroSection {
+    grid-template-columns: 1fr;
+    padding: 40px 0;
+    text-align: center;
+  }
+}
+
+.heroContent {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+@media (max-width: 768px) {
+  .heroContent {
+    align-items: center;
+  }
+}
+
+.heroTitle {
+  font-size: 48px;
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -1.5px;
+  margin-bottom: 20px;
+  color: var(--foreground);
+}
+
+.heroSubtitle {
+  font-size: 18px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin-bottom: 32px;
+}
+
+.heroForm {
+  display: flex;
+  width: 100%;
+  max-width: 460px;
+  background: var(--card-bg);
+  border: 1px solid var(--input-border);
+  border-radius: var(--radius-pill);
+  padding: 6px;
+  box-shadow: var(--shadow-subtle);
+  transition: border-color 0.2s;
+}
+
+.heroForm:focus-within {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px rgba(127, 0, 255, 0.15);
+}
+
+.heroInputWrapper {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  padding-left: 16px;
+  font-size: 15px;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.heroInput {
+  flex: 1;
+  border: none;
+  background: transparent;
+  outline: none;
+  padding: 10px 4px;
+  font-size: 15px;
+  color: var(--foreground);
+  font-weight: 600;
+}
+
+.heroBtn {
+  background: var(--primary);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: var(--radius-pill);
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.heroBtn:hover {
+  background: var(--primary-hover);
+}
+
+/* Mockups CSS Visuales */
+.mockupContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  height: 420px;
+}
+
+@media (max-width: 768px) {
+  .mockupContainer {
+    display: none;
+  }
+}
+
+.phoneMockup {
+  width: 200px;
+  height: 380px;
+  background: white;
+  border: 8px solid #1d1d1f;
+  border-radius: 36px;
+  box-shadow: var(--shadow-active);
+  position: absolute;
+  left: 10px;
+  z-index: 2;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.phoneScreen {
+  flex: 1;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  background: #fafafa;
+}
+
+.macMockup {
+  width: 340px;
+  height: 240px;
+  background: white;
+  border: 1px solid #d2d2d7;
+  border-radius: 12px;
+  box-shadow: var(--shadow-subtle);
+  position: absolute;
+  right: 10px;
+  bottom: 20px;
+  z-index: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.macHeader {
+  height: 24px;
+  background: #f5f5f7;
+  border-bottom: 1px solid #d2d2d7;
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  gap: 6px;
+}
+
+.macDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.macScreen {
+  flex: 1;
+  background: #ffffff;
+  padding: 8px;
+}
+
+/* Features Grid */
+.featuresSection {
+  padding: 80px 0;
+  border-top: 1px solid var(--card-border);
+}
+
+.sectionHeading {
+  text-align: center;
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  margin-bottom: 40px;
+  color: var(--foreground);
+}
+
+.featuresGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+@media (max-width: 768px) {
+  .featuresGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.featureCard {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-card);
+  padding: 32px;
+  text-align: left;
+  box-shadow: var(--shadow-subtle);
+  transition: transform 0.2s;
+}
+
+.featureCard:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-active);
+}
+
+.featureIcon {
+  font-size: 28px;
+  margin-bottom: 16px;
+}
+
+.featureTitle {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 10px;
+  color: var(--foreground);
+}
+
+.featureText {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+/* Pricing Section */
+.pricingSection {
+  padding: 80px 0;
+  border-top: 1px solid var(--card-border);
+  text-align: center;
+}
+
+.pricingGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin-top: 40px;
+}
+
+@media (max-width: 768px) {
+  .pricingGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.pricingCard {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-card);
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  position: relative;
+  box-shadow: var(--shadow-subtle);
+}
+
+.pricingCardPopular {
+  border-color: var(--primary);
+}
+
+.popularBadge {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: var(--brand-gradient);
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+}
+
+.planName {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--foreground);
+  margin-bottom: 8px;
+}
+
+.planPrice {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--foreground);
+  margin-bottom: 20px;
+}
+
+.planPrice span {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.planFeatures {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 32px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1;
+}
+
+.planFeatureItem {
+  font-size: 13.5px;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.planBtn {
+  width: 100%;
+  padding: 12px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--input-border);
+  background: transparent;
+  color: var(--foreground);
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.2s;
+}
+
+.planBtn:hover {
+  border-color: var(--foreground);
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.planBtnPrimary {
+  background: var(--primary);
+  color: white;
+  border: none;
+}
+
+.planBtnPrimary:hover {
+  background: var(--primary-hover);
+}
+
+/* Container de registro */
+.registerSection {
+  padding: 80px 0;
+  border-top: 1px solid var(--card-border);
+}
+```
+
+- [ ] **Step 2: Verificar sintaxis del CSS de landing**
+
+Run: `git diff src/app/page.module.css` (para confirmar la inserción de las clases sin conflictos).
+
+---
+
+### Task 2: Implementar la Estructura de Landing Page en page.tsx
+
+**Files:**
+- Modify: `src/app/page.tsx`
+
+- [ ] **Step 1: Escribir el código completo de la Landing Page**
+
+Modificar `src/app/page.tsx` para agregar la cabecera, el hero, los mockups CSS, la grilla de beneficios, la tabla de precios y conectar la lógica para transferir datos al formulario de registro en el scroll suave:
+
+```tsx
 "use client";
 
 import React, { useState } from "react";
-import Link from "next/link";
 import styles from "./page.module.css";
 import QrDownloader from "@/components/QrDownloader";
 
@@ -116,7 +549,7 @@ export default function LandingAndOnboardingPage() {
       {/* 1. Cabecera */}
       <header className={styles.header}>
         <div style={{ display: "flex", alignItems: "center", gap: "10px", cursor: "pointer" }} onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>
-          <span className={styles.logo} style={{ marginBottom: 0 }}>AgendaLink</span>
+          <img src="/logo.png" alt="AgendaLink" style={{ height: "28px" }} />
         </div>
         <nav className={styles.headerNav}>
           <button className={styles.headerLink} onClick={() => scrollToSection("features")}>Funcionalidades</button>
@@ -467,3 +900,28 @@ export default function LandingAndOnboardingPage() {
     </div>
   );
 }
+```
+
+- [ ] **Step 2: Verificar sintaxis de page.tsx**
+
+Run: `git diff src/app/page.tsx` (para verificar que los imports de React y Link son correctos).
+
+---
+
+### Task 3: Verificación y Compilación del Proyecto
+
+**Files:**
+- Test: Compilación estática de Next.js y verificación de tipos
+
+- [ ] **Step 1: Ejecutar compilación de producción**
+
+Run: `npm run build`
+Expected: Compilación exitosa sin errores en Turbopack o TypeScript.
+
+- [ ] **Step 2: Realizar Commit**
+
+```bash
+git add src/app/page.tsx src/app/page.module.css docs/superpowers/specs/2026-06-08-agendalink-landing-page-design.md
+git commit -m "feat: implement fully designed clean apple style landing page with integrated onboarding"
+```
+Expected: Commit exitoso.
