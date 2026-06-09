@@ -29,6 +29,10 @@ export default function LandingAndOnboardingPage() {
   const [slug, setSlug] = useState("");
   const [copied, setCopied] = useState(false);
   const [segmentsOpen, setSegmentsOpen] = useState(false);
+  const [loginModalOpen, setLoginModalOpen] = useState(false);
+  const [loginSlug, setLoginSlug] = useState("");
+  const [loginLoading, setLoginLoading] = useState(false);
+  const [loginError, setLoginError] = useState("");
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -159,6 +163,31 @@ export default function LandingAndOnboardingPage() {
     scrollToSection("registro");
   };
 
+  const handleLoginSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!loginSlug) return;
+    setLoginLoading(true);
+    setLoginError("");
+    try {
+      const res = await fetch(`/api/admin?slug=${loginSlug}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success) {
+          window.location.href = `/admin/${loginSlug}`;
+        } else {
+          setLoginError("No se pudo iniciar sesión. Verifica el link.");
+        }
+      } else {
+        setLoginError("El negocio no existe. Asegúrate de que el link sea correcto.");
+      }
+    } catch (err) {
+      console.error(err);
+      setLoginError("Error de conexión. Inténtalo de nuevo.");
+    } finally {
+      setLoginLoading(false);
+    }
+  };
+
 
   return (
     <div className={styles.landingWrapper}>
@@ -285,7 +314,7 @@ export default function LandingAndOnboardingPage() {
           <button className={styles.headerLink} onClick={() => scrollToSection("pricing")}>Precios</button>
         </nav>
         <div className={styles.headerActions}>
-          <button className={styles.headerLink} onClick={() => scrollToSection("registro")}>Iniciar Sesión</button>
+          <button className={styles.headerLink} onClick={() => setLoginModalOpen(true)}>Iniciar Sesión</button>
           <button className={styles.heroBtn} style={{ padding: "8px 16px", fontSize: "13px" }} onClick={() => scrollToSection("registro")}>Registrar negocio</button>
         </div>
       </header>
@@ -767,6 +796,46 @@ export default function LandingAndOnboardingPage() {
       <footer style={{ padding: "40px 0", borderTop: "1px solid var(--card-border)", textAlign: "center", fontSize: "12px", color: "var(--text-secondary)" }}>
         <p>© 2026 AgendaLink. Todos los derechos reservados.</p>
       </footer>
+
+      {/* Modal de Inicio de Sesión */}
+      {loginModalOpen && (
+        <div className={styles.modalOverlay} onClick={() => setLoginModalOpen(false)}>
+          <div className={styles.modalBox} onClick={(e) => e.stopPropagation()}>
+            <button className={styles.modalCloseBtn} onClick={() => setLoginModalOpen(false)}>×</button>
+            <h3 className={styles.modalTitle}>Iniciar Sesión</h3>
+            <p className={styles.modalSubtitle}>Ingresa el link de tu negocio para acceder al Panel de Control</p>
+            
+            {loginError && <div className={styles.modalError}>{loginError}</div>}
+            
+            <form onSubmit={handleLoginSubmit}>
+              <div className={styles.formGroup} style={{ marginBottom: "20px" }}>
+                <label className={styles.label}>Link de tu negocio</label>
+                <div className={styles.heroInputWrapper} style={{ background: "var(--input-bg)", border: "1px solid var(--input-border)", borderRadius: "var(--radius-input)", padding: "4px 8px 4px 12px", height: "48px" }}>
+                  <span style={{ fontSize: "13.5px", fontWeight: "600", color: "var(--text-secondary)" }}>agendalink.com/</span>
+                  <input
+                    type="text"
+                    placeholder="tu-negocio"
+                    className={styles.heroInput}
+                    style={{ fontSize: "13.5px", padding: "6px 4px" }}
+                    value={loginSlug}
+                    onChange={(e) => setLoginSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))}
+                    required
+                  />
+                </div>
+              </div>
+              
+              <button 
+                type="submit" 
+                className={`${styles.btn} ${styles.btnPrimary}`} 
+                style={{ width: "100%", padding: "12px", height: "46px" }}
+                disabled={loginLoading || !loginSlug}
+              >
+                {loginLoading ? "Verificando..." : "Ingresar"}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
