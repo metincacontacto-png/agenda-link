@@ -199,7 +199,7 @@ export default function LandingAndOnboardingPage() {
       {/* 1. Cabecera */}
       <header className={styles.header}>
         <div style={{ display: "flex", alignItems: "center", cursor: "pointer" }} onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>
-          <img src="/logo.png" alt="AgendaLink Logo" style={{ height: "30px", width: "auto" }} />
+          <img src="/logo.png" alt="AgendaLink Logo" style={{ height: "36px", width: "auto" }} />
         </div>
         <nav className={styles.headerNav}>
           <div
@@ -309,7 +309,6 @@ export default function LandingAndOnboardingPage() {
             )}
           </div>
 
-          <button className={styles.headerLink} onClick={() => handleSegmentClick("Restaurante")}>Restaurantes</button>
           <button className={styles.headerLink} onClick={() => scrollToSection("features")}>Funcionalidades</button>
           <button className={styles.headerLink} onClick={() => scrollToSection("pricing")}>Precios</button>
         </nav>
