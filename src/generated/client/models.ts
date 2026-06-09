@@ -11,5 +11,7 @@
 export type * from './models/Business'
 export type * from './models/Service'
 export type * from './models/Professional'
+export type * from './models/Table'
+export type * from './models/MenuItem'
 export type * from './models/Appointment'
 export type * from './commonInputTypes'

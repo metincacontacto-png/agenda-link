@@ -17,6 +17,12 @@ export default function LandingAndOnboardingPage() {
     serviceName: "",
     serviceDuration: "30",
     servicePrice: "",
+    tablesCount: "5",
+    tableCapacity: "4",
+    menuItemName: "",
+    menuItemPrice: "",
+    menuItemDescription: "",
+    menuItemCategory: "Fondos",
   });
 
   const [loading, setLoading] = useState(false);
@@ -24,7 +30,27 @@ export default function LandingAndOnboardingPage() {
   const [copied, setCopied] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    if (name === "category") {
+      if (value === "Restaurante") {
+        setFormData((prev) => ({
+          ...prev,
+          category: value,
+          serviceName: "Reserva de Mesa",
+          serviceDuration: "120",
+          servicePrice: "0",
+        }));
+      } else {
+        setFormData((prev) => ({
+          ...prev,
+          category: value,
+          serviceName: prev.serviceName === "Reserva de Mesa" ? "" : prev.serviceName,
+          servicePrice: prev.servicePrice === "0" ? "" : prev.servicePrice,
+        }));
+      }
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
   };
 
   const nextStep = () => setStep((prev) => prev + 1);
@@ -372,42 +398,149 @@ export default function LandingAndOnboardingPage() {
             )}
 
             {step === 2 && (
-              <form onSubmit={(e) => { e.preventDefault(); if (formData.serviceName && formData.servicePrice && !loading) handleSubmit(); }}>
-                <h2 style={{ fontSize: "15px", marginBottom: "20px", textAlign: "center", fontWeight: "700" }}>Agrega tu primer servicio</h2>
-                <div className={styles.formGroup}>
-                  <label className={styles.label}>Nombre del Servicio</label>
-                  <input
-                    type="text"
-                    name="serviceName"
-                    value={formData.serviceName}
-                    onChange={handleChange}
-                    placeholder="Ej. Corte de Cabello Caballero"
-                    className={styles.input}
-                    required
-                  />
-                </div>
-                <div className={styles.formGroup}>
-                  <label className={styles.label}>Duración (minutos)</label>
-                  <select name="serviceDuration" value={formData.serviceDuration} onChange={handleChange} className={styles.select}>
-                    <option value="15">15 minutos</option>
-                    <option value="30">30 minutos</option>
-                    <option value="45">45 minutos</option>
-                    <option value="60">1 hora</option>
-                    <option value="90">1 hora y media</option>
-                  </select>
-                </div>
-                <div className={styles.formGroup}>
-                  <label className={styles.label}>Precio</label>
-                  <input
-                    type="number"
-                    name="servicePrice"
-                    value={formData.servicePrice}
-                    onChange={handleChange}
-                    placeholder="Ej. 15000"
-                    className={styles.input}
-                    required
-                  />
-                </div>
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  if (loading) return;
+                  if (formData.category === "Restaurante") {
+                    if (formData.tablesCount && formData.tableCapacity && formData.menuItemName && formData.menuItemPrice) {
+                      handleSubmit();
+                    }
+                  } else {
+                    if (formData.serviceName && formData.servicePrice) {
+                      handleSubmit();
+                    }
+                  }
+                }}
+              >
+                {formData.category === "Restaurante" ? (
+                  <>
+                    <h2 style={{ fontSize: "15px", marginBottom: "20px", textAlign: "center", fontWeight: "700" }}>Configuración de tu Restaurante</h2>
+                    
+                    <div style={{ display: "flex", gap: "12px", marginBottom: "16px" }}>
+                      <div className={styles.formGroup} style={{ flex: 1, marginBottom: 0 }}>
+                        <label className={styles.label}>Cantidad de Mesas</label>
+                        <input
+                          type="number"
+                          name="tablesCount"
+                          value={formData.tablesCount}
+                          onChange={handleChange}
+                          placeholder="Ej. 5"
+                          className={styles.input}
+                          min="1"
+                          required
+                        />
+                      </div>
+                      <div className={styles.formGroup} style={{ flex: 1, marginBottom: 0 }}>
+                        <label className={styles.label}>Capacidad por Mesa</label>
+                        <input
+                          type="number"
+                          name="tableCapacity"
+                          value={formData.tableCapacity}
+                          onChange={handleChange}
+                          placeholder="Ej. 4"
+                          className={styles.input}
+                          min="1"
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    <h2 style={{ fontSize: "14px", margin: "24px 0 16px 0", textAlign: "left", fontWeight: "700", borderTop: "1px solid var(--card-border)", paddingTop: "16px" }}>Agrega tu primer plato o bebida</h2>
+                    
+                    <div className={styles.formGroup}>
+                      <label className={styles.label}>Nombre del Plato</label>
+                      <input
+                        type="text"
+                        name="menuItemName"
+                        value={formData.menuItemName}
+                        onChange={handleChange}
+                        placeholder="Ej. Fettuccine Alfredo"
+                        className={styles.input}
+                        required
+                      />
+                    </div>
+
+                    <div style={{ display: "flex", gap: "12px", marginBottom: "16px" }}>
+                      <div className={styles.formGroup} style={{ flex: 1, marginBottom: 0 }}>
+                        <label className={styles.label}>Precio</label>
+                        <input
+                          type="number"
+                          name="menuItemPrice"
+                          value={formData.menuItemPrice}
+                          onChange={handleChange}
+                          placeholder="Ej. 12000"
+                          className={styles.input}
+                          required
+                        />
+                      </div>
+                      <div className={styles.formGroup} style={{ flex: 1, marginBottom: 0 }}>
+                        <label className={styles.label}>Categoría</label>
+                        <select
+                          name="menuItemCategory"
+                          value={formData.menuItemCategory}
+                          onChange={handleChange}
+                          className={styles.select}
+                        >
+                          <option value="Entradas">Entradas</option>
+                          <option value="Fondos">Platos de Fondo</option>
+                          <option value="Postres">Postres</option>
+                          <option value="Bebidas">Bebidas</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className={styles.formGroup}>
+                      <label className={styles.label}>Descripción (Opcional)</label>
+                      <input
+                        type="text"
+                        name="menuItemDescription"
+                        value={formData.menuItemDescription}
+                        onChange={handleChange}
+                        placeholder="Ej. Pasta fresca con salsa de crema, mantequilla y queso parmesano"
+                        className={styles.input}
+                      />
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <h2 style={{ fontSize: "15px", marginBottom: "20px", textAlign: "center", fontWeight: "700" }}>Agrega tu primer servicio</h2>
+                    <div className={styles.formGroup}>
+                      <label className={styles.label}>Nombre del Servicio</label>
+                      <input
+                        type="text"
+                        name="serviceName"
+                        value={formData.serviceName}
+                        onChange={handleChange}
+                        placeholder="Ej. Corte de Cabello Caballero"
+                        className={styles.input}
+                        required
+                      />
+                    </div>
+                    <div className={styles.formGroup}>
+                      <label className={styles.label}>Duración (minutos)</label>
+                      <select name="serviceDuration" value={formData.serviceDuration} onChange={handleChange} className={styles.select}>
+                        <option value="15">15 minutos</option>
+                        <option value="30">30 minutos</option>
+                        <option value="45">45 minutos</option>
+                        <option value="60">1 hora</option>
+                        <option value="90">1 hora y media</option>
+                      </select>
+                    </div>
+                    <div className={styles.formGroup}>
+                      <label className={styles.label}>Precio</label>
+                      <input
+                        type="number"
+                        name="servicePrice"
+                        value={formData.servicePrice}
+                        onChange={handleChange}
+                        placeholder="Ej. 15000"
+                        className={styles.input}
+                        required
+                      />
+                    </div>
+                  </>
+                )}
 
                 <div className={styles.buttonRow}>
                   <button type="button" onClick={prevStep} className={`${styles.btn} ${styles.btnSecondary}`}>
@@ -415,7 +548,12 @@ export default function LandingAndOnboardingPage() {
                   </button>
                   <button
                     type="submit"
-                    disabled={!formData.serviceName || !formData.servicePrice || loading}
+                    disabled={
+                      loading ||
+                      (formData.category === "Restaurante"
+                        ? !formData.tablesCount || !formData.tableCapacity || !formData.menuItemName || !formData.menuItemPrice
+                        : !formData.serviceName || !formData.servicePrice)
+                    }
                     className={`${styles.btn} ${styles.btnPrimary}`}
                   >
                     {loading ? "Creando..." : "Crear mi link"}

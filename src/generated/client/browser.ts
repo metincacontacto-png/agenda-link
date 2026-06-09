@@ -33,6 +33,16 @@ export type Service = Prisma.ServiceModel
  */
 export type Professional = Prisma.ProfessionalModel
 /**
+ * Model Table
+ * 
+ */
+export type Table = Prisma.TableModel
+/**
+ * Model MenuItem
+ * 
+ */
+export type MenuItem = Prisma.MenuItemModel
+/**
  * Model Appointment
  * 
  */

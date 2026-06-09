@@ -54,6 +54,8 @@ export const ModelName = {
   Business: 'Business',
   Service: 'Service',
   Professional: 'Professional',
+  Table: 'Table',
+  MenuItem: 'MenuItem',
   Appointment: 'Appointment'
 } as const
 
@@ -109,6 +111,30 @@ export const ProfessionalScalarFieldEnum = {
 export type ProfessionalScalarFieldEnum = (typeof ProfessionalScalarFieldEnum)[keyof typeof ProfessionalScalarFieldEnum]
 
 
+export const TableScalarFieldEnum = {
+  id: 'id',
+  businessId: 'businessId',
+  number: 'number',
+  capacity: 'capacity',
+  createdAt: 'createdAt'
+} as const
+
+export type TableScalarFieldEnum = (typeof TableScalarFieldEnum)[keyof typeof TableScalarFieldEnum]
+
+
+export const MenuItemScalarFieldEnum = {
+  id: 'id',
+  businessId: 'businessId',
+  name: 'name',
+  description: 'description',
+  price: 'price',
+  category: 'category',
+  createdAt: 'createdAt'
+} as const
+
+export type MenuItemScalarFieldEnum = (typeof MenuItemScalarFieldEnum)[keyof typeof MenuItemScalarFieldEnum]
+
+
 export const AppointmentScalarFieldEnum = {
   id: 'id',
   businessId: 'businessId',
@@ -121,6 +147,8 @@ export const AppointmentScalarFieldEnum = {
   paymentStatus: 'paymentStatus',
   paymentMethod: 'paymentMethod',
   paymentAmount: 'paymentAmount',
+  peopleCount: 'peopleCount',
+  tableId: 'tableId',
   createdAt: 'createdAt'
 } as const
 
