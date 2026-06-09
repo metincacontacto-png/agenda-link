@@ -227,3 +227,135 @@
     color: #30d158;
   }
 }
+
+/* Calendar view styles */
+.calendarWrapper {
+  overflow-x: auto;
+  border-radius: var(--radius-card);
+  border: 1px solid var(--card-border);
+  background: var(--card-bg);
+  backdrop-filter: var(--backdrop-blur);
+  margin-top: 16px;
+  box-shadow: var(--shadow-subtle);
+}
+
+.calendarTable {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 800px;
+}
+
+.calendarHeaderCell {
+  padding: 14px 8px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 700;
+  border-bottom: 2px solid var(--card-border);
+  color: var(--foreground);
+  background: rgba(0, 0, 0, 0.02);
+}
+
+@media (prefers-color-scheme: dark) {
+  .calendarHeaderCell {
+    background: rgba(255, 255, 255, 0.02);
+  }
+}
+
+.calendarTimeHeaderCell {
+  width: 70px;
+  border-bottom: 2px solid var(--card-border);
+  background: rgba(0, 0, 0, 0.02);
+  padding: 14px 8px;
+}
+
+@media (prefers-color-scheme: dark) {
+  .calendarTimeHeaderCell {
+    background: rgba(255, 255, 255, 0.02);
+  }
+}
+
+.calendarRow {
+  border-bottom: 1px solid var(--card-border);
+}
+
+.calendarTimeCell {
+  padding: 10px 8px;
+  text-align: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  border-right: 1px solid var(--card-border);
+  background: rgba(0, 0, 0, 0.01);
+  white-space: nowrap;
+}
+
+.calendarCell {
+  height: 60px;
+  padding: 4px;
+  border-right: 1px solid var(--card-border);
+  position: relative;
+  vertical-align: top;
+}
+
+.calendarCell:last-child {
+  border-right: none;
+}
+
+.appointmentBlock {
+  background: rgba(127, 0, 255, 0.06);
+  border-left: 3px solid var(--primary);
+  border-radius: 6px;
+  padding: 6px 8px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--foreground);
+  transition: all 0.2s ease;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+  text-align: left;
+}
+
+.appointmentBlock:hover {
+  background: rgba(127, 0, 255, 0.1);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(127,0,255,0.1);
+}
+
+.appointmentBlockPaid {
+  background: rgba(52, 199, 89, 0.06);
+  border-left-color: var(--success);
+}
+
+.appointmentBlockPaid:hover {
+  background: rgba(52, 199, 89, 0.1);
+  box-shadow: 0 4px 8px rgba(52,199,89,0.1);
+}
+
+.appointmentClientName {
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.appointmentServiceName {
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 10px;
+}
+
+.appointmentPriceBadge {
+  font-weight: 700;
+  color: var(--primary);
+  font-size: 9px;
+  margin-top: 2px;
+}
+
+.appointmentPriceBadgePaid {
+  color: var(--success);
+}

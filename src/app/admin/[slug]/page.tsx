@@ -30,7 +30,10 @@ export default function AdminDashboard({ params }: { params: Promise<{ slug: str
   const { slug } = React.use(params);
   const [business, setBusiness] = useState<Business | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<"reservas" | "secretary" | "marketing" | "business">("reservas");
+  const [activeTab, setActiveTab] = useState<"calendario" | "reservas" | "secretary" | "marketing" | "business">("calendario");
+
+  // Navegación de semana en el calendario
+  const [currentWeekRef, setCurrentWeekRef] = useState(new Date());
 
   // Chat animado de Linki Secretary
   const [chatMessages, setChatMessages] = useState<{ sender: "user" | "bot"; text: string; time: string }[]>([
@@ -111,9 +114,63 @@ export default function AdminDashboard({ params }: { params: Promise<{ slug: str
     return `$${price.toFixed(2)} USD`;
   };
 
+  // Helper para calcular los días de la semana actual (Lunes a Domingo)
+  const getWeekDates = (refDate: Date) => {
+    const temp = new Date(refDate);
+    const day = temp.getDay();
+    // En JS, 0 es Domingo. Queremos que Lunes sea el primer día.
+    const distance = day === 0 ? -6 : 1 - day;
+    temp.setDate(temp.getDate() + distance);
+
+    const dates = [];
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(temp);
+      d.setDate(temp.getDate() + i);
+      dates.push(d);
+    }
+    return dates;
+  };
+
+  const weekDates = getWeekDates(currentWeekRef);
+  const hourSlots = ["09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00"];
+
+  const getAppointmentsForSlot = (date: Date, hourStr: string) => {
+    if (!business?.appointments) return [];
+    const slotHour = parseInt(hourStr.split(":")[0]);
+    return business.appointments.filter((app) => {
+      const appDate = new Date(app.dateTime);
+      return (
+        appDate.getFullYear() === date.getFullYear() &&
+        appDate.getMonth() === date.getMonth() &&
+        appDate.getDate() === date.getDate() &&
+        appDate.getHours() === slotHour
+      );
+    });
+  };
+
+  const handlePrevWeek = () => {
+    const prev = new Date(currentWeekRef);
+    prev.setDate(prev.getDate() - 7);
+    setCurrentWeekRef(prev);
+  };
+
+  const handleNextWeek = () => {
+    const next = new Date(currentWeekRef);
+    next.setDate(next.getDate() + 7);
+    setCurrentWeekRef(next);
+  };
+
+  const getWeekRangeString = () => {
+    if (weekDates.length === 0) return "";
+    const first = weekDates[0];
+    const last = weekDates[6];
+    const options: Intl.DateTimeFormatOptions = { day: "numeric", month: "short" };
+    return `${first.toLocaleDateString("es-ES", options)} - ${last.toLocaleDateString("es-ES", options)}, ${first.getFullYear()}`;
+  };
+
   if (loading) {
     return (
-      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh", background: "url('/hero-bg.png') center/cover fixed", color: "var(--foreground)" }}>
+      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh", color: "var(--foreground)" }}>
         <div className={styles.glassCard} style={{ textAlign: "center", padding: "30px" }}>
           <p style={{ fontWeight: 600, fontSize: "16px" }}>Cargando Centro de Control...</p>
         </div>
@@ -123,7 +180,7 @@ export default function AdminDashboard({ params }: { params: Promise<{ slug: str
 
   if (!business) {
     return (
-      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh", background: "url('/hero-bg.png') center/cover fixed", color: "var(--foreground)", padding: "20px" }}>
+      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh", color: "var(--foreground)", padding: "20px" }}>
         <div className={styles.glassCard} style={{ textAlign: "center", maxWidth: "400px" }}>
           <h1 style={{ fontSize: "20px", fontWeight: "800", marginBottom: "12px" }}>Negocio no encontrado</h1>
           <p style={{ fontSize: "14px", color: "var(--text-secondary)", marginBottom: "20px" }}>El panel administrativo solicitado no existe.</p>
@@ -142,8 +199,11 @@ export default function AdminDashboard({ params }: { params: Promise<{ slug: str
         
         <span className={styles.navSectionTitle}>Operación</span>
         <nav className={styles.navList}>
+          <button className={`${styles.navItem} ${activeTab === "calendario" ? styles.navItemActive : ""}`} onClick={() => setActiveTab("calendario")}>
+            📅 Vista Calendario
+          </button>
           <button className={`${styles.navItem} ${activeTab === "reservas" ? styles.navItemActive : ""}`} onClick={() => setActiveTab("reservas")}>
-            📅 Reservas
+            📋 Lista de Reservas
           </button>
         </nav>
 
@@ -174,6 +234,72 @@ export default function AdminDashboard({ params }: { params: Promise<{ slug: str
           </Link>
         </header>
 
+        {activeTab === "calendario" && (
+          <section className={styles.glassCard} style={{ padding: "20px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
+              <h2 style={{ fontSize: "16px", fontWeight: "700" }}>Agenda de Turnos</h2>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                <button onClick={handlePrevWeek} className={styles.navItemActive} style={{ width: "32px", height: "32px", padding: 0, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: "8px", fontWeight: "bold", border: "none", cursor: "pointer" }}>
+                  &lt;
+                </button>
+                <span style={{ fontSize: "13px", fontWeight: "600", color: "var(--foreground)", minWidth: "150px", textAlign: "center" }}>
+                  {getWeekRangeString()}
+                </span>
+                <button onClick={handleNextWeek} className={styles.navItemActive} style={{ width: "32px", height: "32px", padding: 0, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: "8px", fontWeight: "bold", border: "none", cursor: "pointer" }}>
+                  &gt;
+                </button>
+              </div>
+            </div>
+
+            <div className={styles.calendarWrapper}>
+              <table className={styles.calendarTable}>
+                <thead>
+                  <tr>
+                    <th className={styles.calendarTimeHeaderCell}>Hora</th>
+                    {weekDates.map((date, idx) => {
+                      const dayName = date.toLocaleDateString("es-ES", { weekday: "short" });
+                      const dayNum = date.getDate();
+                      const isToday = new Date().toDateString() === date.toDateString();
+                      return (
+                        <th key={idx} className={styles.calendarHeaderCell} style={isToday ? { color: "var(--primary)", borderBottomColor: "var(--primary)" } : {}}>
+                          <span style={{ display: "block", textTransform: "capitalize", fontSize: "10px", color: "var(--text-secondary)" }}>{dayName}</span>
+                          <span style={{ fontSize: "16px", fontWeight: "800" }}>{dayNum}</span>
+                        </th>
+                      );
+                    })}
+                  </tr>
+                </thead>
+                <tbody>
+                  {hourSlots.map((hour, rowIdx) => (
+                    <tr key={rowIdx} className={styles.calendarRow}>
+                      <td className={styles.calendarTimeCell}>{hour}</td>
+                      {weekDates.map((date, colIdx) => {
+                        const slotApps = getAppointmentsForSlot(date, hour);
+                        return (
+                          <td key={colIdx} className={styles.calendarCell}>
+                            {slotApps.map((app) => {
+                              const isPaid = app.paymentStatus === "PAID";
+                              return (
+                                <div key={app.id} className={`${styles.appointmentBlock} ${isPaid ? styles.appointmentBlockPaid : ""}`}>
+                                  <div className={styles.appointmentClientName}>{app.clientName}</div>
+                                  <div className={styles.appointmentServiceName}>{app.service?.name}</div>
+                                  <div className={`${styles.appointmentPriceBadge} ${isPaid ? styles.appointmentPriceBadgePaid : ""}`}>
+                                    {isPaid ? "✓ " : ""}{formatPrice(app.paymentAmount || app.service?.price || 0, business.currency)}
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        )}
+
         {activeTab === "reservas" && (
           <section className={styles.glassCard}>
             <h2 style={{ fontSize: "16px", fontWeight: "700", marginBottom: "16px" }}>Próximas Reservas Recibidas</h2>
@@ -184,10 +310,10 @@ export default function AdminDashboard({ params }: { params: Promise<{ slug: str
             ) : (
               <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
                 {business.appointments?.map((app) => (
-                  <div key={app.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "16px", borderRadius: "12px", border: "1px solid var(--card-border)", background: "rgba(255,255,255,0.9)", color: "#000" }}>
+                  <div key={app.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "16px", borderRadius: "12px", border: "1px solid var(--card-border)", background: "var(--card-bg)", color: "var(--foreground)" }}>
                     <div>
                       <h3 style={{ fontSize: "15px", fontWeight: "700" }}>{app.clientName}</h3>
-                      <p style={{ fontSize: "12px", color: "#666", marginTop: "2px" }}>WhatsApp: {app.clientWhatsApp}</p>
+                      <p style={{ fontSize: "12px", color: "var(--text-secondary)", marginTop: "2px" }}>WhatsApp: {app.clientWhatsApp}</p>
                       <p style={{ fontSize: "12px", color: "var(--primary)", marginTop: "4px", fontWeight: "600" }}>
                         {app.service?.name} con {app.professional?.name}
                       </p>
