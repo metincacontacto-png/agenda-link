@@ -118,6 +118,9 @@ export const AppointmentScalarFieldEnum = {
   clientWhatsApp: 'clientWhatsApp',
   dateTime: 'dateTime',
   status: 'status',
+  paymentStatus: 'paymentStatus',
+  paymentMethod: 'paymentMethod',
+  paymentAmount: 'paymentAmount',
   createdAt: 'createdAt'
 } as const
 

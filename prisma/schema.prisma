@@ -57,5 +57,8 @@ model Appointment {
   clientWhatsApp String
   dateTime       DateTime     // Fecha y hora reservada
   status         String       @default("CONFIRMED")
+  paymentStatus  String       @default("PENDING")
+  paymentMethod  String?
+  paymentAmount  Float?
   createdAt      DateTime     @default(now())
 }
