@@ -2,37 +2,37 @@
   --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --background: #f5f5f7;
   --foreground: #1d1d1f;
-  --card-bg: rgba(255, 255, 255, 0.85);
-  --card-border: rgba(0, 0, 0, 0.08);
+  --card-bg: rgba(255, 255, 255, 0.75);
+  --card-border: rgba(255, 255, 255, 0.25);
   --primary: #0071e3;
   --primary-hover: #0077ed;
   --primary-text: #ffffff;
   --text-secondary: #86868b;
   --input-bg: rgba(0, 0, 0, 0.02);
-  --input-border: rgba(0, 0, 0, 0.15);
+  --input-border: rgba(0, 0, 0, 0.12);
   --input-focus: #0071e3;
   --success: #34c759;
   --danger: #ff3b30;
   --radius-pill: 9999px;
-  --radius-card: 18px;
+  --radius-card: 20px;
   --radius-input: 12px;
-  --shadow-subtle: 0 4px 20px rgba(0, 0, 0, 0.04);
-  --shadow-active: 0 8px 30px rgba(0, 0, 0, 0.08);
+  --shadow-subtle: 0 8px 32px 0 rgba(31, 38, 135, 0.04);
+  --shadow-active: 0 8px 32px 0 rgba(31, 38, 135, 0.08);
   --backdrop-blur: blur(20px);
+  --brand-gradient: linear-gradient(135deg, #00c6ff 0%, #0072ff 50%, #7000ff 100%);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #000000;
     --foreground: #f5f5f7;
-    --card-bg: rgba(22, 22, 23, 0.8);
+    --card-bg: rgba(22, 22, 23, 0.7);
     --card-border: rgba(255, 255, 255, 0.1);
     --primary: #2997ff;
     --primary-hover: #47a6ff;
-    --text-secondary: #86868b;
-    --input-bg: rgba(255, 255, 255, 0.05);
-    --input-border: rgba(255, 255, 255, 0.2);
-    --shadow-subtle: 0 4px 20px rgba(0, 0, 0, 0.4);
-    --shadow-active: 0 8px 30px rgba(0, 0, 0, 0.6);
+    --input-bg: rgba(255, 255, 255, 0.04);
+    --input-border: rgba(255, 255, 255, 0.15);
+    --shadow-subtle: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+    --shadow-active: 0 12px 40px 0 rgba(0, 0, 0, 0.5);
   }
 }

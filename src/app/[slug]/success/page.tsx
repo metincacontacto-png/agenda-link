@@ -53,6 +53,15 @@ export default async function SuccessPage({
     minute: "2-digit",
   });
 
+  const formatPrice = (price: number, currency: string) => {
+    if (currency === "CLP") {
+      return `$${price.toLocaleString("es-CL")}`;
+    } else if (currency === "MXN") {
+      return `$${price.toLocaleString("es-MX")} MXN`;
+    }
+    return `$${price.toFixed(2)} USD`;
+  };
+
   return (
     <main className={styles.container}>
       <div className={styles.card}>
@@ -82,6 +91,12 @@ export default async function SuccessPage({
           <div className={styles.row}>
             <span className={styles.label}>Hora:</span>
             <span className={styles.value}>{timeFormatted}</span>
+          </div>
+          <div className={styles.row}>
+            <span className={styles.label}>Pago:</span>
+            <span className={styles.value} style={{ fontWeight: "700", color: "var(--success)" }}>
+              ✓ {formatPrice(appointment.paymentAmount || appointment.service.price, appointment.business.currency)} PAGADO ({appointment.paymentMethod || "Tarjeta"})
+            </span>
           </div>
         </div>
 

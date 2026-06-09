@@ -4,7 +4,7 @@ import { prisma } from "@/lib/db";
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { slug, serviceId, professionalId, clientName, clientWhatsApp, date, time } = body;
+    const { slug, serviceId, professionalId, clientName, clientWhatsApp, date, time, paymentStatus, paymentMethod, paymentAmount } = body;
 
     if (!slug || !serviceId || !professionalId || !clientName || !clientWhatsApp || !date || !time) {
       return NextResponse.json({ error: "Datos de reserva incompletos" }, { status: 400 });
@@ -27,6 +27,9 @@ export async function POST(request: Request) {
         clientWhatsApp,
         dateTime,
         status: "CONFIRMED",
+        paymentStatus: paymentStatus || "PENDING",
+        paymentMethod: paymentMethod || null,
+        paymentAmount: paymentAmount ? parseFloat(paymentAmount) : null,
       },
       include: {
         service: true,

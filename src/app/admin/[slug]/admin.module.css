@@ -1,129 +1,229 @@
-.container {
-  max-width: 800px;
-  margin: 40px auto;
-  padding: 24px;
-}
-
-.header {
+.adminContainer {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 32px;
-}
-
-.title {
-  font-size: 24px;
-  font-weight: 800;
+  min-height: 100vh;
+  background-image: url('/hero-bg.png');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
   color: var(--foreground);
 }
 
-.subtitle {
-  font-size: 13px;
-  color: var(--text-secondary);
-}
-
-.pubLinkBtn {
-  padding: 8px 16px;
-  border-radius: var(--radius-pill);
-  border: 1px solid var(--card-border);
-  font-size: 13px;
-  font-weight: 600;
-  background: var(--card-bg);
-  color: var(--foreground);
-  transition: all 0.2s ease;
+.sidebar {
+  width: 240px;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  border-right: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 24px 16px;
   display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.pubLinkBtn:hover {
-  background: rgba(0, 0, 0, 0.05);
-  border-color: var(--foreground);
+  flex-direction: column;
+  gap: 20px;
 }
 
 @media (prefers-color-scheme: dark) {
-  .pubLinkBtn:hover {
-    background: rgba(255, 255, 255, 0.05);
-    border-color: var(--foreground);
+  .sidebar {
+    background: rgba(0, 0, 0, 0.35);
+    border-right-color: rgba(255, 255, 255, 0.05);
   }
 }
 
-.card {
+.brandLogo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  margin-bottom: 12px;
+}
+
+.navSectionTitle {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  letter-spacing: 0.5px;
+  padding-left: 8px;
+}
+
+.navList {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.navItem {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  text-align: left;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--foreground);
+}
+
+.navItem:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+@media (prefers-color-scheme: dark) {
+  .navItem:hover {
+    background: rgba(255, 255, 255, 0.05);
+  }
+}
+
+.navItemActive {
+  background: rgba(255, 255, 255, 0.85);
+  color: #1d1d1f;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+@media (prefers-color-scheme: dark) {
+  .navItemActive {
+    background: rgba(255, 255, 255, 0.9);
+    color: #000;
+  }
+}
+
+.contentArea {
+  flex: 1;
+  padding: 40px;
+  overflow-y: auto;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.glassCard {
   background: var(--card-bg);
+  backdrop-filter: var(--backdrop-blur);
+  -webkit-backdrop-filter: var(--backdrop-blur);
   border: 1px solid var(--card-border);
   border-radius: var(--radius-card);
   padding: 24px;
   box-shadow: var(--shadow-subtle);
-  backdrop-filter: var(--backdrop-blur);
+  color: var(--foreground);
 }
 
-.cardTitle {
-  font-size: 16px;
+/* WhatsApp Sim Styles */
+.chatWindow {
+  border: 1px solid var(--card-border);
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 400px;
+  background: #f0f2f5;
+}
+
+@media (prefers-color-scheme: dark) {
+  .chatWindow {
+    background: #0b141a;
+  }
+}
+
+.chatHeader {
+  background: #008069;
+  color: white;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.chatAvatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #00c6ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  color: white;
+}
+
+.chatBody {
+  flex: 1;
+  padding: 16px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.msgIn, .msgOut {
+  max-width: 70%;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 13.5px;
+  line-height: 1.4;
+  box-shadow: 0 1px 1px rgba(0,0,0,0.06);
+}
+
+.msgIn {
+  background: white;
+  color: #1d1d1f;
+  align-self: flex-start;
+  border-top-left-radius: 0;
+}
+
+@media (prefers-color-scheme: dark) {
+  .msgIn {
+    background: #202c33;
+    color: #f5f5f7;
+  }
+}
+
+.msgOut {
+  background: #d9fdd3;
+  color: #1d1d1f;
+  align-self: flex-end;
+  border-top-right-radius: 0;
+}
+
+@media (prefers-color-scheme: dark) {
+  .msgOut {
+    background: #005c4b;
+    color: #e9edef;
+  }
+}
+
+/* Report Styles */
+.reportTitle {
+  font-size: 18px;
   font-weight: 700;
+  margin-bottom: 12px;
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.reportParagraph {
+  font-size: 14px;
+  line-height: 1.6;
   margin-bottom: 16px;
   color: var(--foreground);
 }
 
-.emptyState {
-  color: var(--text-secondary);
-  font-size: 14px;
-  text-align: center;
-  padding: 40px 0;
-}
-
-.appointmentList {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.appointmentItem {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 16px;
-  border-radius: var(--radius-input);
-  border: 1px solid var(--card-border);
-  background: var(--background);
-}
-
-.clientInfo {
-  text-align: left;
-}
-
-.clientName {
-  font-size: 15px;
-  font-weight: 700;
-  color: var(--foreground);
-}
-
-.clientWhatsApp {
-  font-size: 12px;
-  color: var(--text-secondary);
-  margin-top: 2px;
-}
-
-.appointmentDetails {
-  font-size: 12px;
-  color: var(--primary);
-  margin-top: 4px;
-  font-weight: 600;
-}
-
-.dateTimeInfo {
-  text-align: right;
-}
-
-.dateText {
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--foreground);
-}
-
-.statusText {
-  display: block;
+.badgePaid {
+  background: rgba(52, 199, 89, 0.12);
+  color: #248a3d;
+  padding: 4px 8px;
+  border-radius: 6px;
   font-size: 11px;
-  color: var(--success);
   font-weight: 700;
-  margin-top: 4px;
+  display: inline-block;
+}
+
+@media (prefers-color-scheme: dark) {
+  .badgePaid {
+    background: rgba(52, 199, 89, 0.2);
+    color: #30d158;
+  }
 }

@@ -5,6 +5,7 @@ import Link from "next/link";
 import styles from "./page.module.css";
 import Calendar from "@/components/Calendar";
 import OtpModal from "@/components/OtpModal";
+import PaymentModal from "@/components/PaymentModal";
 
 interface Professional {
   id: string;
@@ -48,6 +49,9 @@ export default function BookingPage({ params }: { params: Promise<{ slug: string
   const [slots, setSlots] = useState<string[]>([]);
   
   const [loading, setLoading] = useState(true);
+  const [showPayment, setShowPayment] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState("");
+  const [paidAmount, setPaidAmount] = useState(0);
   const [showOtp, setShowOtp] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
@@ -87,6 +91,15 @@ export default function BookingPage({ params }: { params: Promise<{ slug: string
 
   const handleBookClick = () => {
     if (!selectedService || !selectedProfessional || !selectedDate || !selectedTime) return;
+    setShowPayment(true);
+  };
+
+  const handlePaymentSuccess = (method: string) => {
+    setShowPayment(false);
+    setPaymentMethod(method);
+    if (selectedService) {
+      setPaidAmount(selectedService.price);
+    }
     setShowOtp(true);
   };
 
@@ -107,6 +120,9 @@ export default function BookingPage({ params }: { params: Promise<{ slug: string
           clientWhatsApp,
           date: selectedDate,
           time: selectedTime,
+          paymentStatus: "PAID",
+          paymentMethod: paymentMethod,
+          paymentAmount: paidAmount,
         }),
       });
 
@@ -240,6 +256,15 @@ export default function BookingPage({ params }: { params: Promise<{ slug: string
             : "Confirmar Reserva"}
         </button>
       </div>
+
+      {showPayment && selectedService && (
+        <PaymentModal
+          amount={selectedService.price}
+          formattedAmount={formatPrice(selectedService.price, business.currency)}
+          onClose={() => setShowPayment(false)}
+          onSuccess={handlePaymentSuccess}
+        />
+      )}
 
       {showOtp && selectedService && selectedProfessional && (
         <OtpModal

@@ -98,7 +98,7 @@ export default function OnboardingPage() {
     <main className={styles.container}>
       <div className={styles.card}>
         <div className={styles.header}>
-          <h1 className={styles.logo}>Agenda Link</h1>
+          <img src="/logo.png" alt="AgendaLink" style={{ height: "40px", marginBottom: "16px" }} />
           <p className={styles.subtitle}>Un link. Todo resuelto.</p>
         </div>
 
