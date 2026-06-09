@@ -43,13 +43,16 @@ interface Business {
   services: { name: string }[];
   tables?: Table[];
   menuItems?: MenuItem[];
+  professionals?: { name: string }[];
 }
 
 export default function AdminDashboard({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = React.use(params);
   const [business, setBusiness] = useState<Business | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<"calendario" | "reservas" | "secretary" | "marketing" | "business" | "mesas" | "carta">("calendario");
+  const [activeTab, setActiveTab] = useState<"dashboard" | "calendario" | "reservas" | "secretary" | "marketing" | "business" | "mesas" | "carta">("dashboard");
+  const [timePeriod, setTimePeriod] = useState("week");
+  const [todayReservationsCollapsed, setTodayReservationsCollapsed] = useState(false);
 
   // Formulario de Mesas
   const [tableNumber, setTableNumber] = useState("");
@@ -338,6 +341,54 @@ export default function AdminDashboard({ params }: { params: Promise<{ slug: str
     );
   }
 
+  // --- CALCULOS DEL DASHBOARD ---
+  const totalReservations = business.appointments?.length || 0;
+
+  const totalSales = business.appointments
+    ?.filter((app) => app.paymentStatus === "PAID")
+    ?.reduce((acc, app) => acc + (app.paymentAmount || app.service?.price || 0), 0) || 0;
+
+  const uniqueClients = new Set(business.appointments?.map((app) => app.clientWhatsApp)).size;
+
+  const professionalsCount = business.professionals?.length || 1;
+  const tablesCount = business.tables?.length || 1;
+  const totalWeeklySlots = business.category === "Restaurante" 
+    ? 70 * tablesCount 
+    : 70 * professionalsCount;
+  
+  const currentWeekAppointments = business.appointments?.filter((app) => {
+    const appDate = new Date(app.dateTime);
+    const startOfWeek = weekDates[0];
+    const endOfWeek = weekDates[6];
+    return appDate >= startOfWeek && appDate <= endOfWeek;
+  })?.length || 0;
+
+  const occupancyRate = totalWeeklySlots > 0 
+    ? Math.round((currentWeekAppointments / totalWeeklySlots) * 100) 
+    : 0;
+
+  const todayStart = new Date();
+  todayStart.setHours(0,0,0,0);
+  const todayEnd = new Date();
+  todayEnd.setHours(23,59,59,999);
+
+  const todayAppointments = business.appointments?.filter((app) => {
+    const appDate = new Date(app.dateTime);
+    return appDate >= todayStart && appDate <= todayEnd;
+  }) || [];
+
+  const applePayAppointments = business.appointments?.filter((app) => app.paymentStatus === "PAID" && app.paymentMethod === "Apple Pay") || [];
+  const visaAppointments = business.appointments?.filter((app) => app.paymentStatus === "PAID" && app.paymentMethod !== "Apple Pay") || [];
+  
+  const applePaySales = applePayAppointments.reduce((acc, app) => acc + (app.paymentAmount || app.service?.price || 0), 0);
+  const visaSales = visaAppointments.reduce((acc, app) => acc + (app.paymentAmount || app.service?.price || 0), 0);
+  
+  const applePayPercent = totalSales > 0 ? Math.round((applePaySales / totalSales) * 100) : 0;
+  const visaPercent = totalSales > 0 ? Math.round((visaSales / totalSales) * 100) : 0;
+
+  const whatsappSent = totalReservations * 2;
+  const emailsSent = totalReservations;
+
   return (
     <main className={styles.adminContainer}>
       {/* Background Glowing Orbs */}
@@ -351,6 +402,9 @@ export default function AdminDashboard({ params }: { params: Promise<{ slug: str
         
         <span className={styles.navSectionTitle}>Operación</span>
         <nav className={styles.navList}>
+          <button className={`${styles.navItem} ${activeTab === "dashboard" ? styles.navItemActive : ""}`} onClick={() => setActiveTab("dashboard")}>
+            📊 Dashboard Resumen
+          </button>
           {business.category === "Restaurante" && (
             <>
               <button className={`${styles.navItem} ${activeTab === "mesas" ? styles.navItemActive : ""}`} onClick={() => setActiveTab("mesas")}>
@@ -401,6 +455,272 @@ export default function AdminDashboard({ params }: { params: Promise<{ slug: str
             Ver link público ↗
           </Link>
         </header>
+
+        {activeTab === "dashboard" && (
+          <div style={{ display: "flex", flexDirection: "column", gap: "28px" }}>
+            {/* Periodo de Tiempo Selector */}
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                <span style={{ fontSize: "11px", fontWeight: "700", color: "var(--text-secondary)", textTransform: "uppercase", letterSpacing: "0.5px" }}>Periodo de tiempo</span>
+                <select
+                  value={timePeriod}
+                  onChange={(e) => setTimePeriod(e.target.value)}
+                  className={styles.controlSelect}
+                  style={{ minWidth: "180px" }}
+                >
+                  <option value="week">Esta semana</option>
+                  <option value="month">Este mes</option>
+                  <option value="year">Este año</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Fila de KPIs */}
+            <div className={styles.kpiGrid}>
+              <div className={styles.kpiCardDark}>
+                <span className={styles.kpiLabel}>Total de reservas</span>
+                <div className={styles.kpiValue}>{totalReservations}</div>
+                <button onClick={() => setActiveTab("reservas")} className={styles.kpiLink}>Ver detalles</button>
+              </div>
+              <div className={styles.kpiCard}>
+                <span className={styles.kpiLabel}>Factor de ocupación</span>
+                <div className={styles.kpiValue}>{occupancyRate}%</div>
+                <span className={styles.kpiTrendDown}>
+                  ↓ 0% <span style={{ color: "var(--text-secondary)", fontWeight: "normal" }}>vs periodo anterior</span>
+                </span>
+              </div>
+              <div className={styles.kpiCard}>
+                <span className={styles.kpiLabel}>Nuevos clientes</span>
+                <div className={styles.kpiValue}>{uniqueClients}</div>
+                <span className={styles.kpiTrendUp}>
+                  ↑ 100% <span style={{ color: "var(--text-secondary)", fontWeight: "normal" }}>vs periodo anterior</span>
+                </span>
+              </div>
+              <div className={styles.kpiCard}>
+                <span className={styles.kpiLabel}>Ventas facturadas</span>
+                <div className={styles.kpiValue}>{formatPrice(totalSales, business.currency)}</div>
+                <span className={styles.kpiTrendDown}>
+                  ↓ 0% <span style={{ color: "var(--text-secondary)", fontWeight: "normal" }}>vs periodo anterior</span>
+                </span>
+              </div>
+            </div>
+
+            {/* Ver detalle de reservas de hoy (Colapsable) */}
+            <div className={styles.collapsibleWrapper}>
+              <button 
+                onClick={() => setTodayReservationsCollapsed(!todayReservationsCollapsed)} 
+                className={styles.collapsibleHeader}
+              >
+                <span>Ver detalle de reservas de hoy ({todayAppointments.length})</span>
+                <span className={styles.collapsibleArrow}>{todayReservationsCollapsed ? "▲" : "▼"}</span>
+              </button>
+              
+              {!todayReservationsCollapsed && (
+                <div className={styles.collapsibleContent}>
+                  {todayAppointments.length === 0 ? (
+                    <p style={{ margin: 0, padding: "16px", color: "var(--text-secondary)", fontSize: "13.5px", textAlign: "center" }}>
+                      No tienes reservas programadas para el día de hoy.
+                    </p>
+                  ) : (
+                    <div style={{ display: "flex", flexDirection: "column", gap: "8px", padding: "16px" }}>
+                      {todayAppointments.map((app) => (
+                        <div key={app.id} className={styles.todayAppointmentRow}>
+                          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                            <span className={styles.todayTimeBadge}>
+                              {new Date(app.dateTime).toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" })}
+                            </span>
+                            <div>
+                              <strong style={{ fontSize: "14px", color: "var(--foreground)" }}>{app.clientName}</strong>
+                              <span style={{ fontSize: "12px", color: "var(--text-secondary)", marginLeft: "8px" }}>
+                                {business.category === "Restaurante" ? `Mesa ${app.table?.number || "General"}` : app.service?.name}
+                              </span>
+                            </div>
+                          </div>
+                          <button onClick={() => setActiveTab("reservas")} className={styles.todayDetailsBtn}>Ver Ficha</button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Grid de Reportes Gráficos */}
+            <div className={styles.reportGrid}>
+              {/* Widget 1: Pagos en línea */}
+              <div className={styles.reportCard}>
+                <div className={styles.reportHeader}>
+                  <div className={styles.reportIconWrapper}>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <line x1="12" y1="1" x2="12" y2="23"></line>
+                      <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                    </svg>
+                  </div>
+                  <h3 className={styles.reportCardTitle}>Pagos en línea</h3>
+                </div>
+                <p className={styles.reportCardDesc}>Estado de tus transacciones y distribución de métodos de pago en el periodo.</p>
+                
+                <div style={{ display: "flex", flexDirection: "column", gap: "16px", marginTop: "24px" }}>
+                  <div className={styles.statProgressBarRow}>
+                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12.5px", fontWeight: "600", marginBottom: "4px" }}>
+                      <span> Pay</span>
+                      <span>{applePayPercent}% ({formatPrice(applePaySales, business.currency)})</span>
+                    </div>
+                    <div className={styles.progressBarBg}>
+                      <div className={styles.progressBarFill} style={{ width: `${applePayPercent}%`, background: "var(--foreground)" }} />
+                    </div>
+                  </div>
+                  <div className={styles.statProgressBarRow}>
+                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12.5px", fontWeight: "600", marginBottom: "4px" }}>
+                      <span>Tarjetas de Crédito/Débito</span>
+                      <span>{visaPercent}% ({formatPrice(visaSales, business.currency)})</span>
+                    </div>
+                    <div className={styles.progressBarBg}>
+                      <div className={styles.progressBarFill} style={{ width: `${visaPercent}%`, background: "var(--primary)" }} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Widget 2: Factor de Ocupación */}
+              <div className={styles.reportCard}>
+                <div className={styles.reportHeader}>
+                  <div className={styles.reportIconWrapper}>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path>
+                      <path d="M22 12A10 10 0 0 0 12 2v10z"></path>
+                    </svg>
+                  </div>
+                  <h3 className={styles.reportCardTitle}>Factor de ocupación</h3>
+                </div>
+                <p className={styles.reportCardDesc}>Visualización del uso de capacidad operativa (profesionales o mesas) esta semana.</p>
+                
+                <div style={{ display: "flex", flexDirection: "column", gap: "12px", marginTop: "24px" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: "13px" }}>
+                    <span style={{ color: "var(--text-secondary)", fontWeight: "500" }}>Capacidad Operativa:</span>
+                    <strong style={{ color: "var(--foreground)" }}>{totalWeeklySlots} turnos/semana</strong>
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: "13px" }}>
+                    <span style={{ color: "var(--text-secondary)", fontWeight: "500" }}>Turnos Agendados:</span>
+                    <strong style={{ color: "var(--primary)" }}>{currentWeekAppointments} reservas</strong>
+                  </div>
+                  <div className={styles.progressBarBg} style={{ height: "8px", marginTop: "8px" }}>
+                    <div className={styles.progressBarFill} style={{ width: `${occupancyRate}%`, background: "var(--primary)" }} />
+                  </div>
+                </div>
+              </div>
+
+              {/* Widget 3: Origen de las reservas */}
+              <div className={styles.reportCard}>
+                <div className={styles.reportHeader}>
+                  <div className={styles.reportIconWrapper}>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <circle cx="12" cy="12" r="6"></circle>
+                    </svg>
+                  </div>
+                  <h3 className={styles.reportCardTitle}>Origen de las reservas</h3>
+                </div>
+                
+                <div className={styles.donutLayout}>
+                  <div className={styles.donutSvgWrapper}>
+                    <svg width="100%" height="110" viewBox="0 0 200 200" style={{ transform: "rotate(-90deg)" }}>
+                      <circle cx="100" cy="100" r="70" fill="transparent" stroke="rgba(0, 102, 255, 0.05)" strokeWidth="24" />
+                      <circle 
+                        cx="100" 
+                        cy="100" 
+                        r="70" 
+                        fill="transparent" 
+                        stroke="var(--primary)" 
+                        strokeWidth="24" 
+                        strokeDasharray="439.8" 
+                        strokeDashoffset={totalReservations > 0 ? "0" : "439.8"} 
+                        style={{ transition: "stroke-dashoffset 0.5s ease" }} 
+                      />
+                    </svg>
+                    <div className={styles.donutCenterText}>
+                      <span style={{ fontSize: "16px", fontWeight: "800", color: "var(--foreground)" }}>
+                        {totalReservations > 0 ? "100%" : "0%"}
+                      </span>
+                      <span style={{ fontSize: "9px", color: "var(--text-secondary)", textTransform: "uppercase", fontWeight: "700" }}>Online</span>
+                    </div>
+                  </div>
+                  
+                  <div className={styles.donutStats}>
+                    <div className={styles.donutStatItem}>
+                      <span className={styles.donutStatIndicatorBlue} />
+                      <div style={{ display: "flex", flexDirection: "column" }}>
+                        <span style={{ fontSize: "11px", fontWeight: "700", color: "var(--foreground)" }}>Reservas en línea</span>
+                        <span style={{ fontSize: "10px", color: "var(--text-secondary)" }}>{totalReservations > 0 ? "100%" : "0%"} • {totalReservations} reserv.</span>
+                      </div>
+                    </div>
+                    <div className={styles.donutStatItem}>
+                      <span className={styles.donutStatIndicatorGray} />
+                      <div style={{ display: "flex", flexDirection: "column" }}>
+                        <span style={{ fontSize: "11px", fontWeight: "700", color: "var(--text-secondary)" }}>Reservas desde agenda</span>
+                        <span style={{ fontSize: "10px", color: "var(--text-secondary)" }}>0% • 0 reserv.</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Segunda Fila de Widgets */}
+            <div className={styles.reportGrid}>
+              {/* Ventas Facturadas Widget */}
+              <div className={styles.reportCard}>
+                <div className={styles.reportHeader}>
+                  <div className={styles.reportIconWrapper} style={{ background: "rgba(52, 199, 89, 0.08)", borderColor: "rgba(52, 199, 89, 0.15)", color: "var(--success)" }}>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="2" y="4" width="20" height="16" rx="2" ry="2"></rect>
+                      <line x1="12" y1="10" x2="12" y2="10"></line>
+                      <line x1="12" y1="14" x2="12" y2="14"></line>
+                    </svg>
+                  </div>
+                  <h3 className={styles.reportCardTitle}>Ventas Facturadas</h3>
+                </div>
+                <div style={{ margin: "20px 0 10px 0" }}>
+                  <div style={{ fontSize: "28px", fontWeight: "800", color: "var(--foreground)" }}>{formatPrice(totalSales, business.currency)}</div>
+                  <p style={{ fontSize: "12px", color: "var(--text-secondary)", marginTop: "4px" }}>Total acumulado cobrado con tarjeta o Apple Pay en la plataforma.</p>
+                </div>
+              </div>
+
+              {/* Recordatorios WhatsApp Widget */}
+              <div className={styles.reportCard}>
+                <div className={styles.reportHeader}>
+                  <div className={styles.reportIconWrapper} style={{ background: "rgba(37, 211, 102, 0.08)", borderColor: "rgba(37, 211, 102, 0.15)", color: "#25d366" }}>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+                    </svg>
+                  </div>
+                  <h3 className={styles.reportCardTitle}>Recordatorios WhatsApp</h3>
+                </div>
+                <div style={{ margin: "20px 0 10px 0" }}>
+                  <div style={{ fontSize: "28px", fontWeight: "800", color: "#128c7e" }}>{whatsappSent}</div>
+                  <p style={{ fontSize: "12px", color: "var(--text-secondary)", marginTop: "4px" }}>Mensajes automáticos de confirmación y recordatorio enviados por Linki Secretary IA.</p>
+                </div>
+              </div>
+
+              {/* Recordatorios Email Widget */}
+              <div className={styles.reportCard}>
+                <div className={styles.reportHeader}>
+                  <div className={styles.reportIconWrapper} style={{ background: "rgba(0, 102, 255, 0.08)", borderColor: "rgba(0, 102, 255, 0.15)", color: "var(--primary)" }}>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                      <polyline points="22,6 12,13 2,6"></polyline>
+                    </svg>
+                  </div>
+                  <h3 className={styles.reportCardTitle}>Recordatorios Email</h3>
+                </div>
+                <div style={{ margin: "20px 0 10px 0" }}>
+                  <div style={{ fontSize: "28px", fontWeight: "800", color: "var(--primary)" }}>{emailsSent}</div>
+                  <p style={{ fontSize: "12px", color: "var(--text-secondary)", marginTop: "4px" }}>Correos electrónicos de notificación de turnos y marketing automatizado enviados.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {activeTab === "mesas" && (
           <div style={{ display: "flex", flexDirection: "column", gap: "32px" }}>

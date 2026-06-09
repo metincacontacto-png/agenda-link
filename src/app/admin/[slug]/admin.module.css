@@ -819,3 +819,321 @@
   align-items: center;
   gap: 12px;
 }
+
+/* Dashboard Report Grid & KPIs Styles */
+.kpiGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+}
+
+.kpiCard, .kpiCardDark {
+  border-radius: 20px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 
+    0 4px 10px rgba(0, 0, 0, 0.01),
+    0 0 1px 0 rgba(0, 102, 255, 0.08) inset;
+}
+
+.kpiCard {
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(0, 102, 255, 0.06);
+  color: var(--foreground);
+}
+
+.kpiCardDark {
+  background: #111215;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: white;
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.05);
+}
+
+.kpiCard:hover {
+  transform: translateY(-2px);
+  border-color: rgba(0, 102, 255, 0.15);
+  box-shadow: 
+    0 8px 16px rgba(0, 102, 255, 0.04),
+    0 0 1px 0 rgba(0, 102, 255, 0.2) inset;
+}
+
+.kpiCardDark:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 12px 32px rgba(0, 0, 0, 0.15),
+    0 0 1px 0 rgba(255, 255, 255, 0.25) inset;
+}
+
+.kpiLabel {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  letter-spacing: 0.6px;
+}
+
+.kpiCardDark .kpiLabel {
+  color: #86868b;
+}
+
+.kpiValue {
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: -1.2px;
+  line-height: 1.1;
+  margin: 4px 0;
+}
+
+.kpiLink {
+  background: transparent;
+  border: none;
+  color: var(--primary);
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  text-align: left;
+  padding: 0;
+  align-self: flex-start;
+  transition: opacity 0.2s;
+}
+
+.kpiLink:hover {
+  opacity: 0.85;
+  text-decoration: underline;
+}
+
+.kpiTrendUp {
+  color: #34c759;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.kpiTrendDown {
+  color: #ff3b30;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+/* Collapsible Section Reservas de Hoy */
+.collapsibleWrapper {
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(0, 102, 255, 0.06);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 
+    0 4px 10px rgba(0, 0, 0, 0.01),
+    0 0 1px 0 rgba(0, 102, 255, 0.08) inset;
+}
+
+.collapsibleHeader {
+  width: 100%;
+  padding: 18px 24px;
+  background: transparent;
+  border: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14.5px;
+  font-weight: 750;
+  color: var(--foreground);
+  cursor: pointer;
+  transition: background 0.2s;
+  text-align: left;
+}
+
+.collapsibleHeader:hover {
+  background: rgba(0, 102, 255, 0.02);
+}
+
+.collapsibleArrow {
+  font-size: 10px;
+  color: var(--text-secondary);
+}
+
+.collapsibleContent {
+  border-top: 1px solid rgba(0, 102, 255, 0.05);
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.todayAppointmentRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.75);
+  border: 1px solid rgba(0, 102, 255, 0.03);
+  transition: all 0.2s;
+}
+
+.todayAppointmentRow:hover {
+  border-color: rgba(0, 102, 255, 0.1);
+  transform: translateX(2px);
+  background: white;
+}
+
+.todayTimeBadge {
+  background: rgba(0, 102, 255, 0.06);
+  color: var(--primary);
+  padding: 4px 8px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.todayDetailsBtn {
+  background: transparent;
+  border: none;
+  color: var(--primary);
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 6px 12px;
+  border-radius: 8px;
+  transition: background 0.2s;
+}
+
+.todayDetailsBtn:hover {
+  background: rgba(0, 102, 255, 0.05);
+}
+
+/* Grid de Reportes Widgets */
+.reportGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 24px;
+}
+
+.reportCard {
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(0, 102, 255, 0.06);
+  border-radius: 24px;
+  padding: 28px;
+  box-shadow: 
+    0 4px 10px rgba(0, 0, 0, 0.01),
+    0 0 1px 0 rgba(0, 102, 255, 0.08) inset;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.reportCard:hover {
+  border-color: rgba(0, 102, 255, 0.12);
+  transform: translateY(-3px);
+  box-shadow: 
+    0 12px 24px rgba(0, 102, 255, 0.04),
+    0 0 1px 0 rgba(0, 102, 255, 0.18) inset;
+}
+
+.reportHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.reportIconWrapper {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: rgba(0, 102, 255, 0.06);
+  border: 1px solid rgba(0, 102, 255, 0.12);
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.reportCardTitle {
+  font-size: 15px;
+  font-weight: 850;
+  color: var(--foreground);
+  margin: 0;
+}
+
+.reportCardDesc {
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.4;
+  margin: 0 0 16px 0;
+}
+
+/* Progress Bars */
+.statProgressBarRow {
+  display: flex;
+  flex-direction: column;
+}
+
+.progressBarBg {
+  width: 100%;
+  height: 6px;
+  background: rgba(0, 0, 0, 0.04);
+  border-radius: 9999px;
+  overflow: hidden;
+}
+
+.progressBarFill {
+  height: 100%;
+  border-radius: 9999px;
+  transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Donut Chart Layout */
+.donutLayout {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-top: 10px;
+}
+
+.donutSvgWrapper {
+  width: 110px;
+  height: 110px;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.donutCenterText {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 5;
+}
+
+.donutStats {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.donutStatItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.donutStatIndicatorBlue {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--primary);
+  margin-top: 4px;
+}
+
+.donutStatIndicatorGray {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #d2d2d7;
+  margin-top: 4px;
+}
+
