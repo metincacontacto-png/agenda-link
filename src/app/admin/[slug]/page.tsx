@@ -340,6 +340,10 @@ export default function AdminDashboard({ params }: { params: Promise<{ slug: str
 
   return (
     <main className={styles.adminContainer}>
+      {/* Background Glowing Orbs */}
+      <div className={styles.adminGlowOrb1} />
+      <div className={styles.adminGlowOrb2} />
+
       <div className={styles.sidebar}>
         <div className={styles.brandLogo}>
           <img src="/logo.png" alt="AgendaLink" style={{ height: "24px" }} />
@@ -380,14 +384,20 @@ export default function AdminDashboard({ params }: { params: Promise<{ slug: str
       </div>
 
       <div className={styles.contentArea}>
-        <header style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "32px" }}>
+        <header className={styles.dashboardHeader}>
           <div>
-            <h1 style={{ fontSize: "24px", fontWeight: "800" }}>{business.name}</h1>
-            <p style={{ fontSize: "13px", color: "var(--text-secondary)" }}>
-              Panel de Administración · Plan Automático: {business.teamSize}
-            </p>
+            <h1 className={styles.dashboardTitle}>{business.name}</h1>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px", marginTop: "4px" }}>
+              <p style={{ fontSize: "13px", color: "var(--text-secondary)", margin: 0 }}>
+                Panel de Administración · Plan Automático: {business.teamSize}
+              </p>
+              <span className={styles.statusBadge}>
+                <span className={styles.statusDot} />
+                Activo
+              </span>
+            </div>
           </div>
-          <Link href={`/${business.slug}`} target="_blank" className={styles.navItemActive} style={{ padding: "8px 16px", borderRadius: "9999px", fontSize: "13px", display: "inline-block", fontWeight: 600 }}>
+          <Link href={`/${business.slug}`} target="_blank" className={styles.publicLinkBtn}>
             Ver link público ↗
           </Link>
         </header>

@@ -1,18 +1,52 @@
 .adminContainer {
   display: flex;
   min-height: 100vh;
-  background-color: var(--background);
+  background-color: #fafafa;
+  background-image: radial-gradient(rgba(0, 102, 255, 0.035) 1px, transparent 1px);
+  background-size: 24px 24px;
   color: var(--foreground);
+  position: relative;
+  overflow: hidden;
 }
 
+/* Background Glowing Orbs */
+.adminGlowOrb1 {
+  position: absolute;
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(0, 102, 255, 0.04) 0%, rgba(0, 198, 255, 0.01) 55%, transparent 70%);
+  filter: blur(80px);
+  z-index: 1;
+  top: -100px;
+  right: -100px;
+  pointer-events: none;
+}
+
+.adminGlowOrb2 {
+  position: absolute;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(0, 198, 255, 0.03) 0%, rgba(0, 102, 255, 0.015) 55%, transparent 70%);
+  filter: blur(100px);
+  z-index: 1;
+  bottom: -150px;
+  left: -150px;
+  pointer-events: none;
+}
+
+/* Sidebar Estilo Glassmorphism */
 .sidebar {
-  width: 240px;
-  background: #f5f5f7;
-  border-right: 1px solid rgba(0, 0, 0, 0.08);
-  padding: 24px 16px;
+  width: 250px;
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-right: 1px solid rgba(0, 102, 255, 0.06);
+  padding: 32px 18px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 24px;
+  z-index: 10;
+  position: relative;
 }
 
 .brandLogo {
@@ -20,7 +54,7 @@
   align-items: center;
   gap: 8px;
   padding: 8px;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 
 .navSectionTitle {
@@ -28,163 +62,175 @@
   font-weight: 700;
   text-transform: uppercase;
   color: var(--text-secondary);
-  letter-spacing: 0.5px;
-  padding-left: 8px;
+  letter-spacing: 0.8px;
+  padding-left: 12px;
+  opacity: 0.8;
 }
 
 .navList {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
 }
 
 .navItem {
   width: 100%;
-  padding: 10px 12px;
-  border-radius: 8px;
-  border: none;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid transparent;
   background: transparent;
   text-align: left;
-  font-size: 13px;
+  font-size: 13.5px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.15s;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   display: flex;
   align-items: center;
   gap: 10px;
-  color: var(--foreground);
+  color: var(--text-secondary);
 }
 
 .navItem:hover {
-  background: rgba(0, 0, 0, 0.04);
+  background: rgba(0, 102, 255, 0.04);
+  color: var(--primary);
+  transform: translateX(4px);
+  border-color: rgba(0, 102, 255, 0.05);
 }
 
 .navItemActive {
-  background: rgba(0, 102, 255, 0.08);
-  color: var(--primary);
-  box-shadow: 0 2px 8px rgba(0, 102, 255, 0.05);
+  background: rgba(0, 102, 255, 0.06) !important;
+  color: var(--primary) !important;
+  border: 1px solid rgba(0, 102, 255, 0.12) !important;
+  box-shadow: 
+    0 4px 12px rgba(0, 102, 255, 0.03),
+    0 0 1px 0 rgba(0, 102, 255, 0.1) inset !important;
+  font-weight: 700;
 }
 
+/* Área de Contenido Principal */
 .contentArea {
   flex: 1;
   padding: 40px;
   overflow-y: auto;
-  max-width: 1200px;
+  max-width: 1240px;
   margin: 0 auto;
+  z-index: 5;
+  width: 100%;
 }
 
-.glassCard {
-  background: var(--card-bg);
-  backdrop-filter: var(--backdrop-blur);
-  -webkit-backdrop-filter: var(--backdrop-blur);
-  border: 1px solid var(--card-border);
-  border-radius: var(--radius-card);
-  padding: 24px;
-  box-shadow: var(--shadow-subtle);
+.dashboardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 36px;
+}
+
+.dashboardTitle {
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.8px;
   color: var(--foreground);
 }
 
-/* WhatsApp Sim Styles */
-.chatWindow {
-  border: 1px solid var(--card-border);
-  border-radius: 12px;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  height: 400px;
-  background: #f0f2f5;
-}
-
-.chatHeader {
-  background: #008069;
-  color: white;
-  padding: 12px 16px;
-  display: flex;
+/* Status Pulsing Badge */
+.statusBadge {
+  display: inline-flex;
   align-items: center;
-  gap: 10px;
-}
-
-.chatAvatar {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: #00c6ff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: bold;
-  color: white;
-}
-
-.chatBody {
-  flex: 1;
-  padding: 16px;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.msgIn, .msgOut {
-  max-width: 70%;
-  padding: 10px 14px;
-  border-radius: 8px;
-  font-size: 13.5px;
-  line-height: 1.4;
-  box-shadow: 0 1px 1px rgba(0,0,0,0.06);
-}
-
-.msgIn {
-  background: white;
-  color: #1d1d1f;
-  align-self: flex-start;
-  border-top-left-radius: 0;
-}
-
-.msgOut {
-  background: #d9fdd3;
-  color: #1d1d1f;
-  align-self: flex-end;
-  border-top-right-radius: 0;
-}
-
-/* Report Styles */
-.reportTitle {
-  font-size: 18px;
-  font-weight: 700;
-  margin-bottom: 12px;
-  color: var(--primary);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.reportParagraph {
-  font-size: 14px;
-  line-height: 1.6;
-  margin-bottom: 16px;
-  color: var(--foreground);
-}
-
-.badgePaid {
-  background: rgba(52, 199, 89, 0.12);
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  background: rgba(52, 199, 89, 0.08);
+  border: 1px solid rgba(52, 199, 89, 0.18);
   color: #248a3d;
-  padding: 4px 8px;
-  border-radius: 6px;
   font-size: 11px;
   font-weight: 700;
-  display: inline-block;
 }
 
-/* Calendar view styles */
+.statusDot {
+  width: 6px;
+  height: 6px;
+  background-color: #34c759;
+  border-radius: 50%;
+  display: inline-block;
+  box-shadow: 0 0 0 0 rgba(52, 199, 89, 0.7);
+  animation: statusPulse 1.8s infinite;
+}
+
+@keyframes statusPulse {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(52, 199, 89, 0.5);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 5px rgba(52, 199, 89, 0);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(52, 199, 89, 0);
+  }
+}
+
+.publicLinkBtn {
+  padding: 10px 18px;
+  border-radius: 9999px;
+  background: rgba(0, 102, 255, 0.05);
+  color: var(--primary);
+  border: 1px solid rgba(0, 102, 255, 0.12);
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 6px rgba(0, 102, 255, 0.02);
+}
+
+.publicLinkBtn:hover {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+  box-shadow: 0 4px 12px rgba(0, 102, 255, 0.15);
+}
+
+/* Glassmorphic Cards */
+.glassCard {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(0, 102, 255, 0.06);
+  border-radius: 24px;
+  padding: 32px;
+  box-shadow: 
+    0 4px 10px rgba(0, 0, 0, 0.01),
+    0 20px 40px rgba(0, 102, 255, 0.02),
+    0 0 1px 0 rgba(0, 102, 255, 0.12) inset;
+  color: var(--foreground);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glassCard:hover {
+  border-color: rgba(0, 102, 255, 0.12);
+  box-shadow: 
+    0 10px 20px rgba(0, 0, 0, 0.02),
+    0 30px 60px rgba(0, 102, 255, 0.04),
+    0 0 1px 0 rgba(0, 102, 255, 0.2) inset;
+}
+
+/* Calendar wrapper */
 .calendarWrapper {
   overflow-x: auto;
-  border-radius: var(--radius-card);
-  border: 1px solid var(--card-border);
-  background: var(--card-bg);
-  backdrop-filter: var(--backdrop-blur);
-  margin-top: 16px;
-  box-shadow: var(--shadow-subtle);
+  border-radius: 24px;
+  border: 1px solid rgba(0, 102, 255, 0.08);
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  margin-top: 20px;
+  box-shadow: 
+    0 4px 10px rgba(0, 0, 0, 0.01),
+    0 20px 40px rgba(0, 102, 255, 0.02),
+    0 0 1px 0 rgba(0, 102, 255, 0.1) inset;
 }
 
 .calendarTable {
@@ -194,41 +240,46 @@
 }
 
 .calendarHeaderCell {
-  padding: 14px 8px;
+  padding: 16px 10px;
   text-align: center;
   font-size: 13px;
   font-weight: 700;
-  border-bottom: 2px solid var(--card-border);
+  border-bottom: 1px solid rgba(0, 102, 255, 0.08);
   color: var(--foreground);
-  background: rgba(0, 0, 0, 0.02);
+  background: rgba(0, 102, 255, 0.02);
 }
 
 .calendarTimeHeaderCell {
-  width: 70px;
-  border-bottom: 2px solid var(--card-border);
-  background: rgba(0, 0, 0, 0.02);
-  padding: 14px 8px;
+  width: 80px;
+  border-bottom: 1px solid rgba(0, 102, 255, 0.08);
+  background: rgba(0, 102, 255, 0.02);
+  padding: 16px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  letter-spacing: 0.5px;
 }
 
 .calendarRow {
-  border-bottom: 1px solid var(--card-border);
+  border-bottom: 1px solid rgba(0, 102, 255, 0.04);
 }
 
 .calendarTimeCell {
-  padding: 10px 8px;
+  padding: 14px 10px;
   text-align: center;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
-  color: var(--text-secondary);
-  border-right: 1px solid var(--card-border);
-  background: rgba(0, 0, 0, 0.01);
+  color: var(--primary);
+  border-right: 1px solid rgba(0, 102, 255, 0.05);
+  background: rgba(0, 102, 255, 0.01);
   white-space: nowrap;
 }
 
 .calendarCell {
-  height: 60px;
-  padding: 4px;
-  border-right: 1px solid var(--card-border);
+  height: 70px;
+  padding: 6px;
+  border-right: 1px solid rgba(0, 102, 255, 0.04);
   position: relative;
   vertical-align: top;
 }
@@ -237,41 +288,52 @@
   border-right: none;
 }
 
+/* Bloques de turnos premium */
 .appointmentBlock {
-  background: rgba(0, 102, 255, 0.06);
-  border-left: 3px solid var(--primary);
-  border-radius: 6px;
-  padding: 6px 8px;
+  background: linear-gradient(135deg, rgba(0, 102, 255, 0.06) 0%, rgba(0, 102, 255, 0.02) 100%);
+  border: 1px solid rgba(0, 102, 255, 0.15);
+  border-left: 4px solid var(--primary);
+  border-radius: 10px;
+  padding: 8px 10px;
   height: 100%;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   font-size: 11px;
   color: var(--foreground);
-  transition: all 0.2s ease;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   cursor: pointer;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.01);
   text-align: left;
 }
 
 .appointmentBlock:hover {
-  background: rgba(0, 102, 255, 0.1);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(0,102,255,0.1);
+  background: linear-gradient(135deg, rgba(0, 102, 255, 0.1) 0%, rgba(0, 102, 255, 0.05) 100%);
+  transform: translateY(-2px) scale(1.01);
+  box-shadow: 
+    0 8px 16px rgba(0, 102, 255, 0.08),
+    0 0 1px 0 rgba(0, 102, 255, 0.25) inset;
+  border-color: rgba(0, 102, 255, 0.25);
+  z-index: 10;
 }
 
 .appointmentBlockPaid {
-  background: rgba(52, 199, 89, 0.06);
+  background: linear-gradient(135deg, rgba(52, 199, 89, 0.06) 0%, rgba(52, 199, 89, 0.02) 100%);
+  border-color: rgba(52, 199, 89, 0.15);
   border-left-color: var(--success);
 }
 
 .appointmentBlockPaid:hover {
-  background: rgba(52, 199, 89, 0.1);
-  box-shadow: 0 4px 8px rgba(52,199,89,0.1);
+  background: linear-gradient(135deg, rgba(52, 199, 89, 0.1) 0%, rgba(52, 199, 89, 0.05) 100%);
+  box-shadow: 
+    0 8px 16px rgba(52, 199, 89, 0.08),
+    0 0 1px 0 rgba(52, 199, 89, 0.25) inset;
+  border-color: rgba(52, 199, 89, 0.25);
 }
 
 .appointmentClientName {
-  font-weight: 700;
+  font-weight: 750;
+  font-size: 11.5px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -283,17 +345,121 @@
   overflow: hidden;
   text-overflow: ellipsis;
   font-size: 10px;
+  margin-top: 1px;
 }
 
 .appointmentPriceBadge {
-  font-weight: 700;
+  font-weight: 800;
   color: var(--primary);
-  font-size: 9px;
-  margin-top: 2px;
+  font-size: 9.5px;
+  margin-top: 4px;
 }
 
 .appointmentPriceBadgePaid {
-  color: var(--success);
+  color: #248a3d;
+}
+
+/* WhatsApp Sim Styles */
+.chatWindow {
+  border: 1px solid rgba(0, 102, 255, 0.08);
+  border-radius: 20px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 420px;
+  background: #f7f9fa;
+  box-shadow: 
+    0 4px 12px rgba(0,0,0,0.01),
+    0 0 1px 0 rgba(0, 102, 255, 0.05) inset;
+}
+
+.chatHeader {
+  background: #ffffff;
+  color: var(--foreground);
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.chatAvatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--brand-gradient);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  color: white;
+  font-size: 13px;
+  box-shadow: 0 4px 10px rgba(0, 102, 255, 0.15);
+}
+
+.chatBody {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background-image: radial-gradient(rgba(0, 0, 0, 0.015) 1px, transparent 1px);
+  background-size: 16px 16px;
+}
+
+.msgIn, .msgOut {
+  max-width: 75%;
+  padding: 12px 16px;
+  font-size: 13.5px;
+  line-height: 1.45;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+}
+
+.msgIn {
+  background: white;
+  color: var(--foreground);
+  align-self: flex-start;
+  border-radius: 18px 18px 18px 4px;
+  border: 1px solid rgba(0, 0, 0, 0.03);
+}
+
+.msgOut {
+  background: var(--primary);
+  color: white;
+  align-self: flex-end;
+  border-radius: 18px 18px 4px 18px;
+  box-shadow: 0 4px 12px rgba(0, 102, 255, 0.15);
+}
+
+/* Report Styles */
+.reportTitle {
+  font-size: 18px;
+  font-weight: 800;
+  margin-bottom: 12px;
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  letter-spacing: -0.3px;
+}
+
+.reportParagraph {
+  font-size: 14.5px;
+  line-height: 1.6;
+  margin-bottom: 18px;
+  color: var(--foreground);
+}
+
+.badgePaid {
+  background: rgba(52, 199, 89, 0.08);
+  border: 1px solid rgba(52, 199, 89, 0.18);
+  color: #248a3d;
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  display: inline-block;
 }
 
 /* Restaurant Module Styles */
@@ -306,99 +472,115 @@
 }
 
 .controlSelect {
-  padding: 10px 14px;
-  border-radius: 8px;
-  border: 1px solid var(--card-border);
-  background: var(--card-bg);
+  padding: 10px 16px;
+  border-radius: 12px;
+  border: 1px solid var(--input-border);
+  background: rgba(0, 0, 0, 0.02);
   color: var(--foreground);
   font-size: 14px;
+  font-weight: 600;
   outline: none;
   cursor: pointer;
   min-height: 44px;
+  transition: all 0.2s;
+}
+
+.controlSelect:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px rgba(0, 102, 255, 0.12);
+  background: white;
 }
 
 .tableGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 24px;
   margin-top: 20px;
 }
 
 .tableCard {
-  background: var(--card-bg);
-  border: 1px solid var(--card-border);
-  border-radius: 12px;
-  padding: 24px;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(0, 102, 255, 0.06);
+  border-radius: 20px;
+  padding: 28px;
   text-align: center;
   display: flex;
   flex-direction: column;
   align-items: center;
   position: relative;
-  transition: all 0.2s ease;
-  box-shadow: var(--shadow-subtle);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 
+    0 4px 10px rgba(0, 0, 0, 0.01),
+    0 0 1px 0 rgba(0, 102, 255, 0.08) inset;
 }
 
 .tableCard:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 16px rgba(0,0,0,0.04);
+  transform: translateY(-4px);
+  border-color: rgba(0, 102, 255, 0.15);
+  box-shadow: 
+    0 12px 24px rgba(0, 102, 255, 0.05),
+    0 0 1px 0 rgba(0, 102, 255, 0.2) inset;
 }
 
 .tableCardAvailable {
-  border-color: rgba(52, 199, 89, 0.2);
+  border-color: rgba(52, 199, 89, 0.15);
   background: rgba(52, 199, 89, 0.01);
 }
 
 .tableCardReserved {
-  border-color: rgba(255, 59, 48, 0.2);
+  border-color: rgba(255, 59, 48, 0.15);
   background: rgba(255, 59, 48, 0.01);
 }
 
 .tableIconContainer {
-  width: 90px;
-  height: 90px;
+  width: 96px;
+  height: 96px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 16px;
+  margin-bottom: 18px;
   position: relative;
 }
 
 .tableIcon {
-  width: 48px;
-  height: 48px;
+  width: 52px;
+  height: 52px;
   border-radius: 50%;
   background: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 800;
-  font-size: 16px;
+  font-size: 17px;
   color: #1d1d1f;
   border: 3px solid #e5e5ea;
   z-index: 10;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
 }
 
 .tableIconAvailable {
   border-color: #34c759;
   color: #34c759;
+  box-shadow: 0 4px 12px rgba(52, 199, 89, 0.15);
 }
 
 .tableIconReserved {
   border-color: #ff3b30;
   color: #ff3b30;
+  box-shadow: 0 4px 12px rgba(255, 59, 48, 0.15);
 }
 
 .chair {
   position: absolute;
-  width: 14px;
-  height: 14px;
-  background: #e5e5ea;
-  border: 2px solid #ffffff;
+  width: 16px;
+  height: 16px;
+  background: #d2d2d7;
+  border: 3px solid #ffffff;
   border-radius: 50%;
   z-index: 1;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
   transition: all 0.3s ease;
 }
 
@@ -416,52 +598,48 @@
 }
 
 .tableNumberTitle {
-  font-size: 16px;
-  font-weight: 700;
+  font-size: 17px;
+  font-weight: 800;
   margin-bottom: 2px;
+  color: var(--foreground);
 }
 
 .tableCapacityText {
-  font-size: 12px;
+  font-size: 12.5px;
   color: var(--text-secondary);
-  margin-bottom: 12px;
-}
-
-.statusBadge {
-  padding: 4px 10px;
-  border-radius: 9999px;
-  font-size: 11px;
-  font-weight: 700;
-  display: inline-block;
+  margin-bottom: 14px;
 }
 
 .statusBadgeAvailable {
-  background: rgba(52, 199, 89, 0.1);
-  color: #34c759;
+  background: rgba(52, 199, 89, 0.08);
+  border: 1px solid rgba(52, 199, 89, 0.18);
+  color: #248a3d;
 }
 
 .statusBadgeReserved {
-  background: rgba(255, 59, 48, 0.1);
-  color: #ff3b30;
+  background: rgba(255, 59, 48, 0.08);
+  border: 1px solid rgba(255, 59, 48, 0.18);
+  color: #c93b3b;
 }
 
 .reservedDetail {
-  margin-top: 10px;
-  padding-top: 8px;
-  border-top: 1px dashed rgba(0, 0, 0, 0.08);
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px dashed rgba(0, 102, 255, 0.08);
   width: 100%;
-  font-size: 12px;
+  font-size: 12.5px;
 }
 
 .reservedClientName {
-  font-weight: 700;
+  font-weight: 750;
   color: var(--foreground);
 }
 
 .reservedTime {
   color: var(--primary);
-  font-weight: 600;
+  font-weight: 700;
   margin-top: 2px;
+  font-size: 11.5px;
 }
 
 .deleteBtn {
@@ -475,8 +653,8 @@
   font-size: 14px;
   opacity: 0.3;
   transition: all 0.2s ease;
-  width: 24px;
-  height: 24px;
+  width: 26px;
+  height: 26px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -503,47 +681,56 @@
 
 .formGroup label {
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
 .formInput {
-  padding: 10px 14px;
-  border-radius: 8px;
-  border: 1px solid var(--card-border);
-  background: var(--card-bg);
+  padding: 12px 16px;
+  border-radius: 12px;
+  border: 1px solid var(--input-border);
+  background: rgba(0, 0, 0, 0.02);
   color: var(--foreground);
-  font-size: 14px;
+  font-size: 14.5px;
   font-family: inherit;
   outline: none;
-  transition: border-color 0.15s;
-  min-height: 44px;
+  transition: all 0.2s;
+  min-height: 46px;
 }
 
 .formInput:focus {
   border-color: var(--primary);
+  background: white;
+  box-shadow: 0 0 0 4px rgba(0, 102, 255, 0.12);
 }
 
 .submitButton {
   background: var(--primary);
   color: white;
-  padding: 12px;
-  border-radius: 8px;
+  padding: 12px 20px;
+  border-radius: 9999px;
   border: none;
-  font-weight: 600;
-  font-size: 14px;
+  font-weight: 700;
+  font-size: 14.5px;
   cursor: pointer;
-  transition: opacity 0.15s;
-  min-height: 44px;
+  transition: all 0.2s;
+  min-height: 46px;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 4px 12px rgba(0, 102, 255, 0.15);
 }
 
 .submitButton:hover {
-  opacity: 0.9;
+  background: var(--primary-hover);
+  box-shadow: 0 6px 16px rgba(0, 102, 255, 0.25);
+  transform: translateY(-1px);
+}
+
+.submitButton:active {
+  transform: translateY(0);
 }
 
 .menuGrid {
@@ -564,35 +751,39 @@
 
 .menuSectionTitle {
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 800;
   color: var(--text-secondary);
   text-transform: uppercase;
-  border-bottom: 1px solid var(--card-border);
-  padding-bottom: 6px;
-  margin-bottom: 12px;
-  letter-spacing: 0.5px;
+  border-bottom: 1px solid rgba(0, 102, 255, 0.08);
+  padding-bottom: 8px;
+  margin-bottom: 14px;
+  letter-spacing: 0.8px;
 }
 
 .menuItemList {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 }
 
 .menuItemCard {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 14px 18px;
-  border-radius: 10px;
-  background: var(--card-bg);
-  border: 1px solid var(--card-border);
-  transition: all 0.2s ease;
+  padding: 16px 20px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(0, 102, 255, 0.05);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .menuItemCard:hover {
-  box-shadow: 0 4px 12px rgba(0,0,0,0.02);
   border-color: rgba(0, 102, 255, 0.15);
+  background: white;
+  transform: translateY(-2px);
+  box-shadow: 
+    0 8px 16px rgba(0, 102, 255, 0.04),
+    0 0 1px 0 rgba(0, 102, 255, 0.1) inset;
 }
 
 .menuItemInfo {
@@ -605,8 +796,8 @@
 }
 
 .menuItemName {
-  font-weight: 700;
-  font-size: 15px;
+  font-weight: 800;
+  font-size: 15.5px;
   color: var(--foreground);
 }
 
@@ -617,8 +808,8 @@
 }
 
 .menuItemPrice {
-  font-weight: 700;
-  font-size: 14px;
+  font-weight: 800;
+  font-size: 14.5px;
   color: var(--primary);
   white-space: nowrap;
 }
