@@ -24,7 +24,7 @@
   font-size: 24px;
   font-weight: 700;
   margin: 0 auto 12px auto;
-  box-shadow: 0 4px 12px rgba(0, 113, 227, 0.2);
+  box-shadow: 0 4px 12px rgba(127, 0, 255, 0.2);
 }
 
 .businessName {
@@ -69,8 +69,8 @@
 
 .serviceItemActive {
   border-color: var(--primary);
-  background: rgba(0, 113, 227, 0.03);
-  box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.1);
+  background: rgba(127, 0, 255, 0.03);
+  box-shadow: 0 0 0 3px rgba(127, 0, 255, 0.1);
 }
 
 .serviceName {
@@ -155,7 +155,7 @@
 
 .profItemActive {
   border-color: var(--primary);
-  background: rgba(0, 113, 227, 0.03);
+  background: rgba(127, 0, 255, 0.03);
 }
 
 .profAvatar {

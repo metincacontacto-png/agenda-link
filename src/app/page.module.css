@@ -84,7 +84,7 @@
 .input:focus, .select:focus {
   border-color: var(--input-focus);
   background-color: var(--background);
-  box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.15);
+  box-shadow: 0 0 0 4px rgba(127, 0, 255, 0.15);
 }
 
 .buttonRow {

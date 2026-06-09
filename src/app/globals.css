@@ -9,24 +9,11 @@
 body {
   font-family: var(--font-sans);
   background-color: var(--background);
-  background-image: radial-gradient(at 0% 0%, rgba(127, 0, 255, 0.05) 0px, transparent 40%),
-                    radial-gradient(at 100% 0%, rgba(255, 0, 127, 0.05) 0px, transparent 40%);
-  background-size: cover;
-  background-position: center;
-  background-attachment: fixed;
-  background-repeat: no-repeat;
   color: var(--foreground);
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   line-height: 1.5;
-}
-
-@media (prefers-color-scheme: dark) {
-  body {
-    background-image: radial-gradient(at 0% 0%, rgba(127, 0, 255, 0.08) 0px, transparent 45%),
-                      radial-gradient(at 100% 0%, rgba(255, 0, 127, 0.08) 0px, transparent 45%);
-  }
 }
 
 a {
@@ -47,5 +34,11 @@ a {
 
 .glassCard:hover {
   box-shadow: var(--shadow-active);
-  border-color: rgba(255, 255, 255, 0.35);
+  border-color: rgba(0, 0, 0, 0.15);
+}
+
+@media (prefers-color-scheme: dark) {
+  .glassCard:hover {
+    border-color: rgba(255, 255, 255, 0.25);
+  }
 }
