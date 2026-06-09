@@ -103,13 +103,6 @@
   justify-content: center;
   z-index: 10;
 }
-
-@media (prefers-color-scheme: dark) {
-  .footerBar {
-    background: rgba(0, 0, 0, 0.85);
-  }
-}
-
 .bookBtn {
   width: 100%;
   max-width: 440px;
