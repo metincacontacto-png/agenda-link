@@ -107,6 +107,16 @@
   font-weight: 700;
 }
 
+.sidebarIcon {
+  width: 18px;
+  height: 18px;
+  color: var(--primary) !important;
+  stroke: var(--primary) !important;
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+
 /* Área de Contenido Principal */
 .contentArea {
   flex: 1;
