@@ -713,7 +713,7 @@
 .featureImageContainer {
   margin-top: 24px;
   width: 100%;
-  height: 180px;
+  height: 280px;
   border-radius: 12px;
   border: 1px solid rgba(0, 102, 255, 0.08);
   overflow: hidden;
@@ -726,7 +726,7 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: top center;
+  object-position: center;
   transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
