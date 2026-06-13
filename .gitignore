@@ -49,3 +49,6 @@ next-env.d.ts
 # Wrangler
 .wrangler/
 
+# OpenNext & Cloudflare Pages build output
+.open-next/
+.cloudflare/
