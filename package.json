@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build && npx @opennextjs/cloudflare build --skipNextBuild && rm -rf .cloudflare && mkdir .cloudflare && mv .open-next/worker.js .cloudflare/_worker.js && cp -r .open-next/assets/* .cloudflare/ && node -e \"require('fs').writeFileSync('.cloudflare/_routes.json', JSON.stringify({ version: 1, include: ['/*'], exclude: ['/_next/*'] }))\"",
+    "build": "next build && npx @opennextjs/cloudflare build --skipNextBuild && rm -rf .cloudflare && cp -R .open-next .cloudflare && mv .cloudflare/worker.js .cloudflare/_worker.js && cp -r .cloudflare/assets/* .cloudflare/ && node -e \"require('fs').writeFileSync('.cloudflare/_routes.json', JSON.stringify({ version: 1, include: ['/*'], exclude: ['/_next/*'] }))\"",
     "start": "next start",
     "lint": "eslint"
   },
