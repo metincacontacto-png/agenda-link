@@ -355,17 +355,21 @@ export default function LandingAndOnboardingPage() {
           {/* Teléfono */}
           <div className={styles.phoneMockup}>
             <div className={styles.phoneScreen}>
-              <div style={{ width: "32px", height: "32px", borderRadius: "50%", background: "#0066ff", color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "11px", fontWeight: "bold", margin: "0 auto 8px auto" }}>AL</div>
-              <div style={{ fontSize: "12px", fontWeight: "800", textAlign: "center" }}>Estudio Demo</div>
-              <div style={{ fontSize: "9px", color: "gray", textAlign: "center", marginBottom: "14px" }}>Otros</div>
+              <div style={{ width: "32px", height: "32px", borderRadius: "50%", background: "#0066ff", color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "11px", fontWeight: "bold", margin: "0 auto 8px auto" }}>KL</div>
+              <div style={{ fontSize: "12px", fontWeight: "800", textAlign: "center" }}>KineActive</div>
+              <div style={{ fontSize: "9px", color: "gray", textAlign: "center", marginBottom: "14px" }}>Kinesiología y Rehabilitación</div>
               
               <div style={{ border: "1px solid #0066ff", borderRadius: "8px", padding: "8px", background: "rgba(0, 102, 255, 0.03)", display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
-                <span style={{ fontSize: "10px", fontWeight: "bold" }}>Corte Caballo</span>
-                <span style={{ fontSize: "10px", fontWeight: "bold", color: "#0066ff" }}>$15.000</span>
+                <span style={{ fontSize: "10px", fontWeight: "bold" }}>Sesión Kinesiológica</span>
+                <span style={{ fontSize: "10px", fontWeight: "bold", color: "#0066ff" }}>$25.000</span>
+              </div>
+              <div style={{ border: "1px solid rgba(0,0,0,0.06)", borderRadius: "8px", padding: "8px", background: "white", display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px", opacity: 0.8 }}>
+                <span style={{ fontSize: "10px" }}>Evaluación Inicial</span>
+                <span style={{ fontSize: "10px", fontWeight: "bold" }}>$30.000</span>
               </div>
               <div style={{ border: "1px solid rgba(0,0,0,0.06)", borderRadius: "8px", padding: "8px", background: "white", display: "flex", justifyContent: "space-between", alignItems: "center", opacity: 0.6 }}>
-                <span style={{ fontSize: "10px" }}>Perfilado Barba</span>
-                <span style={{ fontSize: "10px", fontWeight: "bold" }}>$8.000</span>
+                <span style={{ fontSize: "10px" }}>Terapia Manual</span>
+                <span style={{ fontSize: "10px", fontWeight: "bold" }}>$20.000</span>
               </div>
 
               <div style={{ marginTop: "auto", background: "black", color: "white", padding: "10px", borderRadius: "20px", fontSize: "11px", fontWeight: "bold", textAlign: "center", cursor: "pointer" }}>
@@ -390,13 +394,13 @@ export default function LandingAndOnboardingPage() {
                 <div style={{ display: "flex", gap: "4px" }}>
                   <span style={{ fontSize: "8px", width: "22px", color: "gray" }}>09:00</span>
                   <div style={{ flex: 1, background: "rgba(52, 199, 89, 0.08)", borderLeft: "2px solid #34c759", padding: "2px 4px", borderRadius: "3px", fontSize: "8px", textAlign: "left" }}>
-                    <strong>Juan Pérez</strong> · Corte Caballo (✓ Pago)
+                    <strong>Juan Pérez</strong> · Evaluación (✓ Pago)
                   </div>
                 </div>
                 <div style={{ display: "flex", gap: "4px" }}>
                   <span style={{ fontSize: "8px", width: "22px", color: "gray" }}>10:00</span>
                   <div style={{ flex: 1, background: "rgba(0, 102, 255, 0.08)", borderLeft: "2px solid #0066ff", padding: "2px 4px", borderRadius: "3px", fontSize: "8px", textAlign: "left" }}>
-                    <strong>María Gómez</strong> · Manicure
+                    <strong>María Gómez</strong> · Sesión Kine
                   </div>
                 </div>
               </div>
