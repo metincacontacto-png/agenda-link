@@ -760,7 +760,15 @@ export default function LandingAndOnboardingPage() {
                     name="serviceName"
                     value={formData.serviceName}
                     onChange={handleChange}
-                    placeholder="Ej. Corte de Cabello Caballero"
+                    placeholder={
+                      formData.category === "Profesionales"
+                        ? "Ej. Asesoría de Negocios o Consultoría"
+                        : formData.category === "Salud"
+                        ? "Ej. Consulta de Especialidad"
+                        : formData.category === "Fitness"
+                        ? "Ej. Clase Personalizada"
+                        : "Ej. Corte de Cabello Caballero"
+                    }
                     className={styles.input}
                     required
                   />

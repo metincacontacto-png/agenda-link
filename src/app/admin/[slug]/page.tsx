@@ -1811,7 +1811,7 @@ export default function AdminDashboard({ params }: { params: Promise<{ slug: str
                   <div style={{ padding: "12px", display: "flex", flexDirection: "column", gap: "6px" }}>
                     <div className={styles.previewContactPill}>
                       <span>📞</span>
-                      <span>{landingPhone || (business.category === "Restaurante" ? "+56 9 8765 4321" : "+56 9 1234 5678")}</span>
+                      <span>{landingPhone || (business.category === "Profesionales" ? "+56 9 9999 8888" : "+56 9 1234 5678")}</span>
                     </div>
                     <div className={styles.previewContactPill}>
                       <span>📍</span>
@@ -1852,8 +1852,8 @@ export default function AdminDashboard({ params }: { params: Promise<{ slug: str
                           </svg>
                         </div>
                         <div style={{ display: "flex", flexDirection: "column" }}>
-                          <span style={{ fontSize: "10px", fontWeight: "600" }}>{feat1Title || (business.category === "Restaurante" ? "Chef de Alta Cocina" : "Atención Personalizada")}</span>
-                          <span style={{ fontSize: "9px", color: "var(--text-secondary)", textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap", maxWidth: "200px" }}>{feat1Desc || (business.category === "Restaurante" ? "Platos preparados por expertos culinarios." : "Adaptados a tus necesidades.")}</span>
+                          <span style={{ fontSize: "10px", fontWeight: "600" }}>{feat1Title || (business.category === "Profesionales" ? "Asesoría Experta" : "Atención Personalizada")}</span>
+                          <span style={{ fontSize: "9px", color: "var(--text-secondary)", textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap", maxWidth: "200px" }}>{feat1Desc || (business.category === "Profesionales" ? "Consultores y especialistas certificados." : "Adaptados a tus necesidades.")}</span>
                         </div>
                       </div>
                       <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
@@ -1864,8 +1864,8 @@ export default function AdminDashboard({ params }: { params: Promise<{ slug: str
                           </svg>
                         </div>
                         <div style={{ display: "flex", flexDirection: "column" }}>
-                          <span style={{ fontSize: "10px", fontWeight: "600" }}>{feat2Title || (business.category === "Restaurante" ? "Ambiente Exclusivo" : "Profesionales Expertos")}</span>
-                          <span style={{ fontSize: "9px", color: "var(--text-secondary)", textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap", maxWidth: "200px" }}>{feat2Desc || (business.category === "Restaurante" ? "Espacios cómodos y de primer nivel." : "Personal certificado y con experiencia.")}</span>
+                          <span style={{ fontSize: "10px", fontWeight: "600" }}>{feat2Title || (business.category === "Profesionales" ? "Horarios Flexibles" : "Profesionales Expertos")}</span>
+                          <span style={{ fontSize: "9px", color: "var(--text-secondary)", textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap", maxWidth: "200px" }}>{feat2Desc || (business.category === "Profesionales" ? "Reserva tu hora y conéctate cómodamente." : "Personal certificado y con experiencia.")}</span>
                         </div>
                       </div>
                       <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
@@ -1875,8 +1875,8 @@ export default function AdminDashboard({ params }: { params: Promise<{ slug: str
                           </svg>
                         </div>
                         <div style={{ display: "flex", flexDirection: "column" }}>
-                          <span style={{ fontSize: "10px", fontWeight: "600" }}>{feat3Title || (business.category === "Restaurante" ? "Ingredientes Frescos" : "Confirmación Inmediata")}</span>
-                          <span style={{ fontSize: "9px", color: "var(--text-secondary)", textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap", maxWidth: "200px" }}>{feat3Desc || (business.category === "Restaurante" ? "Insumos locales y de temporada." : "Tu cupo queda asegurado al instante.")}</span>
+                          <span style={{ fontSize: "10px", fontWeight: "600" }}>{feat3Title || "Confirmación Inmediata"}</span>
+                          <span style={{ fontSize: "9px", color: "var(--text-secondary)", textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap", maxWidth: "200px" }}>{feat3Desc || "Tu cupo queda asegurado al instante."}</span>
                         </div>
                       </div>
                     </div>
@@ -1910,7 +1910,7 @@ export default function AdminDashboard({ params }: { params: Promise<{ slug: str
                   {/* Footer CTA */}
                   <div className={styles.previewFooterCTA}>
                     <button className={styles.previewBookBtn} type="button">
-                      {business.category === "Restaurante" ? "Ver Carta Digital" : "Reservar Cita Online"}
+                      Reservar Cita Online
                     </button>
                   </div>
 
