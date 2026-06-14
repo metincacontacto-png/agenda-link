@@ -9,6 +9,7 @@ export async function POST(request: Request) {
     const {
       name,
       ownerName,
+      email,
       category,
       teamSize,
       country,
@@ -27,6 +28,7 @@ export async function POST(request: Request) {
     if (
       !name ||
       !ownerName ||
+      !email ||
       !category ||
       !teamSize ||
       !country ||
@@ -123,6 +125,7 @@ export async function POST(request: Request) {
         name,
         slug: finalSlug,
         ownerName,
+        email: email.trim().toLowerCase(),
         category,
         teamSize,
         country,

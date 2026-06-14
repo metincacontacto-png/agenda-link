@@ -13,6 +13,7 @@ model Business {
   name          String
   slug          String         @unique
   ownerName     String
+  email         String         @default("")
   category      String
   teamSize      String
   country       String

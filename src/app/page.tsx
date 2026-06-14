@@ -12,6 +12,7 @@ export default function LandingAndOnboardingPage() {
   const [formData, setFormData] = useState({
     name: "",
     ownerName: "",
+    email: "",
     category: "Peluquería",
     teamSize: "1 persona",
     country: "Chile",
@@ -698,7 +699,7 @@ export default function LandingAndOnboardingPage() {
             )}
 
             {step === 1 && (
-              <form onSubmit={(e) => { e.preventDefault(); if (formData.name && formData.ownerName) nextStep(); }}>
+              <form onSubmit={(e) => { e.preventDefault(); if (formData.name && formData.ownerName && formData.email) nextStep(); }}>
                 <div className={styles.formGroup}>
                   <label className={styles.label}>Nombre de tu Negocio</label>
                   <input
@@ -719,6 +720,18 @@ export default function LandingAndOnboardingPage() {
                     value={formData.ownerName}
                     onChange={handleChange}
                     placeholder="Ej. Juan Pérez"
+                    className={styles.input}
+                    required
+                  />
+                </div>
+                <div className={styles.formGroup}>
+                  <label className={styles.label}>Correo Electrónico</label>
+                  <input
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    placeholder="Ej. juan.perez@correo.com"
                     className={styles.input}
                     required
                   />
@@ -751,7 +764,7 @@ export default function LandingAndOnboardingPage() {
                 <div className={styles.buttonRow}>
                   <button
                     type="submit"
-                    disabled={!formData.name || !formData.ownerName}
+                    disabled={!formData.name || !formData.ownerName || !formData.email}
                     className={`${styles.btn} ${styles.btnPrimary}`}
                   >
                     Siguiente
