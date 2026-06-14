@@ -676,7 +676,15 @@ export default function LandingAndOnboardingPage() {
                     name="name"
                     value={formData.name}
                     onChange={handleChange}
-                    placeholder="Ej. Peluquería Bella Vista"
+                    placeholder={
+                      formData.category === "Profesionales"
+                        ? "Ej. Consultoría Inmobiliaria o Estudio Jurídico"
+                        : formData.category === "Salud"
+                        ? "Ej. Centro Médico Alameda"
+                        : formData.category === "Fitness"
+                        ? "Ej. Gimnasio UpFit"
+                        : "Ej. Peluquería Bella Vista"
+                    }
                     className={styles.input}
                     required
                   />

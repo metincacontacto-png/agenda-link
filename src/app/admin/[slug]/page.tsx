@@ -17,13 +17,6 @@ interface Appointment {
   professional: { name: string };
 }
 
-interface MenuItem {
-  id: string;
-  name: string;
-  description: string | null;
-  price: number;
-  category: string;
-}
 
 interface Client {
   name: string;
