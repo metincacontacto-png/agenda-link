@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useState, useRef } from "react";
-import QRCode from "qrcode";
 import styles from "./QrDownloader.module.css";
 
 interface Props {
@@ -17,23 +16,28 @@ export default function QrDownloader({ slug, businessName }: Props) {
     // Generar la URL de reserva para el QR
     const url = `${window.location.origin}/${slug}`;
 
-    // Generar Data URL para usar en la impresión (con mayor resolución)
-    QRCode.toDataURL(url, { width: 600, margin: 2 }, (err, dataUrl) => {
-      if (err) {
-        console.error("Error generating QR Data URL:", err);
-      } else {
-        setQrDataUrl(dataUrl);
-      }
-    });
-
-    // Renderizar en el canvas para vista previa en pantalla
-    if (canvasRef.current) {
-      QRCode.toCanvas(canvasRef.current, url, { width: 160, margin: 1 }, (err) => {
+    // Cargar QRCode dinámicamente en el cliente
+    import("qrcode").then((QRCode) => {
+      // Generar Data URL para usar en la impresión (con mayor resolución)
+      QRCode.default.toDataURL(url, { width: 600, margin: 2 }, (err, dataUrl) => {
         if (err) {
-          console.error("Error rendering QR to Canvas:", err);
+          console.error("Error generating QR Data URL:", err);
+        } else {
+          setQrDataUrl(dataUrl);
         }
       });
-    }
+
+      // Renderizar en el canvas para vista previa en pantalla
+      if (canvasRef.current) {
+        QRCode.default.toCanvas(canvasRef.current, url, { width: 160, margin: 1 }, (err) => {
+          if (err) {
+            console.error("Error rendering QR to Canvas:", err);
+          }
+        });
+      }
+    }).catch((err) => {
+      console.error("Error loading qrcode library dynamically:", err);
+    });
   }, [slug]);
 
   const handlePrint = () => {
@@ -65,12 +69,12 @@ export default function QrDownloader({ slug, businessName }: Props) {
       </button>
 
       {/* Área oculta en pantalla, visible solo al imprimir */}
-      <div className={styles.printArea}>
+      <div className="printArea">
         {/* Página 1: Cartel de Vitrina A4 */}
-        <div className={styles.pageA4}>
+        <div className="pageA4">
           <h1>{businessName}</h1>
           <p>Escanea para agendar tu cita al instante</p>
-          <div className={styles.qrWrapper}>
+          <div className="qrWrapper">
             {qrDataUrl && (
               /* eslint-disable-next-line @next/next/no-img-element */
               <img
@@ -83,12 +87,12 @@ export default function QrDownloader({ slug, businessName }: Props) {
           <p style={{ fontSize: "16px", color: "#86868b", marginTop: "12px" }}>
             Sin contraseñas. Sin descargar apps. Todo con tu WhatsApp.
           </p>
-          <span className={styles.brandUrl}>agendalink.cl/{slug}</span>
+          <span className="brandUrl">agendalink.cl/{slug}</span>
         </div>
 
         {/* Página 2: Tarjeta de Presentación (85x55mm) */}
-        <div className={styles.pageCard}>
-          <div className={styles.cardText}>
+        <div className="pageCard">
+          <div className="cardText">
             <h2>{businessName}</h2>
             <p>Agenda tu hora en línea directamente</p>
             <span>agendalink.cl/{slug}</span>

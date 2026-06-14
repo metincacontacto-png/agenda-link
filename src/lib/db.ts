@@ -1,5 +1,5 @@
 import { PrismaClient as WASMPrismaClient } from "@prisma/client/wasm";
-import { PrismaClient as NativePrismaClient } from "@prisma/client";
+import type { PrismaClient } from "@prisma/client";
 import { PrismaD1 } from "@prisma/adapter-d1";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { cache } from "react";
@@ -19,12 +19,19 @@ const getDb = cache(() => {
     console.warn("getCloudflareContext falló. Usando SQLite local. (Detalle: " + (e as Error).message + ")");
   }
   
-  // Fallback a SQLite local
-  return new NativePrismaClient();
+  // Fallback a SQLite local usando require con variable para evitar que esbuild/webpack incluyan los motores de consulta nativos (.node / .wasm) en el bundle de producción de Cloudflare
+  try {
+    const clientModuleName = "@prisma/client";
+    const { PrismaClient: NativePrismaClient } = require(clientModuleName);
+    return new NativePrismaClient();
+  } catch (err) {
+    console.error("Error al cargar PrismaClient nativo local:", err);
+    throw new Error("No se pudo inicializar la base de datos.");
+  }
 });
 
 // Proxy dinámico para mantener compatibilidad 100% transparente con "import { prisma } from '@/lib/db'"
-export const prisma = new Proxy({} as NativePrismaClient, {
+export const prisma = new Proxy({} as PrismaClient, {
   get(target, prop, receiver) {
     const db = getDb();
     return Reflect.get(db, prop, receiver);

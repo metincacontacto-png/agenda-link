@@ -1,4 +1,7 @@
 import { defineCloudflareConfig } from "@opennextjs/cloudflare";
 
-// Configuración de compilación para OpenNext en Cloudflare Pages
-export default defineCloudflareConfig();
+const config = defineCloudflareConfig();
+
+config.default.minify = true;
+
+export default config;

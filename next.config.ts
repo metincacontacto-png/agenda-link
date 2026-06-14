@@ -9,6 +9,9 @@ if (process.env.NODE_ENV === "development") {
 const nextConfig: NextConfig = {
   output: "standalone",
   serverExternalPackages: ["@prisma/client", ".prisma/client"],
+  experimental: {
+    serverMinification: true,
+  },
 };
 
 export default nextConfig;

@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build && npx @opennextjs/cloudflare build --skipNextBuild && rm -rf .cloudflare && cp -R .open-next .cloudflare && mv .cloudflare/worker.js .cloudflare/_worker.js && cp -r .cloudflare/assets/* .cloudflare/ && node -e \"const fs = require('fs'); const publicFiles = fs.readdirSync('public').map(f => '/' + f); const routes = { version: 1, include: ['/*'], exclude: ['/_next/*', '/favicon.ico', ...publicFiles] }; fs.writeFileSync('.cloudflare/_routes.json', JSON.stringify(routes))\"",
+    "build": "next build --webpack && npx @opennextjs/cloudflare build --skipNextBuild && rm -rf .cloudflare && cp -R .open-next .cloudflare && mv .cloudflare/worker.js .cloudflare/_worker.js && cp -r .cloudflare/assets/* .cloudflare/ && node -e \"const fs = require('fs'); const publicFiles = fs.readdirSync('public').map(f => '/' + f); const routes = { version: 1, include: ['/*'], exclude: ['/_next/*', '/favicon.ico', ...publicFiles] }; fs.writeFileSync('.cloudflare/_routes.json', JSON.stringify(routes))\"",
     "start": "next start",
     "lint": "eslint"
   },
