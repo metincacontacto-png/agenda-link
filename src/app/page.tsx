@@ -270,6 +270,41 @@ export default function LandingAndOnboardingPage() {
                   </div>
                 </div>
 
+                <div className={styles.dropdownColumn}>
+                  <div className={styles.columnTitle}>Servicios Profesionales</div>
+                  <div className={styles.columnItems}>
+                    <div className={styles.columnItem} onClick={() => handleSegmentClick("Profesionales")}>
+                      <svg className={styles.columnIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                        <circle cx="9" cy="7" r="4" />
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                      </svg>
+                      <span>Consultores y Asesores</span>
+                    </div>
+                    <div className={styles.columnItem} onClick={() => handleSegmentClick("Profesionales")}>
+                      <svg className={styles.columnIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                        <path d="M12 8v4M12 16h.01" />
+                      </svg>
+                      <span>Abogados y Legal</span>
+                    </div>
+                    <div className={styles.columnItem} onClick={() => handleSegmentClick("Profesionales")}>
+                      <svg className={styles.columnIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M4.5 16.5c-1.5 1.26-2.5 3.19-2.5 5.5h20c0-2.31-1-4.24-2.5-5.5" />
+                        <path d="M12 2a5 5 0 0 0-5 5c0 4 5 9 5 9s5-5 5-5a5 5 0 0 0-5-5z" />
+                      </svg>
+                      <span>Psicólogos y Terapeutas</span>
+                    </div>
+                    <div className={styles.columnItem} onClick={() => handleSegmentClick("Profesionales")}>
+                      <svg className={styles.columnIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+                        <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+                      </svg>
+                      <span>Clases y Tutorías</span>
+                    </div>
+                  </div>
+                </div>
 
               </div>
             )}
@@ -676,6 +711,7 @@ export default function LandingAndOnboardingPage() {
                     <option value="Peluquería">Peluquería</option>
                     <option value="Salud">Salud y Bienestar</option>
                     <option value="Fitness">Fitness y Deporte</option>
+                    <option value="Profesionales">Servicios Profesionales</option>
                     <option value="Otros">Otros servicios</option>
                   </select>
                 </div>
