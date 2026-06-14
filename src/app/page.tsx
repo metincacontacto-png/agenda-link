@@ -660,15 +660,8 @@ export default function LandingAndOnboardingPage() {
               <p className={styles.subtitle} style={{ marginTop: "4px" }}>Toma menos de 10 minutos empezar.</p>
             </div>
 
-            {step < 3 && (
-              <div className={styles.stepIndicator}>
-                <div className={`${styles.dot} ${step === 1 ? styles.dotActive : ""}`} />
-                <div className={`${styles.dot} ${step === 2 ? styles.dotActive : ""}`} />
-              </div>
-            )}
-
             {step === 1 && (
-              <form onSubmit={(e) => { e.preventDefault(); if (formData.name && formData.ownerName && formData.email) nextStep(); }}>
+              <form onSubmit={(e) => { e.preventDefault(); if (!loading && formData.name && formData.ownerName && formData.email) handleSubmit(); }}>
                 <div className={styles.formGroup}>
                   <label className={styles.label}>Nombre de tu Negocio</label>
                   <input
@@ -741,76 +734,7 @@ export default function LandingAndOnboardingPage() {
                 <div className={styles.buttonRow}>
                   <button
                     type="submit"
-                    disabled={!formData.name || !formData.ownerName || !formData.email}
-                    className={`${styles.btn} ${styles.btnPrimary}`}
-                  >
-                    Siguiente
-                  </button>
-                </div>
-              </form>
-            )}
-
-            {step === 2 && (
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  if (loading) return;
-                  if (formData.serviceName && formData.servicePrice) {
-                    handleSubmit();
-                  }
-                }}
-              >
-                <h2 style={{ fontSize: "15px", marginBottom: "20px", textAlign: "center", fontWeight: "700" }}>Agrega tu primer servicio</h2>
-                <div className={styles.formGroup}>
-                  <label className={styles.label}>Nombre del Servicio</label>
-                  <input
-                    type="text"
-                    name="serviceName"
-                    value={formData.serviceName}
-                    onChange={handleChange}
-                    placeholder={
-                      formData.category === "Profesionales"
-                        ? "Ej. Asesoría de Negocios o Consultoría"
-                        : formData.category === "Salud"
-                        ? "Ej. Consulta de Especialidad"
-                        : formData.category === "Fitness"
-                        ? "Ej. Clase Personalizada"
-                        : "Ej. Corte de Cabello Caballero"
-                    }
-                    className={styles.input}
-                    required
-                  />
-                </div>
-                <div className={styles.formGroup}>
-                  <label className={styles.label}>Duración (minutos)</label>
-                  <select name="serviceDuration" value={formData.serviceDuration} onChange={handleChange} className={styles.select}>
-                    <option value="15">15 minutos</option>
-                    <option value="30">30 minutos</option>
-                    <option value="45">45 minutos</option>
-                    <option value="60">1 hora</option>
-                    <option value="90">1 hora y media</option>
-                  </select>
-                </div>
-                <div className={styles.formGroup}>
-                  <label className={styles.label}>Precio</label>
-                  <input
-                    type="number"
-                    name="servicePrice"
-                    value={formData.servicePrice}
-                    onChange={handleChange}
-                    placeholder="Ej. 15000"
-                    className={styles.input}
-                    required
-                  />
-                </div>
-
-                <div className={styles.buttonRow}>
-                  <button type="button" onClick={prevStep} className={`${styles.btn} ${styles.btnSecondary}`}>
-                    Atrás
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={loading || !formData.serviceName || !formData.servicePrice}
+                    disabled={loading || !formData.name || !formData.ownerName || !formData.email}
                     className={`${styles.btn} ${styles.btnPrimary}`}
                   >
                     {loading ? "Creando..." : "Crear mi link"}

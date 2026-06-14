@@ -17,7 +17,6 @@ export async function POST(request: Request) {
       serviceDuration,
       servicePrice,
     } = body;
-
     // Verificar presencia de campos requeridos (permitiendo precios en 0)
     if (
       !name ||
@@ -25,19 +24,42 @@ export async function POST(request: Request) {
       !email ||
       !category ||
       !teamSize ||
-      !country ||
-      !serviceName ||
-      serviceDuration === undefined ||
-      servicePrice === undefined ||
-      servicePrice === ""
+      !country
     ) {
       return NextResponse.json({ error: "Faltan campos obligatorios" }, { status: 400 });
     }
 
-    // Validar precio y duración
-    const parsedPrice = parseFloat(servicePrice);
-    const parsedDuration = parseInt(serviceDuration, 10);
-    if (isNaN(parsedPrice) || parsedPrice < 0 || isNaN(parsedDuration) || parsedDuration <= 0) {
+    // Default service values based on category
+    let finalServiceName = serviceName || "";
+    let finalServiceDuration = serviceDuration ? parseInt(serviceDuration, 10) : 30;
+    let finalServicePrice = servicePrice !== undefined && servicePrice !== "" ? parseFloat(servicePrice) : 0;
+
+    if (!finalServiceName) {
+      if (category === "Peluquería") {
+        finalServiceName = "Corte de Cabello Caballero";
+        finalServiceDuration = 30;
+        finalServicePrice = 12000;
+      } else if (category === "Salud") {
+        finalServiceName = "Consulta General";
+        finalServiceDuration = 30;
+        finalServicePrice = 25000;
+      } else if (category === "Fitness") {
+        finalServiceName = "Evaluación o Clase Personalizada";
+        finalServiceDuration = 60;
+        finalServicePrice = 15000;
+      } else if (category === "Profesionales") {
+        finalServiceName = "Asesoría o Consultoría Inicial";
+        finalServiceDuration = 45;
+        finalServicePrice = 30000;
+      } else {
+        finalServiceName = "Servicio General";
+        finalServiceDuration = 30;
+        finalServicePrice = 15000;
+      }
+    }
+
+    // Validar precio y duración final
+    if (isNaN(finalServicePrice) || finalServicePrice < 0 || isNaN(finalServiceDuration) || finalServiceDuration <= 0) {
       return NextResponse.json({ error: "Precio o duración inválidos" }, { status: 400 });
     }
 
@@ -91,9 +113,9 @@ export async function POST(request: Request) {
         currency,
         services: {
           create: {
-            name: serviceName,
-            duration: parsedDuration,
-            price: parsedPrice,
+            name: finalServiceName,
+            duration: finalServiceDuration,
+            price: finalServicePrice,
           },
         },
         professionals: {
