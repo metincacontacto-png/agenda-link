@@ -1,10 +1,10 @@
 datasource db {
   provider = "sqlite"
+  url      = "file:./dev.db"
 }
 
 generator client {
-  provider        = "prisma-client"
-  output          = "../src/generated/client"
+  provider        = "prisma-client-js"
   previewFeatures = ["driverAdapters"]
 }
 
@@ -28,6 +28,9 @@ model Business {
   landingHours            String?
   landingFeaturesJson     String?
   landingTestimonialsJson String?
+  plan                    String         @default("INDIVIDUAL")
+  billingBypass           Boolean        @default(false)
+  customDomain            String?        @unique
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
   services      Service[]
@@ -100,4 +103,9 @@ model Appointment {
   tableId        String?
   table          Table?       @relation(fields: [tableId], references: [id])
   createdAt      DateTime     @default(now())
+}
+
+model SystemSetting {
+  key   String @id
+  value String
 }
