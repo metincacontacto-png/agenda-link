@@ -1151,3 +1151,168 @@
     padding: 32px;
   }
 }
+
+/* Google Login Styles */
+.divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 20px 0;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid var(--card-border);
+}
+
+.divider:not(:empty)::before {
+  margin-right: 12px;
+}
+
+.divider:not(:empty)::after {
+  margin-left: 12px;
+}
+
+.googleBtn {
+  width: 100%;
+  height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: var(--radius-input);
+  color: var(--foreground);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+  transition: all 0.2s ease;
+}
+
+.googleBtn:hover {
+  background: rgba(0, 0, 0, 0.02);
+  border-color: rgba(0, 0, 0, 0.15);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+/* Google Account Chooser UI */
+.googleChooser {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  animation: googleFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes googleFadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.googleLogoWrapper {
+  margin: 8px 0 16px 0;
+}
+
+.googleAccountList {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-input);
+  overflow: hidden;
+  background: #ffffff;
+  margin: 20px 0;
+}
+
+.googleAccountItem {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--card-border);
+  cursor: pointer;
+  text-align: left;
+  transition: background-color 0.2s ease;
+}
+
+.googleAccountItem:last-child {
+  border-bottom: none;
+}
+
+.googleAccountItem:hover {
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+.googleAvatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.googleAccountInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.googleAccountName {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--foreground);
+}
+
+.googleAccountEmail {
+  font-size: 11.5px;
+  color: var(--text-secondary);
+}
+
+.googleFooter {
+  font-size: 11px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin-top: 12px;
+  opacity: 0.8;
+}
+
+.googleFooter a {
+  color: var(--primary);
+  text-decoration: underline;
+}
+
+.googleBackBtn {
+  margin-top: 8px;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 6px 12px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.googleBackBtn:hover {
+  color: var(--foreground);
+  background-color: rgba(0, 0, 0, 0.04);
+}
+

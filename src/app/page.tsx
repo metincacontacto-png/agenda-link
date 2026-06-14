@@ -34,6 +34,8 @@ export default function LandingAndOnboardingPage() {
   const [loginSlug, setLoginSlug] = useState("");
   const [loginLoading, setLoginLoading] = useState(false);
   const [loginError, setLoginError] = useState("");
+  const [googleMode, setGoogleMode] = useState<"none" | "chooser">("none");
+  const [googleLoading, setGoogleLoading] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -186,6 +188,33 @@ export default function LandingAndOnboardingPage() {
       setLoginError("Error de conexión. Inténtalo de nuevo.");
     } finally {
       setLoginLoading(false);
+    }
+  };
+
+  const handleGoogleAccountSelect = async (accountEmail: string, accountName: string, accountSlug: string) => {
+    setGoogleLoading(true);
+    setLoginError("");
+    try {
+      const res = await fetch("/api/auth/google-seed", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          slug: accountSlug,
+          name: accountSlug === "me-tinca" ? "Me Tinca Estudio Creativo" : "Invitado Demo",
+          category: accountSlug === "me-tinca" ? "Estética/Salón" : "Otros",
+        }),
+      });
+      const data = await res.json();
+      if (data.success && data.slug) {
+        window.location.href = `/admin/${data.slug}`;
+      } else {
+        setLoginError(data.error || "Error al conectar con la cuenta de Google.");
+        setGoogleLoading(false);
+      }
+    } catch (err) {
+      console.error(err);
+      setLoginError("Error de conexión al iniciar con Google.");
+      setGoogleLoading(false);
     }
   };
 
@@ -940,40 +969,123 @@ export default function LandingAndOnboardingPage() {
 
       {/* Modal de Inicio de Sesión */}
       {loginModalOpen && (
-        <div className={styles.modalOverlay} onClick={() => setLoginModalOpen(false)}>
+        <div className={styles.modalOverlay} onClick={() => { setLoginModalOpen(false); setGoogleMode("none"); setGoogleLoading(false); }}>
           <div className={styles.modalBox} onClick={(e) => e.stopPropagation()}>
-            <button className={styles.modalCloseBtn} onClick={() => setLoginModalOpen(false)}>×</button>
-            <h3 className={styles.modalTitle}>Iniciar Sesión</h3>
-            <p className={styles.modalSubtitle}>Ingresa el link de tu negocio para acceder al Panel de Control</p>
+            <button className={styles.modalCloseBtn} onClick={() => { setLoginModalOpen(false); setGoogleMode("none"); setGoogleLoading(false); }}>×</button>
             
-            {loginError && <div className={styles.modalError}>{loginError}</div>}
-            
-            <form onSubmit={handleLoginSubmit}>
-              <div className={styles.formGroup} style={{ marginBottom: "20px" }}>
-                <label className={styles.label}>Link de tu negocio</label>
-                <div className={styles.heroInputWrapper} style={{ background: "var(--input-bg)", border: "1px solid var(--input-border)", borderRadius: "var(--radius-input)", padding: "4px 8px 4px 12px", height: "48px" }}>
-                  <span style={{ fontSize: "13.5px", fontWeight: "600", color: "var(--text-secondary)" }}>agendalink.cl/</span>
-                  <input
-                    type="text"
-                    placeholder="tu-negocio"
-                    className={styles.heroInput}
-                    style={{ fontSize: "13.5px", padding: "6px 4px" }}
-                    value={loginSlug}
-                    onChange={(e) => setLoginSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))}
-                    required
-                  />
+            {googleMode === "none" ? (
+              <>
+                <h3 className={styles.modalTitle}>Iniciar Sesión</h3>
+                <p className={styles.modalSubtitle}>Ingresa el link de tu negocio para acceder al Panel de Control</p>
+                
+                {loginError && <div className={styles.modalError}>{loginError}</div>}
+                
+                <form onSubmit={handleLoginSubmit}>
+                  <div className={styles.formGroup} style={{ marginBottom: "20px" }}>
+                    <label className={styles.label}>Link de tu negocio</label>
+                    <div className={styles.heroInputWrapper} style={{ background: "var(--input-bg)", border: "1px solid var(--input-border)", borderRadius: "var(--radius-input)", padding: "4px 8px 4px 12px", height: "48px" }}>
+                      <span style={{ fontSize: "13.5px", fontWeight: "600", color: "var(--text-secondary)" }}>agendalink.cl/</span>
+                      <input
+                        type="text"
+                        placeholder="tu-negocio"
+                        className={styles.heroInput}
+                        style={{ fontSize: "13.5px", padding: "6px 4px" }}
+                        value={loginSlug}
+                        onChange={(e) => setLoginSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))}
+                        required
+                      />
+                    </div>
+                  </div>
+                  
+                  <button 
+                    type="submit" 
+                    className={`${styles.btn} ${styles.btnPrimary}`} 
+                    style={{ width: "100%", padding: "12px", height: "46px" }}
+                    disabled={loginLoading || !loginSlug}
+                  >
+                    {loginLoading ? "Verificando..." : "Ingresar"}
+                  </button>
+                </form>
+
+                <div className={styles.divider}>o ingresar con</div>
+
+                <button 
+                  type="button" 
+                  className={styles.googleBtn}
+                  onClick={() => setGoogleMode("chooser")}
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24">
+                    <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v3.92h6.69a5.74 5.74 0 0 1-2.48 3.77v3.08h3.97c2.33-2.15 3.66-5.32 3.66-8.7z"/>
+                    <path fill="#34A853" d="M12 24c3.24 0 5.97-1.08 7.96-2.91l-3.97-3.08c-1.12.75-2.54 1.19-3.99 1.19-3.07 0-5.67-2.08-6.6-4.88H1.31v3.18A12 12 0 0 0 12 24z"/>
+                    <path fill="#FBBC05" d="M5.4 14.32a7.16 7.16 0 0 1 0-4.64V6.5H1.31a12 12 0 0 0 0 11L5.4 14.32z"/>
+                    <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.43-3.43A11.93 11.93 0 0 0 12 0 12 12 0 0 0 1.31 6.5l4.09 3.18c.93-2.8 3.53-4.93 6.6-4.93z"/>
+                  </svg>
+                  Continuar con Google
+                </button>
+              </>
+            ) : (
+              <div className={styles.googleChooser}>
+                <div className={styles.googleLogoWrapper}>
+                  <svg width="32" height="32" viewBox="0 0 24 24">
+                    <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v3.92h6.69a5.74 5.74 0 0 1-2.48 3.77v3.08h3.97c2.33-2.15 3.66-5.32 3.66-8.7z"/>
+                    <path fill="#34A853" d="M12 24c3.24 0 5.97-1.08 7.96-2.91l-3.97-3.08c-1.12.75-2.54 1.19-3.99 1.19-3.07 0-5.67-2.08-6.6-4.88H1.31v3.18A12 12 0 0 0 12 24z"/>
+                    <path fill="#FBBC05" d="M5.4 14.32a7.16 7.16 0 0 1 0-4.64V6.5H1.31a12 12 0 0 0 0 11L5.4 14.32z"/>
+                    <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.43-3.43A11.93 11.93 0 0 0 12 0 12 12 0 0 0 1.31 6.5l4.09 3.18c.93-2.8 3.53-4.93 6.6-4.93z"/>
+                  </svg>
                 </div>
+                
+                <h3 className={styles.modalTitle} style={{ fontSize: "18px", fontWeight: "750", marginBottom: "4px" }}>Elige una cuenta</h3>
+                <p className={styles.modalSubtitle} style={{ fontSize: "13px" }}>para continuar en AgendaLink</p>
+                
+                {loginError && <div className={styles.modalError} style={{ marginTop: "12px", width: "100%" }}>{loginError}</div>}
+
+                {googleLoading ? (
+                  <div style={{ padding: "40px 0", color: "var(--text-secondary)", fontSize: "14px", fontWeight: "600", display: "flex", flexDirection: "column", alignItems: "center", gap: "12px" }}>
+                    <div style={{ width: "24px", height: "24px", border: "2.5px solid var(--primary)", borderTopColor: "transparent", borderRadius: "50%", animation: "badgePulse 1s infinite linear" }} />
+                    Iniciando espacio de trabajo...
+                  </div>
+                ) : (
+                  <>
+                    <div className={styles.googleAccountList}>
+                      <button 
+                        type="button" 
+                        className={styles.googleAccountItem}
+                        onClick={() => handleGoogleAccountSelect("contacto@metinca.cl", "Metinca Contacto", "me-tinca")}
+                      >
+                        <div className={styles.googleAvatar} style={{ background: "#4285F4" }}>M</div>
+                        <div className={styles.googleAccountInfo}>
+                          <span className={styles.googleAccountName}>Metinca Contacto</span>
+                          <span className={styles.googleAccountEmail}>contacto@metinca.cl</span>
+                        </div>
+                      </button>
+                      <button 
+                        type="button" 
+                        className={styles.googleAccountItem}
+                        onClick={() => handleGoogleAccountSelect("demo@agendalink.cl", "Invitado Demo", "invitado-demo")}
+                      >
+                        <div className={styles.googleAvatar} style={{ background: "#34A853" }}>D</div>
+                        <div className={styles.googleAccountInfo}>
+                          <span className={styles.googleAccountName}>Invitado Demo</span>
+                          <span className={styles.googleAccountEmail}>demo@agendalink.cl</span>
+                        </div>
+                      </button>
+                    </div>
+
+                    <button 
+                      type="button" 
+                      className={styles.googleBackBtn}
+                      onClick={() => setGoogleMode("none")}
+                    >
+                      Usar otro link de negocio
+                    </button>
+                  </>
+                )}
+                
+                <p className={styles.googleFooter}>
+                  Para continuar, Google compartirá tu nombre, correo y foto de perfil con AgendaLink. Consulta la <a href="#">Política de Privacidad</a> y los <a href="#">Términos del Servicio</a>.
+                </p>
               </div>
-              
-              <button 
-                type="submit" 
-                className={`${styles.btn} ${styles.btnPrimary}`} 
-                style={{ width: "100%", padding: "12px", height: "46px" }}
-                disabled={loginLoading || !loginSlug}
-              >
-                {loginLoading ? "Verificando..." : "Ingresar"}
-              </button>
-            </form>
+            )}
           </div>
         </div>
       )}
