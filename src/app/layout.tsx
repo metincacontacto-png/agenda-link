@@ -2,8 +2,21 @@ import "./globals.css";
 import React from "react";
 
 export const metadata = {
+  metadataBase: new URL("https://agendalink.cl"),
   title: "Agenda Link",
   description: "Un link. Todo resuelto.",
+  openGraph: {
+    title: "Agenda Link",
+    description: "Un link. Todo resuelto.",
+    images: [
+      {
+        url: "/logo.png",
+        width: 512,
+        height: 512,
+        alt: "Agenda Link Logo",
+      },
+    ],
+  },
 };
 
 export default function RootLayout({
