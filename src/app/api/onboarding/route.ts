@@ -16,12 +16,6 @@ export async function POST(request: Request) {
       serviceName,
       serviceDuration,
       servicePrice,
-      tablesCount,
-      tableCapacity,
-      menuItemName,
-      menuItemPrice,
-      menuItemCategory,
-      menuItemDescription,
     } = body;
 
     // Verificar presencia de campos requeridos (permitiendo precios en 0)
@@ -45,30 +39,6 @@ export async function POST(request: Request) {
     const parsedDuration = parseInt(serviceDuration, 10);
     if (isNaN(parsedPrice) || parsedPrice < 0 || isNaN(parsedDuration) || parsedDuration <= 0) {
       return NextResponse.json({ error: "Precio o duración inválidos" }, { status: 400 });
-    }
-
-    // Validaciones específicas de restaurante
-    let parsedTablesCount = 0;
-    let parsedTableCapacity = 0;
-    let parsedMenuItemPrice = 0;
-
-    if (category === "Restaurante") {
-      if (!tablesCount || !tableCapacity || !menuItemName || !menuItemPrice) {
-        return NextResponse.json({ error: "Faltan campos obligatorios de restaurante" }, { status: 400 });
-      }
-      parsedTablesCount = parseInt(tablesCount, 10);
-      parsedTableCapacity = parseInt(tableCapacity, 10);
-      parsedMenuItemPrice = parseFloat(menuItemPrice);
-      if (
-        isNaN(parsedTablesCount) ||
-        parsedTablesCount <= 0 ||
-        isNaN(parsedTableCapacity) ||
-        parsedTableCapacity <= 0 ||
-        isNaN(parsedMenuItemPrice) ||
-        parsedMenuItemPrice < 0
-      ) {
-        return NextResponse.json({ error: "Configuración de restaurante inválida" }, { status: 400 });
-      }
     }
 
     // Generar slug único del negocio (removiendo acentos en español)
@@ -108,17 +78,6 @@ export async function POST(request: Request) {
     // Determinar la moneda por país
     const currency = country === "Chile" ? "CLP" : country === "México" ? "MXN" : "USD";
 
-    // Preparar datos de las mesas
-    const tablesData = [];
-    if (category === "Restaurante") {
-      for (let i = 1; i <= parsedTablesCount; i++) {
-        tablesData.push({
-          number: i,
-          capacity: parsedTableCapacity,
-        });
-      }
-    }
-
     // Crear negocio, servicio por defecto y profesional por defecto (el dueño)
     const business = await prisma.business.create({
       data: {
@@ -143,28 +102,10 @@ export async function POST(request: Request) {
             avatar: ownerName.substring(0, 2).toUpperCase(),
           },
         },
-        // Crear mesas y plato por defecto si es restaurante
-        ...(category === "Restaurante"
-          ? {
-              tables: {
-                create: tablesData,
-              },
-              menuItems: {
-                create: {
-                  name: menuItemName,
-                  price: parsedMenuItemPrice,
-                  description: menuItemDescription || null,
-                  category: menuItemCategory || "Fondos",
-                },
-              },
-            }
-          : {}),
       },
       include: {
         services: true,
         professionals: true,
-        tables: true,
-        menuItems: true,
       },
     });
 

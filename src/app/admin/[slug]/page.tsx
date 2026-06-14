@@ -15,15 +15,6 @@ interface Appointment {
   paymentAmount: number | null;
   service: { name: string; duration: number; price: number };
   professional: { name: string };
-  peopleCount?: number | null;
-  tableId?: string | null;
-  table?: { number: number; capacity: number } | null;
-}
-
-interface Table {
-  id: string;
-  number: number;
-  capacity: number;
 }
 
 interface MenuItem {
@@ -51,8 +42,7 @@ interface Business {
   category: string;
   appointments: Appointment[];
   services: { id: string; name: string; price: number; duration: number; imageUrl?: string | null }[];
-  tables?: Table[];
-  menuItems?: MenuItem[];
+
   professionals?: { name: string }[];
   logoUrl?: string | null;
   landingTitle?: string | null;
@@ -120,7 +110,7 @@ export default function AdminDashboard({ params }: { params: Promise<{ slug: str
     );
   };
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<"dashboard" | "ventas" | "clientes" | "administracion" | "calendario" | "reservas" | "secretary" | "marketing" | "business" | "mesas" | "carta" | "landing">("dashboard");
+  const [activeTab, setActiveTab] = useState<"dashboard" | "ventas" | "clientes" | "administracion" | "calendario" | "reservas" | "secretary" | "marketing" | "business" | "landing">("dashboard");
   const [adminSubTab, setAdminSubTab] = useState<"servicios" | "whatsapp">("servicios");
   const [salesSubTab, setSalesSubTab] = useState<"transacciones" | "membresias" | "giftcards" | "caja">("transacciones");
   const [clientsSubTab, setClientsSubTab] = useState<"base" | "recordatorios" | "crece">("base");
@@ -251,24 +241,7 @@ export default function AdminDashboard({ params }: { params: Promise<{ slug: str
 
   const [isSavingLanding, setIsSavingLanding] = useState(false);
 
-  // Formulario de Mesas
-  const [tableNumber, setTableNumber] = useState("");
-  const [tableCapacity, setTableCapacity] = useState("4");
-  const [isSubmittingTable, setIsSubmittingTable] = useState(false);
 
-  // Formulario de Carta
-  const [menuName, setMenuName] = useState("");
-  const [menuPrice, setMenuPrice] = useState("");
-  const [menuDesc, setMenuDesc] = useState("");
-  const [menuCategory, setMenuCategory] = useState("Fondos");
-  const [isSubmittingMenu, setIsSubmittingMenu] = useState(false);
-
-  // Selector de mapa visual de mesas
-  const [selectedDate, setSelectedDate] = useState(() => {
-    const today = new Date();
-    return today.toISOString().split("T")[0];
-  });
-  const [selectedTime, setSelectedTime] = useState("13:00");
 
   // Navegación de semana en el calendario
   const [currentWeekRef, setCurrentWeekRef] = useState(new Date());
@@ -302,12 +275,7 @@ export default function AdminDashboard({ params }: { params: Promise<{ slug: str
     loadAdminData();
   }, [slug]);
 
-  // Redirigir por defecto si es Restaurante
-  useEffect(() => {
-    if (business && business.category === "Restaurante" && activeTab === "calendario") {
-      setActiveTab("mesas");
-    }
-  }, [business]);
+
 
   // Cargar datos en los campos de edición
   useEffect(() => {
@@ -583,107 +551,7 @@ export default function AdminDashboard({ params }: { params: Promise<{ slug: str
     return () => clearInterval(interval);
   }, [isLinkingWhatsApp]);
 
-  const handleAddTable = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!tableNumber || !tableCapacity) return;
-    setIsSubmittingTable(true);
-    try {
-      const res = await fetch("/api/tables", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          slug,
-          number: parseInt(tableNumber, 10),
-          capacity: parseInt(tableCapacity, 10),
-        }),
-      });
-      if (res.ok) {
-        setTableNumber("");
-        await loadAdminData();
-      } else {
-        const data = await res.json();
-        alert(data.error || "Error al agregar mesa");
-      }
-    } catch (err) {
-      console.error("Error adding table:", err);
-    } finally {
-      setIsSubmittingTable(false);
-    }
-  };
 
-  const handleDeleteTable = async (id: string) => {
-    if (!confirm("¿Seguro que deseas eliminar esta mesa?")) return;
-    try {
-      const res = await fetch(`/api/tables?id=${id}`, { method: "DELETE" });
-      if (res.ok) {
-        await loadAdminData();
-      } else {
-        alert("Error al eliminar mesa");
-      }
-    } catch (err) {
-      console.error("Error deleting table:", err);
-    }
-  };
-
-  const handleAddMenuItem = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!menuName || !menuPrice) return;
-    setIsSubmittingMenu(true);
-    try {
-      const res = await fetch("/api/menu", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          slug,
-          name: menuName,
-          price: parseFloat(menuPrice),
-          description: menuDesc,
-          category: menuCategory,
-        }),
-      });
-      if (res.ok) {
-        setMenuName("");
-        setMenuPrice("");
-        setMenuDesc("");
-        await loadAdminData();
-      } else {
-        alert("Error al agregar plato");
-      }
-    } catch (err) {
-      console.error("Error adding menu item:", err);
-    } finally {
-      setIsSubmittingMenu(false);
-    }
-  };
-
-  const handleDeleteMenuItem = async (id: string) => {
-    if (!confirm("¿Seguro que deseas eliminar este plato?")) return;
-    try {
-      const res = await fetch(`/api/menu?id=${id}`, { method: "DELETE" });
-      if (res.ok) {
-        await loadAdminData();
-      } else {
-        alert("Error al eliminar plato");
-      }
-    } catch (err) {
-      console.error("Error deleting menu item:", err);
-    }
-  };
-
-  const getReservationForTable = (tableId: string) => {
-    if (!business?.appointments) return null;
-    const [hours, minutes] = selectedTime.split(":").map(Number);
-    const [year, month, day] = selectedDate.split("-").map(Number);
-    const selectedDateObj = new Date(year, month - 1, day, hours, minutes, 0, 0);
-
-    return business.appointments.find((app) => {
-      if (app.tableId !== tableId) return false;
-      const appDateTime = new Date(app.dateTime);
-      const diffMs = Math.abs(selectedDateObj.getTime() - appDateTime.getTime());
-      const diffMinutes = diffMs / (1000 * 60);
-      return diffMinutes < 120;
-    }) || null;
-  };
 
   // Simulación de escritura progresiva de Linki Secretary
   useEffect(() => {
@@ -822,10 +690,7 @@ export default function AdminDashboard({ params }: { params: Promise<{ slug: str
   const uniqueClients = new Set(business.appointments?.map((app) => app.clientWhatsApp)).size;
 
   const professionalsCount = business.professionals?.length || 1;
-  const tablesCount = business.tables?.length || 1;
-  const totalWeeklySlots = business.category === "Restaurante" 
-    ? 70 * tablesCount 
-    : 70 * professionalsCount;
+  const totalWeeklySlots = 70 * professionalsCount;
   
   const currentWeekAppointments = business.appointments?.filter((app) => {
     const appDate = new Date(app.dateTime);
@@ -881,23 +746,7 @@ export default function AdminDashboard({ params }: { params: Promise<{ slug: str
             </svg>
             Dashboard Resumen
           </button>
-          {business.category === "Restaurante" && (
-            <>
-              <button className={`${styles.navItem} ${activeTab === "mesas" ? styles.navItemActive : ""}`} onClick={() => setActiveTab("mesas")}>
-                <svg className={styles.sidebarIcon} width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <rect x="3" y="3" width="18" height="18" rx="2" />
-                  <path d="M9 3v18M15 3v18M3 9h18M3 15h18" />
-                </svg>
-                Distribución de Mesas
-              </button>
-              <button className={`${styles.navItem} ${activeTab === "carta" ? styles.navItemActive : ""}`} onClick={() => setActiveTab("carta")}>
-                <svg className={styles.sidebarIcon} width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2zM22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
-                </svg>
-                Carta Digital
-              </button>
-            </>
-          )}
+
           <button className={`${styles.navItem} ${activeTab === "calendario" ? styles.navItemActive : ""}`} onClick={() => setActiveTab("calendario")}>
             <svg className={styles.sidebarIcon} width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
@@ -1226,7 +1075,7 @@ export default function AdminDashboard({ params }: { params: Promise<{ slug: str
                             <div>
                               <strong style={{ fontSize: "14px", color: "var(--foreground)" }}>{app.clientName}</strong>
                               <span style={{ fontSize: "12px", color: "var(--text-secondary)", marginLeft: "8px" }}>
-                                {business.category === "Restaurante" ? `Mesa ${app.table?.number || "General"}` : app.service?.name}
+                                {app.service?.name}
                               </span>
                             </div>
                           </div>
@@ -1417,286 +1266,7 @@ export default function AdminDashboard({ params }: { params: Promise<{ slug: str
           </div>
         )}
 
-        {activeTab === "mesas" && (
-          <div style={{ display: "flex", flexDirection: "column", gap: "32px" }}>
-            <section className={styles.glassCard}>
-              <h2 style={{ fontSize: "18px", fontWeight: "700", marginBottom: "8px" }}>Mapa de Distribución de Mesas</h2>
-              <p style={{ fontSize: "13px", color: "var(--text-secondary)", marginBottom: "20px" }}>
-                Monitorea el estado de tus mesas en tiempo real. Selecciona una fecha y hora para verificar la ocupación.
-              </p>
 
-              <div className={styles.controlsRow}>
-                <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-                  <span style={{ fontSize: "11px", fontWeight: "700", color: "var(--text-secondary)", textTransform: "uppercase" }}>Fecha</span>
-                  <input
-                    type="date"
-                    value={selectedDate}
-                    onChange={(e) => setSelectedDate(e.target.value)}
-                    className={styles.controlSelect}
-                  />
-                </div>
-                <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-                  <span style={{ fontSize: "11px", fontWeight: "700", color: "var(--text-secondary)", textTransform: "uppercase" }}>Turno / Hora</span>
-                  <select
-                    value={selectedTime}
-                    onChange={(e) => setSelectedTime(e.target.value)}
-                    className={styles.controlSelect}
-                  >
-                    <optgroup label="Almuerzo">
-                      <option value="12:00">12:00 hrs</option>
-                      <option value="12:30">12:30 hrs</option>
-                      <option value="13:00">13:00 hrs</option>
-                      <option value="13:30">13:30 hrs</option>
-                      <option value="14:00">14:00 hrs</option>
-                      <option value="14:30">14:30 hrs</option>
-                    </optgroup>
-                    <optgroup label="Cena">
-                      <option value="19:00">19:00 hrs</option>
-                      <option value="19:30">19:30 hrs</option>
-                      <option value="20:00">20:00 hrs</option>
-                      <option value="20:30">20:30 hrs</option>
-                      <option value="21:00">21:00 hrs</option>
-                      <option value="21:30">21:30 hrs</option>
-                    </optgroup>
-                  </select>
-                </div>
-              </div>
-
-              {business.tables?.length === 0 ? (
-                <p style={{ color: "var(--text-secondary)", fontSize: "14px", textAlign: "center", padding: "40px 0" }}>
-                  No hay mesas registradas. Usa el formulario de abajo para agregar tu primera mesa.
-                </p>
-              ) : (
-                <div className={styles.tableGrid}>
-                  {business.tables?.map((table) => {
-                    const reservation = getReservationForTable(table.id);
-                    const isReserved = !!reservation;
-                    return (
-                      <div
-                        key={table.id}
-                        className={`${styles.tableCard} ${isReserved ? styles.tableCardReserved : styles.tableCardAvailable}`}
-                      >
-                        <button
-                          className={styles.deleteBtn}
-                          onClick={() => handleDeleteTable(table.id)}
-                          title="Eliminar Mesa"
-                        >
-                          ✕
-                        </button>
-                        
-                        <div className={styles.tableIconContainer}>
-                          {Array.from({ length: table.capacity }).map((_, i) => {
-                            const angle = (i * 360) / table.capacity;
-                            const x = 45 + 36 * Math.cos((angle * Math.PI) / 180);
-                            const y = 45 + 36 * Math.sin((angle * Math.PI) / 180);
-                            return (
-                              <div
-                                key={i}
-                                className={`${styles.chair} ${isReserved ? styles.chairReserved : styles.chairAvailable}`}
-                                style={{
-                                  left: `${x - 7}px`,
-                                  top: `${y - 7}px`,
-                                }}
-                              />
-                            );
-                          })}
-
-                          <div
-                            className={`${styles.tableIcon} ${
-                              isReserved ? styles.tableIconReserved : styles.tableIconAvailable
-                            }`}
-                          >
-                            {table.number}
-                          </div>
-                        </div>
-
-                        <div className={styles.tableInfo}>
-                          <h3 className={styles.tableNumberTitle}>Mesa {table.number}</h3>
-                          <p className={styles.tableCapacityText}>Capacidad: {table.capacity} personas</p>
-                          <span
-                            className={`${styles.statusBadge} ${
-                              isReserved ? styles.statusBadgeReserved : styles.statusBadgeAvailable
-                            }`}
-                          >
-                            {isReserved ? "Reservada" : "Disponible"}
-                          </span>
-
-                          {isReserved && (
-                            <div className={styles.reservedDetail}>
-                              <div className={styles.reservedClientName}>{reservation.clientName}</div>
-                              <div style={{ color: "var(--text-secondary)", fontSize: "11px" }}>
-                                WhatsApp: {reservation.clientWhatsApp}
-                              </div>
-                              <div style={{ color: "var(--text-secondary)", fontSize: "11px" }}>
-                                {reservation.peopleCount} comensales
-                              </div>
-                              <div className={styles.reservedTime}>
-                                {new Date(reservation.dateTime).toLocaleTimeString("es-ES", {
-                                  hour: "2-digit",
-                                  minute: "2-digit",
-                                })}
-                                {" hrs"}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </section>
-
-            <section className={styles.glassCard} style={{ maxWidth: "480px" }}>
-              <h3 style={{ fontSize: "16px", fontWeight: "700", marginBottom: "16px" }}>Agregar Nueva Mesa</h3>
-              <form onSubmit={handleAddTable} className={styles.adminForm}>
-                <div className={styles.formGroup}>
-                  <label htmlFor="table-num">Número de Mesa</label>
-                  <input
-                    id="table-num"
-                    type="number"
-                    min="1"
-                    required
-                    placeholder="Ej. 6"
-                    value={tableNumber}
-                    onChange={(e) => setTableNumber(e.target.value)}
-                    className={styles.formInput}
-                  />
-                </div>
-                <div className={styles.formGroup}>
-                  <label htmlFor="table-cap">Capacidad de Comensales</label>
-                  <select
-                    id="table-cap"
-                    value={tableCapacity}
-                    onChange={(e) => setTableCapacity(e.target.value)}
-                    className={styles.formInput}
-                  >
-                    <option value="2">2 personas</option>
-                    <option value="4">4 personas</option>
-                    <option value="6">6 personas</option>
-                    <option value="8">8 personas</option>
-                    <option value="10">10 personas</option>
-                  </select>
-                </div>
-                <button type="submit" disabled={isSubmittingTable} className={styles.submitButton}>
-                  {isSubmittingTable ? "Creando..." : "Crear Mesa"}
-                </button>
-              </form>
-            </section>
-          </div>
-        )}
-
-        {activeTab === "carta" && (
-          <section className={styles.glassCard}>
-            <h2 style={{ fontSize: "18px", fontWeight: "700", marginBottom: "8px" }}>Carta Digital del Restaurante</h2>
-            <p style={{ fontSize: "13px", color: "var(--text-secondary)", marginBottom: "24px" }}>
-              Administra los platos de tu menú. Los cambios se verán reflejados inmediatamente en tu página pública.
-            </p>
-
-            <div className={styles.menuGrid}>
-              <div>
-                <h3 style={{ fontSize: "15px", fontWeight: "700", marginBottom: "16px" }}>Agregar Plato</h3>
-                <form onSubmit={handleAddMenuItem} className={styles.adminForm}>
-                  <div className={styles.formGroup}>
-                    <label htmlFor="menu-name">Nombre del Plato</label>
-                    <input
-                      id="menu-name"
-                      type="text"
-                      required
-                      placeholder="Ej. Spaghetti a la Carbonara"
-                      value={menuName}
-                      onChange={(e) => setMenuName(e.target.value)}
-                      className={styles.formInput}
-                    />
-                  </div>
-                  <div className={styles.formGroup}>
-                    <label htmlFor="menu-cat">Categoría</label>
-                    <select
-                      id="menu-cat"
-                      value={menuCategory}
-                      onChange={(e) => setMenuCategory(e.target.value)}
-                      className={styles.formInput}
-                    >
-                      <option value="Entradas">Entradas</option>
-                      <option value="Fondos">Platos de Fondo</option>
-                      <option value="Postres">Postres</option>
-                      <option value="Bebidas">Bebidas / Tragos</option>
-                    </select>
-                  </div>
-                  <div className={styles.formGroup}>
-                    <label htmlFor="menu-price">Precio</label>
-                    <input
-                      id="menu-price"
-                      type="number"
-                      required
-                      min="0"
-                      step="any"
-                      placeholder="Ej. 12000"
-                      value={menuPrice}
-                      onChange={(e) => setMenuPrice(e.target.value)}
-                      className={styles.formInput}
-                    />
-                  </div>
-                  <div className={styles.formGroup}>
-                    <label htmlFor="menu-desc">Descripción</label>
-                    <textarea
-                      id="menu-desc"
-                      placeholder="Ingredientes o detalles del plato..."
-                      value={menuDesc}
-                      onChange={(e) => setMenuDesc(e.target.value)}
-                      className={styles.formInput}
-                      style={{ minHeight: "80px", resize: "vertical" }}
-                    />
-                  </div>
-                  <button type="submit" disabled={isSubmittingMenu} className={styles.submitButton}>
-                    {isSubmittingMenu ? "Agregando..." : "Agregar al Menú"}
-                  </button>
-                </form>
-              </div>
-
-              <div>
-                <h3 style={{ fontSize: "15px", fontWeight: "700", marginBottom: "16px" }}>Platos en la Carta</h3>
-                {["Entradas", "Fondos", "Postres", "Bebidas"].map((cat) => {
-                  const items = business.menuItems?.filter((item) => item.category === cat) || [];
-                  return (
-                    <div key={cat} className={styles.menuSection}>
-                      <h4 className={styles.menuSectionTitle}>
-                        {cat === "Fondos" ? "Platos de Fondo" : cat} ({items.length})
-                      </h4>
-                      {items.length === 0 ? (
-                        <p style={{ fontStyle: "italic", color: "var(--text-secondary)", fontSize: "13px", paddingLeft: "8px" }}>
-                          No hay platos registrados en esta categoría.
-                        </p>
-                      ) : (
-                        <div className={styles.menuItemList}>
-                          {items.map((item) => (
-                            <div key={item.id} className={styles.menuItemCard}>
-                              <div className={styles.menuItemInfo}>
-                                <div className={styles.menuItemName}>{item.name}</div>
-                                {item.description && <div className={styles.menuItemDesc}>{item.description}</div>}
-                              </div>
-                              <div className={styles.menuItemActions}>
-                                <span className={styles.menuItemPrice}>{formatPrice(item.price, business.currency)}</span>
-                                <button
-                                  className={styles.deleteBtn}
-                                  style={{ position: "relative", top: 0, right: 0, opacity: 0.6 }}
-                                  onClick={() => handleDeleteMenuItem(item.id)}
-                                  title="Eliminar Plato"
-                                >
-                                  ✕
-                                </button>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </section>
-        )}
 
         {activeTab === "calendario" && (
           <section className={styles.glassCard} style={{ padding: "20px" }}>
@@ -1784,11 +1354,7 @@ export default function AdminDashboard({ params }: { params: Promise<{ slug: str
                       <h3 style={{ fontSize: "15px", fontWeight: "700" }}>{app.clientName}</h3>
                       <p style={{ fontSize: "12px", color: "var(--text-secondary)", marginTop: "2px" }}>WhatsApp: {app.clientWhatsApp}</p>
                       <p style={{ fontSize: "12px", color: "var(--primary)", marginTop: "4px", fontWeight: "600" }}>
-                        {business.category === "Restaurante" && app.table ? (
-                          `Mesa ${app.table.number} (${app.peopleCount} personas)`
-                        ) : (
-                          `${app.service?.name} con ${app.professional?.name}`
-                        )}
+                        {`${app.service?.name} con ${app.professional?.name}`}
                       </p>
                     </div>
                     <div style={{ textAlign: "right" }}>
@@ -1796,14 +1362,7 @@ export default function AdminDashboard({ params }: { params: Promise<{ slug: str
                         {new Date(app.dateTime).toLocaleDateString("es-ES", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
                       </span>
                       <div style={{ marginTop: "4px" }}>
-                        {business.category === "Restaurante" ? (
-                          <span className={styles.badgePaid} style={{ background: "rgba(52, 199, 89, 0.12)", color: "#248a3d" }}>
-                            <svg className={styles.badgeIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                              <polyline points="20 6 9 17 4 12" />
-                            </svg>
-                            RESERVA CONFIRMADA
-                          </span>
-                        ) : app.paymentStatus === "PAID" ? (
+                        {app.paymentStatus === "PAID" ? (
                           <span className={styles.badgePaid}>
                             <svg className={styles.badgeIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                               <polyline points="20 6 9 17 4 12" />

@@ -37,8 +37,6 @@ model Business {
   services      Service[]
   professionals Professional[]
   appointments  Appointment[]
-  tables        Table[]
-  menuItems     MenuItem[]
 }
 
 model Service {
@@ -63,28 +61,6 @@ model Professional {
   appointments Appointment[]
 }
 
-model Table {
-  id           String        @id @default(uuid())
-  businessId   String
-  business     Business      @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  number       Int           // Número de mesa
-  capacity     Int           // Capacidad de personas
-  appointments Appointment[]
-  createdAt    DateTime      @default(now())
-}
-
-model MenuItem {
-  id          String   @id @default(uuid())
-  businessId  String
-  business    Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  name        String
-  description String?
-  price       Float
-  category    String   // "Entradas", "Fondos", "Postres", "Bebidas"
-  imageUrl    String?
-  createdAt   DateTime @default(now())
-}
-
 model Appointment {
   id             String       @id @default(uuid())
   businessId     String
@@ -100,9 +76,6 @@ model Appointment {
   paymentStatus  String       @default("PENDING")
   paymentMethod  String?
   paymentAmount  Float?
-  peopleCount    Int?
-  tableId        String?
-  table          Table?       @relation(fields: [tableId], references: [id])
   createdAt      DateTime     @default(now())
 }
 

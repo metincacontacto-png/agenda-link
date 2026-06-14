@@ -19,13 +19,10 @@ export async function GET(request: Request) {
           include: {
             service: true,
             professional: true,
-            table: true,
           },
         },
         services: true,
         professionals: true,
-        tables: true,
-        menuItems: true,
       },
     });
 

@@ -21,15 +21,6 @@ interface Service {
   imageUrl?: string | null;
 }
 
-interface MenuItem {
-  id: string;
-  name: string;
-  description: string | null;
-  price: number;
-  category: string;
-  imageUrl?: string | null;
-}
-
 interface Business {
   id: string;
   name: string;
@@ -37,7 +28,6 @@ interface Business {
   currency: string;
   services: Service[];
   professionals: Professional[];
-  menuItems?: MenuItem[];
   logoUrl?: string | null;
   landingTitle?: string | null;
   landingSubtitle?: string | null;
@@ -78,16 +68,12 @@ export default function BookingPage({ params }: { params: Promise<{ slug: string
   const [submitting, setSubmitting] = useState(false);
   const [viewMode, setViewMode] = useState<"landing" | "booking">("landing");
 
-  // Restaurant specific states
-  const [activeTab, setActiveTab] = useState<"reserva" | "carta">("reserva");
-  const [peopleCount, setPeopleCount] = useState(2);
-
   useEffect(() => {
     if (!slug) return;
     
     async function loadData() {
       try {
-        const res = await fetch(`/api/availability?slug=${slug}&date=${selectedDate}&people=${peopleCount}`);
+        const res = await fetch(`/api/availability?slug=${slug}&date=${selectedDate}`);
         if (!res.ok) {
           setBusiness(null);
           setLoading(false);
@@ -104,11 +90,6 @@ export default function BookingPage({ params }: { params: Promise<{ slug: string
         if (bizProfs.length > 0 && !selectedProfessional) {
           setSelectedProfessional(bizProfs[0]);
         }
-
-        // Auto-seleccionar primer servicio si es restaurante
-        if (data.business?.category === "Restaurante" && data.business?.services?.length > 0 && !selectedService) {
-          setSelectedService(data.business.services[0]);
-        }
       } catch (err) {
         console.error(err);
         setBusiness(null);
@@ -119,16 +100,11 @@ export default function BookingPage({ params }: { params: Promise<{ slug: string
 
     loadData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [slug, selectedDate, peopleCount]);
+  }, [slug, selectedDate]);
 
   const handleBookClick = () => {
-    if (business?.category === "Restaurante") {
-      if (!selectedDate || !selectedTime) return;
-      setShowOtp(true);
-    } else {
-      if (!selectedService || !selectedProfessional || !selectedDate || !selectedTime) return;
-      setShowPayment(true);
-    }
+    if (!selectedService || !selectedProfessional || !selectedDate || !selectedTime) return;
+    setShowPayment(true);
   };
 
   const handlePaymentSuccess = (method: string) => {
@@ -146,7 +122,6 @@ export default function BookingPage({ params }: { params: Promise<{ slug: string
     setSubmitting(true);
     
     try {
-      const isRestaurant = business?.category === "Restaurante";
       const payload = {
         slug,
         serviceId: selectedService.id,
@@ -155,10 +130,9 @@ export default function BookingPage({ params }: { params: Promise<{ slug: string
         clientWhatsApp,
         date: selectedDate,
         time: selectedTime,
-        paymentStatus: isRestaurant ? "PENDING" : "PAID",
-        paymentMethod: isRestaurant ? "Reserva Mesa" : paymentMethod,
-        paymentAmount: isRestaurant ? 0 : paidAmount,
-        peopleCount: isRestaurant ? peopleCount : null,
+        paymentStatus: "PAID",
+        paymentMethod: paymentMethod,
+        paymentAmount: paidAmount,
       };
 
       const res = await fetch("/api/appointments", {
@@ -212,24 +186,14 @@ export default function BookingPage({ params }: { params: Promise<{ slug: string
     );
   }
 
-  // Agrupar menú por categoría para restaurantes
-  const menuByCategory = business.menuItems?.reduce((acc: Record<string, MenuItem[]>, item) => {
-    acc[item.category] = acc[item.category] || [];
-    acc[item.category].push(item);
-    return acc;
-  }, {}) || {};
-
-  // Rubro/Categoría
-  const isRestaurant = business.category === "Restaurante";
-
   // Fallbacks
-  const heroTitle = business.landingTitle || (isRestaurant ? `Descubre el sabor único de ${business.name}` : `Reserva tu cita en segundos con ${business.name}`);
-  const heroSubtitle = business.landingSubtitle || (isRestaurant ? "Reserva tu mesa en línea o explora nuestra carta digital en pocos clics." : "Selecciona tu servicio y profesional favorito para agendar de forma inmediata.");
-  const aboutText = business.landingAbout || (isRestaurant ? `En ${business.name} nos apasiona ofrecer platos excepcionales con ingredientes seleccionados y frescos, combinando cocina tradicional con técnicas modernas. Ven a vivir una experiencia gastronómica única.` : `Somos un equipo altamente calificado y dedicado a entregarte la mejor experiencia en ${business.name}. Ven a visitarnos y disfruta de una atención personalizada en nuestro local.`);
+  const heroTitle = business.landingTitle || `Reserva tu cita en segundos con ${business.name}`;
+  const heroSubtitle = business.landingSubtitle || "Selecciona tu servicio y profesional favorito para agendar de forma inmediata.";
+  const aboutText = business.landingAbout || `Somos un equipo altamente calificado y dedicado a entregarte la mejor experiencia en ${business.name}. Ven a visitarnos y disfruta de una atención personalizada en nuestro local.`;
   const coverUrl = business.landingCoverUrl || "";
   const phone = business.landingPhone || "+56 9 9999 8888";
   const address = business.landingAddress || "Santiago, Chile";
-  const hours = business.landingHours || (isRestaurant ? "Lun a Sáb: 12:30 - 23:00" : "Lun a Sáb: 09:00 - 20:00");
+  const hours = business.landingHours || "Lun a Sáb: 09:00 - 20:00";
 
   // Parsear Características
   let features = [];
@@ -241,11 +205,7 @@ export default function BookingPage({ params }: { params: Promise<{ slug: string
     console.error("Error parsing features", e);
   }
   if (!Array.isArray(features) || features.length === 0) {
-    features = isRestaurant ? [
-      { icon: "🍴", title: "Chef de Alta Cocina", desc: "Platos preparados por expertos culinarios." },
-      { icon: "✨", title: "Ambiente Exclusivo", desc: "Espacios cómodos y de primer nivel." },
-      { icon: "🌱", title: "Ingredientes Frescos", desc: "Insumos locales y de temporada." }
-    ] : [
+    features = [
       { icon: "✨", title: "Atención Personalizada", desc: "Adaptados a tus necesidades." },
       { icon: "👤", title: "Profesionales Expertos", desc: "Personal certificado y con amplia trayectoria." },
       { icon: "⚡", title: "Confirmación Inmediata", desc: "Tu cupo queda asegurado al instante." }
@@ -380,34 +340,13 @@ export default function BookingPage({ params }: { params: Promise<{ slug: string
               </section>
             </div>
 
-            {/* Right Column: Services/Carta, Testimonials, Secondary Banner */}
+            {/* Right Column: Services, Testimonials, Secondary Banner */}
             <div className={styles.landingRightColumn}>
-              {/* Servicios / Carta Destacada */}
+              {/* Servicios */}
               <section className={styles.landingSectionGlass}>
-                <h3 className={styles.landingSectionTitle}>
-                  {isRestaurant ? "Nuestra Carta" : "Nuestros Servicios"}
-                </h3>
+                <h3 className={styles.landingSectionTitle}>Nuestros Servicios</h3>
                 <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-                  {isRestaurant && business.menuItems && business.menuItems.length > 0 ? (
-                    business.menuItems.slice(0, 3).map((item) => (
-                      <div key={item.id} className={styles.landingServiceCardGlass}>
-                        <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
-                          {item.imageUrl ? (
-                            <img src={item.imageUrl} alt={item.name} style={{ width: "48px", height: "48px", borderRadius: "8px", objectFit: "cover", flexShrink: 0 }} />
-                          ) : (
-                            <div style={{ width: "48px", height: "48px", borderRadius: "8px", background: "rgba(0,0,0,0.05)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "20px", flexShrink: 0 }}>🍔</div>
-                          )}
-                          <div style={{ display: "flex", flexDirection: "column", gap: "2px", alignItems: "flex-start", textAlign: "left" }}>
-                            <span style={{ fontWeight: "700", fontSize: "14px" }}>{item.name}</span>
-                            {item.description && <span style={{ fontSize: "12px", color: "var(--text-secondary)" }}>{item.description}</span>}
-                          </div>
-                        </div>
-                        <span style={{ fontWeight: "800", color: "var(--primary)", fontSize: "14px" }}>
-                          {formatPrice(item.price, business.currency)}
-                        </span>
-                      </div>
-                    ))
-                  ) : business.services && business.services.length > 0 ? (
+                  {business.services && business.services.length > 0 ? (
                     business.services.slice(0, 3).map((service) => (
                       <div key={service.id} className={styles.landingServiceCardGlass}>
                         <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
@@ -470,40 +409,13 @@ export default function BookingPage({ params }: { params: Promise<{ slug: string
 
           {/* Floating Call to Action */}
           <div className={styles.floatingCTA}>
-            {isRestaurant ? (
-              <div style={{ display: "flex", gap: "10px", width: "100%" }}>
-                <button 
-                  type="button" 
-                  className={styles.ctaBtn} 
-                  style={{ flex: 1, background: "rgba(255, 255, 255, 0.95)", color: "#1d1d1f", border: "1px solid rgba(0,0,0,0.1)" }}
-                  onClick={() => {
-                    setActiveTab("carta");
-                    setViewMode("booking");
-                  }}
-                >
-                  📋 Ver Carta Digital
-                </button>
-                <button 
-                  type="button" 
-                  className={styles.ctaBtn} 
-                  style={{ flex: 1 }}
-                  onClick={() => {
-                    setActiveTab("reserva");
-                    setViewMode("booking");
-                  }}
-                >
-                  🍴 Reservar Mesa
-                </button>
-              </div>
-            ) : (
-              <button 
-                type="button" 
-                className={styles.ctaBtn} 
-                onClick={() => setViewMode("booking")}
-              >
-                ⚡ Reservar Cita Online
-              </button>
-            )}
+            <button 
+              type="button" 
+              className={styles.ctaBtn} 
+              onClick={() => setViewMode("booking")}
+            >
+              ⚡ Reservar Cita Online
+            </button>
           </div>
         </div>
       ) : (
@@ -532,163 +444,86 @@ export default function BookingPage({ params }: { params: Promise<{ slug: string
             <p className={styles.category}>{business.category}</p>
           </div>
 
-          {business.category === "Restaurante" && (
-            <div style={{ display: "flex", gap: "10px", marginBottom: "24px" }}>
-              <button
-                type="button"
-                className={`${styles.btn} ${activeTab === "reserva" ? styles.btnPrimary : styles.btnSecondary}`}
-                onClick={() => setActiveTab("reserva")}
-                style={{ flex: 1, padding: "10px 12px", fontSize: "14px" }}
-              >
-                🍴 Reservar Mesa
-              </button>
-              <button
-                type="button"
-                className={`${styles.btn} ${activeTab === "carta" ? styles.btnPrimary : styles.btnSecondary}`}
-                onClick={() => setActiveTab("carta")}
-                style={{ flex: 1, padding: "10px 12px", fontSize: "14px" }}
-              >
-                📋 Carta Digital
-              </button>
-            </div>
-          )}
-
-          {activeTab === "reserva" ? (
-            <>
-              {business.category === "Restaurante" ? (
-                <div style={{ marginBottom: "24px" }}>
-                  <h2 className={styles.sectionTitle}>1. Selecciona número de comensales</h2>
-                  <select
-                    value={peopleCount}
-                    onChange={(e) => setPeopleCount(parseInt(e.target.value, 10))}
-                    className={styles.select}
-                  >
-                    {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
-                      <option key={n} value={n}>
-                        {n} {n === 1 ? "persona" : "personas"}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              ) : (
-                <div style={{ marginBottom: "24px" }}>
-                  <h2 className={styles.sectionTitle}>1. Selecciona un Servicio</h2>
-                  <div className={styles.serviceList}>
-                    {business.services?.map((service) => (
-                      <button
-                        key={service.id}
-                        type="button"
-                        onClick={() => setSelectedService(service)}
-                        className={`${styles.serviceItem} ${selectedService?.id === service.id ? styles.serviceItemActive : ""}`}
-                      >
-                        <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
-                          {service.imageUrl ? (
-                            <img src={service.imageUrl} alt={service.name} style={{ width: "40px", height: "40px", borderRadius: "8px", objectFit: "cover", flexShrink: 0 }} />
-                          ) : (
-                            <div style={{ width: "40px", height: "40px", borderRadius: "8px", background: "rgba(0,0,0,0.05)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "16px", flexShrink: 0 }}>✨</div>
-                          )}
-                          <span style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: "2px" }}>
-                            <span className={styles.serviceName}>{service.name}</span>
-                            <span className={styles.serviceMeta}>{service.duration} min</span>
-                          </span>
-                        </div>
-                        <span className={styles.price}>
-                          {formatPrice(service.price, business.currency)}
-                        </span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {business.category !== "Restaurante" && professionals.length > 1 && (
-                <div style={{ marginBottom: "24px" }}>
-                  <h2 className={styles.sectionTitle}>2. Selecciona un Profesional</h2>
-                  <div className={styles.profList}>
-                    {professionals.map((prof) => (
-                      <button
-                        key={prof.id}
-                        type="button"
-                        onClick={() => setSelectedProfessional(prof)}
-                        className={`${styles.profItem} ${selectedProfessional?.id === prof.id ? styles.profItemActive : ""}`}
-                      >
-                        <div className={styles.profAvatar}>
-                          {prof.avatar || prof.name.substring(0, 2).toUpperCase()}
-                        </div>
-                        <div className={styles.profName}>{prof.name}</div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {(selectedService || business.category === "Restaurante") && (
-                <div style={{ marginBottom: "24px" }}>
-                  <h2 className={styles.sectionTitle}>
-                    {business.category === "Restaurante" ? "2. Elige Fecha y Hora" : professionals.length > 1 ? "3. Elige Fecha y Hora" : "2. Elige Fecha y Hora"}
-                  </h2>
-                  <Calendar
-                    slug={slug}
-                    selectedDate={selectedDate}
-                    onSelectDate={setSelectedDate}
-                    selectedTime={selectedTime}
-                    onSelectTime={setSelectedTime}
-                    slots={slots}
-                  />
-                </div>
-              )}
-
-              <div className={styles.footerBar}>
+          <div style={{ marginBottom: "24px" }}>
+            <h2 className={styles.sectionTitle}>1. Selecciona un Servicio</h2>
+            <div className={styles.serviceList}>
+              {business.services?.map((service) => (
                 <button
+                  key={service.id}
                   type="button"
-                  disabled={(business.category === "Restaurante" ? !selectedTime : (!selectedService || !selectedTime)) || submitting}
-                  onClick={handleBookClick}
-                  className={styles.bookBtn}
+                  onClick={() => setSelectedService(service)}
+                  className={`${styles.serviceItem} ${selectedService?.id === service.id ? styles.serviceItemActive : ""}`}
                 >
-                  {submitting
-                    ? "Reservando..."
-                    : !selectedTime
-                    ? "Selecciona fecha y hora"
-                    : business.category === "Restaurante"
-                    ? "Confirmar Reserva de Mesa"
-                    : "Confirmar Reserva"}
-                </button>
-              </div>
-            </>
-          ) : (
-            <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
-              {Object.keys(menuByCategory).map((catName) => (
-                <div key={catName}>
-                  <h3 style={{ fontSize: "16px", fontWeight: "700", borderBottom: "1px solid var(--card-border)", paddingBottom: "6px", marginBottom: "12px", color: "var(--foreground)" }}>
-                    {catName}
-                  </h3>
-                  <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-                    {menuByCategory[catName].map((item) => (
-                      <div key={item.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "var(--card-bg)", border: "1px solid var(--card-border)", borderRadius: "12px", padding: "16px" }}>
-                        <div style={{ display: "flex", gap: "12px", alignItems: "center", flex: 1, paddingRight: "12px", overflow: "hidden" }}>
-                          {item.imageUrl ? (
-                            <img src={item.imageUrl} alt={item.name} style={{ width: "48px", height: "48px", borderRadius: "8px", objectFit: "cover", flexShrink: 0 }} />
-                          ) : (
-                            <div style={{ width: "48px", height: "48px", borderRadius: "8px", background: "rgba(0,0,0,0.05)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "20px", flexShrink: 0 }}>🍔</div>
-                          )}
-                          <div style={{ display: "flex", flexDirection: "column", gap: "4px", alignItems: "flex-start", textAlign: "left", overflow: "hidden" }}>
-                            <span style={{ fontWeight: "700", fontSize: "14px", color: "var(--foreground)", textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap", width: "100%" }}>{item.name}</span>
-                            {item.description && <span style={{ fontSize: "12px", color: "var(--text-secondary)", textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap", width: "100%" }}>{item.description}</span>}
-                          </div>
-                        </div>
-                        <span style={{ fontWeight: "700", color: "var(--primary)", fontSize: "14px", flexShrink: 0 }}>
-                          {formatPrice(item.price, business.currency)}
-                        </span>
-                      </div>
-                    ))}
+                  <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
+                    {service.imageUrl ? (
+                      <img src={service.imageUrl} alt={service.name} style={{ width: "40px", height: "40px", borderRadius: "8px", objectFit: "cover", flexShrink: 0 }} />
+                    ) : (
+                      <div style={{ width: "40px", height: "40px", borderRadius: "8px", background: "rgba(0,0,0,0.05)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "16px", flexShrink: 0 }}>✨</div>
+                    )}
+                    <span style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: "2px" }}>
+                      <span className={styles.serviceName}>{service.name}</span>
+                      <span className={styles.serviceMeta}>{service.duration} min</span>
+                    </span>
                   </div>
-                </div>
+                  <span className={styles.price}>
+                    {formatPrice(service.price, business.currency)}
+                  </span>
+                </button>
               ))}
-              {(!business.menuItems || business.menuItems.length === 0) && (
-                <p style={{ textAlign: "center", color: "var(--text-secondary)", fontSize: "13px", margin: "40px 0" }}>No hay platos en el menú todavía.</p>
-              )}
+            </div>
+          </div>
+
+          {professionals.length > 1 && (
+            <div style={{ marginBottom: "24px" }}>
+              <h2 className={styles.sectionTitle}>2. Selecciona un Profesional</h2>
+              <div className={styles.profList}>
+                {professionals.map((prof) => (
+                  <button
+                    key={prof.id}
+                    type="button"
+                    onClick={() => setSelectedProfessional(prof)}
+                    className={`${styles.profItem} ${selectedProfessional?.id === prof.id ? styles.profItemActive : ""}`}
+                  >
+                    <div className={styles.profAvatar}>
+                      {prof.avatar || prof.name.substring(0, 2).toUpperCase()}
+                    </div>
+                    <div className={styles.profName}>{prof.name}</div>
+                  </button>
+                ))}
+              </div>
             </div>
           )}
+
+          {selectedService && (
+            <div style={{ marginBottom: "24px" }}>
+              <h2 className={styles.sectionTitle}>
+                {professionals.length > 1 ? "3. Elige Fecha y Hora" : "2. Elige Fecha y Hora"}
+              </h2>
+              <Calendar
+                slug={slug}
+                selectedDate={selectedDate}
+                onSelectDate={setSelectedDate}
+                selectedTime={selectedTime}
+                onSelectTime={setSelectedTime}
+                slots={slots}
+              />
+            </div>
+          )}
+
+          <div className={styles.footerBar}>
+            <button
+              type="button"
+              disabled={!selectedService || !selectedTime || submitting}
+              onClick={handleBookClick}
+              className={styles.bookBtn}
+            >
+              {submitting
+                ? "Reservando..."
+                : !selectedTime
+                ? "Selecciona fecha y hora"
+                : "Confirmar Reserva"}
+            </button>
+          </div>
         </>
       )}
 
@@ -710,4 +545,3 @@ export default function BookingPage({ params }: { params: Promise<{ slug: string
     </main>
   );
 }
-

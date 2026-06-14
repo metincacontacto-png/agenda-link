@@ -19,12 +19,6 @@ export default function LandingAndOnboardingPage() {
     serviceName: "",
     serviceDuration: "30",
     servicePrice: "",
-    tablesCount: "5",
-    tableCapacity: "4",
-    menuItemName: "",
-    menuItemPrice: "",
-    menuItemDescription: "",
-    menuItemCategory: "Fondos",
   });
 
   const [loading, setLoading] = useState(false);
@@ -40,26 +34,7 @@ export default function LandingAndOnboardingPage() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    if (name === "category") {
-      if (value === "Restaurante") {
-        setFormData((prev) => ({
-          ...prev,
-          category: value,
-          serviceName: "Reserva de Mesa",
-          serviceDuration: "120",
-          servicePrice: "0",
-        }));
-      } else {
-        setFormData((prev) => ({
-          ...prev,
-          category: value,
-          serviceName: prev.serviceName === "Reserva de Mesa" ? "" : prev.serviceName,
-          servicePrice: prev.servicePrice === "0" ? "" : prev.servicePrice,
-        }));
-      }
-    } else {
-      setFormData((prev) => ({ ...prev, [name]: value }));
-    }
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const nextStep = () => setStep((prev) => prev + 1);
@@ -148,22 +123,10 @@ export default function LandingAndOnboardingPage() {
 
   const handleSegmentClick = (categoryVal: string) => {
     setSegmentsOpen(false);
-    if (categoryVal === "Restaurante") {
-      setFormData((prev) => ({
-        ...prev,
-        category: "Restaurante",
-        serviceName: "Reserva de Mesa",
-        serviceDuration: "120",
-        servicePrice: "0",
-      }));
-    } else {
-      setFormData((prev) => ({
-        ...prev,
-        category: categoryVal,
-        serviceName: prev.serviceName === "Reserva de Mesa" ? "" : prev.serviceName,
-        servicePrice: prev.servicePrice === "0" ? "" : prev.servicePrice,
-      }));
-    }
+    setFormData((prev) => ({
+      ...prev,
+      category: categoryVal,
+    }));
     scrollToSection("registro");
   };
 
@@ -307,35 +270,7 @@ export default function LandingAndOnboardingPage() {
                   </div>
                 </div>
 
-                <div className={styles.dropdownColumn}>
-                  <div className={styles.columnTitle}>Gastronomía</div>
-                  <div className={styles.columnItems}>
-                    <div className={styles.columnItem} onClick={() => handleSegmentClick("Restaurante")}>
-                      <svg className={styles.columnIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M18 2v20M21 2v4a3 3 0 0 1-3 3M8 2v10M12 2v10M4 2v6a4 4 0 0 0 8 0V2" />
-                      </svg>
-                      <span>Restaurantes</span>
-                    </div>
-                    <div className={styles.columnItem} onClick={() => handleSegmentClick("Restaurante")}>
-                      <svg className={styles.columnIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M17 8h1a3 3 0 0 1 3 3v1a3 3 0 0 1-3 3h-1M2 6h15v8a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V6ZM6 2v4M10 2v4" />
-                      </svg>
-                      <span>Cafeterías</span>
-                    </div>
-                    <div className={styles.columnItem} onClick={() => handleSegmentClick("Restaurante")}>
-                      <svg className={styles.columnIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M20 21v-8a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8M4 16h16M12 5V2M12 11c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3Z" />
-                      </svg>
-                      <span>Pastelerías</span>
-                    </div>
-                    <div className={styles.columnItem} onClick={() => handleSegmentClick("Restaurante")}>
-                      <svg className={styles.columnIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M12 12 2 3h20L12 12Zm0 0v10M8 22h8" />
-                      </svg>
-                      <span>Bares y Pubs</span>
-                    </div>
-                  </div>
-                </div>
+
               </div>
             )}
           </div>
@@ -454,7 +389,7 @@ export default function LandingAndOnboardingPage() {
             </div>
             <div className={styles.diffVisualLink} style={{ display: "flex", flexDirection: "column", gap: "16px", alignItems: "center", width: "100%" }}>
               <div style={{ width: "100%", aspectRatio: "1.1 / 1", borderRadius: "18px", overflow: "hidden", border: "1px solid rgba(0, 102, 255, 0.12)", boxShadow: "var(--shadow-subtle)" }}>
-                <img src="/restaurant_qr.png" alt="Restaurante QR Reservas" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                <img src="/qr_mockup.png" alt="Código QR para reservas" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
               </div>
               <div className={styles.visualLinkCard}>
                 <span className={styles.visualLinkIcon}>🔗</span>
@@ -639,7 +574,6 @@ export default function LandingAndOnboardingPage() {
               <li className={styles.planFeatureItem}>✓ 2 a 5 Profesionales / Sucursales</li>
               <li className={styles.planFeatureItem}>✓ Landing page para cada profesional</li>
               <li className={styles.planFeatureItem}>✓ Panel completo (Turnos, Reservas, Clientes)</li>
-              <li className={styles.planFeatureItem}>✓ Carta digital ilimitada (Restaurantes)</li>
               <li className={styles.planFeatureItem}>✓ Caja diaria, control de arqueo y propinas</li>
               <li className={styles.planFeatureItem}>✓ Emisión de Gift Cards y Membresías</li>
               <li className={styles.planFeatureItem}>✓ Recordatorios de WhatsApp (Confirmación e inmediata)</li>
@@ -742,7 +676,6 @@ export default function LandingAndOnboardingPage() {
                     <option value="Peluquería">Peluquería</option>
                     <option value="Salud">Salud y Bienestar</option>
                     <option value="Fitness">Fitness y Deporte</option>
-                    <option value="Restaurante">Restaurante</option>
                     <option value="Otros">Otros servicios</option>
                   </select>
                 </div>
@@ -778,145 +711,46 @@ export default function LandingAndOnboardingPage() {
                 onSubmit={(e) => {
                   e.preventDefault();
                   if (loading) return;
-                  if (formData.category === "Restaurante") {
-                    if (formData.tablesCount && formData.tableCapacity && formData.menuItemName && formData.menuItemPrice) {
-                      handleSubmit();
-                    }
-                  } else {
-                    if (formData.serviceName && formData.servicePrice) {
-                      handleSubmit();
-                    }
+                  if (formData.serviceName && formData.servicePrice) {
+                    handleSubmit();
                   }
                 }}
               >
-                {formData.category === "Restaurante" ? (
-                  <>
-                    <h2 style={{ fontSize: "15px", marginBottom: "20px", textAlign: "center", fontWeight: "700" }}>Configuración de tu Restaurante</h2>
-                    
-                    <div style={{ display: "flex", gap: "12px", marginBottom: "16px" }}>
-                      <div className={styles.formGroup} style={{ flex: 1, marginBottom: 0 }}>
-                        <label className={styles.label}>Cantidad de Mesas</label>
-                        <input
-                          type="number"
-                          name="tablesCount"
-                          value={formData.tablesCount}
-                          onChange={handleChange}
-                          placeholder="Ej. 5"
-                          className={styles.input}
-                          min="1"
-                          required
-                        />
-                      </div>
-                      <div className={styles.formGroup} style={{ flex: 1, marginBottom: 0 }}>
-                        <label className={styles.label}>Capacidad por Mesa</label>
-                        <input
-                          type="number"
-                          name="tableCapacity"
-                          value={formData.tableCapacity}
-                          onChange={handleChange}
-                          placeholder="Ej. 4"
-                          className={styles.input}
-                          min="1"
-                          required
-                        />
-                      </div>
-                    </div>
-
-                    <h2 style={{ fontSize: "14px", margin: "24px 0 16px 0", textAlign: "left", fontWeight: "700", borderTop: "1px solid var(--card-border)", paddingTop: "16px" }}>Agrega tu primer plato o bebida</h2>
-                    
-                    <div className={styles.formGroup}>
-                      <label className={styles.label}>Nombre del Plato</label>
-                      <input
-                        type="text"
-                        name="menuItemName"
-                        value={formData.menuItemName}
-                        onChange={handleChange}
-                        placeholder="Ej. Fettuccine Alfredo"
-                        className={styles.input}
-                        required
-                      />
-                    </div>
-
-                    <div style={{ display: "flex", gap: "12px", marginBottom: "16px" }}>
-                      <div className={styles.formGroup} style={{ flex: 1, marginBottom: 0 }}>
-                        <label className={styles.label}>Precio</label>
-                        <input
-                          type="number"
-                          name="menuItemPrice"
-                          value={formData.menuItemPrice}
-                          onChange={handleChange}
-                          placeholder="Ej. 12000"
-                          className={styles.input}
-                          required
-                        />
-                      </div>
-                      <div className={styles.formGroup} style={{ flex: 1, marginBottom: 0 }}>
-                        <label className={styles.label}>Categoría</label>
-                        <select
-                          name="menuItemCategory"
-                          value={formData.menuItemCategory}
-                          onChange={handleChange}
-                          className={styles.select}
-                        >
-                          <option value="Entradas">Entradas</option>
-                          <option value="Fondos">Platos de Fondo</option>
-                          <option value="Postres">Postres</option>
-                          <option value="Bebidas">Bebidas</option>
-                        </select>
-                      </div>
-                    </div>
-
-                    <div className={styles.formGroup}>
-                      <label className={styles.label}>Descripción (Opcional)</label>
-                      <input
-                        type="text"
-                        name="menuItemDescription"
-                        value={formData.menuItemDescription}
-                        onChange={handleChange}
-                        placeholder="Ej. Pasta fresca con salsa de crema, mantequilla y queso parmesano"
-                        className={styles.input}
-                      />
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <h2 style={{ fontSize: "15px", marginBottom: "20px", textAlign: "center", fontWeight: "700" }}>Agrega tu primer servicio</h2>
-                    <div className={styles.formGroup}>
-                      <label className={styles.label}>Nombre del Servicio</label>
-                      <input
-                        type="text"
-                        name="serviceName"
-                        value={formData.serviceName}
-                        onChange={handleChange}
-                        placeholder="Ej. Corte de Cabello Caballero"
-                        className={styles.input}
-                        required
-                      />
-                    </div>
-                    <div className={styles.formGroup}>
-                      <label className={styles.label}>Duración (minutos)</label>
-                      <select name="serviceDuration" value={formData.serviceDuration} onChange={handleChange} className={styles.select}>
-                        <option value="15">15 minutos</option>
-                        <option value="30">30 minutos</option>
-                        <option value="45">45 minutos</option>
-                        <option value="60">1 hora</option>
-                        <option value="90">1 hora y media</option>
-                      </select>
-                    </div>
-                    <div className={styles.formGroup}>
-                      <label className={styles.label}>Precio</label>
-                      <input
-                        type="number"
-                        name="servicePrice"
-                        value={formData.servicePrice}
-                        onChange={handleChange}
-                        placeholder="Ej. 15000"
-                        className={styles.input}
-                        required
-                      />
-                    </div>
-                  </>
-                )}
+                <h2 style={{ fontSize: "15px", marginBottom: "20px", textAlign: "center", fontWeight: "700" }}>Agrega tu primer servicio</h2>
+                <div className={styles.formGroup}>
+                  <label className={styles.label}>Nombre del Servicio</label>
+                  <input
+                    type="text"
+                    name="serviceName"
+                    value={formData.serviceName}
+                    onChange={handleChange}
+                    placeholder="Ej. Corte de Cabello Caballero"
+                    className={styles.input}
+                    required
+                  />
+                </div>
+                <div className={styles.formGroup}>
+                  <label className={styles.label}>Duración (minutos)</label>
+                  <select name="serviceDuration" value={formData.serviceDuration} onChange={handleChange} className={styles.select}>
+                    <option value="15">15 minutos</option>
+                    <option value="30">30 minutos</option>
+                    <option value="45">45 minutos</option>
+                    <option value="60">1 hora</option>
+                    <option value="90">1 hora y media</option>
+                  </select>
+                </div>
+                <div className={styles.formGroup}>
+                  <label className={styles.label}>Precio</label>
+                  <input
+                    type="number"
+                    name="servicePrice"
+                    value={formData.servicePrice}
+                    onChange={handleChange}
+                    placeholder="Ej. 15000"
+                    className={styles.input}
+                    required
+                  />
+                </div>
 
                 <div className={styles.buttonRow}>
                   <button type="button" onClick={prevStep} className={`${styles.btn} ${styles.btnSecondary}`}>
@@ -924,12 +758,7 @@ export default function LandingAndOnboardingPage() {
                   </button>
                   <button
                     type="submit"
-                    disabled={
-                      loading ||
-                      (formData.category === "Restaurante"
-                        ? !formData.tablesCount || !formData.tableCapacity || !formData.menuItemName || !formData.menuItemPrice
-                        : !formData.serviceName || !formData.servicePrice)
-                    }
+                    disabled={loading || !formData.serviceName || !formData.servicePrice}
                     className={`${styles.btn} ${styles.btnPrimary}`}
                   >
                     {loading ? "Creando..." : "Crear mi link"}
