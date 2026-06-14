@@ -83,7 +83,7 @@ export default function QrDownloader({ slug, businessName }: Props) {
           <p style={{ fontSize: "16px", color: "#86868b", marginTop: "12px" }}>
             Sin contraseñas. Sin descargar apps. Todo con tu WhatsApp.
           </p>
-          <span className={styles.brandUrl}>agendalink.com/{slug}</span>
+          <span className={styles.brandUrl}>agendalink.cl/{slug}</span>
         </div>
 
         {/* Página 2: Tarjeta de Presentación (85x55mm) */}
@@ -91,7 +91,7 @@ export default function QrDownloader({ slug, businessName }: Props) {
           <div className={styles.cardText}>
             <h2>{businessName}</h2>
             <p>Agenda tu hora en línea directamente</p>
-            <span>agendalink.com/{slug}</span>
+            <span>agendalink.cl/{slug}</span>
           </div>
           <div>
             {qrDataUrl && (

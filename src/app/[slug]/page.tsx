@@ -296,167 +296,177 @@ export default function BookingPage({ params }: { params: Promise<{ slug: string
             </div>
           </div>
 
-          {/* Quick Contacts */}
-          <div className={styles.quickContactGrid}>
-            {phone && (
-              <div className={styles.contactPill}>
-                <span className={styles.contactIcon}>📞</span>
-                <div className={styles.contactText}>
-                  <span className={styles.contactLabel}>WhatsApp / Teléfono</span>
-                  <span className={styles.contactValue}>{phone}</span>
-                </div>
-              </div>
-            )}
-            {hours && (
-              <div className={styles.contactPill}>
-                <span className={styles.contactIcon}>🕒</span>
-                <div className={styles.contactText}>
-                  <span className={styles.contactLabel}>Horario</span>
-                  <span className={styles.contactValue}>{hours}</span>
-                </div>
-              </div>
-            )}
-          </div>
-          {address && (
-            <div style={{ marginTop: "10px" }}>
-              <div className={styles.contactPill} style={{ justifyContent: "center" }}>
-                <span className={styles.contactIcon}>📍</span>
-                <div className={styles.contactText}>
-                  <span className={styles.contactLabel}>Dirección</span>
-                  <span className={styles.contactValue}>{address}</span>
-                </div>
-              </div>
-            </div>
-          )}
+          {/* Responsive Layout Grid under Hero */}
+          <div className={styles.landingLayoutGrid}>
+            
+            {/* Left Column: About, Contacts, Why Choose Us */}
+            <div className={styles.landingLeftColumn}>
+              {/* Sobre Nosotros */}
+              <section className={styles.landingSectionGlass}>
+                <h3 className={styles.landingSectionTitle}>Sobre Nosotros</h3>
+                <p className={styles.aboutText}>{aboutText}</p>
+              </section>
 
-          {/* Sobre Nosotros */}
-          <section className={styles.landingSection}>
-            <h3 className={styles.landingSectionTitle}>Sobre Nosotros</h3>
-            <p className={styles.aboutText}>{aboutText}</p>
-          </section>
+              {/* Quick Contacts */}
+              <div className={styles.quickContactGrid}>
+                {phone && (
+                  <div className={styles.contactPillGlass}>
+                    <span className={styles.contactIcon}>📞</span>
+                    <div className={styles.contactText}>
+                      <span className={styles.contactLabel}>WhatsApp / Teléfono</span>
+                      <span className={styles.contactValue}>{phone}</span>
+                    </div>
+                  </div>
+                )}
+                {hours && (
+                  <div className={styles.contactPillGlass}>
+                    <span className={styles.contactIcon}>🕒</span>
+                    <div className={styles.contactText}>
+                      <span className={styles.contactLabel}>Horario</span>
+                      <span className={styles.contactValue}>{hours}</span>
+                    </div>
+                  </div>
+                )}
+                {address && (
+                  <div className={styles.contactPillGlass} style={{ gridColumn: "span 2" }}>
+                    <span className={styles.contactIcon}>📍</span>
+                    <div className={styles.contactText}>
+                      <span className={styles.contactLabel}>Dirección</span>
+                      <span className={styles.contactValue}>{address}</span>
+                    </div>
+                  </div>
+                )}
+              </div>
 
-          {/* Servicios / Carta Destacada */}
-          <section className={styles.landingSection}>
-            <h3 className={styles.landingSectionTitle}>
-              {isRestaurant ? "Nuestra Carta" : "Nuestros Servicios"}
-            </h3>
-            <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-              {isRestaurant && business.menuItems && business.menuItems.length > 0 ? (
-                business.menuItems.slice(0, 3).map((item) => (
-                  <div key={item.id} className={styles.landingServiceCard}>
-                    <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
-                      {item.imageUrl ? (
-                        <img src={item.imageUrl} alt={item.name} style={{ width: "48px", height: "48px", borderRadius: "8px", objectFit: "cover", flexShrink: 0 }} />
-                      ) : (
-                        <div style={{ width: "48px", height: "48px", borderRadius: "8px", background: "rgba(0,0,0,0.05)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "20px", flexShrink: 0 }}>🍔</div>
-                      )}
-                      <div style={{ display: "flex", flexDirection: "column", gap: "2px", alignItems: "flex-start", textAlign: "left" }}>
-                        <span style={{ fontWeight: "700", fontSize: "14px" }}>{item.name}</span>
-                        {item.description && <span style={{ fontSize: "12px", color: "var(--text-secondary)" }}>{item.description}</span>}
+              {/* Ventajas */}
+              <section className={styles.landingSectionGlass}>
+                <h3 className={styles.landingSectionTitle}>¿Por qué elegirnos?</h3>
+                <div className={styles.featuresList}>
+                  {features.map((feat, index) => {
+                    let svgIcon = (
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={styles.flatBlueIcon}>
+                        <circle cx="12" cy="8" r="7" />
+                        <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88" />
+                      </svg>
+                    );
+                    if (index === 1) {
+                      svgIcon = (
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={styles.flatBlueIcon}>
+                          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                          <polyline points="9 11 11 13 15 9" />
+                        </svg>
+                      );
+                    } else if (index === 2) {
+                      svgIcon = (
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={styles.flatBlueIcon}>
+                          <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+                        </svg>
+                      );
+                    }
+
+                    return (
+                      <div key={index} className={styles.featureItem}>
+                        <div className={styles.featureIconWrapper}>
+                          {svgIcon}
+                        </div>
+                        <div style={{ textAlign: "left" }}>
+                          <h4 className={styles.featureTitle}>{feat.title}</h4>
+                          <p className={styles.featureDesc}>{feat.desc}</p>
+                        </div>
                       </div>
-                    </div>
-                    <span style={{ fontWeight: "800", color: "var(--primary)", fontSize: "14px" }}>
-                      {formatPrice(item.price, business.currency)}
-                    </span>
-                  </div>
-                ))
-              ) : business.services && business.services.length > 0 ? (
-                business.services.slice(0, 3).map((service) => (
-                  <div key={service.id} className={styles.landingServiceCard}>
-                    <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
-                      {service.imageUrl ? (
-                        <img src={service.imageUrl} alt={service.name} style={{ width: "48px", height: "48px", borderRadius: "8px", objectFit: "cover", flexShrink: 0 }} />
-                      ) : (
-                        <div style={{ width: "48px", height: "48px", borderRadius: "8px", background: "rgba(0,0,0,0.05)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "20px", flexShrink: 0 }}>✨</div>
-                      )}
-                      <div style={{ display: "flex", flexDirection: "column", gap: "2px", alignItems: "flex-start", textAlign: "left" }}>
-                        <span style={{ fontWeight: "700", fontSize: "14px" }}>{service.name}</span>
-                        <span style={{ fontSize: "12px", color: "var(--text-secondary)" }}>{service.duration} min</span>
-                      </div>
-                    </div>
-                    <span style={{ fontWeight: "800", color: "var(--primary)", fontSize: "14px" }}>
-                      {formatPrice(service.price, business.currency)}
-                    </span>
-                  </div>
-                ))
-              ) : (
-                <p style={{ fontSize: "13px", color: "var(--text-secondary)", margin: "16px 0" }}>No hay servicios cargados.</p>
-              )}
-            </div>
-          </section>
-
-          {/* Banner Secundario divisor */}
-          <div 
-            className={styles.landingSecondaryBanner}
-            style={{
-              backgroundImage: business.landingSecondaryCoverUrl ? `url(${business.landingSecondaryCoverUrl})` : "none",
-              background: business.landingSecondaryCoverUrl ? "none" : "linear-gradient(135deg, #7000ff 0%, #0072ff 100%)"
-            }}
-          >
-            <div className={styles.landingSecondaryBannerOverlay}>
-              <span className={styles.landingSecondaryBannerText}>
-                Confirmación al instante vía WhatsApp
-              </span>
-            </div>
-          </div>
-
-          {/* Ventajas */}
-          <section className={styles.landingSection}>
-            <h3 className={styles.landingSectionTitle}>¿Por qué elegirnos?</h3>
-            <div className={styles.featuresList}>
-              {features.map((feat, index) => {
-                // Seleccionar un icono SVG representativo según el índice de la ventaja
-                let svgIcon = (
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={styles.flatBlueIcon}>
-                    <circle cx="12" cy="8" r="7" />
-                    <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88" />
-                  </svg>
-                );
-                if (index === 1) {
-                  svgIcon = (
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={styles.flatBlueIcon}>
-                      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                      <polyline points="9 11 11 13 15 9" />
-                    </svg>
-                  );
-                } else if (index === 2) {
-                  svgIcon = (
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={styles.flatBlueIcon}>
-                      <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
-                    </svg>
-                  );
-                }
-
-                return (
-                  <div key={index} className={styles.featureItem}>
-                    <div className={styles.featureIconWrapper}>
-                      {svgIcon}
-                    </div>
-                    <div style={{ textAlign: "left" }}>
-                      <h4 className={styles.featureTitle}>{feat.title}</h4>
-                      <p className={styles.featureDesc}>{feat.desc}</p>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </section>
-
-          {/* Testimonios */}
-          <section className={styles.landingSection}>
-            <h3 className={styles.landingSectionTitle}>Opiniones de Clientes</h3>
-            <div className={styles.testimonialsGrid}>
-              {testimonials.map((test, index) => (
-                <div key={index} className={styles.testimonialCard}>
-                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "6px" }}>
-                    <span style={{ fontWeight: "700", fontSize: "12px" }}>{test.author}</span>
-                    <span style={{ color: "#ffcc00", fontSize: "11px" }}>{"★".repeat(test.rating || 5)}</span>
-                  </div>
-                  <p className={styles.testimonialText}>&quot;{test.text}&quot;</p>
+                    );
+                  })}
                 </div>
-              ))}
+              </section>
             </div>
-          </section>
+
+            {/* Right Column: Services/Carta, Testimonials, Secondary Banner */}
+            <div className={styles.landingRightColumn}>
+              {/* Servicios / Carta Destacada */}
+              <section className={styles.landingSectionGlass}>
+                <h3 className={styles.landingSectionTitle}>
+                  {isRestaurant ? "Nuestra Carta" : "Nuestros Servicios"}
+                </h3>
+                <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                  {isRestaurant && business.menuItems && business.menuItems.length > 0 ? (
+                    business.menuItems.slice(0, 3).map((item) => (
+                      <div key={item.id} className={styles.landingServiceCardGlass}>
+                        <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
+                          {item.imageUrl ? (
+                            <img src={item.imageUrl} alt={item.name} style={{ width: "48px", height: "48px", borderRadius: "8px", objectFit: "cover", flexShrink: 0 }} />
+                          ) : (
+                            <div style={{ width: "48px", height: "48px", borderRadius: "8px", background: "rgba(0,0,0,0.05)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "20px", flexShrink: 0 }}>🍔</div>
+                          )}
+                          <div style={{ display: "flex", flexDirection: "column", gap: "2px", alignItems: "flex-start", textAlign: "left" }}>
+                            <span style={{ fontWeight: "700", fontSize: "14px" }}>{item.name}</span>
+                            {item.description && <span style={{ fontSize: "12px", color: "var(--text-secondary)" }}>{item.description}</span>}
+                          </div>
+                        </div>
+                        <span style={{ fontWeight: "800", color: "var(--primary)", fontSize: "14px" }}>
+                          {formatPrice(item.price, business.currency)}
+                        </span>
+                      </div>
+                    ))
+                  ) : business.services && business.services.length > 0 ? (
+                    business.services.slice(0, 3).map((service) => (
+                      <div key={service.id} className={styles.landingServiceCardGlass}>
+                        <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
+                          {service.imageUrl ? (
+                            <img src={service.imageUrl} alt={service.name} style={{ width: "48px", height: "48px", borderRadius: "8px", objectFit: "cover", flexShrink: 0 }} />
+                          ) : (
+                            <div style={{ width: "48px", height: "48px", borderRadius: "8px", background: "rgba(0,0,0,0.05)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "20px", flexShrink: 0 }}>✨</div>
+                          )}
+                          <div style={{ display: "flex", flexDirection: "column", gap: "2px", alignItems: "flex-start", textAlign: "left" }}>
+                            <span style={{ fontWeight: "700", fontSize: "14px" }}>{service.name}</span>
+                            <span style={{ fontSize: "12px", color: "var(--text-secondary)" }}>{service.duration} min</span>
+                          </div>
+                        </div>
+                        <span style={{ fontWeight: "800", color: "var(--primary)", fontSize: "14px" }}>
+                          {formatPrice(service.price, business.currency)}
+                        </span>
+                      </div>
+                    ))
+                  ) : (
+                    <p style={{ fontSize: "13px", color: "var(--text-secondary)", margin: "16px 0" }}>No hay servicios cargados.</p>
+                  )}
+                </div>
+              </section>
+
+              {/* Testimonios */}
+              <section className={styles.landingSectionGlass}>
+                <h3 className={styles.landingSectionTitle}>Opiniones de Clientes</h3>
+                <div className={styles.testimonialsContainer}>
+                  <div className={styles.testimonialsGridGlass}>
+                    {testimonials.map((test, index) => (
+                      <div key={index} className={styles.testimonialCardGlass}>
+                        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "6px" }}>
+                          <span style={{ fontWeight: "700", fontSize: "12px" }}>{test.author}</span>
+                          <span style={{ color: "#ffcc00", fontSize: "11px" }}>{"★".repeat(test.rating || 5)}</span>
+                        </div>
+                        <p className={styles.testimonialText}>&quot;{test.text}&quot;</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </section>
+
+              {/* Banner Secundario divisor */}
+              <div 
+                className={styles.landingSecondaryBanner}
+                style={{
+                  backgroundImage: business.landingSecondaryCoverUrl ? `url(${business.landingSecondaryCoverUrl})` : "none",
+                  background: business.landingSecondaryCoverUrl ? "none" : "linear-gradient(135deg, #7000ff 0%, #0072ff 100%)"
+                }}
+              >
+                <div className={styles.landingSecondaryBannerOverlay}>
+                  <span className={styles.landingSecondaryBannerText}>
+                    Confirmación al instante vía WhatsApp
+                  </span>
+                </div>
+              </div>
+            </div>
+
+          </div>
 
           {/* Floating Call to Action */}
           <div className={styles.floatingCTA}>

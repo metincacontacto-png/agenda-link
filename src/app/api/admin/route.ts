@@ -60,6 +60,7 @@ export async function POST(request: Request) {
       landingHours,
       landingFeaturesJson,
       landingTestimonialsJson,
+      plan,
     } = body;
 
     if (!slug) {
@@ -121,6 +122,7 @@ export async function POST(request: Request) {
         landingHours: landingHours === undefined ? undefined : landingHours,
         landingFeaturesJson: landingFeaturesJson === undefined ? undefined : landingFeaturesJson,
         landingTestimonialsJson: landingTestimonialsJson === undefined ? undefined : landingTestimonialsJson,
+        plan: plan === undefined ? undefined : plan,
       },
     });
 

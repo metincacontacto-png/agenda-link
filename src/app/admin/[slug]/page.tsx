@@ -45,6 +45,7 @@ interface Client {
 interface Business {
   name: string;
   slug: string;
+  ownerName?: string | null;
   teamSize: string;
   currency: string;
   category: string;
@@ -64,11 +65,60 @@ interface Business {
   landingHours?: string | null;
   landingFeaturesJson?: string | null;
   landingTestimonialsJson?: string | null;
+  plan: string;
+  billingBypass: boolean;
+  customDomain?: string | null;
 }
 
 export default function AdminDashboard({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = React.use(params);
   const [business, setBusiness] = useState<Business | null>(null);
+
+  const ownerName = business?.ownerName || "Juan Ortega";
+  const ownerInitials = (() => {
+    if (!business?.ownerName) return "JO";
+    const parts = business.ownerName.trim().split(/\s+/);
+    if (parts.length >= 2) {
+      return (parts[0][0] + parts[1][0]).toUpperCase();
+    }
+    return business.ownerName.substring(0, 2).toUpperCase();
+  })();
+
+  const isFeatureRestricted = (requiredPlan: "EQUIPO" | "NEGOCIO"): boolean => {
+    if (!business) return true;
+    if (business.billingBypass) return false;
+    
+    if (requiredPlan === "EQUIPO") {
+      return business.plan === "INDIVIDUAL";
+    }
+    if (requiredPlan === "NEGOCIO") {
+      return business.plan === "INDIVIDUAL" || business.plan === "EQUIPO";
+    }
+    return false;
+  };
+
+  const renderUpgradePrompt = (planRequired: "EQUIPO" | "NEGOCIO", featureName: string) => {
+    return (
+      <section className={styles.glassCard} style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "60px 24px", textAlign: "center" }}>
+        <div style={{ fontSize: "54px", marginBottom: "16px" }}>🔒</div>
+        <h2 style={{ fontSize: "20px", fontWeight: "800", marginBottom: "8px", color: "var(--foreground)" }}>
+          {featureName} es una función Premium
+        </h2>
+        <p style={{ fontSize: "14px", color: "var(--text-secondary)", maxWidth: "480px", lineHeight: "1.5", marginBottom: "24px" }}>
+          Tu negocio se encuentra en el <strong>Plan {business?.plan}</strong>. Para acceder a esta herramienta de Inteligencia Artificial necesitas mejorar tu plan al <strong>Plan {planRequired}</strong>.
+        </p>
+        <button 
+          onClick={() => {
+            alert(`¡Solicitud de Upgrade al Plan ${planRequired} enviada con éxito! Nos contactaremos a la brevedad.`);
+          }}
+          className={styles.submitButton}
+          style={{ width: "auto", padding: "10px 24px" }}
+        >
+          Mejorar Plan ahora ⚡️
+        </button>
+      </section>
+    );
+  };
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<"dashboard" | "ventas" | "clientes" | "administracion" | "calendario" | "reservas" | "secretary" | "marketing" | "business" | "mesas" | "carta" | "landing">("dashboard");
   const [adminSubTab, setAdminSubTab] = useState<"servicios" | "whatsapp">("servicios");
@@ -102,6 +152,41 @@ export default function AdminDashboard({ params }: { params: Promise<{ slug: str
     { id: "INV-001", date: "01/06/2026", amount: 29900, status: "PAID" },
     { id: "INV-002", date: "01/05/2026", amount: 29900, status: "PAID" }
   ]);
+  const [selectedPlanId, setSelectedPlanId] = useState<"INDIVIDUAL" | "EQUIPO" | "NEGOCIO">("INDIVIDUAL");
+
+  useEffect(() => {
+    if (business?.plan) {
+      setSelectedPlanId(business.plan as any);
+    }
+  }, [business?.plan]);
+
+  // Memberships State
+  const [memberships, setMemberships] = useState([
+    { id: 1, name: "Plan 10 Sesiones - Masaje Descontracturante", clientName: "María Jesús", phone: "+56 9 8765 4321", current: 4, total: 10, status: "Activo" },
+    { id: 2, name: "Pase Mensual - Spa Completo", clientName: "Rodrigo A.", phone: "+56 9 1234 5678", current: 22, total: 30, status: "Activo" }
+  ]);
+  const [editingMembershipId, setEditingMembershipId] = useState<number | null>(null);
+  const [editingMembershipName, setEditingMembershipName] = useState("");
+  const [editingMembershipClient, setEditingMembershipClient] = useState("");
+  const [editingMembershipPhone, setEditingMembershipPhone] = useState("");
+  const [editingMembershipCurrent, setEditingMembershipCurrent] = useState(0);
+  const [editingMembershipTotal, setEditingMembershipTotal] = useState(10);
+  const [editingMembershipStatus, setEditingMembershipStatus] = useState("Activo");
+
+  // Gift Cards State
+  const [giftCards, setGiftCards] = useState([
+    { id: "COD-GIFT-9827", beneficiary: "Antonia Valenzuela", amount: 50000, status: "Vigente" },
+    { id: "COD-GIFT-1102", beneficiary: "Ignacio Pérez", amount: 25000, status: "Vigente" }
+  ]);
+  const [giftCardBeneficiary, setGiftCardBeneficiary] = useState("");
+  const [giftCardAmount, setGiftCardAmount] = useState("");
+  const [editingGiftCardId, setEditingGiftCardId] = useState<string | null>(null);
+  const [editingGiftCardBeneficiary, setEditingGiftCardBeneficiary] = useState("");
+  const [editingGiftCardAmount, setEditingGiftCardAmount] = useState(0);
+  const [editingGiftCardStatus, setEditingGiftCardStatus] = useState("Vigente");
+
+  // Propinas Liquidadas State
+  const [liquidatedTips, setLiquidatedTips] = useState(0);
 
   // Checklist de Primeros Pasos
   const [firstStepsChecked, setFirstStepsChecked] = useState({
@@ -385,9 +470,32 @@ export default function AdminDashboard({ params }: { params: Promise<{ slug: str
   };
 
   // Stripe Simulator Payment
-  const handleProcessPayment = (e: React.FormEvent) => {
+  const handleProcessPayment = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsProcessingPayment(true);
+
+    try {
+      const res = await fetch("/api/admin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          slug,
+          plan: selectedPlanId,
+        }),
+      });
+
+      if (!res.ok) {
+        throw new Error("Error al actualizar el plan");
+      }
+
+      const data = await res.json();
+      if (data.success && data.business) {
+        setBusiness(data.business);
+      }
+    } catch (err) {
+      console.error("Error updating plan:", err);
+    }
+
     setTimeout(() => {
       setIsProcessingPayment(false);
       setPaymentSuccess(true);
@@ -395,8 +503,13 @@ export default function AdminDashboard({ params }: { params: Promise<{ slug: str
         setPaymentSuccess(false);
         const nextInvNum = paymentHistory.length + 1;
         const todayStr = new Date().toLocaleDateString("es-ES");
+        
+        let planPriceAmount = 3999000; // default Negocio
+        if (selectedPlanId === "INDIVIDUAL") planPriceAmount = 990000;
+        else if (selectedPlanId === "EQUIPO") planPriceAmount = 1999000;
+
         setPaymentHistory(prev => [
-          { id: `INV-00${nextInvNum}`, date: todayStr, amount: 29900, status: "PAID" },
+          { id: `INV-00${nextInvNum}`, date: todayStr, amount: planPriceAmount, status: "PAID" },
           ...prev
         ]);
         setPaymentCardName("");
@@ -585,7 +698,7 @@ export default function AdminDashboard({ params }: { params: Promise<{ slug: str
     const messagesScript = [
       { sender: "bot", text: "¡Hola! Con gusto. Para mañana tengo horas disponibles a las 15:30 y 16:30. ¿Te sirve alguna?", delay: 2000 },
       { sender: "user", text: "La de las 15:30 me acomoda. ¿Cuál es el valor?", delay: 5500 },
-      { sender: "bot", text: "Perfecto. El servicio es 'Corte de Cabello' con Juan Pérez y tiene un valor de $15.000 CLP. Para confirmar la reserva, debes ingresar al siguiente link de pago simulado: agendalink.com/democut/pay. ¿Deseas proceder?", delay: 9000 },
+      { sender: "bot", text: "Perfecto. El servicio es 'Corte de Cabello' con Juan Pérez y tiene un valor de $15.000 CLP. Para confirmar la reserva, debes ingresar al siguiente link de pago simulado: agendalink.cl/democut/pay. ¿Deseas proceder?", delay: 9000 },
       { sender: "user", text: "Sí, acabo de pagar en el link.", delay: 13500 },
       { sender: "bot", text: "¡Recibido! Tu pago fue aprobado. He agendado tu cita para mañana a las 15:30 hrs. ¡Te esperamos! ⚡️", delay: 17000 }
     ];
@@ -907,7 +1020,7 @@ export default function AdminDashboard({ params }: { params: Promise<{ slug: str
                 setIsGearDropdownOpen(false);
               }}
             >
-              JO
+              {ownerInitials}
             </button>
 
             {/* Dropdown de Engranaje */}
@@ -948,9 +1061,9 @@ export default function AdminDashboard({ params }: { params: Promise<{ slug: str
             {isProfileDropdownOpen && (
               <div className={styles.profileDropdown}>
                 <div className={styles.profileDropdownHeader}>
-                  <div className={styles.profileHeaderAvatar}>JO</div>
+                  <div className={styles.profileHeaderAvatar}>{ownerInitials}</div>
                   <div>
-                    <div style={{ fontWeight: "bold", fontSize: "14px" }}>Juan Ortega</div>
+                    <div style={{ fontWeight: "bold", fontSize: "14px" }}>{ownerName}</div>
                     <div style={{ fontSize: "11px", color: "var(--text-secondary)" }}>Administrador</div>
                   </div>
                 </div>
@@ -1716,295 +1829,384 @@ export default function AdminDashboard({ params }: { params: Promise<{ slug: str
         )}
 
         {activeTab === "secretary" && (
-          <section className={styles.glassCard}>
-            <h2 style={{ fontSize: "16px", fontWeight: "700", marginBottom: "8px" }}>Linki Secretary · Agendador de WhatsApp 24/7</h2>
-            <p style={{ fontSize: "13px", color: "var(--text-secondary)", marginBottom: "20px" }}>
-              Monitorea en tiempo real cómo tu asistente de inteligencia artificial conversa con tus clientes para reservar cupos.
-            </p>
-            <div className={styles.chatWindow}>
-              <div className={styles.chatHeader}>
-                <div className={styles.chatAvatar}>LS</div>
-                <div>
-                  <div style={{ fontWeight: "bold", fontSize: "14px" }}>Linki Secretary</div>
-                  <div style={{ fontSize: "11px", opacity: 0.8 }}>En línea • Respondiendo automáticamente</div>
+          isFeatureRestricted("EQUIPO") ? renderUpgradePrompt("EQUIPO", "Linki Secretary") : (
+            <section className={styles.glassCard}>
+              <h2 style={{ fontSize: "16px", fontWeight: "700", marginBottom: "8px" }}>Linki Secretary · Agendador de WhatsApp 24/7</h2>
+              <p style={{ fontSize: "13px", color: "var(--text-secondary)", marginBottom: "20px" }}>
+                Monitorea en tiempo real cómo tu asistente de inteligencia artificial conversa con tus clientes para reservar cupos.
+              </p>
+              <div className={styles.chatWindow}>
+                <div className={styles.chatHeader}>
+                  <div className={styles.chatAvatar}>LS</div>
+                  <div>
+                    <div style={{ fontWeight: "bold", fontSize: "14px" }}>Linki Secretary</div>
+                    <div style={{ fontSize: "11px", opacity: 0.8 }}>En línea • Respondiendo automáticamente</div>
+                  </div>
+                </div>
+                <div className={styles.chatBody}>
+                  {chatMessages.map((msg, idx) => (
+                    <div key={idx} className={msg.sender === "user" ? styles.msgIn : styles.msgOut}>
+                      {msg.text}
+                      <div style={{ fontSize: "9px", color: "gray", textAlign: "right", marginTop: "4px" }}>{msg.time}</div>
+                    </div>
+                  ))}
+                  {secretaryTyping && (
+                    <div className={styles.msgOut} style={{ fontStyle: "italic", color: "gray" }}>
+                      Linki Secretary está escribiendo...
+                    </div>
+                  )}
+                  <div ref={chatEndRef} />
                 </div>
               </div>
-              <div className={styles.chatBody}>
-                {chatMessages.map((msg, idx) => (
-                  <div key={idx} className={msg.sender === "user" ? styles.msgIn : styles.msgOut}>
-                    {msg.text}
-                    <div style={{ fontSize: "9px", color: "gray", textAlign: "right", marginTop: "4px" }}>{msg.time}</div>
-                  </div>
-                ))}
-                {secretaryTyping && (
-                  <div className={styles.msgOut} style={{ fontStyle: "italic", color: "gray" }}>
-                    Linki Secretary está escribiendo...
-                  </div>
-                )}
-                <div ref={chatEndRef} />
-              </div>
-            </div>
-          </section>
+            </section>
+          )
         )}
 
         {activeTab === "marketing" && (
-          <section className={styles.glassCard}>
-            <h2 style={{ fontSize: "16px", fontWeight: "700", marginBottom: "16px" }}>Linki Marketing · Reactivación de Clientes</h2>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "16px", marginBottom: "24px" }}>
-              <div style={{ background: "rgba(255,255,255,0.06)", padding: "16px", borderRadius: "10px", textAlign: "center", border: "1px solid var(--card-border)" }}>
-                <span style={{ fontSize: "24px", fontWeight: "800", display: "block" }}>32</span>
-                <p style={{ fontSize: "11px", color: "var(--text-secondary)", marginTop: "4px" }}>Clientes Inactivos Detectados</p>
+          isFeatureRestricted("EQUIPO") ? renderUpgradePrompt("EQUIPO", "Linki Marketing") : (
+            <section className={styles.glassCard}>
+              <h2 style={{ fontSize: "16px", fontWeight: "700", marginBottom: "16px" }}>Linki Marketing · Reactivación de Clientes</h2>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "16px", marginBottom: "24px" }}>
+                <div style={{ background: "rgba(255,255,255,0.06)", padding: "16px", borderRadius: "10px", textAlign: "center", border: "1px solid var(--card-border)" }}>
+                  <span style={{ fontSize: "24px", fontWeight: "800", display: "block" }}>32</span>
+                  <p style={{ fontSize: "11px", color: "var(--text-secondary)", marginTop: "4px" }}>Clientes Inactivos Detectados</p>
+                </div>
+                <div style={{ background: "rgba(255,255,255,0.06)", padding: "16px", borderRadius: "10px", textAlign: "center", border: "1px solid var(--card-border)" }}>
+                  <span style={{ fontSize: "24px", fontWeight: "800", display: "block" }}>28</span>
+                  <p style={{ fontSize: "11px", color: "var(--text-secondary)", marginTop: "4px" }}>WhatsApp Promocionales Enviados</p>
+                </div>
+                <div style={{ background: "rgba(255,255,255,0.06)", padding: "16px", borderRadius: "10px", textAlign: "center", border: "1px solid var(--card-border)" }}>
+                  <span style={{ fontSize: "24px", fontWeight: "800", display: "block" }}>14%</span>
+                  <p style={{ fontSize: "11px", color: "var(--text-secondary)", marginTop: "4px" }}>Tasa de Retorno y Agendamiento</p>
+                </div>
               </div>
-              <div style={{ background: "rgba(255,255,255,0.06)", padding: "16px", borderRadius: "10px", textAlign: "center", border: "1px solid var(--card-border)" }}>
-                <span style={{ fontSize: "24px", fontWeight: "800", display: "block" }}>28</span>
-                <p style={{ fontSize: "11px", color: "var(--text-secondary)", marginTop: "4px" }}>WhatsApp Promocionales Enviados</p>
+              <div style={{ borderTop: "1px solid var(--card-border)", paddingTop: "16px" }}>
+                <h3 style={{ fontSize: "14px", fontWeight: "700", marginBottom: "12px" }}>Campaña Activa: Fidelización de 30 Días</h3>
+                <div style={{ padding: "14px", background: "rgba(255,255,255,0.03)", borderRadius: "8px", fontSize: "13px", lineHeight: "1.5", border: "1px solid var(--card-border)" }}>
+                  <strong>Mensaje automático enviado:</strong><br />
+                  <p style={{ marginTop: "6px", fontStyle: "italic" }}>
+                    &quot;¡Hola [Nombre]! Te extrañamos en {business.name}. Hace un mes que no nos visitas. Agenda tu hora hoy y obtén un 10% de descuento usando tu link de reservas: agendalink.cl/{business.slug} ⚡️&quot;
+                  </p>
+                </div>
               </div>
-              <div style={{ background: "rgba(255,255,255,0.06)", padding: "16px", borderRadius: "10px", textAlign: "center", border: "1px solid var(--card-border)" }}>
-                <span style={{ fontSize: "24px", fontWeight: "800", display: "block" }}>14%</span>
-                <p style={{ fontSize: "11px", color: "var(--text-secondary)", marginTop: "4px" }}>Tasa de Retorno y Agendamiento</p>
-              </div>
-            </div>
-            <div style={{ borderTop: "1px solid var(--card-border)", paddingTop: "16px" }}>
-              <h3 style={{ fontSize: "14px", fontWeight: "700", marginBottom: "12px" }}>Campaña Activa: Fidelización de 30 Días</h3>
-              <div style={{ padding: "14px", background: "rgba(255,255,255,0.03)", borderRadius: "8px", fontSize: "13px", lineHeight: "1.5", border: "1px solid var(--card-border)" }}>
-                <strong>Mensaje automático enviado:</strong><br />
-                <p style={{ marginTop: "6px", fontStyle: "italic" }}>
-                  &quot;¡Hola [Nombre]! Te extrañamos en {business.name}. Hace un mes que no nos visitas. Agenda tu hora hoy y obtén un 10% de descuento usando tu link de reservas: agendalink.com/{business.slug} ⚡️&quot;
-                </p>
-              </div>
-            </div>
-          </section>
+            </section>
+          )
         )}
 
         {activeTab === "business" && (
-          <section className={styles.glassCard}>
-            <div className={styles.reportTitle}>
-              <svg className={styles.interiorIcon} style={{ width: "22px", height: "22px" }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M9.5 2a2.5 2.5 0 0 1 2.5 2.5v15a2.5 2.5 0 0 1-4.96-.44 2.5 2.5 0 0 1 0-4.12 2.5 2.5 0 0 1 0-4.12A2.5 2.5 0 0 0 14.5 2z" />
-              </svg>
-              Linki Business • Reporte Semanal Estratégico
-            </div>
-            <div style={{ borderLeft: "4px solid var(--primary)", paddingLeft: "16px", margin: "16px 0" }}>
-              <p className={styles.reportParagraph} style={{ fontStyle: "italic", fontWeight: "500" }}>
-                &quot;Hola. He analizado el rendimiento del negocio durante los últimos 7 días. Aquí tienes mi balance estratégico:&quot;
-              </p>
-            </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-              <p className={styles.reportParagraph}>
-                <svg className={styles.interiorIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
-                  <polyline points="17 6 23 6 23 12" />
+          isFeatureRestricted("NEGOCIO") ? renderUpgradePrompt("NEGOCIO", "Linki Business") : (
+            <section className={styles.glassCard}>
+              <div className={styles.reportTitle}>
+                <svg className={styles.interiorIcon} style={{ width: "22px", height: "22px" }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M9.5 2a2.5 2.5 0 0 1 2.5 2.5v15a2.5 2.5 0 0 1-4.96-.44 2.5 2.5 0 0 1 0-4.12 2.5 2.5 0 0 1 0-4.12A2.5 2.5 0 0 0 14.5 2z" />
                 </svg>
-                <strong>Rendimiento General:</strong> Las reservas de esta semana aumentaron un <strong>12%</strong> comparado con la semana anterior, registrando una facturación simulada de <strong>{formatPrice(business.appointments?.reduce((acc, curr) => acc + (curr.paymentAmount || 0), 0) || 120000, business.currency)}</strong>.
-              </p>
-              <p className={styles.reportParagraph}>
-                <svg className={styles.interiorIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-                </svg>
-                <strong>Servicios y Staff Estrella:</strong> Tu servicio más demandado fue {business.services?.[0]?.name || "el servicio estrella"} y tu profesional con más reservas fue {business.appointments?.[0]?.professional?.name || "el profesional estrella"}. Hay alta retención en el bloque de las 15:30 hrs.
-              </p>
-              <p className={styles.reportParagraph}>
-                <svg className={styles.interiorIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .5 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5" />
-                  <line x1="9" y1="18" x2="15" y2="18" />
-                  <line x1="10" y1="22" x2="14" y2="22" />
-                </svg>
-                <strong>Consejo de IA:</strong> He notado que los días martes por la mañana tienen baja ocupación (menos del 20%). Le he sugerido a <strong>Linki Marketing</strong> programar un recordatorio automático con un descuento especial para incentivar reservas los martes temprano.
-              </p>
-            </div>
-          </section>
+                Linki Business • Reporte Semanal Estratégico
+              </div>
+              <div style={{ borderLeft: "4px solid var(--primary)", paddingLeft: "16px", margin: "16px 0" }}>
+                <p className={styles.reportParagraph} style={{ fontStyle: "italic", fontWeight: "500" }}>
+                  &quot;Hola. He analizado el rendimiento del negocio durante los últimos 7 días. Aquí tienes mi balance estratégico:&quot;
+                </p>
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                <p className={styles.reportParagraph}>
+                  <svg className={styles.interiorIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
+                    <polyline points="17 6 23 6 23 12" />
+                  </svg>
+                  <strong>Rendimiento General:</strong> Las reservas de esta semana aumentaron un <strong>12%</strong> comparado con la semana anterior, registrando una facturación simulada de <strong>{formatPrice(business.appointments?.reduce((acc, curr) => acc + (curr.paymentAmount || 0), 0) || 120000, business.currency)}</strong>.
+                </p>
+                <p className={styles.reportParagraph}>
+                  <svg className={styles.interiorIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                  </svg>
+                  <strong>Servicios y Staff Estrella:</strong> Tu servicio más demandado fue {business.services?.[0]?.name || "el servicio estrella"} y tu profesional con más reservas fue {business.appointments?.[0]?.professional?.name || "el profesional estrella"}. Hay alta retención en el bloque de las 15:30 hrs.
+                </p>
+                <p className={styles.reportParagraph}>
+                  <svg className={styles.interiorIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .5 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5" />
+                    <line x1="9" y1="18" x2="15" y2="18" />
+                    <line x1="10" y1="22" x2="14" y2="22" />
+                  </svg>
+                  <strong>Consejo de IA:</strong> He notado que los días martes por la mañana tienen baja ocupación (menos del 20%). Le he sugerido a <strong>Linki Marketing</strong> programar un recordatorio automático con un descuento especial para incentivar reservas los martes temprano.
+                </p>
+              </div>
+            </section>
+          )
         )}
         {/* --- VISTA: PERSONALIZAR LANDING --- */}
         {activeTab === "landing" && (
           <div className={styles.perfilLayoutGrid}>
-            <section className={styles.glassCard}>
-              <h2 style={{ fontSize: "18px", fontWeight: "700", marginBottom: "8px" }}>Personalizar Landing Page</h2>
-              <p style={{ fontSize: "13px", color: "var(--text-secondary)", marginBottom: "20px" }}>
-                Edita los contenidos, fotos y banners de tu página de presentación. Los cambios se reflejarán de inmediato en el simulador.
-              </p>
-              
-              <form onSubmit={handleSaveLanding} className={styles.adminForm}>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
-                  <div className={styles.formGroup}>
-                    <label>Título Principal</label>
-                    <input 
-                      type="text" 
-                      value={landingTitle} 
-                      onChange={e => setLandingTitle(e.target.value)} 
-                      placeholder="Ej. Corte y Estilo Exclusivo" 
-                      className={styles.formInput} 
-                    />
-                  </div>
-                  <div className={styles.formGroup}>
-                    <label>Subtítulo</label>
-                    <input 
-                      type="text" 
-                      value={landingSubtitle} 
-                      onChange={e => setLandingSubtitle(e.target.value)} 
-                      placeholder="Ej. Agenda tu cita en segundos." 
-                      className={styles.formInput} 
-                    />
-                  </div>
-                </div>
-
-                <div className={styles.formGroup}>
-                  <label>Sobre Nosotros (Historia del Negocio)</label>
-                  <textarea 
-                    value={landingAbout} 
-                    onChange={e => setLandingAbout(e.target.value)} 
-                    placeholder="Describe tu negocio, experiencia y propuesta de valor..." 
-                    className={styles.formInput} 
-                    style={{ minHeight: "80px", resize: "vertical" }}
-                  />
-                </div>
-
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "16px" }}>
-                  <div className={styles.formGroup}>
-                    <label>Logotipo del Negocio</label>
-                    <input 
-                      type="file" 
-                      id="logo-upload" 
-                      accept="image/*" 
-                      style={{ display: "none" }} 
-                      onChange={e => handleImageFileChange(e, setLogoUrl)} 
-                    />
-                    <label htmlFor="logo-upload" className={styles.uploadBtnLabel}>
-                      {logoUrl ? "Cambiar Logotipo" : "Subir Logotipo"}
-                    </label>
-                    {logoUrl && (
-                      <div style={{ marginTop: "8px", display: "flex", alignItems: "center", gap: "8px" }}>
-                        <img src={logoUrl} style={{ width: "32px", height: "32px", borderRadius: "50%", objectFit: "cover" }} />
-                        <button type="button" onClick={() => setLogoUrl("")} style={{ border: "none", background: "none", color: "var(--danger)", fontSize: "11px", fontWeight: "bold", cursor: "pointer" }}>Eliminar</button>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className={styles.formGroup}>
-                    <label>Banner Principal (Hero)</label>
-                    <input 
-                      type="file" 
-                      id="cover-upload" 
-                      accept="image/*" 
-                      style={{ display: "none" }} 
-                      onChange={e => handleImageFileChange(e, setLandingCoverUrl)} 
-                    />
-                    <label htmlFor="cover-upload" className={styles.uploadBtnLabel}>
-                      {landingCoverUrl ? "Cambiar Banner" : "Subir Banner"}
-                    </label>
-                    {landingCoverUrl && (
-                      <div style={{ marginTop: "8px", display: "flex", alignItems: "center", gap: "8px" }}>
-                        <div style={{ width: "60px", height: "32px", borderRadius: "4px", backgroundImage: `url(${landingCoverUrl})`, backgroundSize: "cover" }} />
-                        <button type="button" onClick={() => setLandingCoverUrl("")} style={{ border: "none", background: "none", color: "var(--danger)", fontSize: "11px", fontWeight: "bold", cursor: "pointer" }}>Eliminar</button>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className={styles.formGroup}>
-                    <label>Banner Secundario</label>
-                    <input 
-                      type="file" 
-                      id="sec-cover-upload" 
-                      accept="image/*" 
-                      style={{ display: "none" }} 
-                      onChange={e => handleImageFileChange(e, setLandingSecondaryCoverUrl)} 
-                    />
-                    <label htmlFor="sec-cover-upload" className={styles.uploadBtnLabel}>
-                      {landingSecondaryCoverUrl ? "Cambiar Banner Sec." : "Subir Banner Sec."}
-                    </label>
-                    {landingSecondaryCoverUrl && (
-                      <div style={{ marginTop: "8px", display: "flex", alignItems: "center", gap: "8px" }}>
-                        <div style={{ width: "60px", height: "32px", borderRadius: "4px", backgroundImage: `url(${landingSecondaryCoverUrl})`, backgroundSize: "cover" }} />
-                        <button type="button" onClick={() => setLandingSecondaryCoverUrl("")} style={{ border: "none", background: "none", color: "var(--danger)", fontSize: "11px", fontWeight: "bold", cursor: "pointer" }}>Eliminar</button>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "16px" }}>
-                  <div className={styles.formGroup}>
-                    <label>Teléfono de Contacto</label>
-                    <input 
-                      type="text" 
-                      value={landingPhone} 
-                      onChange={e => setLandingPhone(e.target.value)} 
-                      placeholder="+56 9 1234 5678" 
-                      className={styles.formInput} 
-                    />
-                  </div>
-                  <div className={styles.formGroup}>
-                    <label>Dirección</label>
-                    <input 
-                      type="text" 
-                      value={landingAddress} 
-                      onChange={e => setLandingAddress(e.target.value)} 
-                      placeholder="Ej. Av. Providencia 1234" 
-                      className={styles.formInput} 
-                    />
-                  </div>
-                  <div className={styles.formGroup}>
-                    <label>Horario de Atención</label>
-                    <input 
-                      type="text" 
-                      value={landingHours} 
-                      onChange={e => setLandingHours(e.target.value)} 
-                      placeholder="Ej. Lun a Sáb: 9:00 - 20:00" 
-                      className={styles.formInput} 
-                    />
-                  </div>
-                </div>
-
-                <div style={{ borderTop: "1px solid rgba(0,102,255,0.08)", paddingTop: "16px", marginTop: "16px" }}>
-                  <h3 style={{ fontSize: "14px", fontWeight: "700", marginBottom: "12px" }}>Ventajas Principales (¿Por qué elegirnos?)</h3>
-                  <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 2fr", gap: "12px" }}>
-                      <input type="text" value={feat1Title} onChange={e => setFeat1Title(e.target.value)} placeholder="Ventaja 1" className={styles.formInput} />
-                      <input type="text" value={feat1Desc} onChange={e => setFeat1Desc(e.target.value)} placeholder="Descripción Ventaja 1" className={styles.formInput} />
+            <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+              <section className={styles.glassCard}>
+                <h2 style={{ fontSize: "18px", fontWeight: "700", marginBottom: "8px" }}>Personalizar Landing Page</h2>
+                <p style={{ fontSize: "13px", color: "var(--text-secondary)", marginBottom: "20px" }}>
+                  Edita los contenidos, fotos y banners de tu página de presentación. Los cambios se reflejarán de inmediato en el simulador.
+                </p>
+                
+                <form onSubmit={handleSaveLanding} className={styles.adminForm}>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+                    <div className={styles.formGroup}>
+                      <label>Título Principal</label>
+                      <input 
+                        type="text" 
+                        value={landingTitle} 
+                        onChange={e => setLandingTitle(e.target.value)} 
+                        placeholder="Ej. Corte y Estilo Exclusivo" 
+                        className={styles.formInput} 
+                      />
                     </div>
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 2fr", gap: "12px" }}>
-                      <input type="text" value={feat2Title} onChange={e => setFeat2Title(e.target.value)} placeholder="Ventaja 2" className={styles.formInput} />
-                      <input type="text" value={feat2Desc} onChange={e => setFeat2Desc(e.target.value)} placeholder="Descripción Ventaja 2" className={styles.formInput} />
-                    </div>
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 2fr", gap: "12px" }}>
-                      <input type="text" value={feat3Title} onChange={e => setFeat3Title(e.target.value)} placeholder="Ventaja 3" className={styles.formInput} />
-                      <input type="text" value={feat3Desc} onChange={e => setFeat3Desc(e.target.value)} placeholder="Descripción Ventaja 3" className={styles.formInput} />
+                    <div className={styles.formGroup}>
+                      <label>Subtítulo</label>
+                      <input 
+                        type="text" 
+                        value={landingSubtitle} 
+                        onChange={e => setLandingSubtitle(e.target.value)} 
+                        placeholder="Ej. Agenda tu cita en segundos." 
+                        className={styles.formInput} 
+                      />
                     </div>
                   </div>
-                </div>
 
-                <div style={{ borderTop: "1px solid rgba(0,102,255,0.08)", paddingTop: "16px", marginTop: "16px" }}>
-                  <h3 style={{ fontSize: "14px", fontWeight: "700", marginBottom: "12px" }}>Testimonios de Clientes</h3>
-                  <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-                    <div style={{ padding: "12px", background: "rgba(0,0,0,0.01)", borderRadius: "12px", border: "1px solid var(--input-border)" }}>
-                      <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: "12px", marginBottom: "8px" }}>
-                        <input type="text" value={test1Name} onChange={e => setTest1Name(e.target.value)} placeholder="Nombre Cliente 1" className={styles.formInput} />
-                        <select value={test1Stars} onChange={e => setTest1Stars(parseInt(e.target.value))} className={styles.formInput}>
-                          <option value="5">5 estrellas</option>
-                          <option value="4">4 estrellas</option>
-                          <option value="3">3 estrellas</option>
-                        </select>
-                      </div>
-                      <input type="text" value={test1Text} onChange={e => setTest1Text(e.target.value)} placeholder="Texto del testimonio 1" className={styles.formInput} />
+                  <div className={styles.formGroup}>
+                    <label>Sobre Nosotros (Historia del Negocio)</label>
+                    <textarea 
+                      value={landingAbout} 
+                      onChange={e => setLandingAbout(e.target.value)} 
+                      placeholder="Describe tu negocio, experiencia y propuesta de valor..." 
+                      className={styles.formInput} 
+                      style={{ minHeight: "80px", resize: "vertical" }}
+                    />
+                  </div>
+
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "16px" }}>
+                    <div className={styles.formGroup}>
+                      <label>Logotipo del Negocio</label>
+                      <input 
+                        type="file" 
+                        id="logo-upload" 
+                        accept="image/*" 
+                        style={{ display: "none" }} 
+                        onChange={e => handleImageFileChange(e, setLogoUrl)} 
+                      />
+                      <label htmlFor="logo-upload" className={styles.uploadBtnLabel}>
+                        {logoUrl ? "Cambiar Logotipo" : "Subir Logotipo"}
+                      </label>
+                      {logoUrl && (
+                        <div style={{ marginTop: "8px", display: "flex", alignItems: "center", gap: "8px" }}>
+                          <img src={logoUrl} style={{ width: "32px", height: "32px", borderRadius: "50%", objectFit: "cover" }} />
+                          <button type="button" onClick={() => setLogoUrl("")} style={{ border: "none", background: "none", color: "var(--danger)", fontSize: "11px", fontWeight: "bold", cursor: "pointer" }}>Eliminar</button>
+                        </div>
+                      )}
                     </div>
 
-                    <div style={{ padding: "12px", background: "rgba(0,0,0,0.01)", borderRadius: "12px", border: "1px solid var(--input-border)" }}>
-                      <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: "12px", marginBottom: "8px" }}>
-                        <input type="text" value={test2Name} onChange={e => setTest2Name(e.target.value)} placeholder="Nombre Cliente 2" className={styles.formInput} />
-                        <select value={test2Stars} onChange={e => setTest2Stars(parseInt(e.target.value))} className={styles.formInput}>
-                          <option value="5">5 estrellas</option>
-                          <option value="4">4 estrellas</option>
-                          <option value="3">3 estrellas</option>
-                        </select>
-                      </div>
-                      <input type="text" value={test2Text} onChange={e => setTest2Text(e.target.value)} placeholder="Texto del testimonio 2" className={styles.formInput} />
+                    <div className={styles.formGroup}>
+                      <label>Banner Principal (Hero)</label>
+                      <input 
+                        type="file" 
+                        id="cover-upload" 
+                        accept="image/*" 
+                        style={{ display: "none" }} 
+                        onChange={e => handleImageFileChange(e, setLandingCoverUrl)} 
+                      />
+                      <label htmlFor="cover-upload" className={styles.uploadBtnLabel}>
+                        {landingCoverUrl ? "Cambiar Banner" : "Subir Banner"}
+                      </label>
+                      {landingCoverUrl && (
+                        <div style={{ marginTop: "8px", display: "flex", alignItems: "center", gap: "8px" }}>
+                          <div style={{ width: "60px", height: "32px", borderRadius: "4px", backgroundImage: `url(${landingCoverUrl})`, backgroundSize: "cover" }} />
+                          <button type="button" onClick={() => setLandingCoverUrl("")} style={{ border: "none", background: "none", color: "var(--danger)", fontSize: "11px", fontWeight: "bold", cursor: "pointer" }}>Eliminar</button>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className={styles.formGroup}>
+                      <label>Banner Secundario</label>
+                      <input 
+                        type="file" 
+                        id="sec-cover-upload" 
+                        accept="image/*" 
+                        style={{ display: "none" }} 
+                        onChange={e => handleImageFileChange(e, setLandingSecondaryCoverUrl)} 
+                      />
+                      <label htmlFor="sec-cover-upload" className={styles.uploadBtnLabel}>
+                        {landingSecondaryCoverUrl ? "Cambiar Banner Sec." : "Subir Banner Sec."}
+                      </label>
+                      {landingSecondaryCoverUrl && (
+                        <div style={{ marginTop: "8px", display: "flex", alignItems: "center", gap: "8px" }}>
+                          <div style={{ width: "60px", height: "32px", borderRadius: "4px", backgroundImage: `url(${landingSecondaryCoverUrl})`, backgroundSize: "cover" }} />
+                          <button type="button" onClick={() => setLandingSecondaryCoverUrl("")} style={{ border: "none", background: "none", color: "var(--danger)", fontSize: "11px", fontWeight: "bold", cursor: "pointer" }}>Eliminar</button>
+                        </div>
+                      )}
                     </div>
                   </div>
-                </div>
 
-                <button type="submit" disabled={isSavingLanding} className={styles.submitButton} style={{ marginTop: "20px" }}>
-                  {isSavingLanding ? "Guardando Cambios..." : "Guardar Cambios"}
-                </button>
-              </form>
-            </section>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "16px" }}>
+                    <div className={styles.formGroup}>
+                      <label>Teléfono de Contacto</label>
+                      <input 
+                        type="text" 
+                        value={landingPhone} 
+                        onChange={e => setLandingPhone(e.target.value)} 
+                        placeholder="+56 9 1234 5678" 
+                        className={styles.formInput} 
+                      />
+                    </div>
+                    <div className={styles.formGroup}>
+                      <label>Dirección</label>
+                      <input 
+                        type="text" 
+                        value={landingAddress} 
+                        onChange={e => setLandingAddress(e.target.value)} 
+                        placeholder="Ej. Av. Providencia 1234" 
+                        className={styles.formInput} 
+                      />
+                    </div>
+                    <div className={styles.formGroup}>
+                      <label>Horario de Atención</label>
+                      <input 
+                        type="text" 
+                        value={landingHours} 
+                        onChange={e => setLandingHours(e.target.value)} 
+                        placeholder="Ej. Lun a Sáb: 9:00 - 20:00" 
+                        className={styles.formInput} 
+                      />
+                    </div>
+                  </div>
+
+                  <div style={{ borderTop: "1px solid rgba(0,102,255,0.08)", paddingTop: "16px", marginTop: "16px" }}>
+                    <h3 style={{ fontSize: "14px", fontWeight: "700", marginBottom: "12px" }}>Ventajas Principales (¿Por qué elegirnos?)</h3>
+                    <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 2fr", gap: "12px" }}>
+                        <input type="text" value={feat1Title} onChange={e => setFeat1Title(e.target.value)} placeholder="Ventaja 1" className={styles.formInput} />
+                        <input type="text" value={feat1Desc} onChange={e => setFeat1Desc(e.target.value)} placeholder="Descripción Ventaja 1" className={styles.formInput} />
+                      </div>
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 2fr", gap: "12px" }}>
+                        <input type="text" value={feat2Title} onChange={e => setFeat2Title(e.target.value)} placeholder="Ventaja 2" className={styles.formInput} />
+                        <input type="text" value={feat2Desc} onChange={e => setFeat2Desc(e.target.value)} placeholder="Descripción Ventaja 2" className={styles.formInput} />
+                      </div>
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 2fr", gap: "12px" }}>
+                        <input type="text" value={feat3Title} onChange={e => setFeat3Title(e.target.value)} placeholder="Ventaja 3" className={styles.formInput} />
+                        <input type="text" value={feat3Desc} onChange={e => setFeat3Desc(e.target.value)} placeholder="Descripción Ventaja 3" className={styles.formInput} />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div style={{ borderTop: "1px solid rgba(0,102,255,0.08)", paddingTop: "16px", marginTop: "16px" }}>
+                    <h3 style={{ fontSize: "14px", fontWeight: "700", marginBottom: "12px" }}>Testimonios de Clientes</h3>
+                    <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                      <div style={{ padding: "12px", background: "rgba(0,0,0,0.01)", borderRadius: "12px", border: "1px solid var(--input-border)" }}>
+                        <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: "12px", marginBottom: "8px" }}>
+                          <input type="text" value={test1Name} onChange={e => setTest1Name(e.target.value)} placeholder="Nombre Cliente 1" className={styles.formInput} />
+                          <select value={test1Stars} onChange={e => setTest1Stars(parseInt(e.target.value))} className={styles.formInput}>
+                            <option value="5">5 estrellas</option>
+                            <option value="4">4 estrellas</option>
+                            <option value="3">3 estrellas</option>
+                          </select>
+                        </div>
+                        <input type="text" value={test1Text} onChange={e => setTest1Text(e.target.value)} placeholder="Texto del testimonio 1" className={styles.formInput} />
+                      </div>
+
+                      <div style={{ padding: "12px", background: "rgba(0,0,0,0.01)", borderRadius: "12px", border: "1px solid var(--input-border)" }}>
+                        <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: "12px", marginBottom: "8px" }}>
+                          <input type="text" value={test2Name} onChange={e => setTest2Name(e.target.value)} placeholder="Nombre Cliente 2" className={styles.formInput} />
+                          <select value={test2Stars} onChange={e => setTest2Stars(parseInt(e.target.value))} className={styles.formInput}>
+                            <option value="5">5 estrellas</option>
+                            <option value="4">4 estrellas</option>
+                            <option value="3">3 estrellas</option>
+                          </select>
+                        </div>
+                        <input type="text" value={test2Text} onChange={e => setTest2Text(e.target.value)} placeholder="Texto del testimonio 2" className={styles.formInput} />
+                      </div>
+                    </div>
+                  </div>
+
+                  <button type="submit" disabled={isSavingLanding} className={styles.submitButton} style={{ marginTop: "20px" }}>
+                    {isSavingLanding ? "Guardando Cambios..." : "Guardar Cambios"}
+                  </button>
+                </form>
+              </section>
+
+              <section className={styles.glassCard}>
+                <h2 style={{ fontSize: "18px", fontWeight: "700", marginBottom: "8px", display: "flex", alignItems: "center", gap: "8px" }}>
+                  🌐 Dominio Personalizado
+                </h2>
+                <p style={{ fontSize: "13px", color: "var(--text-secondary)", marginBottom: "20px" }}>
+                  Configura tu propia dirección web (ej: <code>mi-negocio.cl</code>) para que tus clientes accedan directamente a tu landing page y agenda de reservas.
+                </p>
+
+                {business.customDomain ? (
+                  <div>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: "rgba(52, 199, 89, 0.08)", border: "1px solid rgba(52, 199, 89, 0.2)", padding: "14px 16px", borderRadius: "12px", marginBottom: "20px" }}>
+                      <div>
+                        <span style={{ fontSize: "11px", fontWeight: "bold", textTransform: "uppercase", color: "#34c759", display: "block", letterSpacing: "0.5px" }}>Estado del Dominio</span>
+                        <a href={`https://${business.customDomain}`} target="_blank" rel="noopener noreferrer" style={{ fontSize: "15px", fontWeight: "700", color: "var(--primary)", textDecoration: "underline", display: "inline-block", marginTop: "4px" }}>
+                          {business.customDomain}
+                        </a>
+                      </div>
+                      <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                        <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#34c759", display: "inline-block", boxShadow: "0 0 8px #34c759" }} />
+                        <span style={{ fontSize: "13px", fontWeight: "700", color: "#34c759" }}>Activo</span>
+                      </div>
+                    </div>
+
+                    <div style={{ background: "rgba(255, 255, 255, 0.03)", border: "1px solid var(--card-border)", borderRadius: "12px", padding: "16px" }}>
+                      <h3 style={{ fontSize: "13px", fontWeight: "700", marginBottom: "12px", color: "var(--foreground)" }}>Instrucciones de Configuración DNS</h3>
+                      <p style={{ fontSize: "12.5px", color: "var(--text-secondary)", lineHeight: "1.5", marginBottom: "12px" }}>
+                        Para activar y mantener enlazado tu dominio, debes configurar los siguientes registros en tu proveedor de DNS (ej: NIC Chile, GoDaddy, Cloudflare, etc.):
+                      </p>
+                      
+                      <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1.5fr 2fr", gap: "8px", background: "rgba(0,0,0,0.02)", padding: "10px", borderRadius: "8px", fontSize: "12px", border: "1px solid var(--card-border)" }}>
+                          <div><strong>Tipo:</strong> CNAME</div>
+                          <div><strong>Nombre/Host:</strong> <code>@</code> (o raíz)</div>
+                          <div><strong>Valor/Destino:</strong> <code>agendalink.cl</code></div>
+                        </div>
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1.5fr 2fr", gap: "8px", background: "rgba(0,0,0,0.02)", padding: "10px", borderRadius: "8px", fontSize: "12px", border: "1px solid var(--card-border)" }}>
+                          <div><strong>Tipo:</strong> CNAME</div>
+                          <div><strong>Nombre/Host:</strong> <code>www</code></div>
+                          <div><strong>Valor/Destino:</strong> <code>agendalink.cl</code></div>
+                        </div>
+                      </div>
+
+                      <div style={{ display: "flex", gap: "8px", marginTop: "14px", background: "rgba(0, 102, 255, 0.05)", border: "1px solid rgba(0, 102, 255, 0.1)", padding: "10px 12px", borderRadius: "8px" }}>
+                        <span style={{ fontSize: "16px" }}>💡</span>
+                        <p style={{ fontSize: "11px", color: "var(--text-secondary)", lineHeight: "1.4", margin: 0 }}>
+                          La propagación de los cambios en el DNS puede tardar desde unos minutos hasta 24 horas dependiendo de tu proveedor.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    <div style={{ display: "flex", alignItems: "center", gap: "12px", background: "rgba(0, 102, 255, 0.05)", border: "1px solid rgba(0, 102, 255, 0.1)", padding: "16px", borderRadius: "12px", marginBottom: "20px" }}>
+                      <span style={{ fontSize: "24px" }}>💎</span>
+                      <div style={{ textAlign: "left" }}>
+                        <h3 style={{ fontSize: "14px", fontWeight: "700", color: "var(--foreground)", margin: "0 0 4px 0" }}>Dale un toque profesional a tu negocio</h3>
+                        <p style={{ fontSize: "12.5px", color: "var(--text-secondary)", lineHeight: "1.4", margin: 0 }}>
+                          Con un dominio personalizado, tus clientes verán una dirección como <code>www.tualianza.cl</code> en vez de <code>agendalink.cl/{business.slug}</code>.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div style={{ display: "flex", flexDirection: "column", gap: "12px", alignItems: "center", textAlign: "center", padding: "10px 0" }}>
+                      <button 
+                        type="button" 
+                        onClick={() => {
+                          window.open(`https://wa.me/56982731102?text=Hola,%20quisiera%20solicitar%20un%20dominio%20personalizado%20para%20mi%20negocio%20${business.slug}`, "_blank");
+                        }}
+                        className={styles.submitButton}
+                        style={{ width: "auto", padding: "10px 24px", background: "var(--primary)" }}
+                      >
+                        Solicitar Dominio Personalizado 🚀
+                      </button>
+                      <span style={{ fontSize: "11px", color: "var(--text-secondary)" }}>
+                        *Disponible para planes Premium. Nuestro equipo lo configurará por ti de inmediato.
+                      </span>
+                    </div>
+                  </div>
+                )}
+              </section>
+            </div>
 
             {/* iPhone Simulator Live Preview */}
             <div className={styles.previewContainer}>
@@ -2260,44 +2462,174 @@ export default function AdminDashboard({ params }: { params: Promise<{ slug: str
             )}
 
             {salesSubTab === "membresias" && (
-              <section className={styles.glassCard}>
-                <h2 style={{ fontSize: "16px", fontWeight: "700", marginBottom: "16px" }}>Membresías de Clientes</h2>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}>
-                  <div className={styles.configToggleRow} style={{ flexDirection: "column", alignItems: "flex-start", gap: "12px" }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", width: "100%" }}>
-                      <strong style={{ fontSize: "14px" }}>Plan 10 Sesiones - Masaje Descontracturante</strong>
-                      <span className={styles.badgePaid}>Activo</span>
-                    </div>
-                    <span style={{ fontSize: "12px", color: "var(--text-secondary)" }}>Cliente: María Jesús (WhatsApp: +56 9 8765 4321)</span>
-                    <div style={{ width: "100%", marginTop: "6px" }}>
-                      <div style={{ display: "flex", justifyContent: "space-between", fontSize: "11px", color: "var(--text-secondary)", marginBottom: "4px" }}>
-                        <span>Progreso de Sesiones Consumidas</span>
-                        <span>4 / 10 (40%)</span>
-                      </div>
-                      <div className={styles.progressBarBg}>
-                        <div className={styles.progressBarFill} style={{ width: "40%", background: "var(--primary)" }} />
-                      </div>
-                    </div>
-                  </div>
+              <div style={{ display: "grid", gridTemplateColumns: "1.2fr 0.8fr", gap: "24px" }}>
+                <section className={styles.glassCard}>
+                  <h2 style={{ fontSize: "16px", fontWeight: "700", marginBottom: "16px" }}>Membresías de Clientes</h2>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                    {memberships.map((m) => {
+                      const percent = Math.min(100, Math.round((m.current / m.total) * 100));
+                      const isSessions = m.name.toLowerCase().includes("sesion") || m.name.toLowerCase().includes("sesión");
+                      const progressLabel = isSessions ? "Progreso de Sesiones Consumidas" : "Días Restantes de Acceso";
+                      const progressValue = isSessions ? `${m.current} / ${m.total} (${percent}%)` : `${m.current} / ${m.total} días (${percent}%)`;
+                      const progressBarColor = isSessions ? "var(--primary)" : "var(--success)";
 
-                  <div className={styles.configToggleRow} style={{ flexDirection: "column", alignItems: "flex-start", gap: "12px" }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", width: "100%" }}>
-                      <strong style={{ fontSize: "14px" }}>Pase Mensual - Spa Completo</strong>
-                      <span className={styles.badgePaid}>Activo</span>
-                    </div>
-                    <span style={{ fontSize: "12px", color: "var(--text-secondary)" }}>Cliente: Rodrigo A. (WhatsApp: +56 9 1234 5678)</span>
-                    <div style={{ width: "100%", marginTop: "6px" }}>
-                      <div style={{ display: "flex", justifyContent: "space-between", fontSize: "11px", color: "var(--text-secondary)", marginBottom: "4px" }}>
-                        <span>Días Restantes de Acceso</span>
-                        <span>22 / 30 días (73%)</span>
-                      </div>
-                      <div className={styles.progressBarBg}>
-                        <div className={styles.progressBarFill} style={{ width: "73%", background: "var(--success)" }} />
-                      </div>
-                    </div>
+                      return (
+                        <div key={m.id} className={styles.configToggleRow} style={{ flexDirection: "column", alignItems: "flex-start", gap: "12px", background: "rgba(0,0,0,0.01)", border: "1px solid var(--card-border)", padding: "16px", borderRadius: "16px" }}>
+                          <div style={{ display: "flex", justifyContent: "space-between", width: "100%", alignItems: "center" }}>
+                            <strong style={{ fontSize: "14px" }}>{m.name}</strong>
+                            <span className={m.status === "Activo" ? styles.badgePaid : styles.badgeRefunded} style={{ fontSize: "10px", padding: "2px 8px" }}>{m.status}</span>
+                          </div>
+                          <div style={{ display: "flex", justifyContent: "space-between", width: "100%", alignItems: "center" }}>
+                            <span style={{ fontSize: "12px", color: "var(--text-secondary)" }}>
+                              Cliente: {m.clientName} (WhatsApp: {m.phone})
+                            </span>
+                            <div style={{ display: "flex", gap: "6px" }}>
+                              {/* Quick edit buttons */}
+                              <button
+                                onClick={() => {
+                                  setMemberships(prev => prev.map(item => item.id === m.id ? { ...item, current: Math.max(0, item.current - 1) } : item));
+                                }}
+                                style={{ border: "1px solid var(--card-border)", background: "white", borderRadius: "4px", width: "24px", height: "24px", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", fontSize: "12px", fontWeight: "bold" }}
+                                title="Disminuir"
+                              >-</button>
+                              <button
+                                onClick={() => {
+                                  setMemberships(prev => prev.map(item => item.id === m.id ? { ...item, current: Math.min(item.total, item.current + 1) } : item));
+                                }}
+                                style={{ border: "1px solid var(--card-border)", background: "white", borderRadius: "4px", width: "24px", height: "24px", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", fontSize: "12px", fontWeight: "bold" }}
+                                title="Incrementar"
+                              >+</button>
+                              <button
+                                onClick={() => {
+                                  setEditingMembershipId(m.id);
+                                  setEditingMembershipName(m.name);
+                                  setEditingMembershipClient(m.clientName);
+                                  setEditingMembershipPhone(m.phone);
+                                  setEditingMembershipCurrent(m.current);
+                                  setEditingMembershipTotal(m.total);
+                                  setEditingMembershipStatus(m.status);
+                                }}
+                                style={{ border: "1px solid var(--primary)", background: "rgba(0,102,255,0.05)", color: "var(--primary)", borderRadius: "4px", padding: "0 8px", fontSize: "11px", height: "24px", cursor: "pointer", fontWeight: "600" }}
+                              >
+                                Editar
+                              </button>
+                            </div>
+                          </div>
+                          <div style={{ width: "100%", marginTop: "4px" }}>
+                            <div style={{ display: "flex", justifyContent: "space-between", fontSize: "11px", color: "var(--text-secondary)", marginBottom: "4px" }}>
+                              <span>{progressLabel}</span>
+                              <span>{progressValue}</span>
+                            </div>
+                            <div className={styles.progressBarBg}>
+                              <div className={styles.progressBarFill} style={{ width: `${percent}%`, background: progressBarColor }} />
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
-                </div>
-              </section>
+                </section>
+
+                <section className={styles.glassCard}>
+                  {editingMembershipId ? (
+                    <div>
+                      <h3 style={{ fontSize: "15px", fontWeight: "700", marginBottom: "16px" }}>Editar Membresía</h3>
+                      <form onSubmit={e => {
+                        e.preventDefault();
+                        setMemberships(prev => prev.map(item => item.id === editingMembershipId ? {
+                          ...item,
+                          name: editingMembershipName,
+                          clientName: editingMembershipClient,
+                          phone: editingMembershipPhone,
+                          current: Number(editingMembershipCurrent),
+                          total: Number(editingMembershipTotal),
+                          status: editingMembershipStatus
+                        } : item));
+                        setEditingMembershipId(null);
+                        alert("Membresía actualizada con éxito");
+                      }} className={styles.adminForm}>
+                        <div className={styles.formGroup}>
+                          <label>Nombre del Plan</label>
+                          <input type="text" required value={editingMembershipName} onChange={e => setEditingMembershipName(e.target.value)} className={styles.formInput} />
+                        </div>
+                        <div className={styles.formGroup}>
+                          <label>Nombre del Cliente</label>
+                          <input type="text" required value={editingMembershipClient} onChange={e => setEditingMembershipClient(e.target.value)} className={styles.formInput} />
+                        </div>
+                        <div className={styles.formGroup}>
+                          <label>WhatsApp / Teléfono</label>
+                          <input type="text" required value={editingMembershipPhone} onChange={e => setEditingMembershipPhone(e.target.value)} className={styles.formInput} />
+                        </div>
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+                          <div className={styles.formGroup}>
+                            <label>Consumido</label>
+                            <input type="number" required value={editingMembershipCurrent} onChange={e => setEditingMembershipCurrent(Number(e.target.value))} className={styles.formInput} />
+                          </div>
+                          <div className={styles.formGroup}>
+                            <label>Total Plan</label>
+                            <input type="number" required value={editingMembershipTotal} onChange={e => setEditingMembershipTotal(Number(e.target.value))} className={styles.formInput} />
+                          </div>
+                        </div>
+                        <div className={styles.formGroup}>
+                          <label>Estado</label>
+                          <select value={editingMembershipStatus} onChange={e => setEditingMembershipStatus(e.target.value)} className={styles.formInput} style={{ background: "white" }}>
+                            <option value="Activo">Activo</option>
+                            <option value="Vencido">Vencido</option>
+                            <option value="Pausado">Pausado</option>
+                          </select>
+                        </div>
+                        <div style={{ display: "flex", gap: "10px", marginTop: "8px" }}>
+                          <button type="submit" className={styles.submitButton} style={{ flex: 1 }}>Guardar</button>
+                          <button type="button" onClick={() => setEditingMembershipId(null)} className={styles.todayDetailsBtn} style={{ flex: 1, minHeight: "42px" }}>Cancelar</button>
+                        </div>
+                      </form>
+                    </div>
+                  ) : (
+                    <div>
+                      <h3 style={{ fontSize: "15px", fontWeight: "700", marginBottom: "16px" }}>Crear Membresía</h3>
+                      <form onSubmit={e => {
+                        e.preventDefault();
+                        const target = e.target as any;
+                        const name = target.planName.value;
+                        const clientName = target.clientName.value;
+                        const phone = target.phone.value;
+                        const total = Number(target.total.value);
+                        
+                        const newM: any = {
+                          id: memberships.length + 1,
+                          name,
+                          clientName,
+                          phone,
+                          current: 0,
+                          total,
+                          status: "Activo"
+                        };
+                        setMemberships(prev => [...prev, newM]);
+                        target.reset();
+                        alert("Membresía creada con éxito");
+                      }} className={styles.adminForm}>
+                        <div className={styles.formGroup}>
+                          <label>Nombre del Plan</label>
+                          <input type="text" name="planName" required placeholder="Ej. Plan 5 Sesiones Kinesiología" className={styles.formInput} />
+                        </div>
+                        <div className={styles.formGroup}>
+                          <label>Nombre del Cliente</label>
+                          <input type="text" name="clientName" required placeholder="Ej. Camila Silva" className={styles.formInput} />
+                        </div>
+                        <div className={styles.formGroup}>
+                          <label>WhatsApp / Teléfono</label>
+                          <input type="text" name="phone" required placeholder="Ej. +56 9 1234 5678" className={styles.formInput} />
+                        </div>
+                        <div className={styles.formGroup}>
+                          <label>Cantidad de Sesiones o Días</label>
+                          <input type="number" name="total" required placeholder="Ej. 10" className={styles.formInput} />
+                        </div>
+                        <button type="submit" className={styles.submitButton}>Crear Membresía</button>
+                      </form>
+                    </div>
+                  )}
+                </section>
+              </div>
             )}
 
             {salesSubTab === "giftcards" && (
@@ -2305,47 +2637,105 @@ export default function AdminDashboard({ params }: { params: Promise<{ slug: str
                 <section className={styles.glassCard}>
                   <h2 style={{ fontSize: "16px", fontWeight: "700", marginBottom: "16px" }}>Tarjetas de Regalo Emitidas</h2>
                   <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-                    <div className={styles.giftCardItem}>
-                      <div className={styles.giftCardHeader}>
-                        <div>
-                          <strong style={{ fontSize: "14px", color: "var(--primary)" }}>COD-GIFT-9827</strong>
-                          <p style={{ fontSize: "12px", color: "var(--text-secondary)", marginTop: "2px" }}>Beneficiario: Antonia Valenzuela</p>
-                        </div>
-                        <div style={{ textAlign: "right" }}>
-                          <span style={{ fontSize: "16px", fontWeight: "800" }}>$50.000 CLP</span>
-                          <span className={styles.badgePaid} style={{ display: "block", marginTop: "4px", fontSize: "9px" }}>Vigente</span>
+                    {giftCards.map((gc) => (
+                      <div key={gc.id} className={styles.giftCardItem} style={{ border: "1px solid var(--card-border)", borderRadius: "12px", padding: "14px", background: "white" }}>
+                        <div className={styles.giftCardHeader} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                          <div>
+                            <strong style={{ fontSize: "14px", color: "var(--primary)" }}>{gc.id}</strong>
+                            <p style={{ fontSize: "12px", color: "var(--text-secondary)", marginTop: "2px" }}>Beneficiario: {gc.beneficiary}</p>
+                          </div>
+                          <div style={{ textAlign: "right", display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "4px" }}>
+                            <span style={{ fontSize: "16px", fontWeight: "800" }}>{formatPrice(gc.amount, business?.currency || "CLP")}</span>
+                            <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+                              <span className={gc.status === "Vigente" ? styles.badgePaid : styles.badgeRefunded} style={{ fontSize: "9px", padding: "2px 6px" }}>{gc.status}</span>
+                              <button
+                                onClick={() => {
+                                  setEditingGiftCardId(gc.id);
+                                  setEditingGiftCardBeneficiary(gc.beneficiary);
+                                  setEditingGiftCardAmount(gc.amount);
+                                  setEditingGiftCardStatus(gc.status);
+                                }}
+                                style={{ border: "1px solid var(--primary)", background: "rgba(0,102,255,0.05)", color: "var(--primary)", borderRadius: "4px", padding: "2px 8px", fontSize: "10px", cursor: "pointer", fontWeight: "600" }}
+                              >
+                                Editar
+                              </button>
+                            </div>
+                          </div>
                         </div>
                       </div>
-                    </div>
-
-                    <div className={styles.giftCardItem}>
-                      <div className={styles.giftCardHeader}>
-                        <div>
-                          <strong style={{ fontSize: "14px", color: "var(--primary)" }}>COD-GIFT-1102</strong>
-                          <p style={{ fontSize: "12px", color: "var(--text-secondary)", marginTop: "2px" }}>Beneficiario: Ignacio Pérez</p>
-                        </div>
-                        <div style={{ textAlign: "right" }}>
-                          <span style={{ fontSize: "16px", fontWeight: "800" }}>$25.000 CLP</span>
-                          <span className={styles.badgePaid} style={{ display: "block", marginTop: "4px", fontSize: "9px" }}>Vigente</span>
-                        </div>
-                      </div>
-                    </div>
+                    ))}
                   </div>
                 </section>
 
                 <section className={styles.glassCard}>
-                  <h3 style={{ fontSize: "15px", fontWeight: "700", marginBottom: "16px" }}>Crear Gift Card</h3>
-                  <form onSubmit={e => { e.preventDefault(); alert("¡Gift Card emitida exitosamente!"); }} className={styles.adminForm}>
-                    <div className={styles.formGroup}>
-                      <label>Nombre del Beneficiario</label>
-                      <input type="text" required placeholder="Ej. Juan Gómez" className={styles.formInput} />
+                  {editingGiftCardId ? (
+                    <div>
+                      <h3 style={{ fontSize: "15px", fontWeight: "700", marginBottom: "16px" }}>Editar Gift Card</h3>
+                      <form onSubmit={e => {
+                        e.preventDefault();
+                        setGiftCards(prev => prev.map(item => item.id === editingGiftCardId ? {
+                          ...item,
+                          beneficiary: editingGiftCardBeneficiary,
+                          amount: Number(editingGiftCardAmount),
+                          status: editingGiftCardStatus
+                        } : item));
+                        setEditingGiftCardId(null);
+                        alert("¡Gift Card actualizada exitosamente!");
+                      }} className={styles.adminForm}>
+                        <div className={styles.formGroup}>
+                          <label>Código Tarjeta</label>
+                          <input type="text" disabled value={editingGiftCardId} className={styles.formInput} style={{ background: "#f5f5f7", cursor: "not-allowed" }} />
+                        </div>
+                        <div className={styles.formGroup}>
+                          <label>Nombre del Beneficiario</label>
+                          <input type="text" required value={editingGiftCardBeneficiary} onChange={e => setEditingGiftCardBeneficiary(e.target.value)} className={styles.formInput} />
+                        </div>
+                        <div className={styles.formGroup}>
+                          <label>Monto</label>
+                          <input type="number" required value={editingGiftCardAmount} onChange={e => setEditingGiftCardAmount(Number(e.target.value))} className={styles.formInput} />
+                        </div>
+                        <div className={styles.formGroup}>
+                          <label>Estado</label>
+                          <select value={editingGiftCardStatus} onChange={e => setEditingGiftCardStatus(e.target.value)} className={styles.formInput} style={{ background: "white" }}>
+                            <option value="Vigente">Vigente</option>
+                            <option value="Canjeada">Canjeada</option>
+                            <option value="Expirada">Expirada</option>
+                          </select>
+                        </div>
+                        <div style={{ display: "flex", gap: "10px", marginTop: "8px" }}>
+                          <button type="submit" className={styles.submitButton} style={{ flex: 1 }}>Guardar</button>
+                          <button type="button" onClick={() => setEditingGiftCardId(null)} className={styles.todayDetailsBtn} style={{ flex: 1, minHeight: "42px" }}>Cancelar</button>
+                        </div>
+                      </form>
                     </div>
-                    <div className={styles.formGroup}>
-                      <label>Monto</label>
-                      <input type="number" required placeholder="Ej. 15000" className={styles.formInput} />
+                  ) : (
+                    <div>
+                      <h3 style={{ fontSize: "15px", fontWeight: "700", marginBottom: "16px" }}>Crear Gift Card</h3>
+                      <form onSubmit={e => {
+                        e.preventDefault();
+                        const nextCode = `COD-GIFT-${Math.floor(1000 + Math.random() * 9000)}`;
+                        setGiftCards(prev => [...prev, {
+                          id: nextCode,
+                          beneficiary: giftCardBeneficiary,
+                          amount: Number(giftCardAmount),
+                          status: "Vigente"
+                        }]);
+                        setGiftCardBeneficiary("");
+                        setGiftCardAmount("");
+                        alert("¡Gift Card emitida exitosamente!");
+                      }} className={styles.adminForm}>
+                        <div className={styles.formGroup}>
+                          <label>Nombre del Beneficiario</label>
+                          <input type="text" required placeholder="Ej. Juan Gómez" value={giftCardBeneficiary} onChange={e => setGiftCardBeneficiary(e.target.value)} className={styles.formInput} />
+                        </div>
+                        <div className={styles.formGroup}>
+                          <label>Monto</label>
+                          <input type="number" required placeholder="Ej. 15000" value={giftCardAmount} onChange={e => setGiftCardAmount(e.target.value)} className={styles.formInput} />
+                        </div>
+                        <button type="submit" className={styles.submitButton}>Emitir Tarjeta</button>
+                      </form>
                     </div>
-                    <button type="submit" className={styles.submitButton}>Emitir Tarjeta</button>
-                  </form>
+                  )}
                 </section>
               </div>
             )}
@@ -2363,11 +2753,11 @@ export default function AdminDashboard({ params }: { params: Promise<{ slug: str
                       </div>
                       <div style={{ display: "flex", justifyContent: "space-between" }}>
                         <span>Ingresos Online Tarjeta:</span>
-                        <strong>{formatPrice(totalSales, business.currency)}</strong>
+                        <strong>{formatPrice(totalSales, business?.currency || "CLP")}</strong>
                       </div>
                       <div style={{ display: "flex", justifyContent: "space-between", borderTop: "1px solid rgba(0,0,0,0.05)", paddingTop: "8px", fontSize: "15px" }}>
                         <span>Total Balance Caja:</span>
-                        <strong style={{ color: "var(--primary)" }}>{formatPrice(totalSales + 50000, business.currency)}</strong>
+                        <strong style={{ color: "var(--primary)" }}>{formatPrice(totalSales + 50000, business?.currency || "CLP")}</strong>
                       </div>
                     </div>
                   </div>
@@ -2377,17 +2767,25 @@ export default function AdminDashboard({ params }: { params: Promise<{ slug: str
                     <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginTop: "12px" }}>
                       <div style={{ display: "flex", justifyContent: "space-between" }}>
                         <span>Propinas Acumuladas 10%:</span>
-                        <strong>{formatPrice(totalSales * 0.1, business.currency)}</strong>
+                        <strong>{formatPrice(totalSales * 0.1, business?.currency || "CLP")}</strong>
                       </div>
                       <div style={{ display: "flex", justifyContent: "space-between" }}>
                         <span>Propinas por Liquidar:</span>
-                        <strong>{formatPrice(totalSales * 0.1, business.currency)}</strong>
+                        <strong>{formatPrice(Math.max(0, (totalSales * 0.1) - liquidatedTips), business?.currency || "CLP")}</strong>
                       </div>
                       <button 
-                        onClick={() => alert("¡Propinas liquidadas con éxito al staff de turno!")}
+                        onClick={() => {
+                          const toLiquidate = Math.max(0, (totalSales * 0.1) - liquidatedTips);
+                          if (toLiquidate <= 0) {
+                            alert("No hay propinas pendientes por liquidar.");
+                            return;
+                          }
+                          setLiquidatedTips(totalSales * 0.1);
+                          alert(`¡Propinas por un monto de ${formatPrice(toLiquidate, business?.currency || "CLP")} liquidadas con éxito al staff de turno!`);
+                        }}
                         className={styles.submitButton} 
                         style={{ marginTop: "12px", minHeight: "36px" }}
-                        disabled={totalSales === 0}
+                        disabled={Math.max(0, (totalSales * 0.1) - liquidatedTips) <= 0}
                       >
                         Liquidar Propinas
                       </button>
@@ -2896,10 +3294,10 @@ export default function AdminDashboard({ params }: { params: Promise<{ slug: str
                   Comparte tu enlace de recomendación con otros dueños de negocios. Cuando se registren y activen su cuenta, ambos recibirán 3 meses de suscripción gratis.
                 </p>
                 <div style={{ display: "flex", gap: "8px", background: "rgba(0,0,0,0.02)", border: "1px solid var(--input-border)", borderRadius: "12px", padding: "8px 12px", alignItems: "center", justifyContent: "space-between" }}>
-                  <code style={{ fontSize: "12px", fontWeight: "bold" }}>agendalink.com/ref/JO123</code>
+                  <code style={{ fontSize: "12px", fontWeight: "bold" }}>agendalink.cl/ref/JO123</code>
                   <button 
                     onClick={() => {
-                      navigator.clipboard.writeText("agendalink.com/ref/JO123");
+                      navigator.clipboard.writeText("agendalink.cl/ref/JO123");
                       alert("Enlace copiado al portapapeles");
                     }}
                     className={styles.todayDetailsBtn}
@@ -2961,15 +3359,113 @@ export default function AdminDashboard({ params }: { params: Promise<{ slug: str
                     <h4 style={{ fontWeight: 600, color: "var(--success)" }}>¡Pago Procesado Exitosamente!</h4>
                     <p style={{ fontSize: "12px", color: "var(--text-secondary)", marginTop: "4px" }}>Tu suscripción se encuentra activa. Factura agregada a tu cuenta.</p>
                   </div>
-                ) : (
+                                ) : (
                   <div>
-                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "16px", background: "rgba(0, 102, 255, 0.04)", border: "1px solid rgba(0, 102, 255, 0.1)", padding: "12px", borderRadius: "12px" }}>
-                      <div>
-                        <strong style={{ fontSize: "14px" }}>Plan AgendaLink Premium</strong>
-                        <span style={{ display: "block", fontSize: "11px", color: "var(--text-secondary)", marginTop: "2px" }}>Suscripción mensual recurrente</span>
-                      </div>
-                      <span style={{ fontSize: "16px", fontWeight: "800", color: "var(--primary)" }}>$29.900 CLP</span>
+                    {/* Segmented plan selector */}
+                    <div style={{
+                      display: "grid",
+                      gridTemplateColumns: "1fr 1fr 1fr",
+                      background: "rgba(0,0,0,0.05)",
+                      padding: "4px",
+                      borderRadius: "10px",
+                      marginBottom: "16px",
+                      gap: "4px"
+                    }}>
+                      {(["INDIVIDUAL", "EQUIPO", "NEGOCIO"] as const).map(pKey => (
+                        <button
+                          key={pKey}
+                          type="button"
+                          onClick={() => setSelectedPlanId(pKey)}
+                          style={{
+                            border: "none",
+                            background: selectedPlanId === pKey ? "white" : "transparent",
+                            padding: "8px 4px",
+                            borderRadius: "7px",
+                            fontSize: "11px",
+                            fontWeight: selectedPlanId === pKey ? "bold" : "normal",
+                            color: selectedPlanId === pKey ? "var(--primary)" : "var(--text-secondary)",
+                            cursor: "pointer",
+                            boxShadow: selectedPlanId === pKey ? "0 2px 5px rgba(0,0,0,0.05)" : "none",
+                            transition: "all 0.15s ease"
+                          }}
+                        >
+                          {pKey === "INDIVIDUAL" ? "Individual" : pKey === "EQUIPO" ? "Equipo" : "Negocio"}
+                        </button>
+                      ))}
                     </div>
+
+                    {/* Plan features/price box */}
+                    {(() => {
+                      const PLANS_DETAILS = {
+                        INDIVIDUAL: {
+                          name: "Plan Individual",
+                          priceStr: "$9.900 CLP",
+                          desc: "Para profesionales independientes.",
+                          features: [
+                            "✓ 1 profesional / recurso",
+                            "✓ Calendario online en tiempo real",
+                            "✓ Código QR para tu local",
+                            "✓ Soporte estándar por email"
+                          ]
+                        },
+                        EQUIPO: {
+                          name: "Plan Equipo",
+                          priceStr: "$19.990 CLP",
+                          desc: "Para centros y equipos pequeños.",
+                          features: [
+                            "✓ Hasta 5 profesionales / recursos",
+                            "✓ Gestión de asignación de mesas",
+                            "✓ Historial de clientes y fichas",
+                            "✓ Soporte estándar WhatsApp"
+                          ]
+                        },
+                        NEGOCIO: {
+                          name: "Plan Negocio (Premium)",
+                          priceStr: "$39.990 CLP",
+                          desc: "Para negocios consolidados e IA.",
+                          features: [
+                            "✓ Profesionales y recursos ilimitados",
+                            "✓ Asistente de IA (WhatsApp Secretary 24/7)",
+                            "✓ Módulo de fidelización y puntos IA",
+                            "✓ Soporte prioritario 24/7"
+                          ]
+                        }
+                      };
+
+                      const currentDetails = PLANS_DETAILS[selectedPlanId];
+                      const isCurrentPlan = business?.plan === selectedPlanId;
+
+                      return (
+                        <div style={{
+                          background: "rgba(0, 102, 255, 0.04)",
+                          border: "1px solid rgba(0, 102, 255, 0.1)",
+                          padding: "14px",
+                          borderRadius: "12px",
+                          marginBottom: "16px"
+                        }}>
+                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                            <div>
+                              <strong style={{ fontSize: "14px", color: "var(--foreground)" }}>{currentDetails.name}</strong>
+                              <span style={{ display: "block", fontSize: "11px", color: "var(--text-secondary)", marginTop: "2px" }}>{currentDetails.desc}</span>
+                            </div>
+                            <div style={{ textAlign: "right" }}>
+                              <span style={{ fontSize: "16px", fontWeight: "800", color: "var(--primary)" }}>{currentDetails.priceStr}</span>
+                              {isCurrentPlan && (
+                                <span style={{ display: "block", fontSize: "10px", color: "var(--success)", fontWeight: "bold", marginTop: "2px" }}>✓ Plan actual</span>
+                              )}
+                            </div>
+                          </div>
+                          
+                          <div style={{ borderTop: "1px solid rgba(0,0,0,0.04)", marginTop: "10px", paddingTop: "8px" }}>
+                            <ul style={{ margin: 0, paddingLeft: "16px", fontSize: "11px", color: "var(--text-secondary)", display: "flex", flexDirection: "column", gap: "4px", listStyleType: "none", textAlign: "left" }}>
+                              {currentDetails.features.map((feat, fIdx) => (
+                                <li key={fIdx} style={{ paddingLeft: "0", marginLeft: "-12px" }}>{feat}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        </div>
+                      );
+                    })()}
 
                     <form onSubmit={handleProcessPayment} className={styles.adminForm}>
                       <div className={styles.formGroup}>
@@ -3018,8 +3514,17 @@ export default function AdminDashboard({ params }: { params: Promise<{ slug: str
                           />
                         </div>
                       </div>
-                      <button type="submit" disabled={isProcessingPayment} className={styles.submitButton} style={{ marginTop: "8px" }}>
-                        {isProcessingPayment ? "Procesando cobro Stripe..." : "Pagar $29.900 CLP"}
+                      <button 
+                        type="submit" 
+                        disabled={isProcessingPayment || business?.plan === selectedPlanId} 
+                        className={styles.submitButton} 
+                        style={{ marginTop: "8px" }}
+                      >
+                        {isProcessingPayment 
+                          ? "Procesando cobro Stripe..." 
+                          : business?.plan === selectedPlanId 
+                            ? "Tu plan actual (Activo)" 
+                            : `Upgrade a ${selectedPlanId === "INDIVIDUAL" ? "Plan Individual" : selectedPlanId === "EQUIPO" ? "Plan Equipo" : "Plan Negocio"}`}
                       </button>
                     </form>
 

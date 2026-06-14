@@ -209,22 +209,22 @@
 }
 
 .landingHero {
-  height: 190px;
-  border-radius: var(--radius-card);
+  height: 250px;
+  border-radius: 24px;
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   position: relative;
   overflow: hidden;
-  border: 1px solid var(--card-border);
-  box-shadow: var(--shadow-subtle);
+  border: 1px solid rgba(0,0,0,0.06);
+  box-shadow: 0 12px 30px rgba(0,0,0,0.08);
 }
 
 .landingHeroOverlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.2) 100%);
-  padding: 20px;
+  background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.1) 100%);
+  padding: 24px;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
@@ -234,8 +234,8 @@
 }
 
 .landingLogo {
-  width: 44px;
-  height: 44px;
+  width: 68px;
+  height: 68px;
   border-radius: 50%;
   background: #ffffff;
   color: var(--primary);
@@ -243,25 +243,27 @@
   align-items: center;
   justify-content: center;
   font-weight: 800;
-  font-size: 15px;
-  margin-bottom: 10px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+  font-size: 20px;
+  margin-bottom: 12px;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.25);
+  border: 2px solid rgba(255,255,255,0.9);
+  object-fit: cover;
 }
 
 .landingHeroTitle {
-  font-size: 19px;
-  font-weight: 800;
+  font-size: 22px;
+  font-weight: 850;
   color: #ffffff;
-  text-shadow: 0 1px 3px rgba(0,0,0,0.4);
-  line-height: 1.25;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+  line-height: 1.2;
 }
 
 .landingHeroSubtitle {
-  font-size: 11.5px;
-  color: rgba(255,255,255,0.9);
-  margin-top: 4px;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.4);
-  line-height: 1.4;
+  font-size: 12.5px;
+  color: rgba(255,255,255,0.95);
+  margin-top: 6px;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+  line-height: 1.45;
 }
 
 .landingActiveBadge {
@@ -270,17 +272,17 @@
   color: #34c759;
   background: rgba(52, 199, 89, 0.18);
   border: 1px solid rgba(52, 199, 89, 0.25);
-  padding: 3px 8px;
+  padding: 4px 10px;
   border-radius: 99px;
-  margin-top: 8px;
+  margin-top: 10px;
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: 6px;
 }
 
 .pulseDot {
-  width: 5px;
-  height: 5px;
+  width: 6px;
+  height: 6px;
   background-color: #34c759;
   border-radius: 50%;
   box-shadow: 0 0 0 0 rgba(52, 199, 89, 0.7);
@@ -295,26 +297,31 @@
 
 .quickContactGrid {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 10px;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
 }
 
 .contactPill {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px 14px;
+  padding: 14px 16px;
   background: var(--card-bg);
-  backdrop-filter: var(--backdrop-blur);
-  -webkit-backdrop-filter: var(--backdrop-blur);
   border: 1px solid var(--card-border);
-  border-radius: var(--radius-input);
-  box-shadow: var(--shadow-subtle);
+  border-radius: 16px;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.02);
   box-sizing: border-box;
+  transition: all 0.2s ease;
+}
+
+.contactPill:hover {
+  transform: translateY(-1px);
+  border-color: var(--primary);
+  box-shadow: 0 6px 24px rgba(0,102,255,0.04);
 }
 
 .contactIcon {
-  font-size: 18px;
+  font-size: 20px;
 }
 
 .contactText {
@@ -322,7 +329,7 @@
   flex-direction: column;
   align-items: flex-start;
   text-align: left;
-  gap: 1px;
+  gap: 2px;
 }
 
 .contactLabel {
@@ -334,38 +341,38 @@
 }
 
 .contactValue {
-  font-size: 13px;
+  font-size: 12.5px;
   font-weight: 600;
   color: var(--foreground);
+  line-height: 1.3;
 }
 
 .landingSection {
   background: var(--card-bg);
-  backdrop-filter: var(--backdrop-blur);
-  -webkit-backdrop-filter: var(--backdrop-blur);
   border: 1px solid var(--card-border);
-  border-radius: var(--radius-card);
-  padding: 20px;
-  box-shadow: var(--shadow-subtle);
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.02);
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
 }
 
 .landingSectionTitle {
-  font-size: 14.5px;
+  font-size: 15px;
   font-weight: 800;
   color: var(--foreground);
   text-align: left;
-  border-left: 3px solid var(--primary);
-  padding-left: 8px;
+  border-left: 4px solid var(--primary);
+  padding-left: 10px;
   margin-bottom: 2px;
+  letter-spacing: -0.2px;
 }
 
 .aboutText {
-  font-size: 13px;
+  font-size: 13.5px;
   color: var(--foreground);
-  line-height: 1.5;
+  line-height: 1.6;
   text-align: left;
 }
 
@@ -373,10 +380,12 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 14px;
-  background: rgba(0, 0, 0, 0.02);
-  border: 1px solid rgba(0, 0, 0, 0.04);
-  border-radius: 12px;
+  padding: 14px 16px;
+  background: #ffffff;
+  border: 1px solid rgba(0,0,0,0.05);
+  border-radius: 16px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.015);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .featuresList {
@@ -433,11 +442,21 @@
 
 .testimonialsGrid {
   display: flex;
-  flex-direction: column;
-  gap: 10px;
+  flex-direction: row;
+  gap: 12px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  padding-bottom: 4px;
+  scrollbar-width: none; /* Firefox */
+}
+
+.testimonialsGrid::-webkit-scrollbar {
+  display: none; /* Safari and Chrome */
 }
 
 .testimonialCard {
+  flex: 0 0 250px;
+  scroll-snap-align: start;
   padding: 12px 14px;
   background: rgba(0, 0, 0, 0.02);
   border: 1px solid rgba(0, 0, 0, 0.03);
@@ -527,4 +546,173 @@
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
   text-align: center;
 }
+
+/* Responsive Desktop Layout Override */
+@media (min-width: 768px) {
+  .container {
+    max-width: 1024px;
+    padding: 32px 24px 120px 24px;
+  }
+
+  .landingHero {
+    height: 320px;
+    border-radius: 28px;
+  }
+
+  .landingHeroOverlay {
+    padding: 36px;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-end;
+  }
+
+  .landingLogo {
+    width: 84px;
+    height: 84px;
+    font-size: 24px;
+    margin-bottom: 0;
+  }
+
+  .landingHeroTitle {
+    font-size: 28px;
+  }
+
+  .landingHeroSubtitle {
+    font-size: 14.5px;
+    margin-top: 8px;
+  }
+
+  .landingLayoutGrid {
+    display: grid;
+    grid-template-columns: 1fr 1.3fr;
+    gap: 28px;
+    align-items: start;
+  }
+
+  .quickContactGrid {
+    gap: 16px;
+  }
+
+  .floatingCTA {
+    background: rgba(255, 255, 255, 0.7);
+    padding: 20px;
+  }
+
+  .ctaBtn {
+    max-width: 320px;
+  }
+}
+
+/* Glassmorphism Styles for Landing Cards */
+.landingSectionGlass {
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(0, 102, 255, 0.06);
+  border-radius: 24px;
+  padding: 24px;
+  box-shadow: 
+    0 4px 6px -1px rgba(0, 0, 0, 0.01),
+    0 10px 30px -3px rgba(0, 102, 255, 0.03),
+    0 0 1px 0 rgba(0, 102, 255, 0.1) inset;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.landingSectionGlass:hover {
+  box-shadow: 
+    0 10px 15px -3px rgba(0, 0, 0, 0.02),
+    0 20px 40px -4px rgba(0, 102, 255, 0.06),
+    0 0 1px 0 rgba(0, 102, 255, 0.2) inset;
+  border-color: rgba(0, 102, 255, 0.15);
+  transform: translateY(-2px);
+}
+
+/* Override contact pills, service cards, testimonials to look premium */
+.contactPillGlass {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(0, 102, 255, 0.04);
+  border-radius: 18px;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.01);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.contactPillGlass:hover {
+  transform: translateY(-2px);
+  border-color: var(--primary);
+  box-shadow: 0 8px 24px rgba(0, 102, 255, 0.06);
+  background: #ffffff;
+}
+
+.landingServiceCardGlass {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  border-radius: 18px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.01);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.landingServiceCardGlass:hover {
+  transform: translateY(-2px);
+  border-color: var(--primary);
+  box-shadow: 0 8px 24px rgba(0, 102, 255, 0.05);
+}
+
+/* Testimonials sliding and clipping fix */
+.testimonialsContainer {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+}
+
+.testimonialsGridGlass {
+  display: flex;
+  flex-direction: row;
+  gap: 16px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  padding: 8px 4px 16px 4px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.1) transparent;
+}
+
+.testimonialsGridGlass::-webkit-scrollbar {
+  height: 6px;
+}
+
+.testimonialsGridGlass::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.1);
+  border-radius: 99px;
+}
+
+.testimonialCardGlass {
+  flex: 0 0 280px;
+  scroll-snap-align: start;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(0, 0, 0, 0.03);
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.01);
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.testimonialCardGlass:hover {
+  transform: translateY(-2px);
+  background: #ffffff;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.03);
+}
+
 

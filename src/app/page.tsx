@@ -8,6 +8,7 @@ import QrDownloader from "@/components/QrDownloader";
 export default function LandingAndOnboardingPage() {
   const [heroSlug, setHeroSlug] = useState("");
   const [step, setStep] = useState(1);
+  const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("monthly");
   const [formData, setFormData] = useState({
     name: "",
     ownerName: "",
@@ -335,7 +336,7 @@ export default function LandingAndOnboardingPage() {
           </p>
           <form onSubmit={handleHeroSubmit} className={styles.heroForm}>
             <div className={styles.heroInputWrapper}>
-              <span>agendalink.com/</span>
+              <span>agendalink.cl/</span>
               <input
                 type="text"
                 placeholder="tu-negocio"
@@ -388,7 +389,6 @@ export default function LandingAndOnboardingPage() {
             <div className={styles.macScreen}>
               <div style={{ display: "flex", justifyContent: "space-between", fontSize: "9px", borderBottom: "1px solid #eee", paddingBottom: "4px", marginBottom: "4px" }}>
                 <span style={{ fontWeight: "bold" }}>Agenda Semanal</span>
-                <span style={{ color: "#0066ff", fontWeight: "bold" }}>Giovanni Repetto</span>
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: "3px" }}>
                 <div style={{ display: "flex", gap: "4px" }}>
@@ -403,6 +403,63 @@ export default function LandingAndOnboardingPage() {
                     <strong>María Gómez</strong> · Sesión Kine
                   </div>
                 </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Seccion Diferenciadores Comerciales */}
+      <section className={styles.differentiatorsSection}>
+        <div className={styles.differentiatorBannerGrid}>
+          {/* Banner 1: Un solo link */}
+          <div className={`${styles.diffBanner} ${styles.diffBannerLink}`}>
+            <div className={styles.diffBannerContent}>
+              <span className={styles.diffBadge}>🔗 ATRIBUTO CLAVE</span>
+              <h3 className={styles.diffTitle}>Tu negocio completo en un solo link.</h3>
+              <p className={styles.diffText}>
+                Olvídate de coordinar horas por chats interminables. Un único link para que tus clientes vean tus servicios o carta, elijan profesional, revisen turnos libres y confirmen de inmediato.
+              </p>
+              <div className={styles.diffLabel}>agendalink.cl/tu-marca ➔</div>
+            </div>
+            <div className={styles.diffVisualLink} style={{ display: "flex", flexDirection: "column", gap: "16px", alignItems: "center", width: "100%" }}>
+              <div style={{ width: "100%", aspectRatio: "1.1 / 1", borderRadius: "18px", overflow: "hidden", border: "1px solid rgba(0, 102, 255, 0.12)", boxShadow: "var(--shadow-subtle)" }}>
+                <img src="/restaurant_qr.png" alt="Restaurante QR Reservas" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              </div>
+              <div className={styles.visualLinkCard}>
+                <span className={styles.visualLinkIcon}>🔗</span>
+                <span className={styles.visualLinkLabel}>agendalink.cl/tu-negocio</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Grid de 2 columnas para Rapidez y Facilidad */}
+          <div className={styles.diffSubGrid}>
+            {/* Banner 2: Rapidez */}
+            <div className={`${styles.diffCard} ${styles.diffCardSpeed}`} style={{ justifyContent: "space-between", minHeight: "440px" }}>
+              <div>
+                <span className={styles.diffCardBadge}>⚡️ ULTRA RÁPIDO</span>
+                <h3 className={styles.diffCardTitle}>Reserva en menos de 20 segundos</h3>
+                <p className={styles.diffCardText} style={{ marginBottom: "24px" }}>
+                  Removimos toda la fricción. Tus clientes no necesitan crear contraseñas ni descargar apps. Entran a tu link, seleccionan en 4 clics, pagan y listo.
+                </p>
+              </div>
+              <div style={{ width: "100%", aspectRatio: "1.2 / 1", borderRadius: "16px", overflow: "hidden", border: "1px solid rgba(0, 102, 255, 0.08)", boxShadow: "0 4px 12px rgba(0,0,0,0.02)" }}>
+                <img src="/easy_booking.png" alt="Reserva rápida en smartphone" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              </div>
+            </div>
+
+            {/* Banner 3: Facilidad */}
+            <div className={`${styles.diffCard} ${styles.diffCardEasy}`} style={{ justifyContent: "space-between", minHeight: "440px" }}>
+              <div>
+                <span className={styles.diffCardBadge}>✨ 100% INTUITIVO</span>
+                <h3 className={styles.diffCardTitle}>Tan simple que se explica solo</h3>
+                <p className={styles.diffCardText} style={{ marginBottom: "24px" }}>
+                  Creado pensando en la comodidad móvil. Administra tus turnos, actualiza servicios y ve tus ingresos diarios desde una interfaz limpia y libre de complicaciones.
+                </p>
+              </div>
+              <div style={{ width: "100%", aspectRatio: "1.2 / 1", borderRadius: "16px", overflow: "hidden", border: "1px solid rgba(0, 102, 255, 0.08)", boxShadow: "0 4px 12px rgba(0,0,0,0.02)" }}>
+                <img src="/admin_dashboard.png" alt="Panel de control intuitivo" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
               </div>
             </div>
           </div>
@@ -466,19 +523,69 @@ export default function LandingAndOnboardingPage() {
       {/* 4. Planes de Precios */}
       <section id="pricing" className={styles.pricingSection}>
         <h2 className={styles.sectionHeading}>Planes adaptados a tu etapa de crecimiento</h2>
+        
+        {/* Toggle Facturación */}
+        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "12px", marginBottom: "32px" }}>
+          <span style={{ fontSize: "14px", fontWeight: billingCycle === "monthly" ? "700" : "500", color: billingCycle === "monthly" ? "var(--foreground)" : "var(--text-secondary)" }}>
+            Mensual
+          </span>
+          <button 
+            type="button"
+            onClick={() => setBillingCycle(prev => prev === "monthly" ? "yearly" : "monthly")}
+            style={{
+              width: "50px",
+              height: "26px",
+              borderRadius: "13px",
+              background: "var(--primary)",
+              border: "none",
+              cursor: "pointer",
+              position: "relative",
+              padding: "3px",
+              transition: "background 0.3s"
+            }}
+          >
+            <div 
+              style={{
+                width: "20px",
+                height: "20px",
+                borderRadius: "50%",
+                background: "white",
+                transition: "transform 0.3s",
+                transform: billingCycle === "yearly" ? "translateX(24px)" : "translateX(0px)"
+              }}
+            />
+          </button>
+          <span style={{ fontSize: "14px", fontWeight: billingCycle === "yearly" ? "700" : "500", color: billingCycle === "yearly" ? "var(--foreground)" : "var(--text-secondary)", display: "flex", alignItems: "center", gap: "6px" }}>
+            Anual <span style={{ background: "rgba(52, 199, 89, 0.15)", color: "#34c759", fontSize: "11px", fontWeight: "700", padding: "2px 6px", borderRadius: "20px" }}>Ahorra 20%</span>
+          </span>
+        </div>
+
         <div className={styles.pricingGrid}>
           {/* Plan Individual */}
           <div className={styles.pricingCard}>
             <h3 className={styles.planName}>Plan Individual</h3>
-            <div className={styles.planPrice}>$0<span> / Gratis siempre</span></div>
+            <div className={styles.planPrice}>
+              {billingCycle === "monthly" ? (
+                <>$9.900<span> / mes</span></>
+              ) : (
+                <>
+                  $7.900<span> / mes</span>
+                  <span style={{ display: "block", fontSize: "11px", color: "var(--success)", fontWeight: "600", marginTop: "4px" }}>
+                    Facturado anual ($94.800/año)
+                  </span>
+                </>
+              )}
+            </div>
             <ul className={styles.planFeatures}>
-              <li className={styles.planFeatureItem}>✓ 1 Profesional</li>
-              <li className={styles.planFeatureItem}>✓ Link de Reservas público</li>
+              <li className={styles.planFeatureItem}>✓ 1 Profesional / Sucursal</li>
+              <li className={styles.planFeatureItem}>✓ Link de Reservas público personalizado</li>
               <li className={styles.planFeatureItem}>✓ Panel de administración básico</li>
-              <li className={styles.planFeatureItem}>✓ QR listo para imprimir</li>
+              <li className={styles.planFeatureItem}>✓ Carta digital básica (Hasta 10 platos)</li>
+              <li className={styles.planFeatureItem}>✓ Generación de código QR descargable</li>
+              <li className={styles.planFeatureItem}>✓ Soporte estándar</li>
             </ul>
             <button onClick={() => handleSelectPlan("1 persona")} className={styles.planBtn}>
-              Comenzar Gratis
+              Elegir Plan
             </button>
           </div>
 
@@ -486,12 +593,27 @@ export default function LandingAndOnboardingPage() {
           <div className={`${styles.pricingCard} ${styles.pricingCardPopular}`}>
             <div className={styles.popularBadge}>Más Popular</div>
             <h3 className={styles.planName}>Plan Equipo</h3>
-            <div className={styles.planPrice}>$19.990<span> / mes</span></div>
+            <div className={styles.planPrice}>
+              {billingCycle === "monthly" ? (
+                <>$19.990<span> / mes</span></>
+              ) : (
+                <>
+                  $15.990<span> / mes</span>
+                  <span style={{ display: "block", fontSize: "11px", color: "var(--success)", fontWeight: "600", marginTop: "4px" }}>
+                    Facturado anual ($191.880/año)
+                  </span>
+                </>
+              )}
+            </div>
             <ul className={styles.planFeatures}>
-              <li className={styles.planFeatureItem}>✓ 2 a 5 Profesionales</li>
-              <li className={styles.planFeatureItem}>✓ Todos los links individuales</li>
-              <li className={styles.planFeatureItem}>✓ Asistente Linki Secretary IA</li>
-              <li className={styles.planFeatureItem}>✓ Asistente Linki Marketing IA</li>
+              <li className={styles.planFeatureItem}>✓ 2 a 5 Profesionales / Sucursales</li>
+              <li className={styles.planFeatureItem}>✓ Landing page para cada profesional</li>
+              <li className={styles.planFeatureItem}>✓ Panel completo (Turnos, Reservas, Clientes)</li>
+              <li className={styles.planFeatureItem}>✓ Carta digital ilimitada (Restaurantes)</li>
+              <li className={styles.planFeatureItem}>✓ Caja diaria, control de arqueo y propinas</li>
+              <li className={styles.planFeatureItem}>✓ Emisión de Gift Cards y Membresías</li>
+              <li className={styles.planFeatureItem}>✓ Recordatorios de WhatsApp (Confirmación e inmediata)</li>
+              <li className={styles.planFeatureItem}>✓ Linki Secretary IA (Hasta 100 chats/mes)</li>
             </ul>
             <button onClick={() => handleSelectPlan("2-5 personas")} className={`${styles.planBtn} ${styles.planBtnPrimary}`}>
               Elegir Plan
@@ -501,12 +623,27 @@ export default function LandingAndOnboardingPage() {
           {/* Plan Negocio */}
           <div className={styles.pricingCard}>
             <h3 className={styles.planName}>Plan Negocio</h3>
-            <div className={styles.planPrice}>$39.990<span> / mes</span></div>
+            <div className={styles.planPrice}>
+              {billingCycle === "monthly" ? (
+                <>$39.990<span> / mes</span></>
+              ) : (
+                <>
+                  $31.990<span> / mes</span>
+                  <span style={{ display: "block", fontSize: "11px", color: "var(--success)", fontWeight: "600", marginTop: "4px" }}>
+                    Facturado anual ($383.880/año)
+                  </span>
+                </>
+              )}
+            </div>
             <ul className={styles.planFeatures}>
-              <li className={styles.planFeatureItem}>✓ 6 o más Profesionales</li>
-              <li className={styles.planFeatureItem}>✓ Multi-sucursal avanzada</li>
-              <li className={styles.planFeatureItem}>✓ Asistente Linki Business IA</li>
-              <li className={styles.planFeatureItem}>✓ Reportes estratégicos premium</li>
+              <li className={styles.planFeatureItem}>✓ 6 o más Profesionales / Multi-sucursal</li>
+              <li className={styles.planFeatureItem}>✓ Landing page para cada profesional</li>
+              <li className={styles.planFeatureItem}>✓ Mapa interactivo visual de Mesas</li>
+              <li className={styles.planFeatureItem}>✓ Linki Secretary IA (WhatsApp ilimitado)</li>
+              <li className={styles.planFeatureItem}>✓ Linki Marketing IA (Reactivación de clientes)</li>
+              <li className={styles.planFeatureItem}>✓ Linki Business IA (Consultoría estratégica)</li>
+              <li className={styles.planFeatureItem}>✓ Programa de Puntos IA y Retención avanzada</li>
+              <li className={styles.planFeatureItem}>✓ Soporte prioritario 24/7</li>
             </ul>
             <button onClick={() => handleSelectPlan("6+ personas")} className={styles.planBtn}>
               Elegir Plan
@@ -798,6 +935,7 @@ export default function LandingAndOnboardingPage() {
       {/* 6. Pie de Página */}
       <footer style={{ padding: "40px 0", borderTop: "1px solid var(--card-border)", textAlign: "center", fontSize: "12px", color: "var(--text-secondary)" }}>
         <p>© 2026 AgendaLink. Todos los derechos reservados.</p>
+        <p style={{ marginTop: "8px", opacity: 0.7, letterSpacing: "0.05em" }}>AgendaLink es una plataforma de <a href="https://ganimides.cl" target="_blank" rel="noopener noreferrer" style={{ color: "inherit", textDecoration: "underline", fontWeight: "bold" }}>GANIMIDES.CL</a></p>
       </footer>
 
       {/* Modal de Inicio de Sesión */}
@@ -814,7 +952,7 @@ export default function LandingAndOnboardingPage() {
               <div className={styles.formGroup} style={{ marginBottom: "20px" }}>
                 <label className={styles.label}>Link de tu negocio</label>
                 <div className={styles.heroInputWrapper} style={{ background: "var(--input-bg)", border: "1px solid var(--input-border)", borderRadius: "var(--radius-input)", padding: "4px 8px 4px 12px", height: "48px" }}>
-                  <span style={{ fontSize: "13.5px", fontWeight: "600", color: "var(--text-secondary)" }}>agendalink.com/</span>
+                  <span style={{ fontSize: "13.5px", fontWeight: "600", color: "var(--text-secondary)" }}>agendalink.cl/</span>
                   <input
                     type="text"
                     placeholder="tu-negocio"

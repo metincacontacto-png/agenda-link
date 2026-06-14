@@ -939,3 +939,215 @@
     transform: scale(1);
   }
 }
+
+/* Differentiators Section */
+.differentiatorsSection {
+  padding: 80px 0;
+  border-top: 1px solid var(--card-border);
+}
+
+.differentiatorBannerGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+}
+
+.diffBanner {
+  background: linear-gradient(135deg, rgba(0, 102, 255, 0.03) 0%, rgba(0, 198, 255, 0.01) 100%);
+  border: 1px solid rgba(0, 102, 255, 0.08);
+  border-radius: 28px;
+  padding: 48px;
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 40px;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 
+    0 10px 30px -10px rgba(0, 102, 255, 0.03),
+    0 0 1px 0 rgba(0, 102, 255, 0.08) inset;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.diffBanner:hover {
+  transform: translateY(-2px);
+  border-color: rgba(0, 102, 255, 0.15);
+  box-shadow: 
+    0 20px 40px -10px rgba(0, 102, 255, 0.06),
+    0 0 1px 0 rgba(0, 102, 255, 0.18) inset;
+}
+
+.diffBannerContent {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  z-index: 2;
+}
+
+.diffBadge {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  color: var(--primary);
+  background: rgba(0, 102, 255, 0.06);
+  padding: 4px 10px;
+  border-radius: 20px;
+  margin-bottom: 16px;
+}
+
+.diffTitle {
+  font-size: 32px;
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -1px;
+  margin-bottom: 16px;
+  color: var(--foreground);
+}
+
+.diffText {
+  font-size: 15px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 24px;
+}
+
+.diffLabel {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--primary);
+  transition: transform 0.2s ease;
+}
+
+.diffBanner:hover .diffLabel {
+  transform: translateX(4px);
+}
+
+.diffVisualLink {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  z-index: 1;
+}
+
+.visualLinkCard {
+  background: #ffffff;
+  padding: 16px 24px;
+  border-radius: 20px;
+  box-shadow: 
+    0 10px 25px -5px rgba(0, 0, 0, 0.03),
+    0 0 1px 0 rgba(0, 102, 255, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid rgba(0, 102, 255, 0.08);
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--foreground);
+  animation: floatLink 4s ease-in-out infinite;
+}
+
+@keyframes floatLink {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+.visualLinkIcon {
+  font-size: 18px;
+}
+
+.visualLinkLabel {
+  background: var(--brand-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.diffSubGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.diffCard {
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(0, 102, 255, 0.05);
+  border-radius: 28px;
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  position: relative;
+  box-shadow: 
+    0 4px 6px -1px rgba(0, 0, 0, 0.01),
+    0 10px 20px -3px rgba(0, 102, 255, 0.01),
+    0 0 1px 0 rgba(0, 102, 255, 0.06) inset;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.diffCard:hover {
+  transform: translateY(-2px);
+  border-color: rgba(0, 102, 255, 0.12);
+  box-shadow: 
+    0 10px 15px -3px rgba(0, 0, 0, 0.02),
+    0 20px 30px -4px rgba(0, 102, 255, 0.04),
+    0 0 1px 0 rgba(0, 102, 255, 0.12) inset;
+}
+
+.diffCardBadge {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  margin-bottom: 16px;
+}
+
+.diffCardSpeed .diffCardBadge {
+  color: #ff9500;
+  background: rgba(255, 149, 0, 0.08);
+}
+
+.diffCardEasy .diffCardBadge {
+  color: var(--success);
+  background: rgba(52, 199, 89, 0.08);
+}
+
+.diffCardTitle {
+  font-size: 20px;
+  font-weight: 800;
+  margin-bottom: 12px;
+  color: var(--foreground);
+  letter-spacing: -0.5px;
+}
+
+.diffCardText {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+@media (max-width: 768px) {
+  .diffBanner {
+    grid-template-columns: 1fr;
+    padding: 32px;
+    gap: 24px;
+    text-align: center;
+  }
+  
+  .diffBannerContent {
+    align-items: center;
+  }
+  
+  .diffTitle {
+    font-size: 26px;
+  }
+  
+  .diffSubGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .diffCard {
+    padding: 32px;
+  }
+}
