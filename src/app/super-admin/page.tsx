@@ -194,7 +194,13 @@ export default function SuperAdminPage() {
               <input
                 type="password"
                 value={password}
-                onChange={e => setPassword(e.target.value)}
+                onChange={e => {
+                  const val = e.target.value;
+                  setPassword(val);
+                  if (val.length === 12) {
+                    verifyAndLoad(val);
+                  }
+                }}
                 placeholder="Ingresa clave de super admin"
                 className={styles.input}
                 required

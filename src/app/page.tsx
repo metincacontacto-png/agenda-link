@@ -192,8 +192,9 @@ export default function LandingAndOnboardingPage() {
 
       {/* 1. Cabecera */}
       <header className={styles.header}>
-        <div style={{ display: "flex", alignItems: "center", cursor: "pointer" }} onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>
-          <img src="/logo.png" alt="AgendaLink Logo" style={{ height: "36px", width: "auto" }} />
+        <div style={{ display: "flex", alignItems: "center", gap: "10px", cursor: "pointer" }} onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>
+          <img src="/logo.png" alt="AgendaLink Logo" style={{ height: "32px", width: "auto" }} />
+          <span style={{ fontWeight: "800", fontSize: "22px", color: "#000000", fontFamily: "'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif", letterSpacing: "-0.04em" }}>agenda link</span>
         </div>
         <nav className={styles.headerNav}>
           <div
