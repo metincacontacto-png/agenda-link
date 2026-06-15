@@ -727,6 +727,7 @@ export default function AdminDashboard({ params }: { params: Promise<{ slug: str
       <div className={styles.sidebar}>
         <div className={styles.brandLogo}>
           <img src="/logo.png" alt="AgendaLink" style={{ height: "24px" }} />
+          <span style={{ fontWeight: "800", fontSize: "19px", color: "#000000", fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: "-0.04em" }}>agenda link</span>
         </div>
         
         <span className={styles.navSectionTitle}>Operación</span>
