@@ -389,20 +389,7 @@ export default function BookingPage({ params }: { params: Promise<{ slug: string
                 </div>
               </section>
 
-              {/* Banner Secundario divisor */}
-              <div 
-                className={styles.landingSecondaryBanner}
-                style={{
-                  backgroundImage: business.landingSecondaryCoverUrl ? `url(${business.landingSecondaryCoverUrl})` : "none",
-                  background: business.landingSecondaryCoverUrl ? "none" : "linear-gradient(135deg, #7000ff 0%, #0072ff 100%)"
-                }}
-              >
-                <div className={styles.landingSecondaryBannerOverlay}>
-                  <span className={styles.landingSecondaryBannerText}>
-                    Confirmación al instante vía WhatsApp
-                  </span>
-                </div>
-              </div>
+
             </div>
 
           </div>
