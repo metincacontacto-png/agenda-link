@@ -1,36 +1,68 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AgendaLink
 
-## Getting Started
+AgendaLink permite que negocios publiquen sus servicios, profesionales y disponibilidad para recibir reservas en línea. La aplicación usa Next.js 16, Prisma sobre SQLite local o Cloudflare D1, y almacenamiento de archivos en Cloudflare R2.
 
-First, run the development server:
+## Requisitos
+
+- Node.js 20 o superior y npm.
+- Wrangler autenticado con Cloudflare para preview/deploy, D1 remota y secretos.
+- Acceso al proyecto Cloudflare `agenda-link` para operaciones de producción.
+
+## Configuración local
 
 ```bash
+npm ci
+cp .env.example .env
+npx prisma generate
+npx prisma db push
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+La base local se guarda en `prisma/dev.db` y es desechable. `prisma db push` se usa solo con esa SQLite local; **no ejecutarlo contra producción**. `SUPER_ADMIN_PASSWORD` es opcional en desarrollo y solo se necesita para probar localmente la ruta temporal de superadmin. No reutilizar el valor de producción.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Abre <http://localhost:3000> para probar la aplicación.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Validaciones
 
-## Learn More
+```bash
+npm run lint
+npx tsc --noEmit
+npm run build
+npm run build:cloudflare
+npm run preview
+```
 
-To learn more about Next.js, take a look at the following resources:
+`npm run preview` compila y ejecuta localmente el Worker generado por OpenNext. La suite de tests se añadirá junto con las funciones que requieran pruebas automatizadas.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Cloudflare y despliegue
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+La salida objetivo de producción es un Cloudflare Worker construido con OpenNext. `npm run deploy` publica el Worker y requiere que los bindings D1 (`DB`) y R2 (`BUCKET`) estén configurados en `wrangler.toml`, además de los secretos gestionados con Wrangler. El proyecto Cloudflare Pages sigue atendiendo los dominios de producción mientras se prepara y aprueba el cutover; no mover dominios desde este README.
 
-## Deploy on Vercel
+- [Decisión de despliegue, comandos y runbook de cutover/rollback](docs/cloudflare-deployment.md)
+- [Baseline D1, migraciones, verificación y recuperación](docs/d1-migration-reconciliation.md)
+- [Variables y rotación de secretos](docs/secrets.md)
+- [Plan técnico por escalones](docs/plan-mejora-agendalink.md)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Migraciones D1
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Las migraciones remotas se aplican con Wrangler y nunca con `prisma db push`, `prisma migrate deploy` ni `prisma migrate reset`:
+
+```bash
+npx wrangler d1 migrations list agenda-link-db --remote
+npx wrangler d1 migrations apply agenda-link-db --remote
+npx wrangler d1 execute agenda-link-db --remote --command "PRAGMA foreign_key_check"
+```
+
+Antes de una migración de producción, revisar el SQL, respaldar la base y seguir el procedimiento de rollback de `docs/d1-migration-reconciliation.md`. Confirmar también los conteos de las tablas afectadas y el funcionamiento de la aplicación.
+
+### Secretos
+
+No agregar credenciales a `.env.example`, al código ni a archivos versionados. Los secretos de producción se configuran en Cloudflare; consultar `docs/secrets.md` para los comandos y la rotación.
+
+## Estructura principal
+
+- `src/app/`: páginas, API routes y middleware de Next.js.
+- `src/lib/`: acceso a datos y adaptadores de infraestructura.
+- `prisma/schema.prisma`: esquema compartido entre SQLite local y D1.
+- `prisma/migrations/`: secuencia canónica de migraciones D1.
+- `docs/`: decisiones, operación y roadmap.
