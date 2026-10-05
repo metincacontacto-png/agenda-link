@@ -138,8 +138,8 @@ export default function AdminDashboard({ params }: { params: Promise<{ slug: str
   const [selectedPlanId, setSelectedPlanId] = useState<"INDIVIDUAL" | "EQUIPO" | "NEGOCIO">("INDIVIDUAL");
 
   useEffect(() => {
-    if (business?.plan) {
-      setSelectedPlanId(business.plan as any);
+    if (business?.plan === "INDIVIDUAL" || business?.plan === "EQUIPO" || business?.plan === "NEGOCIO") {
+      setSelectedPlanId(business.plan);
     }
   }, [business?.plan]);
 
@@ -2142,23 +2142,23 @@ export default function AdminDashboard({ params }: { params: Promise<{ slug: str
                       <h3 style={{ fontSize: "15px", fontWeight: "700", marginBottom: "16px" }}>Crear Membresía</h3>
                       <form onSubmit={e => {
                         e.preventDefault();
-                        const target = e.target as any;
-                        const name = target.planName.value;
-                        const clientName = target.clientName.value;
-                        const phone = target.phone.value;
-                        const total = Number(target.total.value);
-                        
-                        const newM: any = {
-                          id: memberships.length + 1,
+                        const form = e.currentTarget;
+                        const formData = new FormData(form);
+                        const name = String(formData.get("planName") ?? "");
+                        const clientName = String(formData.get("clientName") ?? "");
+                        const phone = String(formData.get("phone") ?? "");
+                        const total = Number(formData.get("total"));
+
+                        setMemberships(prev => [...prev, {
+                          id: prev.length + 1,
                           name,
                           clientName,
                           phone,
                           current: 0,
                           total,
                           status: "Activo"
-                        };
-                        setMemberships(prev => [...prev, newM]);
-                        target.reset();
+                        }]);
+                        form.reset();
                         alert("Membresía creada con éxito");
                       }} className={styles.adminForm}>
                         <div className={styles.formGroup}>
