@@ -9,34 +9,57 @@ generator client {
 }
 
 model Business {
-  id            String         @id @default(uuid())
-  name          String
-  slug          String         @unique
-  ownerName     String
-  email         String         @default("")
-  category      String
-  teamSize      String
-  country       String
-  currency      String
-  logoUrl                 String?
-  landingTitle            String?
-  landingSubtitle         String?
-  landingAbout            String?
-  landingCoverUrl         String?
+  id                       String           @id @default(uuid())
+  name                     String
+  slug                     String           @unique
+  ownerName                String
+  email                    String           @default("")
+  category                 String
+  teamSize                 String
+  country                  String
+  currency                 String
+  logoUrl                  String?
+  landingTitle             String?
+  landingSubtitle          String?
+  landingAbout             String?
+  landingCoverUrl          String?
   landingSecondaryCoverUrl String?
-  landingPhone            String?
-  landingAddress          String?
-  landingHours            String?
-  landingFeaturesJson     String?
-  landingTestimonialsJson String?
-  plan                    String         @default("INDIVIDUAL")
-  billingBypass           Boolean        @default(false)
-  customDomain            String?        @unique
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-  services      Service[]
-  professionals Professional[]
-  appointments  Appointment[]
+  landingPhone             String?
+  landingAddress           String?
+  landingHours             String?
+  landingFeaturesJson      String?
+  landingTestimonialsJson  String?
+  plan                     String           @default("INDIVIDUAL")
+  billingBypass            Boolean          @default(false)
+  customDomain             String?          @unique
+  createdAt                DateTime         @default(now())
+  updatedAt                DateTime         @updatedAt
+  services                 Service[]
+  professionals            Professional[]
+  appointments             Appointment[]
+  members                  BusinessMember[]
+}
+
+model User {
+  id           String           @id @default(uuid())
+  email        String           @unique
+  passwordHash String?
+  globalRole   String           @default("USER")
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  memberships  BusinessMember[]
+}
+
+model BusinessMember {
+  businessId String
+  userId     String
+  role       String   @default("OWNER")
+  createdAt  DateTime @default(now())
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([businessId, userId])
+  @@index([userId])
 }
 
 model Service {
@@ -44,7 +67,7 @@ model Service {
   businessId   String
   business     Business      @relation(fields: [businessId], references: [id], onDelete: Cascade)
   name         String
-  duration     Int           // en minutos
+  duration     Int // en minutos
   price        Float
   imageUrl     String?
   createdAt    DateTime      @default(now())
@@ -71,7 +94,7 @@ model Appointment {
   professional   Professional @relation(fields: [professionalId], references: [id])
   clientName     String
   clientWhatsApp String
-  dateTime       DateTime     // Fecha y hora reservada
+  dateTime       DateTime // Fecha y hora reservada
   status         String       @default("CONFIRMED")
   paymentStatus  String       @default("PENDING")
   paymentMethod  String?
