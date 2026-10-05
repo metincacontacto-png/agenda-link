@@ -6,12 +6,15 @@ Los secretos no se escriben en el repositorio, archivos `.env` versionados, ejem
 
 `SUPER_ADMIN_PASSWORD` protege temporalmente la API de superadmin hasta que la autenticacion basada en usuarios sustituya este flujo.
 
+`SESSION_SIGNING_SECRET` firma las cookies de sesión HMAC. Debe ser un secreto aleatorio independiente de la contraseña de superadmin y tener al menos 32 caracteres. Al rotarlo se invalidan todas las sesiones activas.
+
 ## Pages actual
 
 El proyecto Pages activo es `agenda-link`. Para crear o rotar el secreto de produccion:
 
 ```bash
 npx wrangler pages secret put SUPER_ADMIN_PASSWORD --project-name agenda-link
+npx wrangler pages secret put SESSION_SIGNING_SECRET --project-name agenda-link
 ```
 
 Wrangler solicita el valor sin mostrarlo. Pages requiere un nuevo deployment para que el cambio se aplique.
@@ -28,6 +31,7 @@ Cuando AgendaLink se despliegue como Worker, usar:
 
 ```bash
 npx wrangler secret put SUPER_ADMIN_PASSWORD
+npx wrangler secret put SESSION_SIGNING_SECRET
 ```
 
 No asumir que los secretos de Pages se transfieren al Worker.

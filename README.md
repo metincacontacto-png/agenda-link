@@ -18,7 +18,7 @@ npx prisma db push
 npm run dev
 ```
 
-La base local se guarda en `prisma/dev.db` y es desechable. `prisma db push` se usa solo con esa SQLite local; **no ejecutarlo contra producción**. `SUPER_ADMIN_PASSWORD` es opcional en desarrollo y solo se necesita para probar localmente la ruta temporal de superadmin. No reutilizar el valor de producción.
+La base local se guarda en `prisma/dev.db` y es desechable. `prisma db push` se usa solo con esa SQLite local; **no ejecutarlo contra producción**. Para probar autenticación local, establece `SESSION_SIGNING_SECRET` en `.env` con un valor aleatorio (por ejemplo, `openssl rand -hex 32`). `SUPER_ADMIN_PASSWORD` solo se necesita para probar localmente la ruta temporal de superadmin. No reutilizar secretos de producción.
 
 Abre <http://localhost:3000> para probar la aplicación.
 

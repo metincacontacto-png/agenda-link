@@ -42,6 +42,7 @@ model Business {
 
 model User {
   id           String           @id @default(uuid())
+  name         String           @default("")
   email        String           @unique
   passwordHash String?
   globalRole   String           @default("USER")
