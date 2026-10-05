@@ -51,16 +51,9 @@ Convertir el prototipo actual en una aplicación mantenible y segura para reserv
 - Superadmin usa password por query string/header y tiene un fallback hardcodeado.
 - El endpoint `google-seed` crea negocios demo sin autenticación.
 
-### Decisiones previas (antes de codificar)
+### Decisiones adoptadas
 
-1. **Estrategia de sesión.** Elegir una y documentarla:
-   - *Sesiones en D1:* revocables y auditables, pero agregan un lookup a DB por request.
-   - *Cookies firmadas (HMAC sin estado):* más idiomático en Workers y sin latencia extra, pero sin revocación inmediata salvo lista de bloqueo o expiración corta.
-   - Recomendación inicial: cookies firmadas con expiración corta, salvo que se requiera revocación inmediata desde el inicio.
-2. **Recuperación de password.** No existe proveedor de email en el proyecto. Elegir:
-   - Posponer el reset (MVP sin recuperación, reset manual por superadmin).
-   - Magic links (requiere email transaccional, presupone integración futura).
-   - Recomendación inicial: reset manual vía superadmin hasta integrar email en Escalón 8.
+Las decisiones de sesión y recuperación están aceptadas en [ADR-0001](adr/0001-sesiones-y-recuperacion-de-password.md): cookie HMAC stateless con expiración máxima de 8 horas, roles/membresías consultados en D1 y restablecimiento manual temporal hasta disponer de email transaccional. No se crea modelo `Session` para este MVP.
 
 ### Modelo mínimo
 
