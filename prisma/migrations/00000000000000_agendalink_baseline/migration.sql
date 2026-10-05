@@ -1,30 +1,50 @@
--- CreateTable
-CREATE TABLE "Business" (
+-- AgendaLink's first canonical D1 migration.
+--
+-- This baseline intentionally uses idempotent DDL because agenda-link-db
+-- existed before Wrangler migration tracking was configured. It creates the
+-- current Prisma schema on a new database while registering safely on the
+-- populated production database without rewriting any existing table.
+
+CREATE TABLE IF NOT EXISTS "Business" (
     "id" TEXT NOT NULL PRIMARY KEY,
     "name" TEXT NOT NULL,
     "slug" TEXT NOT NULL,
     "ownerName" TEXT NOT NULL,
+    "email" TEXT NOT NULL DEFAULT '',
     "category" TEXT NOT NULL,
     "teamSize" TEXT NOT NULL,
     "country" TEXT NOT NULL,
     "currency" TEXT NOT NULL,
+    "logoUrl" TEXT,
+    "landingTitle" TEXT,
+    "landingSubtitle" TEXT,
+    "landingAbout" TEXT,
+    "landingCoverUrl" TEXT,
+    "landingSecondaryCoverUrl" TEXT,
+    "landingPhone" TEXT,
+    "landingAddress" TEXT,
+    "landingHours" TEXT,
+    "landingFeaturesJson" TEXT,
+    "landingTestimonialsJson" TEXT,
+    "plan" TEXT NOT NULL DEFAULT 'INDIVIDUAL',
+    "billingBypass" BOOLEAN NOT NULL DEFAULT false,
+    "customDomain" TEXT,
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" DATETIME NOT NULL
 );
 
--- CreateTable
-CREATE TABLE "Service" (
+CREATE TABLE IF NOT EXISTS "Service" (
     "id" TEXT NOT NULL PRIMARY KEY,
     "businessId" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "duration" INTEGER NOT NULL,
     "price" REAL NOT NULL,
+    "imageUrl" TEXT,
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT "Service_businessId_fkey" FOREIGN KEY ("businessId") REFERENCES "Business" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 
--- CreateTable
-CREATE TABLE "Professional" (
+CREATE TABLE IF NOT EXISTS "Professional" (
     "id" TEXT NOT NULL PRIMARY KEY,
     "businessId" TEXT NOT NULL,
     "name" TEXT NOT NULL,
@@ -33,8 +53,7 @@ CREATE TABLE "Professional" (
     CONSTRAINT "Professional_businessId_fkey" FOREIGN KEY ("businessId") REFERENCES "Business" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 
--- CreateTable
-CREATE TABLE "Appointment" (
+CREATE TABLE IF NOT EXISTS "Appointment" (
     "id" TEXT NOT NULL PRIMARY KEY,
     "businessId" TEXT NOT NULL,
     "serviceId" TEXT NOT NULL,
@@ -52,6 +71,10 @@ CREATE TABLE "Appointment" (
     CONSTRAINT "Appointment_professionalId_fkey" FOREIGN KEY ("professionalId") REFERENCES "Professional" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
 );
 
--- CreateIndex
-CREATE UNIQUE INDEX "Business_slug_key" ON "Business"("slug");
+CREATE TABLE IF NOT EXISTS "SystemSetting" (
+    "key" TEXT NOT NULL PRIMARY KEY,
+    "value" TEXT NOT NULL
+);
 
+CREATE UNIQUE INDEX IF NOT EXISTS "Business_slug_key" ON "Business"("slug");
+CREATE UNIQUE INDEX IF NOT EXISTS "Business_customDomain_key" ON "Business"("customDomain");

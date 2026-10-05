@@ -1,5 +1,4 @@
-import { PrismaClient as WASMPrismaClient } from "@prisma/client/wasm";
-import type { PrismaClient } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
 import { PrismaD1 } from "@prisma/adapter-d1";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { cache } from "react";
@@ -12,7 +11,7 @@ const getDb = cache(() => {
     const d1 = (env as any).DB; // "DB" es el binding de wrangler.toml
     if (d1) {
       const adapter = new PrismaD1(d1);
-      return new WASMPrismaClient({ adapter });
+      return new PrismaClient({ adapter });
     }
     console.warn("No se encontró el binding D1 'DB' en el entorno. Usando SQLite local.");
   } catch (e) {
@@ -37,4 +36,3 @@ export const prisma = new Proxy({} as PrismaClient, {
     return Reflect.get(db, prop, receiver);
   }
 });
-

@@ -4,16 +4,19 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build --webpack && npx @opennextjs/cloudflare build --skipNextBuild && rm -rf .cloudflare && cp -R .open-next .cloudflare && mv .cloudflare/worker.js .cloudflare/_worker.js && cp -r .cloudflare/assets/* .cloudflare/ && node scratch/patch_handler.js && node scratch/patch_worker.js && node -e \"const fs = require('fs'); const publicFiles = fs.readdirSync('public').map(f => '/' + f); const routes = { version: 1, include: ['/*'], exclude: ['/_next/*', '/favicon.ico', ...publicFiles] }; fs.writeFileSync('.cloudflare/_routes.json', JSON.stringify(routes))\"",
+    "build": "next build --webpack",
+    "build:cloudflare": "opennextjs-cloudflare build",
+    "preview": "npm run build:cloudflare && opennextjs-cloudflare preview",
+    "deploy": "npm run build:cloudflare && opennextjs-cloudflare deploy",
     "start": "next start",
     "lint": "eslint"
   },
   "dependencies": {
-    "@opennextjs/cloudflare": "^1.19.11",
+    "@opennextjs/cloudflare": "^1.20.8",
     "@prisma/adapter-d1": "^6.4.0",
     "@prisma/client": "^6.4.0",
     "better-sqlite3": "^12.10.0",
-    "next": "16.2.7",
+    "next": "^16.3.8",
     "qrcode": "^1.5.4",
     "react": "19.2.4",
     "react-dom": "19.2.4"

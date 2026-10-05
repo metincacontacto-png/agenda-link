@@ -2,29 +2,40 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 
-function getSuperAdminPassword(): string {
+function getSuperAdminPassword(): string | undefined {
   try {
     const { env } = getCloudflareContext();
-    return (env as { SUPER_ADMIN_PASSWORD?: string }).SUPER_ADMIN_PASSWORD || "Giovanni2026";
+    return (env as { SUPER_ADMIN_PASSWORD?: string }).SUPER_ADMIN_PASSWORD;
   } catch {
-    return process.env.SUPER_ADMIN_PASSWORD || "Giovanni2026";
+    return process.env.SUPER_ADMIN_PASSWORD;
   }
 }
 
-function checkAuth(request: Request): boolean {
+function authorize(request: Request): NextResponse | undefined {
+  const superAdminPassword = getSuperAdminPassword();
+  if (!superAdminPassword) {
+    console.error("SUPER_ADMIN_PASSWORD is not configured");
+    return NextResponse.json(
+      { error: "El servicio de superadmin no está configurado" },
+      { status: 503 },
+    );
+  }
+
   const { searchParams } = new URL(request.url);
   const passwordParam = searchParams.get("password");
   const authHeader = request.headers.get("x-super-admin-password");
-  
-  const superAdminPassword = getSuperAdminPassword();
-  return passwordParam === superAdminPassword || authHeader === superAdminPassword;
+
+  if (passwordParam === superAdminPassword || authHeader === superAdminPassword) {
+    return undefined;
+  }
+
+  return NextResponse.json({ error: "No autorizado" }, { status: 401 });
 }
 
 export async function GET(request: Request) {
   try {
-    if (!checkAuth(request)) {
-      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
-    }
+    const authorizationError = authorize(request);
+    if (authorizationError) return authorizationError;
 
     const businesses = await prisma.business.findMany({
       orderBy: { createdAt: "desc" },
@@ -57,9 +68,8 @@ export async function GET(request: Request) {
 
 export async function PUT(request: Request) {
   try {
-    if (!checkAuth(request)) {
-      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
-    }
+    const authorizationError = authorize(request);
+    if (authorizationError) return authorizationError;
 
     const body = await request.json();
     const { isMaintenanceToggle, maintenanceMode, slug, plan, billingBypass, customDomain } = body;
