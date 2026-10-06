@@ -10,7 +10,7 @@
     "deploy": "npm run build:cloudflare && opennextjs-cloudflare deploy",
     "start": "next start",
     "lint": "eslint",
-    "test": "node --experimental-strip-types --test tests/*.test.mjs"
+    "test": "node --experimental-strip-types --test --test-concurrency=1 tests/*.test.mjs"
   },
   "dependencies": {
     "@opennextjs/cloudflare": "^1.20.8",

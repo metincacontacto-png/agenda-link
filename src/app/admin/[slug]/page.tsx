@@ -765,7 +765,7 @@ export default function AdminDashboard({ params }: { params: Promise<{ slug: str
   }
 
   // --- CALCULOS DEL DASHBOARD ---
-  const totalReservations = business.appointments?.length || 0;
+  const totalReservations = appointmentPagination.total;
 
   const totalSales = business.appointments
     ?.filter((app) => app.paymentStatus === "PAID")
@@ -2638,6 +2638,18 @@ export default function AdminDashboard({ params }: { params: Promise<{ slug: str
                     </tbody>
                   </table>
                 </div>
+                {appointmentPagination.hasMore && (
+                  <div style={{ display: "flex", justifyContent: "center", marginTop: 16 }}>
+                    <button
+                      type="button"
+                      disabled={loadingMoreAppointments}
+                      onClick={() => void loadMoreAppointments()}
+                      className={styles.todayDetailsBtn}
+                    >
+                      {loadingMoreAppointments ? "Cargando…" : "Cargar más citas para completar clientes"}
+                    </button>
+                  </div>
+                )}
               </section>
             )}
 

@@ -42,6 +42,7 @@ La salida objetivo de producción es un Cloudflare Worker construido con OpenNex
 - [Decisión de despliegue, comandos y runbook de cutover/rollback](docs/cloudflare-deployment.md)
 - [Baseline D1, migraciones, verificación y recuperación](docs/d1-migration-reconciliation.md)
 - [Variables y rotación de secretos](docs/secrets.md)
+- [Contratos públicos y políticas de medios](docs/api/public-availability.md) · [R2/media](docs/api/media.md) · [datos administrativos](docs/api/admin-business.md)
 - [Plan técnico por escalones](docs/plan-mejora-agendalink.md)
 
 ### Migraciones D1

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { uploadBase64ToR2, deleteFromR2 } from "@/lib/r2";
 import { requireBusinessMembership, requireSession } from "@/lib/authorize";
+import { MediaValidationError } from "@/lib/media";
 
 export async function GET(request: Request) {
   try {
@@ -188,29 +189,41 @@ export async function POST(request: Request) {
     let finalSecondaryCoverUrl = landingSecondaryCoverUrl;
 
     if (logoUrl !== undefined) {
-      if (logoUrl && logoUrl.startsWith("data:image/")) {
-        if (existing?.logoUrl) await deleteFromR2(existing.logoUrl);
+      if (logoUrl !== null && logoUrl !== "") {
+        if (typeof logoUrl !== "string") {
+          return NextResponse.json({ error: "Imagen de logo inválida" }, { status: 400 });
+        }
         finalLogoUrl = await uploadBase64ToR2(logoUrl, `logo_${slug}`);
+        if (existing?.logoUrl && existing.logoUrl !== finalLogoUrl) await deleteFromR2(existing.logoUrl);
       } else if ((logoUrl === null || logoUrl === "") && existing?.logoUrl) {
         await deleteFromR2(existing.logoUrl);
+        finalLogoUrl = null;
       }
     }
 
     if (landingCoverUrl !== undefined) {
-      if (landingCoverUrl && landingCoverUrl.startsWith("data:image/")) {
-        if (existing?.landingCoverUrl) await deleteFromR2(existing.landingCoverUrl);
+      if (landingCoverUrl !== null && landingCoverUrl !== "") {
+        if (typeof landingCoverUrl !== "string") {
+          return NextResponse.json({ error: "Imagen de portada inválida" }, { status: 400 });
+        }
         finalCoverUrl = await uploadBase64ToR2(landingCoverUrl, `cover_${slug}`);
+        if (existing?.landingCoverUrl && existing.landingCoverUrl !== finalCoverUrl) await deleteFromR2(existing.landingCoverUrl);
       } else if ((landingCoverUrl === null || landingCoverUrl === "") && existing?.landingCoverUrl) {
         await deleteFromR2(existing.landingCoverUrl);
+        finalCoverUrl = null;
       }
     }
 
     if (landingSecondaryCoverUrl !== undefined) {
-      if (landingSecondaryCoverUrl && landingSecondaryCoverUrl.startsWith("data:image/")) {
-        if (existing?.landingSecondaryCoverUrl) await deleteFromR2(existing.landingSecondaryCoverUrl);
+      if (landingSecondaryCoverUrl !== null && landingSecondaryCoverUrl !== "") {
+        if (typeof landingSecondaryCoverUrl !== "string") {
+          return NextResponse.json({ error: "Imagen secundaria inválida" }, { status: 400 });
+        }
         finalSecondaryCoverUrl = await uploadBase64ToR2(landingSecondaryCoverUrl, `seccover_${slug}`);
+        if (existing?.landingSecondaryCoverUrl && existing.landingSecondaryCoverUrl !== finalSecondaryCoverUrl) await deleteFromR2(existing.landingSecondaryCoverUrl);
       } else if ((landingSecondaryCoverUrl === null || landingSecondaryCoverUrl === "") && existing?.landingSecondaryCoverUrl) {
         await deleteFromR2(existing.landingSecondaryCoverUrl);
+        finalSecondaryCoverUrl = null;
       }
     }
 
@@ -266,6 +279,9 @@ export async function POST(request: Request) {
       business: { ...business, billingBypass: canViewSensitive ? business.billingBypass : false },
     });
   } catch (error) {
+    if (error instanceof MediaValidationError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
     console.error("Error al actualizar datos de admin:", error);
     return NextResponse.json({ error: "Error en el servidor" }, { status: 500 });
   }

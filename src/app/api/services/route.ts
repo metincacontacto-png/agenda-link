@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { uploadBase64ToR2, deleteFromR2 } from "@/lib/r2";
 import { requireBusinessMembership, requireSession } from "@/lib/authorize";
+import { MediaValidationError } from "@/lib/media";
 
 export async function POST(request: Request) {
   try {
@@ -32,6 +33,9 @@ export async function POST(request: Request) {
     });
     return NextResponse.json({ success: true, service });
   } catch (error) {
+    if (error instanceof MediaValidationError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
     console.error("Error al crear servicio:", error);
     return NextResponse.json({ error: "Error interno del servidor" }, { status: 500 });
   }
@@ -60,6 +64,9 @@ export async function DELETE(request: Request) {
     await prisma.service.delete({ where: { id } });
     return NextResponse.json({ success: true });
   } catch (error) {
+    if (error instanceof MediaValidationError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
     console.error("Error al eliminar servicio:", error);
     return NextResponse.json({ error: "Error interno del servidor" }, { status: 500 });
   }

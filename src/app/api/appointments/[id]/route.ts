@@ -65,7 +65,13 @@ export async function PATCH(
       if (cancelled.length === 0) {
         return NextResponse.json({ error: "La cita cambió y ya no se puede cancelar" }, { status: 409 });
       }
-      return NextResponse.json({ success: true, appointmentId: appointment.id, status: "CANCELLED" });
+      const auditEvent = await prisma.appointmentAudit.findFirst({
+        where: { appointmentId: appointment.id, actorUserId: session.user.id, eventType: "CANCELLED" },
+        orderBy: { createdAt: "desc" },
+        select: { id: true },
+      });
+      if (!auditEvent) throw new Error("Appointment cancellation audit event was not written");
+      return NextResponse.json({ success: true, appointmentId: appointment.id, status: "CANCELLED", auditRecorded: true });
     }
 
     const minuteOfDay = parseLocalTime(parsed.value.time);
@@ -131,11 +137,19 @@ export async function PATCH(
       return NextResponse.json({ error: "El nuevo horario acaba de dejar de estar disponible" }, { status: 409 });
     }
 
+    const auditEvent = await prisma.appointmentAudit.findFirst({
+      where: { appointmentId: appointment.id, actorUserId: session.user.id, eventType: "RESCHEDULED" },
+      orderBy: { createdAt: "desc" },
+      select: { id: true },
+    });
+    if (!auditEvent) throw new Error("Appointment reschedule audit event was not written");
+
     return NextResponse.json({
       success: true,
       appointmentId: appointment.id,
       status: "CONFIRMED",
       dateTime: newDateTime,
+      auditRecorded: true,
     });
   } catch (error) {
     console.error("Error al actualizar la cita:", error);
