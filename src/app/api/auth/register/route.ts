@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { enforceRateLimit } from "@/lib/rate-limit";
 import {
   createSessionToken,
   genericAuthError,
@@ -17,6 +18,9 @@ function isUniqueConstraintError(error: unknown): boolean {
 }
 
 export async function POST(request: Request) {
+  const rateLimitResponse = await enforceRateLimit(request, "AUTH_RATE_LIMITER", "register");
+  if (rateLimitResponse) return rateLimitResponse;
+
   if (!hasSessionSigningSecret()) {
     return NextResponse.json({ error: "El servicio de autenticación no está configurado" }, { status: 503 });
   }

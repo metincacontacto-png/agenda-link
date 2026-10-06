@@ -3,10 +3,14 @@ import { prisma } from "@/lib/db";
 import { getAvailableSlotsForProfessional } from "@/features/booking/availability";
 import { parseCreateBookingInput } from "@/features/booking/validation";
 import { localMinuteToUtc, parseLocalTime } from "@/lib/schedule";
+import { enforceRateLimit } from "@/lib/rate-limit";
 
 // Public POST is the customer-facing booking flow; administrative appointment
 // reads/changes must use authenticated, business-scoped routes.
 export async function POST(request: Request) {
+  const rateLimitResponse = await enforceRateLimit(request, "BOOKING_RATE_LIMITER", "appointment");
+  if (rateLimitResponse) return rateLimitResponse;
+
   let body: unknown;
   try {
     body = await request.json();

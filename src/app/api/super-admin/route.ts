@@ -1,9 +1,12 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requireSuperAdmin } from "@/lib/authorize";
+import { enforceRateLimit } from "@/lib/rate-limit";
 
 export async function GET(request: Request) {
   try {
+    const rateLimitResponse = await enforceRateLimit(request, "SUPER_ADMIN_RATE_LIMITER", "super-admin");
+    if (rateLimitResponse) return rateLimitResponse;
     const authorization = await requireSuperAdmin(request);
     if (!authorization.ok) return authorization.response;
 
@@ -38,6 +41,8 @@ export async function GET(request: Request) {
 
 export async function PUT(request: Request) {
   try {
+    const rateLimitResponse = await enforceRateLimit(request, "SUPER_ADMIN_RATE_LIMITER", "super-admin");
+    if (rateLimitResponse) return rateLimitResponse;
     const authorization = await requireSuperAdmin(request);
     if (!authorization.ok) return authorization.response;
 

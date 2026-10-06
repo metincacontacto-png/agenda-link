@@ -1,9 +1,13 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { enforceRateLimit } from "@/lib/rate-limit";
 
 const RESERVED_SLUGS = ["admin", "api", "public", "auth", "static", "login", "register", "success"];
 
 export async function POST(request: Request) {
+  const rateLimitResponse = await enforceRateLimit(request, "ONBOARDING_RATE_LIMITER", "onboarding");
+  if (rateLimitResponse) return rateLimitResponse;
+
   try {
     const body = await request.json();
     const {

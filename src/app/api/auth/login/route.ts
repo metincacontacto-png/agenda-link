@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { enforceRateLimit } from "@/lib/rate-limit";
 import {
   createSessionToken,
   genericAuthError,
@@ -11,6 +12,9 @@ import {
 } from "@/lib/auth";
 
 export async function POST(request: Request) {
+  const rateLimitResponse = await enforceRateLimit(request, "AUTH_RATE_LIMITER", "login");
+  if (rateLimitResponse) return rateLimitResponse;
+
   let body: unknown;
   try {
     body = await request.json();
