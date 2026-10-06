@@ -97,8 +97,10 @@ export default async function SuccessPage({
           </div>
           <div className={styles.row}>
             <span className={styles.label}>Pago:</span>
-            <span className={styles.value} style={{ fontWeight: "700", color: "var(--success)" }}>
-              ✓ {formatPrice(appointment.paymentAmount || appointment.service.price, appointment.business.currency)} PAGADO ({appointment.paymentMethod || "Tarjeta"})
+            <span className={styles.value} style={{ fontWeight: "700", color: appointment.paymentStatus === "PAID" ? "var(--success)" : "var(--text-secondary)" }}>
+              {appointment.paymentStatus === "PAID"
+                ? `✓ ${formatPrice(appointment.paymentAmount || appointment.service.price, appointment.business.currency)} PAGADO (${appointment.paymentMethod || "Tarjeta"})`
+                : `Pendiente · ${formatPrice(appointment.service.price, appointment.business.currency)}`}
             </span>
           </div>
         </div>
