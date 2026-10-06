@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { logServerError } from "../src/lib/observability.ts";
+import { logServerError } from "../src/server/observability.ts";
 
 test("structured server logs correlate by route and request ID without query, message, or PII", () => {
   const originalError = console.error;

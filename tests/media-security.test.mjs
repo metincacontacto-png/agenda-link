@@ -5,7 +5,7 @@ import {
   isSafeMediaKey,
   MediaValidationError,
   parseImageDataUrl,
-} from "../src/lib/media.ts";
+} from "../src/features/media/validation.ts";
 
 const onePixelPng = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/f9sAAAAASUVORK5CYII=";
 

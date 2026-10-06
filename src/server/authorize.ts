@@ -1,10 +1,11 @@
-import { NextResponse } from "next/server";
+import type { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import {
   getSessionCookie,
   hasSessionSigningSecret,
   verifySessionToken,
-} from "@/lib/auth";
+} from "@/server/auth";
+import { jsonError } from "@/server/errors";
 
 export type UserIdentity = {
   id: string;
@@ -20,21 +21,18 @@ export type AuthorizationResult =
 export async function requireSession(request: Request): Promise<AuthorizationResult> {
   const token = getSessionCookie(request);
   if (!token) {
-    return { ok: false, response: NextResponse.json({ error: "No autorizado" }, { status: 401 }) };
+    return { ok: false, response: jsonError("No autorizado", 401) };
   }
   if (!hasSessionSigningSecret()) {
     return {
       ok: false,
-      response: NextResponse.json(
-        { error: "El servicio de autenticación no está configurado" },
-        { status: 503 },
-      ),
+      response: jsonError("El servicio de autenticación no está configurado", 503),
     };
   }
 
   const claims = await verifySessionToken(token);
   if (!claims) {
-    return { ok: false, response: NextResponse.json({ error: "No autorizado" }, { status: 401 }) };
+    return { ok: false, response: jsonError("No autorizado", 401) };
   }
 
   const user = await prisma.user.findUnique({
@@ -42,7 +40,7 @@ export async function requireSession(request: Request): Promise<AuthorizationRes
     select: { id: true, name: true, email: true, globalRole: true },
   });
   if (!user) {
-    return { ok: false, response: NextResponse.json({ error: "No autorizado" }, { status: 401 }) };
+    return { ok: false, response: jsonError("No autorizado", 401) };
   }
 
   return { ok: true, user };
@@ -75,7 +73,7 @@ export async function requireBusinessMembership(
   if (!membership) {
     return {
       ok: false,
-      response: NextResponse.json({ error: "No autorizado para este negocio" }, { status: 403 }),
+      response: jsonError("No autorizado para este negocio", 403),
     };
   }
 
@@ -86,7 +84,7 @@ export async function requireSuperAdmin(request: Request): Promise<Authorization
   const session = await requireSession(request);
   if (!session.ok) return session;
   if (session.user.globalRole !== "SUPER_ADMIN") {
-    return { ok: false, response: NextResponse.json({ error: "No autorizado" }, { status: 403 }) };
+    return { ok: false, response: jsonError("No autorizado", 403) };
   }
   return session;
 }

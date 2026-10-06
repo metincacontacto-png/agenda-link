@@ -6,7 +6,7 @@ import {
   dateStringAtTimeZone,
   localMinuteToUtc,
   weekdayForDate,
-} from "../src/lib/schedule.ts";
+} from "../src/features/schedule/time.ts";
 
 const timeZone = "America/Santiago";
 const businessA = randomUUID();

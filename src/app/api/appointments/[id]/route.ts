@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { requireBusinessMembership, requireSession } from "@/lib/authorize";
+import { requireBusinessMembership, requireSession } from "@/server/authorize";
 import { getAvailableSlotsForProfessional } from "@/features/booking/availability";
 import { parseAppointmentChangeInput } from "@/features/booking/validation";
-import { localMinuteToUtc, parseLocalTime } from "@/lib/schedule";
-import { logServerError } from "@/lib/observability";
+import { localMinuteToUtc, parseLocalTime } from "@/features/schedule/time";
+import { logServerError } from "@/server/observability";
 
 export async function PATCH(
   request: Request,

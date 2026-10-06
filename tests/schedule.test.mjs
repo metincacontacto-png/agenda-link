@@ -6,7 +6,7 @@ import {
   localMinuteToUtc,
   parseLocalTime,
   weekdayForDate,
-} from "../src/lib/schedule.ts";
+} from "../src/features/schedule/time.ts";
 
 test("resolves a Chilean local time to the matching UTC instant", () => {
   assert.equal(

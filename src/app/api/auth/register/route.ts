@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { enforceRateLimit } from "@/lib/rate-limit";
+import { enforceRateLimit } from "@/server/rate-limit";
 import {
   createSessionToken,
   genericAuthError,
@@ -11,8 +11,8 @@ import {
   validEmail,
   validPassword,
   verifyPassword,
-} from "@/lib/auth";
-import { logServerError } from "@/lib/observability";
+} from "@/server/auth";
+import { logServerError } from "@/server/observability";
 
 function isUniqueConstraintError(error: unknown): boolean {
   return typeof error === "object" && error !== null && "code" in error && error.code === "P2002";

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { logServerError } from "@/lib/observability";
+import { logServerError } from "@/server/observability";
 
 export async function GET(request: Request) {
   try {

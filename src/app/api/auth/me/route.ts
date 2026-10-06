@@ -5,8 +5,8 @@ import {
   hasSessionSigningSecret,
   sessionCookie,
   verifySessionToken,
-} from "@/lib/auth";
-import { logServerError } from "@/lib/observability";
+} from "@/server/auth";
+import { logServerError } from "@/server/observability";
 
 export async function GET(request: Request) {
   const token = getSessionCookie(request);

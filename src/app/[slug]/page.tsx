@@ -6,7 +6,7 @@ import styles from "./page.module.css";
 import Calendar from "@/components/Calendar";
 import OtpModal from "@/components/OtpModal";
 import PaymentModal from "@/components/PaymentModal";
-import { dateStringAtTimeZone } from "@/lib/schedule";
+import { dateStringAtTimeZone } from "@/features/schedule/time";
 
 interface Professional {
   id: string;

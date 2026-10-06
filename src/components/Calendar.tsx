@@ -2,7 +2,7 @@
 
 import React, { useEffect } from "react";
 import styles from "./Calendar.module.css";
-import { dateStringAtTimeZone } from "@/lib/schedule";
+import { dateStringAtTimeZone } from "@/features/schedule/time";
 
 interface Props {
   slug: string;

@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { uploadBase64ToR2, deleteFromR2 } from "@/lib/r2";
-import { requireBusinessMembership, requireSession } from "@/lib/authorize";
-import { MediaValidationError } from "@/lib/media";
-import { logServerError } from "@/lib/observability";
+import { requireBusinessMembership, requireSession } from "@/server/authorize";
+import { MediaValidationError } from "@/features/media/validation";
+import { logServerError } from "@/server/observability";
 
 export async function POST(request: Request) {
   let businessId: string | undefined;

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { enforceRateLimit } from "@/lib/rate-limit";
-import { logServerError } from "@/lib/observability";
+import { enforceRateLimit } from "@/server/rate-limit";
+import { logServerError } from "@/server/observability";
 
 const RESERVED_SLUGS = ["admin", "api", "public", "auth", "static", "login", "register", "success"];
 

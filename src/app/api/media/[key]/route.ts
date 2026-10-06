@@ -1,6 +1,6 @@
 import { getR2Bucket } from "@/lib/r2";
-import { isSafeMediaKey, mediaContentType, MediaValidationError } from "@/lib/media";
-import { logServerError } from "@/lib/observability";
+import { isSafeMediaKey, mediaContentType, MediaValidationError } from "@/features/media/validation";
+import { logServerError } from "@/server/observability";
 
 export async function GET(_request: Request, { params }: { params: Promise<{ key: string }> }) {
   try {

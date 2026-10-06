@@ -3,7 +3,7 @@ import { prisma } from "@/lib/db";
 import { getAvailableSlotsForProfessional } from "@/features/booking/availability";
 import type { PublicBusinessDTO } from "@/features/booking/public-business-dto";
 import { parseAvailabilityQuery } from "@/features/booking/validation";
-import { logServerError } from "@/lib/observability";
+import { logServerError } from "@/server/observability";
 
 export async function GET(request: Request) {
   let businessId: string | undefined;

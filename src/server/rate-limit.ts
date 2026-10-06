@@ -1,5 +1,6 @@
-import { NextResponse } from "next/server";
+import type { NextResponse } from "next/server";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
+import { jsonError } from "@/server/errors";
 
 interface RateLimitBinding {
   limit(options: { key: string }): Promise<{ success: boolean }>;
@@ -26,18 +27,18 @@ export async function enforceRateLimit(
 
   if (!binding) {
     if (process.env.NODE_ENV === "development") return null;
-    return NextResponse.json({ error: "El control de tráfico no está configurado" }, { status: 503 });
+    return jsonError("El control de tráfico no está configurado", 503);
   }
 
   const clientIp = request.headers.get("cf-connecting-ip") ?? "unknown";
   try {
     const result = await binding.limit({ key: `${clientIp}:${scope}` });
     if (!result.success) {
-      return NextResponse.json({ error: "Demasiadas solicitudes. Inténtalo más tarde." }, { status: 429 });
+      return jsonError("Demasiadas solicitudes. Inténtalo más tarde.", 429);
     }
     return null;
   } catch {
     console.error("Rate limit binding failed");
-    return NextResponse.json({ error: "El control de tráfico no está disponible" }, { status: 503 });
+    return jsonError("El control de tráfico no está disponible", 503);
   }
 }

@@ -1,5 +1,5 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
-import { createMediaKey, isSafeMediaKey, MediaValidationError, parseImageDataUrl } from "@/lib/media";
+import { createMediaKey, isSafeMediaKey, MediaValidationError, parseImageDataUrl } from "@/features/media/validation";
 
 interface R2ObjectBody {
   body: ReadableStream | null;

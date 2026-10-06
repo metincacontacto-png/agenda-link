@@ -114,4 +114,4 @@ No agregar secretos al archivo de configuración. Los secretos de Worker se gest
 
 ## Proxy de mantenimiento y dominios
 
-El Proxy conserva la política de mantenimiento y resolución de dominios, pero cachea la respuesta interna de mantenimiento por 5 segundos y el lookup de custom domain por 60 segundos. Esto evita repetir lecturas D1 en cada navegación del mismo POP sin introducir un rewrite recursivo. Un cambio de dominio puede tardar hasta 60 segundos en propagarse; el modo mantenimiento hasta 5 segundos. Los errores de Proxy se registran con Ray ID y ruta, sin query string ni datos del cliente.
+El Proxy lee `maintenanceMode` y `customDomain` con una sola consulta D1 directa. No hace self-fetch a `/api/maintenance-check` ni `/api/domain-lookup`, y mantiene fuera del lookup los hosts del sistema, assets, rutas API y paneles administrativos. Los custom domains se reescriben una sola vez al slug resuelto. Los errores se registran con Ray ID y ruta, sin query string ni datos del cliente.

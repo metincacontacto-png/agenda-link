@@ -1,4 +1,4 @@
-import { isValidDateOnly, parseLocalTime } from "../../lib/schedule.ts";
+import { isValidDateOnly, parseLocalTime } from "../schedule/time.ts";
 
 export interface CreateBookingInput {
   slug: string;

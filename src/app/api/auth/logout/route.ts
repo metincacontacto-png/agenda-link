@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { sessionCookie } from "@/lib/auth";
+import { sessionCookie } from "@/server/auth";
 
 export async function POST() {
   return NextResponse.json(

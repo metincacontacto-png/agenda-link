@@ -3,7 +3,7 @@ import {
   generateAvailableSlots,
   localDayUtcRange,
   weekdayForDate,
-} from "@/lib/schedule";
+} from "@/features/schedule/time";
 
 export async function getAvailableSlotsForProfessional(input: {
   businessId: string;

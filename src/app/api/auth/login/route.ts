@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { enforceRateLimit } from "@/lib/rate-limit";
+import { enforceRateLimit } from "@/server/rate-limit";
 import {
   createSessionToken,
   genericAuthError,
@@ -9,8 +9,8 @@ import {
   sessionCookie,
   validEmail,
   verifyPassword,
-} from "@/lib/auth";
-import { logServerError } from "@/lib/observability";
+} from "@/server/auth";
+import { logServerError } from "@/server/observability";
 
 export async function POST(request: Request) {
   const rateLimitResponse = await enforceRateLimit(request, "AUTH_RATE_LIMITER", "login");

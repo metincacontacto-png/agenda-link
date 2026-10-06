@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { dateStringAtTimeZone } from "@/lib/schedule";
+import { dateStringAtTimeZone } from "@/features/schedule/time";
 import styles from "./admin.module.css";
 
 interface Appointment {

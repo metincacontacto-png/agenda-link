@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { requireSuperAdmin } from "@/lib/authorize";
-import { enforceRateLimit } from "@/lib/rate-limit";
-import { logServerError } from "@/lib/observability";
+import { requireSuperAdmin } from "@/server/authorize";
+import { enforceRateLimit } from "@/server/rate-limit";
+import { logServerError } from "@/server/observability";
 
 export async function GET(request: Request) {
   try {

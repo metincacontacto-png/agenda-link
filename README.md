@@ -45,6 +45,7 @@ La salida objetivo de producción es un Cloudflare Worker construido con OpenNex
 - [Contratos públicos y políticas de medios](docs/api/public-availability.md) · [R2/media](docs/api/media.md) · [datos administrativos](docs/api/admin-business.md)
 - [Rate limiting por operación](docs/api/rate-limiting.md)
 - [Logs estructurados y runbook de incidentes](docs/operations/observability.md)
+- [Límites de features y server](docs/architecture/feature-boundaries.md)
 - [Plan técnico por escalones](docs/plan-mejora-agendalink.md)
 
 ### Migraciones D1
@@ -66,7 +67,9 @@ No agregar credenciales a `.env.example`, al código ni a archivos versionados. 
 ## Estructura principal
 
 - `src/app/`: páginas, API routes y middleware de Next.js.
+- `src/features/`: reglas por dominio, incluyendo booking, schedule y media.
+- `src/server/`: auth, autorización, rate limiting, errores y logs seguros.
 - `src/lib/`: acceso a datos y adaptadores de infraestructura.
 - `prisma/schema.prisma`: esquema compartido entre SQLite local y D1.
 - `prisma/migrations/`: secuencia canónica de migraciones D1.
-- `docs/`: decisiones, operación y roadmap.
+- `docs/`: decisiones, contratos API, arquitectura, operación y roadmap.

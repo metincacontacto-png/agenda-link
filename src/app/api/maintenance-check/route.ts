@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { logServerError } from "@/lib/observability";
+import { logServerError } from "@/server/observability";
 
 export const dynamic = "force-dynamic";
 
