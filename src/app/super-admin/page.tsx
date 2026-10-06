@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import styles from "./super-admin.module.css";
 
 interface Business {
@@ -19,7 +20,6 @@ interface Business {
 
 export default function SuperAdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [password, setPassword] = useState("");
   const [authError, setAuthError] = useState("");
   
   const [businesses, setBusinesses] = useState<Business[]>([]);
@@ -35,66 +35,52 @@ export default function SuperAdminPage() {
   const [maintenanceMode, setMaintenanceMode] = useState(false);
   const [isMaintenanceLoading, setIsMaintenanceLoading] = useState(false);
 
-  const verifyAndLoad = async (passToVerify: string) => {
-    setLoading(true);
+  const verifyAndLoad = async () => {
     try {
-      const res = await fetch(`/api/super-admin?password=${passToVerify}`);
+      const res = await fetch("/api/super-admin");
       if (res.ok) {
         const data = await res.json();
         if (data.success) {
           setBusinesses(data.businesses);
           setMaintenanceMode(data.maintenanceMode || false);
           setIsAuthenticated(true);
-          localStorage.setItem("super_admin_pass", passToVerify);
           setAuthError("");
         }
       } else {
         const errData = await res.json().catch(() => ({}));
-        if (res.status === 401) {
-          setAuthError("Contraseña incorrecta");
-        } else {
-          setAuthError(`Error de servidor (${res.status}): ${errData.error || 'Desconocido'}`);
-        }
-        localStorage.removeItem("super_admin_pass");
+        setIsAuthenticated(false);
+        setAuthError(res.status === 403
+          ? "Tu cuenta no tiene permisos de Super Admin."
+          : res.status === 401
+            ? "Inicia sesión para continuar."
+            : `No se pudo validar el acceso (${res.status}): ${errData.error || "Error"}`);
       }
     } catch (err) {
       console.error(err);
-      setAuthError("Error de conexión al autenticar");
+      setAuthError("Error de conexión al validar el acceso.");
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    const savedPassword = localStorage.getItem("super_admin_pass");
-    if (savedPassword) {
-      setTimeout(() => {
-        verifyAndLoad(savedPassword);
-      }, 0);
-    } else {
-      setTimeout(() => setLoading(false), 0);
-    }
+    const timer = window.setTimeout(() => void verifyAndLoad(), 0);
+    return () => window.clearTimeout(timer);
   }, []);
 
-  const handleLoginSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    verifyAndLoad(password);
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem("super_admin_pass");
+  const handleLogout = async () => {
+    await fetch("/api/auth/logout", { method: "POST" }).catch(() => undefined);
     setIsAuthenticated(false);
-    setPassword("");
     setBusinesses([]);
+    setAuthError("Sesión cerrada.");
   };
 
   const handleToggleMaintenance = async () => {
     setIsMaintenanceLoading(true);
-    const pass = localStorage.getItem("super_admin_pass") || "";
     const newValue = !maintenanceMode;
     
     try {
-      const res = await fetch(`/api/super-admin?password=${pass}`, {
+      const res = await fetch("/api/super-admin", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -124,10 +110,9 @@ export default function SuperAdminPage() {
 
   const handleUpdateField = async (slug: string, field: "plan" | "billingBypass" | "customDomain", value: string | boolean | null) => {
     setActionLoading(`${slug}_${field}`);
-    const pass = localStorage.getItem("super_admin_pass") || "";
     
     try {
-      const res = await fetch(`/api/super-admin?password=${pass}`, {
+      const res = await fetch("/api/super-admin", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -175,41 +160,21 @@ export default function SuperAdminPage() {
     );
   }
 
-  // 1. Pantalla de Login de Super Admin
+  // 1. Acceso protegido por sesión y rol global
   if (!isAuthenticated) {
     return (
       <div className={styles.loginContainer}>
         <div className={styles.loginCard}>
           <div style={{ textAlign: "center", marginBottom: "24px" }}>
-            <span style={{ fontSize: "36px" }}>🔑</span>
+            <span style={{ fontSize: "36px" }}>🔒</span>
             <h1 className={styles.loginTitle}>AgendaLink Super Admin</h1>
-            <p className={styles.loginSubtitle}>Ingresa tu contraseña de administrador para gestionar la plataforma.</p>
+            <p className={styles.loginSubtitle}>Se requiere una cuenta con rol global de Super Admin.</p>
           </div>
 
           {authError && <div className={styles.authError}>{authError}</div>}
-
-          <form onSubmit={handleLoginSubmit}>
-            <div className={styles.formGroup}>
-              <label className={styles.label}>Contraseña</label>
-              <input
-                type="password"
-                value={password}
-                onChange={e => {
-                  const val = e.target.value;
-                  setPassword(val);
-                  if (val.length === 12) {
-                    verifyAndLoad(val);
-                  }
-                }}
-                placeholder="Ingresa clave de super admin"
-                className={styles.input}
-                required
-              />
-            </div>
-            <button type="submit" className={styles.submitBtn}>
-              Acceder al Panel
-            </button>
-          </form>
+          <Link href="/login?next=%2Fsuper-admin" className={styles.submitBtn} style={{ display: "block", textAlign: "center", textDecoration: "none" }}>
+            Iniciar sesión
+          </Link>
         </div>
       </div>
     );

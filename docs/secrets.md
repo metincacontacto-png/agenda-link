@@ -4,7 +4,7 @@
 
 Los secretos no se escriben en el repositorio, archivos `.env` versionados, ejemplos ni logs. Las variables requeridas deben fallar de forma explicita cuando no estan configuradas.
 
-`SUPER_ADMIN_PASSWORD` protege temporalmente la API de superadmin hasta que la autenticacion basada en usuarios sustituya este flujo.
+`SUPER_ADMIN_PASSWORD` queda únicamente en el deployment legado de Pages mientras siga atendiendo los dominios actuales. El Worker ya autoriza Super Admin mediante el rol global de la cuenta y no usa esta contraseña.
 
 `SESSION_SIGNING_SECRET` firma las cookies de sesión HMAC. Debe ser un secreto aleatorio independiente de la contraseña de superadmin y tener al menos 32 caracteres. Al rotarlo se invalidan todas las sesiones activas.
 
@@ -43,3 +43,13 @@ No asumir que los secretos de Pages se transfieren al Worker.
 3. Desplegar Pages y comprobar que la API superadmin responde con la nueva credencial.
 4. Invalidar el valor anterior en todos los gestores y canales donde se hubiera guardado.
 5. Si el secreto falta, `/api/super-admin` responde `503` en vez de usar un fallback.
+
+## Alta/restablecimiento manual de Super Admin
+
+Después de asignar `globalRole = SUPER_ADMIN` a la cuenta autorizada, establece su contraseña desde una terminal interactiva. El script pide la contraseña sin mostrarla, la guarda como hash PBKDF2 en D1 y no la escribe en el repositorio ni en logs:
+
+```bash
+node scripts/set-super-admin-password.mjs admin@example.com
+```
+
+El script solo modifica una cuenta existente cuyo rol global ya sea `SUPER_ADMIN`. Si no actualiza exactamente una cuenta, falla sin crearla ni cambiar otras cuentas.
