@@ -56,6 +56,7 @@ interface Business {
 export default function AdminDashboard({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = React.use(params);
   const [business, setBusiness] = useState<Business | null>(null);
+  const [accessDenied, setAccessDenied] = useState(false);
 
   const ownerName = business?.ownerName || "Juan Ortega";
   const ownerInitials = (() => {
@@ -250,9 +251,11 @@ export default function AdminDashboard({ params }: { params: Promise<{ slug: str
     try {
       const res = await fetch(`/api/admin?slug=${slug}`);
       if (!res.ok) {
+        setAccessDenied(res.status === 401 || res.status === 403);
         setBusiness(null);
         return;
       }
+      setAccessDenied(false);
       const data = await res.json();
       if (data.success) {
         setBusiness(data.business);
@@ -656,6 +659,18 @@ export default function AdminDashboard({ params }: { params: Promise<{ slug: str
       <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh", color: "var(--foreground)" }}>
         <div className={styles.glassCard} style={{ textAlign: "center", padding: "30px" }}>
           <p style={{ fontWeight: 600, fontSize: "16px" }}>Cargando Centro de Control...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (accessDenied) {
+    return (
+      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh", color: "var(--foreground)", padding: "20px" }}>
+        <div className={styles.glassCard} style={{ textAlign: "center", maxWidth: "420px" }}>
+          <h1 style={{ fontSize: "20px", fontWeight: "800", marginBottom: "12px" }}>Acceso restringido</h1>
+          <p style={{ fontSize: "14px", color: "var(--text-secondary)", marginBottom: "20px" }}>Inicia sesión con una cuenta que pertenezca a este negocio.</p>
+          <Link href={`/login?next=${encodeURIComponent(`/admin/${slug}`)}`} className={styles.submitButton} style={{ display: "inline-block", width: "auto", padding: "10px 20px" }}>Iniciar sesión</Link>
         </div>
       </div>
     );

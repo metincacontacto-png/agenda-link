@@ -1,9 +1,13 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { uploadBase64ToR2, deleteFromR2 } from "@/lib/r2";
+import { requireBusinessMembership, requireSession } from "@/lib/authorize";
 
 export async function GET(request: Request) {
   try {
+    const session = await requireSession(request);
+    if (!session.ok) return session.response;
+
     const { searchParams } = new URL(request.url);
     const slug = searchParams.get("slug");
 
@@ -11,8 +15,15 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: "Falta el parámetro slug" }, { status: 400 });
     }
 
+    const businessRef = await prisma.business.findUnique({ where: { slug }, select: { id: true } });
+    if (!businessRef) {
+      return NextResponse.json({ error: "Negocio no encontrado" }, { status: 404 });
+    }
+    const authorization = await requireBusinessMembership(session.user, businessRef.id);
+    if (!authorization.ok) return authorization.response;
+
     const business = await prisma.business.findUnique({
-      where: { slug },
+      where: { id: businessRef.id },
       include: {
         appointments: {
           orderBy: { dateTime: "asc" },
@@ -39,6 +50,9 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
+    const session = await requireSession(request);
+    if (!session.ok) return session.response;
+
     const body = await request.json();
     const {
       slug,
@@ -64,11 +78,21 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Falta el parámetro slug" }, { status: 400 });
     }
 
-    // Obtener valores actuales en la base de datos para controlar la sobreescritura de archivos
+    const businessRef = await prisma.business.findUnique({ where: { slug }, select: { id: true } });
+    if (!businessRef) {
+      return NextResponse.json({ error: "Negocio no encontrado" }, { status: 404 });
+    }
+    const authorization = await requireBusinessMembership(session.user, businessRef.id);
+    if (!authorization.ok) return authorization.response;
+
+    // Leer los archivos existentes solo después de comprobar la membresía.
     const existing = await prisma.business.findUnique({
-      where: { slug },
-      select: { logoUrl: true, landingCoverUrl: true, landingSecondaryCoverUrl: true }
+      where: { id: businessRef.id },
+      select: { logoUrl: true, landingCoverUrl: true, landingSecondaryCoverUrl: true },
     });
+    if (!existing) {
+      return NextResponse.json({ error: "Negocio no encontrado" }, { status: 404 });
+    }
 
     let finalLogoUrl = logoUrl;
     let finalCoverUrl = landingCoverUrl;
@@ -129,4 +153,3 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Error en el servidor" }, { status: 500 });
   }
 }
-

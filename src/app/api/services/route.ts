@@ -1,9 +1,13 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { uploadBase64ToR2, deleteFromR2 } from "@/lib/r2";
+import { requireBusinessMembership, requireSession } from "@/lib/authorize";
 
 export async function POST(request: Request) {
   try {
+    const session = await requireSession(request);
+    if (!session.ok) return session.response;
+
     const body = await request.json();
     const { slug, name, price, duration, imageUrl } = body;
     if (!slug || !name || price === undefined || duration === undefined) {
@@ -13,6 +17,9 @@ export async function POST(request: Request) {
     if (!business) {
       return NextResponse.json({ error: "Negocio no encontrado" }, { status: 404 });
     }
+    const authorization = await requireBusinessMembership(session.user, business.id);
+    if (!authorization.ok) return authorization.response;
+
     const finalImageUrl = await uploadBase64ToR2(imageUrl, `service_${slug}`);
     const service = await prisma.service.create({
       data: {
@@ -32,12 +39,21 @@ export async function POST(request: Request) {
 
 export async function DELETE(request: Request) {
   try {
+    const session = await requireSession(request);
+    if (!session.ok) return session.response;
+
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
     if (!id) {
       return NextResponse.json({ error: "Falta el parámetro id" }, { status: 400 });
     }
     const service = await prisma.service.findUnique({ where: { id } });
+    if (!service) {
+      return NextResponse.json({ error: "Servicio no encontrado" }, { status: 404 });
+    }
+    const authorization = await requireBusinessMembership(session.user, service.businessId);
+    if (!authorization.ok) return authorization.response;
+
     if (service?.imageUrl) {
       await deleteFromR2(service.imageUrl);
     }

@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 
+// Public POST is the customer-facing booking flow; administrative appointment
+// reads/changes must use authenticated, business-scoped routes.
 export async function POST(request: Request) {
   try {
     const body = await request.json();
