@@ -69,28 +69,51 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "El horario ya no está disponible" }, { status: 409 });
     }
 
-    const appointment = await prisma.appointment.create({
-      data: {
-        businessId: business.id,
-        serviceId: service.id,
-        professionalId: professional.id,
-        clientName: input.clientName,
-        clientWhatsApp: input.clientWhatsApp,
-        dateTime,
-        status: "CONFIRMED",
-        // Payment claims from a public client are untrusted. A provider webhook
-        // will be the only path that can move paymentStatus to PAID.
-        paymentStatus: "PENDING",
-        paymentMethod: null,
-        paymentAmount: null,
-      },
-      select: { id: true, dateTime: true, status: true, paymentStatus: true },
-    });
+    const appointmentId = crypto.randomUUID();
+    const instant = dateTime.toISOString();
+    const inserted = await prisma.$queryRaw<Array<{ id: string }>>`
+      INSERT INTO "Appointment" (
+        "id", "businessId", "serviceId", "professionalId", "clientName",
+        "clientWhatsApp", "dateTime", "status", "paymentStatus",
+        "paymentMethod", "paymentAmount"
+      )
+      SELECT
+        ${appointmentId}, ${business.id}, ${service.id}, ${professional.id},
+        ${input.clientName}, ${input.clientWhatsApp}, ${instant},
+        'CONFIRMED', 'PENDING', NULL, NULL
+      WHERE NOT EXISTS (
+        SELECT 1
+        FROM "Appointment" AS existing
+        INNER JOIN "Service" AS existingService ON existingService."id" = existing."serviceId"
+        WHERE existing."businessId" = ${business.id}
+          AND existing."professionalId" = ${professional.id}
+          AND existing."status" NOT IN ('CANCELLED', 'CANCELED')
+          AND julianday(existing."dateTime") < julianday(${instant}) + (${service.duration} / 1440.0)
+          AND julianday(existing."dateTime") + (existingService."duration" / 1440.0) > julianday(${instant})
+      )
+      AND NOT EXISTS (
+        SELECT 1
+        FROM "ScheduleBlock" AS block
+        WHERE block."businessId" = ${business.id}
+          AND (block."professionalId" IS NULL OR block."professionalId" = ${professional.id})
+          AND julianday(block."startsAt") < julianday(${instant}) + (${service.duration} / 1440.0)
+          AND julianday(block."endsAt") > julianday(${instant})
+      )
+      RETURNING "id"
+    `;
+    if (inserted.length === 0) {
+      return NextResponse.json({ error: "El horario acaba de dejar de estar disponible" }, { status: 409 });
+    }
 
     return NextResponse.json({
       success: true,
       appointment: {
-        ...appointment,
+        id: inserted[0].id,
+        dateTime,
+        status: "CONFIRMED",
+        paymentStatus: "PENDING",
+        paymentAmount: null,
+        paymentMethod: null,
         service: { name: service.name, duration: service.duration, price: service.price },
         professional: { name: professional.name },
         business,

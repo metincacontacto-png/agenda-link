@@ -157,6 +157,8 @@ model Appointment {
   paymentMethod  String?
   paymentAmount  Float?
   createdAt      DateTime     @default(now())
+
+  @@index([businessId, professionalId, dateTime])
 }
 
 model SystemSetting {

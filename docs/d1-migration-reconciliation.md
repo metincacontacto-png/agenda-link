@@ -75,6 +75,8 @@ La migración `20261005200000_identity_membership` añade `User` y `BusinessMemb
 
 La migración `20261006200000_professional_schedules_timezone` añade la zona IANA de negocio, horarios semanales de negocio/profesional, descansos recurrentes y bloqueos puntuales. Para preservar la disponibilidad existente, se inicializaron los negocios y profesionales previos con horario diario 09:00–18:00 en hora local. Los bloqueos puntuales se guardan en UTC; las ventanas semanales se expresan en minutos de la hora civil local.
 
+La migración `20261006210000_appointment_conflict_lookup` añade un índice de consulta por negocio, profesional e instante. La reserva hace el re-chequeo final y el `INSERT` en una única sentencia SQLite/D1, que descarta solapamientos de duración y bloqueos concurrentes antes de insertar.
+
 1. Cambiar `prisma/schema.prisma`.
 2. Generar y revisar el SQL de diferencia:
 
