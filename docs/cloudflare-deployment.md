@@ -111,3 +111,7 @@ Workers normales solo pueden configurar custom domains en zonas de la cuenta. Pa
 - `WORKER_SELF_REFERENCE` permite las llamadas internas de OpenNext.
 
 No agregar secretos al archivo de configuración. Los secretos de Worker se gestionan con `wrangler secret put`.
+
+## Proxy de mantenimiento y dominios
+
+El Proxy conserva la política de mantenimiento y resolución de dominios, pero cachea la respuesta interna de mantenimiento por 5 segundos y el lookup de custom domain por 60 segundos. Esto evita repetir lecturas D1 en cada navegación del mismo POP sin introducir un rewrite recursivo. Un cambio de dominio puede tardar hasta 60 segundos en propagarse; el modo mantenimiento hasta 5 segundos. Los errores de Proxy se registran con Ray ID y ruta, sin query string ni datos del cliente.

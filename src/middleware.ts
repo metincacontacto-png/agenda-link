@@ -1,6 +1,28 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
+type CloudflareCachedFetchInit = RequestInit & {
+  cf: {
+    cacheEverything: boolean;
+    cacheTtlByStatus: Record<string, number>;
+  };
+};
+
+function logProxyError(request: NextRequest, event: string, error: unknown) {
+  const url = new URL(request.url);
+  const errorName = error instanceof Error && /^[A-Za-z0-9_]{1,64}$/.test(error.name)
+    ? error.name
+    : "Error";
+  console.error(JSON.stringify({
+    level: "error",
+    event,
+    requestId: request.headers.get("cf-ray") ?? crypto.randomUUID(),
+    method: request.method,
+    route: url.pathname,
+    error: { name: errorName },
+  }));
+}
+
 export async function middleware(request: NextRequest) {
   const url = request.nextUrl.clone();
   const { pathname } = url;
@@ -24,7 +46,12 @@ export async function middleware(request: NextRequest) {
   // 3. Verificar si el modo mantenimiento global está activo
   try {
     const checkUrl = new URL("/api/maintenance-check", request.url);
-    const mRes = await fetch(checkUrl);
+    const mRes = await fetch(checkUrl, {
+      cf: {
+        cacheEverything: true,
+        cacheTtlByStatus: { "200-299": 5, "300-599": 0 },
+      },
+    } as CloudflareCachedFetchInit);
     if (mRes.ok) {
       const mData = await mRes.json();
       if (mData.maintenanceMode) {
@@ -33,7 +60,7 @@ export async function middleware(request: NextRequest) {
       }
     }
   } catch (error) {
-    console.error("Error checking maintenance in middleware:", error);
+    logProxyError(request, "proxy.maintenance_check.failed", error);
   }
 
   // 4. Continuar con el enrutamiento normal si no está en mantenimiento
@@ -65,7 +92,12 @@ export async function middleware(request: NextRequest) {
   // 3. Resolver dominio personalizado llamando al endpoint interno
   try {
     const lookupUrl = new URL(`/api/domain-lookup?domain=${cleanHost}`, request.url);
-    const res = await fetch(lookupUrl);
+    const res = await fetch(lookupUrl, {
+      cf: {
+        cacheEverything: true,
+        cacheTtlByStatus: { "200-299": 60, "300-599": 0 },
+      },
+    } as CloudflareCachedFetchInit);
     
     if (res.ok) {
       const data = await res.json();
@@ -77,7 +109,7 @@ export async function middleware(request: NextRequest) {
       }
     }
   } catch (error) {
-    console.error("Error resolviendo dominio en middleware:", error);
+    logProxyError(request, "proxy.domain_lookup.failed", error);
   }
 
   return NextResponse.next();
