@@ -99,12 +99,7 @@ Agregar los modelos:
 
 ### Primer entregable: modelo temporal
 
-Antes de tocar endpoints, definir y documentar:
-
-- Zona horaria por negocio (campo `timezone` IANA, ej. `America/Santiago`).
-- Persistencia exclusivamente en UTC; conversión a hora local solo en el borde (UI y DTOs).
-- Cómo se comportan los cambios de hora de Chile (DST): los slots se calculan en hora local y se traducen a UTC al persistir.
-- Estrategia al cambiar la zona horaria de un negocio con citas ya agendadas.
+La decisión quedó aceptada en [ADR-0002](adr/0002-zona-horaria-y-reservas-utc.md): zona IANA por negocio, citas persistidas como instantes UTC, resolución determinista de horas DST inexistentes/repetidas y citas existentes que conservan su instante al cambiar la zona.
 
 ### Acciones
 
