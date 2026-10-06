@@ -213,6 +213,20 @@ test("administrative appointments paginate and redact client/payment details by 
   assert.equal("email" in ownerData.business, false);
   assert.equal(ownerData.appointmentsPagination.piiRedacted, false);
 
+  const nextPageQuery = new URLSearchParams({
+    slug: "booking-test-a",
+    limit: "1",
+    cursor: ownerData.appointmentsPagination.nextCursor,
+  });
+  const nextPageResponse = await fetch(`${baseUrl}/api/admin?${nextPageQuery}`, {
+    headers: { Cookie: authCookie },
+  });
+  const nextPageData = await nextPageResponse.json();
+  assert.equal(nextPageResponse.status, 200);
+  assert.equal(nextPageData.business.appointments.length, 1);
+  assert.notEqual(nextPageData.business.appointments[0].id, ownerData.business.appointments[0].id);
+  assert.equal(nextPageData.appointmentsPagination.hasMore, false);
+
   const memberResponse = await fetch(`${baseUrl}/api/admin?slug=booking-test-a&limit=10`, {
     headers: { Cookie: memberCookie },
   });
