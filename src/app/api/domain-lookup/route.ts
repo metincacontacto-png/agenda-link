@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { logServerError } from "@/lib/observability";
 
 export async function GET(request: Request) {
   try {
@@ -22,7 +23,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ success: true, slug: business.slug });
   } catch (error) {
-    console.error("Error en domain-lookup:", error);
+    logServerError(request, "domain_lookup.failed", error);
     return NextResponse.json({ error: "Error en el servidor" }, { status: 500 });
   }
 }

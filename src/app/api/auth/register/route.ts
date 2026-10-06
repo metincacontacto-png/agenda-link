@@ -12,6 +12,7 @@ import {
   validPassword,
   verifyPassword,
 } from "@/lib/auth";
+import { logServerError } from "@/lib/observability";
 
 function isUniqueConstraintError(error: unknown): boolean {
   return typeof error === "object" && error !== null && "code" in error && error.code === "P2002";
@@ -74,7 +75,7 @@ export async function POST(request: Request) {
     );
   } catch (error) {
     if (isUniqueConstraintError(error)) return genericAuthError(400);
-    console.error("Error al registrar usuario");
+    logServerError(request, "auth.register.failed", error);
     return NextResponse.json({ error: "No se pudo completar el registro" }, { status: 500 });
   }
 }

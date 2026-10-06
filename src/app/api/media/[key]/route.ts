@@ -1,5 +1,6 @@
 import { getR2Bucket } from "@/lib/r2";
 import { isSafeMediaKey, mediaContentType, MediaValidationError } from "@/lib/media";
+import { logServerError } from "@/lib/observability";
 
 export async function GET(_request: Request, { params }: { params: Promise<{ key: string }> }) {
   try {
@@ -29,7 +30,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ key
       headers,
     });
   } catch (error) {
-    console.error("Error al obtener recurso de R2:", error);
+    logServerError(_request, "media.read.failed", error);
     return new Response("Internal Server Error", {
       status: error instanceof MediaValidationError ? error.status : 500,
     });

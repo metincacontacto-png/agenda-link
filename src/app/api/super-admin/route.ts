@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requireSuperAdmin } from "@/lib/authorize";
 import { enforceRateLimit } from "@/lib/rate-limit";
+import { logServerError } from "@/lib/observability";
 
 export async function GET(request: Request) {
   try {
@@ -34,7 +35,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ success: true, businesses, maintenanceMode });
   } catch (error) {
-    console.error("Error en super-admin GET:", error);
+    logServerError(request, "super_admin.read.failed", error);
     return NextResponse.json({ error: "Error en el servidor" }, { status: 500 });
   }
 }
@@ -90,7 +91,7 @@ export async function PUT(request: Request) {
 
     return NextResponse.json({ success: true, business: updatedBusiness });
   } catch (error) {
-    console.error("Error en super-admin PUT:", error);
+    logServerError(request, "super_admin.update.failed", error);
     return NextResponse.json({ error: "Error en el servidor" }, { status: 500 });
   }
 }

@@ -3,8 +3,10 @@ import { prisma } from "@/lib/db";
 import { getAvailableSlotsForProfessional } from "@/features/booking/availability";
 import type { PublicBusinessDTO } from "@/features/booking/public-business-dto";
 import { parseAvailabilityQuery } from "@/features/booking/validation";
+import { logServerError } from "@/lib/observability";
 
 export async function GET(request: Request) {
+  let businessId: string | undefined;
   try {
     const { searchParams } = new URL(request.url);
     const parsed = parseAvailabilityQuery(searchParams);
@@ -38,6 +40,7 @@ export async function GET(request: Request) {
     if (!business) {
       return NextResponse.json({ error: "Negocio no encontrado" }, { status: 404 });
     }
+    businessId = business.id;
     const publicBusiness: PublicBusinessDTO = business;
 
     let availableSlots: string[] = [];
@@ -62,7 +65,7 @@ export async function GET(request: Request) {
       availableSlots,
     });
   } catch (error) {
-    console.error("Error al calcular disponibilidad:", error);
+    logServerError(request, "availability.read.failed", error, { businessId });
     return NextResponse.json({ error: "Error en el servidor" }, { status: 500 });
   }
 }

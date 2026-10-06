@@ -3,8 +3,10 @@ import { prisma } from "@/lib/db";
 import { uploadBase64ToR2, deleteFromR2 } from "@/lib/r2";
 import { requireBusinessMembership, requireSession } from "@/lib/authorize";
 import { MediaValidationError } from "@/lib/media";
+import { logServerError } from "@/lib/observability";
 
 export async function GET(request: Request) {
+  let businessId: string | undefined;
   try {
     const session = await requireSession(request);
     if (!session.ok) return session.response;
@@ -26,6 +28,7 @@ export async function GET(request: Request) {
     if (!businessRef) {
       return NextResponse.json({ error: "Negocio no encontrado" }, { status: 404 });
     }
+    businessId = businessRef.id;
     const authorization = await requireBusinessMembership(session.user, businessRef.id);
     if (!authorization.ok) return authorization.response;
     const membership = session.user.globalRole === "SUPER_ADMIN"
@@ -125,12 +128,13 @@ export async function GET(request: Request) {
       },
     });
   } catch (error) {
-    console.error("Error al obtener datos de admin:", error);
+    logServerError(request, "admin.read.failed", error, { businessId });
     return NextResponse.json({ error: "Error en el servidor" }, { status: 500 });
   }
 }
 
 export async function POST(request: Request) {
+  let businessId: string | undefined;
   try {
     const session = await requireSession(request);
     if (!session.ok) return session.response;
@@ -164,6 +168,7 @@ export async function POST(request: Request) {
     if (!businessRef) {
       return NextResponse.json({ error: "Negocio no encontrado" }, { status: 404 });
     }
+    businessId = businessRef.id;
     const authorization = await requireBusinessMembership(session.user, businessRef.id);
     if (!authorization.ok) return authorization.response;
     const membership = session.user.globalRole === "SUPER_ADMIN"
@@ -282,7 +287,7 @@ export async function POST(request: Request) {
     if (error instanceof MediaValidationError) {
       return NextResponse.json({ error: error.message }, { status: error.status });
     }
-    console.error("Error al actualizar datos de admin:", error);
+    logServerError(request, "admin.update.failed", error, { businessId });
     return NextResponse.json({ error: "Error en el servidor" }, { status: 500 });
   }
 }

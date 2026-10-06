@@ -10,6 +10,7 @@ import {
   validEmail,
   verifyPassword,
 } from "@/lib/auth";
+import { logServerError } from "@/lib/observability";
 
 export async function POST(request: Request) {
   const rateLimitResponse = await enforceRateLimit(request, "AUTH_RATE_LIMITER", "login");
@@ -50,8 +51,8 @@ export async function POST(request: Request) {
       { success: true },
       { headers: { "Set-Cookie": sessionCookie(token) } },
     );
-  } catch {
-    console.error("Error al iniciar sesión");
+  } catch (error) {
+    logServerError(request, "auth.login.failed", error);
     return NextResponse.json({ error: "No se pudo completar el inicio de sesión" }, { status: 500 });
   }
 }

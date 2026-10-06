@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { enforceRateLimit } from "@/lib/rate-limit";
+import { logServerError } from "@/lib/observability";
 
 const RESERVED_SLUGS = ["admin", "api", "public", "auth", "static", "login", "register", "success"];
 
@@ -137,7 +138,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true, slug: business.slug, business });
   } catch (error) {
-    console.error("Error en onboarding:", error);
+    logServerError(request, "onboarding.create.failed", error);
     return NextResponse.json({ error: "Error interno del servidor" }, { status: 500 });
   }
 }

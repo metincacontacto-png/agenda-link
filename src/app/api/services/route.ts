@@ -3,8 +3,10 @@ import { prisma } from "@/lib/db";
 import { uploadBase64ToR2, deleteFromR2 } from "@/lib/r2";
 import { requireBusinessMembership, requireSession } from "@/lib/authorize";
 import { MediaValidationError } from "@/lib/media";
+import { logServerError } from "@/lib/observability";
 
 export async function POST(request: Request) {
+  let businessId: string | undefined;
   try {
     const session = await requireSession(request);
     if (!session.ok) return session.response;
@@ -18,6 +20,7 @@ export async function POST(request: Request) {
     if (!business) {
       return NextResponse.json({ error: "Negocio no encontrado" }, { status: 404 });
     }
+    businessId = business.id;
     const authorization = await requireBusinessMembership(session.user, business.id);
     if (!authorization.ok) return authorization.response;
 
@@ -36,12 +39,13 @@ export async function POST(request: Request) {
     if (error instanceof MediaValidationError) {
       return NextResponse.json({ error: error.message }, { status: error.status });
     }
-    console.error("Error al crear servicio:", error);
+    logServerError(request, "services.create.failed", error, { businessId });
     return NextResponse.json({ error: "Error interno del servidor" }, { status: 500 });
   }
 }
 
 export async function DELETE(request: Request) {
+  let businessId: string | undefined;
   try {
     const session = await requireSession(request);
     if (!session.ok) return session.response;
@@ -55,6 +59,7 @@ export async function DELETE(request: Request) {
     if (!service) {
       return NextResponse.json({ error: "Servicio no encontrado" }, { status: 404 });
     }
+    businessId = service.businessId;
     const authorization = await requireBusinessMembership(session.user, service.businessId);
     if (!authorization.ok) return authorization.response;
 
@@ -67,7 +72,7 @@ export async function DELETE(request: Request) {
     if (error instanceof MediaValidationError) {
       return NextResponse.json({ error: error.message }, { status: error.status });
     }
-    console.error("Error al eliminar servicio:", error);
+    logServerError(request, "services.delete.failed", error, { businessId });
     return NextResponse.json({ error: "Error interno del servidor" }, { status: 500 });
   }
 }

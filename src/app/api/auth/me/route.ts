@@ -6,6 +6,7 @@ import {
   sessionCookie,
   verifySessionToken,
 } from "@/lib/auth";
+import { logServerError } from "@/lib/observability";
 
 export async function GET(request: Request) {
   const token = getSessionCookie(request);
@@ -41,8 +42,8 @@ export async function GET(request: Request) {
     }
 
     return NextResponse.json({ user });
-  } catch {
-    console.error("Error al validar la sesión");
+  } catch (error) {
+    logServerError(request, "auth.session.failed", error);
     return NextResponse.json({ error: "No se pudo validar la sesión" }, { status: 500 });
   }
 }

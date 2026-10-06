@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { logServerError } from "@/lib/observability";
 
 export const dynamic = "force-dynamic";
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     const maintenanceSetting = await prisma.systemSetting.findUnique({
       where: { key: "maintenanceMode" }
@@ -11,7 +12,7 @@ export async function GET() {
     const maintenanceMode = maintenanceSetting ? maintenanceSetting.value === "true" : false;
     return NextResponse.json({ maintenanceMode });
   } catch (error) {
-    console.error("Error in maintenance-check:", error);
+    logServerError(request, "maintenance_check.failed", error);
     return NextResponse.json({ maintenanceMode: false });
   }
 }

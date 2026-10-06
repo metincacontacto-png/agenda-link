@@ -4,6 +4,7 @@ import { requireBusinessMembership, requireSession } from "@/lib/authorize";
 import { getAvailableSlotsForProfessional } from "@/features/booking/availability";
 import { parseAppointmentChangeInput } from "@/features/booking/validation";
 import { localMinuteToUtc, parseLocalTime } from "@/lib/schedule";
+import { logServerError } from "@/lib/observability";
 
 export async function PATCH(
   request: Request,
@@ -22,6 +23,7 @@ export async function PATCH(
   const parsed = parseAppointmentChangeInput(body);
   if (!parsed.ok) return NextResponse.json({ error: parsed.error }, { status: 400 });
 
+  let businessId: string | undefined;
   try {
     const appointmentRef = await prisma.appointment.findUnique({
       where: { id },
@@ -30,6 +32,7 @@ export async function PATCH(
     if (!appointmentRef) {
       return NextResponse.json({ error: "Cita no encontrada" }, { status: 404 });
     }
+    businessId = appointmentRef.businessId;
     const authorization = await requireBusinessMembership(session.user, appointmentRef.businessId);
     if (!authorization.ok) {
       return NextResponse.json({ error: "Cita no encontrada" }, { status: 404 });
@@ -152,7 +155,7 @@ export async function PATCH(
       auditRecorded: true,
     });
   } catch (error) {
-    console.error("Error al actualizar la cita:", error);
+    logServerError(request, "appointments.change.failed", error, { businessId });
     return NextResponse.json({ error: "No se pudo actualizar la cita" }, { status: 500 });
   }
 }

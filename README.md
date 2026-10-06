@@ -44,6 +44,7 @@ La salida objetivo de producción es un Cloudflare Worker construido con OpenNex
 - [Variables y rotación de secretos](docs/secrets.md)
 - [Contratos públicos y políticas de medios](docs/api/public-availability.md) · [R2/media](docs/api/media.md) · [datos administrativos](docs/api/admin-business.md)
 - [Rate limiting por operación](docs/api/rate-limiting.md)
+- [Logs estructurados y runbook de incidentes](docs/operations/observability.md)
 - [Plan técnico por escalones](docs/plan-mejora-agendalink.md)
 
 ### Migraciones D1

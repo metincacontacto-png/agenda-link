@@ -4,6 +4,7 @@ import { getAvailableSlotsForProfessional } from "@/features/booking/availabilit
 import { parseCreateBookingInput } from "@/features/booking/validation";
 import { localMinuteToUtc, parseLocalTime } from "@/lib/schedule";
 import { enforceRateLimit } from "@/lib/rate-limit";
+import { logServerError } from "@/lib/observability";
 
 // Public POST is the customer-facing booking flow; administrative appointment
 // reads/changes must use authenticated, business-scoped routes.
@@ -11,6 +12,7 @@ export async function POST(request: Request) {
   const rateLimitResponse = await enforceRateLimit(request, "BOOKING_RATE_LIMITER", "appointment");
   if (rateLimitResponse) return rateLimitResponse;
 
+  let businessId: string | undefined;
   let body: unknown;
   try {
     body = await request.json();
@@ -30,6 +32,7 @@ export async function POST(request: Request) {
     if (!business) {
       return NextResponse.json({ error: "Negocio no encontrado" }, { status: 404 });
     }
+    businessId = business.id;
 
     const [service, professional] = await Promise.all([
       prisma.service.findUnique({
@@ -124,7 +127,7 @@ export async function POST(request: Request) {
       },
     });
   } catch (error) {
-    console.error("Error al crear cita:", error);
+    logServerError(request, "appointments.create.failed", error, { businessId });
     return NextResponse.json({ error: "Error al registrar la cita" }, { status: 500 });
   }
 }
