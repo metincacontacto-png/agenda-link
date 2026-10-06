@@ -28,6 +28,14 @@ interface Client {
   notes: string;
 }
 
+interface AppointmentPagination {
+  total: number;
+  limit: number;
+  hasMore: boolean;
+  nextCursor: string | null;
+  piiRedacted: boolean;
+}
+
 interface Business {
   name: string;
   slug: string;
@@ -60,6 +68,14 @@ export default function AdminDashboard({ params }: { params: Promise<{ slug: str
   const { slug } = React.use(params);
   const [business, setBusiness] = useState<Business | null>(null);
   const [accessDenied, setAccessDenied] = useState(false);
+  const [appointmentPagination, setAppointmentPagination] = useState<AppointmentPagination>({
+    total: 0,
+    limit: 50,
+    hasMore: false,
+    nextCursor: null,
+    piiRedacted: false,
+  });
+  const [loadingMoreAppointments, setLoadingMoreAppointments] = useState(false);
 
   const ownerName = business?.ownerName || "Juan Ortega";
   const ownerInitials = (() => {
@@ -266,6 +282,7 @@ export default function AdminDashboard({ params }: { params: Promise<{ slug: str
       const data = await res.json();
       if (data.success) {
         setBusiness(data.business);
+        setAppointmentPagination(data.appointmentsPagination);
       }
     } catch (err) {
       console.error("Error loading admin data:", err);
@@ -277,6 +294,30 @@ export default function AdminDashboard({ params }: { params: Promise<{ slug: str
   useEffect(() => {
     loadAdminData();
   }, [slug]);
+
+  const loadMoreAppointments = async () => {
+    if (!appointmentPagination.hasMore || !appointmentPagination.nextCursor || loadingMoreAppointments) return;
+    setLoadingMoreAppointments(true);
+    try {
+      const query = new URLSearchParams({
+        slug,
+        limit: String(appointmentPagination.limit),
+        cursor: appointmentPagination.nextCursor,
+      });
+      const response = await fetch(`/api/admin?${query.toString()}`);
+      if (!response.ok) throw new Error("No se pudieron cargar más reservas");
+      const data = await response.json();
+      setBusiness((current) => current
+        ? { ...current, appointments: [...current.appointments, ...data.business.appointments] }
+        : current);
+      setAppointmentPagination(data.appointmentsPagination);
+    } catch (error) {
+      console.error("Error loading more appointments:", error);
+      alert("No se pudieron cargar más reservas.");
+    } finally {
+      setLoadingMoreAppointments(false);
+    }
+  };
 
 
 
@@ -1505,6 +1546,22 @@ export default function AdminDashboard({ params }: { params: Promise<{ slug: str
                 ))}
               </div>
             )}
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, marginTop: 16 }}>
+              <span style={{ fontSize: 12, color: "var(--text-secondary)" }}>
+                Mostrando {business.appointments.length} de {appointmentPagination.total} reservas.
+                {appointmentPagination.piiRedacted ? " WhatsApp y datos de cobro están limitados por tu rol." : ""}
+              </span>
+              {appointmentPagination.hasMore && (
+                <button
+                  type="button"
+                  disabled={loadingMoreAppointments}
+                  onClick={() => void loadMoreAppointments()}
+                  className={styles.todayDetailsBtn}
+                >
+                  {loadingMoreAppointments ? "Cargando…" : "Cargar más"}
+                </button>
+              )}
+            </div>
           </section>
         )}
 

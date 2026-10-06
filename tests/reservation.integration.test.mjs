@@ -18,7 +18,9 @@ const professionalA = randomUUID();
 const professionalB = randomUUID();
 const professionalOtherBusiness = randomUUID();
 const testUserId = randomUUID();
+const memberUserId = randomUUID();
 const existingAppointmentId = randomUUID();
+const historicalAppointmentId = randomUUID();
 const date = dateStringAtTimeZone(new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), timeZone);
 const dayOfWeek = weekdayForDate(date);
 const port = 32_000 + Math.floor(Math.random() * 10_000);
@@ -26,6 +28,8 @@ const baseUrl = `http://localhost:${port}`;
 let server;
 let testEmail;
 let authCookie;
+let memberEmail;
+let memberCookie;
 
 function runWrangler(args) {
   execFileSync("npx", ["wrangler", ...args], { stdio: "ignore" });
@@ -53,7 +57,9 @@ async function insertTestData() {
   const blockStart = localMinuteToUtc(date, 14 * 60, timeZone).toISOString();
   const blockEnd = localMinuteToUtc(date, 15 * 60, timeZone).toISOString();
   testEmail = `reservation-test-${testUserId}@example.invalid`;
+  memberEmail = `reservation-member-${memberUserId}@example.invalid`;
   const passwordHash = await makePasswordHash("ReservationTestPassword123!");
+  const memberPasswordHash = await makePasswordHash("ReservationMemberPassword123!");
   const sql = `
     INSERT INTO Business (id,name,slug,ownerName,email,category,teamSize,country,currency,timezone,createdAt,updatedAt)
     VALUES ('${businessA}','Booking Test A','booking-test-a','Test Owner','owner-a@example.invalid','TEST','1','CL','CLP','${timeZone}',CURRENT_TIMESTAMP,CURRENT_TIMESTAMP),
@@ -78,11 +84,14 @@ async function insertTestData() {
     INSERT INTO ScheduleBlock (id,businessId,professionalId,startsAt,endsAt,reason)
     VALUES ('${randomUUID()}','${businessA}','${professionalA}','${blockStart}','${blockEnd}','Blocked');
     INSERT INTO Appointment (id,businessId,serviceId,professionalId,clientName,clientWhatsApp,dateTime,status,paymentStatus,createdAt)
-    VALUES ('${existingAppointmentId}','${businessA}','${serviceA}','${professionalA}','Existing test appointment','+56000000000','${bookingTime}','CONFIRMED','PENDING',CURRENT_TIMESTAMP);
+    VALUES ('${existingAppointmentId}','${businessA}','${serviceA}','${professionalA}','Existing test appointment','+56000000000','${bookingTime}','CONFIRMED','PENDING',CURRENT_TIMESTAMP),
+           ('${historicalAppointmentId}','${businessA}','${serviceA}','${professionalB}','Historical test appointment','+56987654321','${localMinuteToUtc(date, 15 * 60, timeZone).toISOString()}','CANCELLED','PAID',CURRENT_TIMESTAMP);
     INSERT INTO User (id,name,email,passwordHash,globalRole,createdAt,updatedAt)
-    VALUES ('${testUserId}','Reservation Test','${testEmail}','${passwordHash}','USER',CURRENT_TIMESTAMP,CURRENT_TIMESTAMP);
+    VALUES ('${testUserId}','Reservation Test','${testEmail}','${passwordHash}','USER',CURRENT_TIMESTAMP,CURRENT_TIMESTAMP),
+           ('${memberUserId}','Reservation Member','${memberEmail}','${memberPasswordHash}','USER',CURRENT_TIMESTAMP,CURRENT_TIMESTAMP);
     INSERT INTO BusinessMember (businessId,userId,role)
-    VALUES ('${businessA}','${testUserId}','OWNER');
+    VALUES ('${businessA}','${testUserId}','OWNER'),
+           ('${businessA}','${memberUserId}','MEMBER');
   `;
   runWrangler(["d1", "execute", "agenda-link-db", "--local", "--command", sql]);
 }
@@ -140,6 +149,14 @@ before(async () => {
   assert.equal(login.status, 200);
   authCookie = login.headers.get("set-cookie")?.split(";")[0];
   assert.ok(authCookie);
+  const memberLogin = await fetch(`${baseUrl}/api/auth/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email: memberEmail, password: "ReservationMemberPassword123!" }),
+  });
+  assert.equal(memberLogin.status, 200);
+  memberCookie = memberLogin.headers.get("set-cookie")?.split(";")[0];
+  assert.ok(memberCookie);
 });
 
 after(() => {
@@ -182,6 +199,34 @@ test("availability respects professional schedules, duration, breaks, blocks, an
   const parallelData = await parallelResponse.json();
   assert.equal(parallelData.availableSlots.includes("09:00"), true, "another professional remains available");
   assert.equal(parallelData.availableSlots.includes("17:30"), true, "30-minute service fits before closing");
+});
+
+test("administrative appointments paginate and redact client/payment details by role", async () => {
+  const ownerResponse = await fetch(`${baseUrl}/api/admin?slug=booking-test-a&limit=1`, {
+    headers: { Cookie: authCookie },
+  });
+  const ownerData = await ownerResponse.json();
+  assert.equal(ownerResponse.status, 200);
+  assert.equal(ownerData.business.appointments.length, 1);
+  assert.equal(ownerData.appointmentsPagination.total, 2);
+  assert.equal(ownerData.appointmentsPagination.hasMore, true);
+  assert.equal("email" in ownerData.business, false);
+  assert.equal(ownerData.appointmentsPagination.piiRedacted, false);
+
+  const memberResponse = await fetch(`${baseUrl}/api/admin?slug=booking-test-a&limit=10`, {
+    headers: { Cookie: memberCookie },
+  });
+  const memberData = await memberResponse.json();
+  assert.equal(memberResponse.status, 200);
+  assert.equal(memberData.appointmentsPagination.piiRedacted, true);
+  assert.match(memberData.business.appointments[0].clientWhatsApp, /^••••\d{4}$/);
+  assert.equal(memberData.business.appointments[0].paymentAmount, null);
+  assert.equal(memberData.business.billingBypass, false);
+
+  const crossBusiness = await fetch(`${baseUrl}/api/admin?slug=booking-test-b`, {
+    headers: { Cookie: memberCookie },
+  });
+  assert.equal(crossBusiness.status, 403);
 });
 
 test("booking rejects foreign IDs, malformed/past input, and slots outside schedules", async () => {
