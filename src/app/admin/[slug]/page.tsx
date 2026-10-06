@@ -3,10 +3,12 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import { dateStringAtTimeZone } from "@/lib/schedule";
 import styles from "./admin.module.css";
 
 interface Appointment {
   id: string;
+  status: string;
   clientName: string;
   clientWhatsApp: string;
   dateTime: string;
@@ -32,6 +34,7 @@ interface Business {
   ownerName?: string | null;
   teamSize: string;
   currency: string;
+  timezone: string;
   category: string;
   appointments: Appointment[];
   services: { id: string; name: string; price: number; duration: number; imageUrl?: string | null }[];
@@ -124,6 +127,10 @@ export default function AdminDashboard({ params }: { params: Promise<{ slug: str
   const [isRefundModalOpen, setIsRefundModalOpen] = useState(false);
   const [selectedRefundApp, setSelectedRefundApp] = useState<Appointment | null>(null);
   const [isProcessingRefund, setIsProcessingRefund] = useState(false);
+  const [reschedulingAppointmentId, setReschedulingAppointmentId] = useState<string | null>(null);
+  const [rescheduleDate, setRescheduleDate] = useState("");
+  const [rescheduleTime, setRescheduleTime] = useState("");
+  const [appointmentActionLoading, setAppointmentActionLoading] = useState<string | null>(null);
 
   // Stripe Simulator
   const [paymentCardName, setPaymentCardName] = useState("");
@@ -430,6 +437,34 @@ export default function AdminDashboard({ params }: { params: Promise<{ slug: str
       }
     } catch (err) {
       console.error("Error deleting service:", err);
+    }
+  };
+
+  const handleAppointmentChange = async (
+    appointmentId: string,
+    payload: { action: "cancel" } | { action: "reschedule"; date: string; time: string },
+  ) => {
+    setAppointmentActionLoading(appointmentId);
+    try {
+      const response = await fetch(`/api/appointments/${appointmentId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        alert(data.error || "No se pudo actualizar la cita.");
+        return;
+      }
+      setReschedulingAppointmentId(null);
+      setRescheduleDate("");
+      setRescheduleTime("");
+      await loadAdminData();
+    } catch (error) {
+      console.error("Error al cambiar la cita:", error);
+      alert("Error de conexión al cambiar la cita.");
+    } finally {
+      setAppointmentActionLoading(null);
     }
   };
 
@@ -1079,7 +1114,7 @@ export default function AdminDashboard({ params }: { params: Promise<{ slug: str
                         <div key={app.id} className={styles.todayAppointmentRow}>
                           <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
                             <span className={styles.todayTimeBadge}>
-                              {new Date(app.dateTime).toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" })}
+                        {new Date(app.dateTime).toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit", timeZone: business.timezone })}
                             </span>
                             <div>
                               <strong style={{ fontSize: "14px", color: "var(--foreground)" }}>{app.clientName}</strong>
@@ -1368,7 +1403,7 @@ export default function AdminDashboard({ params }: { params: Promise<{ slug: str
                     </div>
                     <div style={{ textAlign: "right" }}>
                       <span style={{ fontSize: "14px", fontWeight: "700", display: "block" }}>
-                        {new Date(app.dateTime).toLocaleDateString("es-ES", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
+                        {new Date(app.dateTime).toLocaleDateString("es-ES", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", timeZone: business.timezone })}
                       </span>
                       <div style={{ marginTop: "4px" }}>
                         {app.paymentStatus === "PAID" ? (
@@ -1388,6 +1423,83 @@ export default function AdminDashboard({ params }: { params: Promise<{ slug: str
                           </span>
                         )}
                       </div>
+                      {app.status === "CONFIRMED" && (
+                        <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 10 }}>
+                          {reschedulingAppointmentId === app.id ? (
+                            <>
+                              <input
+                                aria-label="Nueva fecha de la cita"
+                                type="date"
+                                min={dateStringAtTimeZone(new Date(), business.timezone)}
+                                value={rescheduleDate}
+                                onChange={(event) => setRescheduleDate(event.target.value)}
+                              />
+                              <input
+                                aria-label="Nueva hora de la cita"
+                                type="time"
+                                value={rescheduleTime}
+                                onChange={(event) => setRescheduleTime(event.target.value)}
+                              />
+                              <button
+                                type="button"
+                                disabled={appointmentActionLoading === app.id || !rescheduleDate || !rescheduleTime}
+                                onClick={() => void handleAppointmentChange(app.id, {
+                                  action: "reschedule",
+                                  date: rescheduleDate,
+                                  time: rescheduleTime,
+                                })}
+                                className={styles.saveBtn}
+                              >
+                                Guardar
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setReschedulingAppointmentId(null)}
+                                className={styles.cancelBtn}
+                              >
+                                Cerrar
+                              </button>
+                            </>
+                          ) : (
+                            <>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const appointmentDate = new Date(app.dateTime);
+                                  setRescheduleDate(dateStringAtTimeZone(appointmentDate, business.timezone));
+                                  setRescheduleTime(appointmentDate.toLocaleTimeString("en-GB", {
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                    hourCycle: "h23",
+                                    timeZone: business.timezone,
+                                  }));
+                                  setReschedulingAppointmentId(app.id);
+                                }}
+                                className={styles.todayDetailsBtn}
+                              >
+                                Reprogramar
+                              </button>
+                              <button
+                                type="button"
+                                disabled={appointmentActionLoading === app.id}
+                                onClick={() => {
+                                  if (confirm("¿Cancelar esta cita? La acción quedará registrada.")) {
+                                    void handleAppointmentChange(app.id, { action: "cancel" });
+                                  }
+                                }}
+                                className={styles.cancelBtn}
+                              >
+                                Cancelar cita
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      )}
+                      {app.status === "CANCELLED" && (
+                        <span style={{ display: "block", marginTop: 8, color: "var(--text-secondary)", fontSize: 12 }}>
+                          Cita cancelada
+                        </span>
+                      )}
                     </div>
                   </div>
                 ))}

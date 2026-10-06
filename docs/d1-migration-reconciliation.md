@@ -77,6 +77,8 @@ La migración `20261006200000_professional_schedules_timezone` añade la zona IA
 
 La migración `20261006210000_appointment_conflict_lookup` añade un índice de consulta por negocio, profesional e instante. La reserva hace el re-chequeo final y el `INSERT` en una única sentencia SQLite/D1, que descarta solapamientos de duración y bloqueos concurrentes antes de insertar.
 
+La migración `20261006220000_appointment_audit` añade timestamps de modificación y una tabla de auditoría. Un trigger SQLite escribe el actor, estado y fechas anteriores/nuevas en la misma transacción que cancela o reprograma una cita.
+
 1. Cambiar `prisma/schema.prisma`.
 2. Generar y revisar el SQL de diferencia:
 

@@ -21,6 +21,10 @@ export interface AvailabilityQuery {
   professionalId: string | null;
 }
 
+export type AppointmentChangeInput =
+  | { action: "cancel" }
+  | { action: "reschedule"; date: string; time: string };
+
 export type AvailabilityQueryResult =
   | { ok: true; value: AvailabilityQuery }
   | { ok: false; error: string };
@@ -87,4 +91,24 @@ export function parseAvailabilityQuery(params: URLSearchParams): AvailabilityQue
   }
 
   return { ok: true, value: { slug, date, serviceId, professionalId } };
+}
+
+export function parseAppointmentChangeInput(input: unknown):
+  | { ok: true; value: AppointmentChangeInput }
+  | { ok: false; error: string } {
+  if (typeof input !== "object" || input === null || !("action" in input)) {
+    return { ok: false, error: "Solicitud de cambio inválida" };
+  }
+  const record = input as Record<string, unknown>;
+  if (record.action === "cancel") return { ok: true, value: { action: "cancel" } };
+  if (record.action !== "reschedule") {
+    return { ok: false, error: "Acción de cita no válida" };
+  }
+
+  const date = boundedString(record.date, 10, 10);
+  const time = boundedString(record.time, 5, 5);
+  if (!date || !isValidDateOnly(date) || !time || parseLocalTime(time) === null) {
+    return { ok: false, error: "Nueva fecha u hora inválida" };
+  }
+  return { ok: true, value: { action: "reschedule", date, time } };
 }

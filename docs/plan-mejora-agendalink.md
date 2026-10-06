@@ -110,7 +110,7 @@ La decisión quedó aceptada en [ADR-0002](adr/0002-zona-horaria-y-reservas-utc.
 5. Añadir una restricción o control de unicidad para `businessId`, `professionalId` y `dateTime`.
 6. Guardar fechas en UTC y definir la zona horaria del negocio.
 7. Devolver DTOs públicos limitados, sin email, plan, bypass ni otros flags internos.
-8. Implementar cancelación y reprogramación como casos de uso explícitos.
+8. Implementar cancelación y reprogramación autenticadas, con auditoría y re-chequeo atómico. Ver [ADR-0003](adr/0003-cancelacion-y-reprogramacion.md).
 9. Escribir en este mismo escalón los tests de reserva: válida, inválida, servicio de otro negocio y doble reserva concurrente. Los tests no se diferiran a un escalón posterior porque validan el núcleo del producto.
 
 ### Criterio de aceptación

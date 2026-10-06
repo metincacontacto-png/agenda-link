@@ -17,20 +17,43 @@ const serviceB = randomUUID();
 const professionalA = randomUUID();
 const professionalB = randomUUID();
 const professionalOtherBusiness = randomUUID();
+const testUserId = randomUUID();
+const existingAppointmentId = randomUUID();
 const date = dateStringAtTimeZone(new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), timeZone);
 const dayOfWeek = weekdayForDate(date);
 const port = 32_000 + Math.floor(Math.random() * 10_000);
 const baseUrl = `http://localhost:${port}`;
 let server;
+let testEmail;
+let authCookie;
 
 function runWrangler(args) {
   execFileSync("npx", ["wrangler", ...args], { stdio: "ignore" });
 }
 
-function insertTestData() {
+function encodeBase64Url(bytes) {
+  let binary = "";
+  for (const byte of bytes) binary += String.fromCharCode(byte);
+  return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+}
+
+async function makePasswordHash(password) {
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(password), "PBKDF2", false, ["deriveBits"]);
+  const bits = new Uint8Array(await crypto.subtle.deriveBits(
+    { name: "PBKDF2", salt, iterations: 100_000, hash: "SHA-256" },
+    key,
+    256,
+  ));
+  return `pbkdf2-sha256$100000$${encodeBase64Url(salt)}$${encodeBase64Url(bits)}`;
+}
+
+async function insertTestData() {
   const bookingTime = localMinuteToUtc(date, 9 * 60 + 30, timeZone).toISOString();
   const blockStart = localMinuteToUtc(date, 14 * 60, timeZone).toISOString();
   const blockEnd = localMinuteToUtc(date, 15 * 60, timeZone).toISOString();
+  testEmail = `reservation-test-${testUserId}@example.invalid`;
+  const passwordHash = await makePasswordHash("ReservationTestPassword123!");
   const sql = `
     INSERT INTO Business (id,name,slug,ownerName,email,category,teamSize,country,currency,timezone,createdAt,updatedAt)
     VALUES ('${businessA}','Booking Test A','booking-test-a','Test Owner','owner-a@example.invalid','TEST','1','CL','CLP','${timeZone}',CURRENT_TIMESTAMP,CURRENT_TIMESTAMP),
@@ -55,7 +78,11 @@ function insertTestData() {
     INSERT INTO ScheduleBlock (id,businessId,professionalId,startsAt,endsAt,reason)
     VALUES ('${randomUUID()}','${businessA}','${professionalA}','${blockStart}','${blockEnd}','Blocked');
     INSERT INTO Appointment (id,businessId,serviceId,professionalId,clientName,clientWhatsApp,dateTime,status,paymentStatus,createdAt)
-    VALUES ('${randomUUID()}','${businessA}','${serviceA}','${professionalA}','Existing test appointment','+56000000000','${bookingTime}','CONFIRMED','PENDING',CURRENT_TIMESTAMP);
+    VALUES ('${existingAppointmentId}','${businessA}','${serviceA}','${professionalA}','Existing test appointment','+56000000000','${bookingTime}','CONFIRMED','PENDING',CURRENT_TIMESTAMP);
+    INSERT INTO User (id,name,email,passwordHash,globalRole,createdAt,updatedAt)
+    VALUES ('${testUserId}','Reservation Test','${testEmail}','${passwordHash}','USER',CURRENT_TIMESTAMP,CURRENT_TIMESTAMP);
+    INSERT INTO BusinessMember (businessId,userId,role)
+    VALUES ('${businessA}','${testUserId}','OWNER');
   `;
   runWrangler(["d1", "execute", "agenda-link-db", "--local", "--command", sql]);
 }
@@ -97,14 +124,22 @@ async function postBooking(payload) {
 
 before(async () => {
   runWrangler(["d1", "migrations", "apply", "agenda-link-db", "--local"]);
-  insertTestData();
+  await insertTestData();
   server = spawn("npm", ["run", "dev", "--", "--port", String(port)], {
     cwd: process.cwd(),
     env: { ...process.env, SESSION_SIGNING_SECRET: "local-reservation-test-secret-0123456789" },
     detached: true,
-    stdio: "ignore",
+    stdio: "inherit",
   });
   await waitForServer();
+  const login = await fetch(`${baseUrl}/api/auth/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email: testEmail, password: "ReservationTestPassword123!" }),
+  });
+  assert.equal(login.status, 200);
+  authCookie = login.headers.get("set-cookie")?.split(";")[0];
+  assert.ok(authCookie);
 });
 
 after(() => {
@@ -117,7 +152,7 @@ after(() => {
   }
   runWrangler([
     "d1", "execute", "agenda-link-db", "--local", "--command",
-    `DELETE FROM Business WHERE id IN ('${businessA}','${businessB}');`,
+    `DELETE FROM Business WHERE id IN ('${businessA}','${businessB}'); DELETE FROM User WHERE id = '${testUserId}';`,
   ]);
 });
 
@@ -164,6 +199,42 @@ test("booking rejects foreign IDs, malformed/past input, and slots outside sched
 
   const outsideHours = await postBooking(bookingPayload({ time: "08:00" }));
   assert.equal(outsideHours.status, 409);
+});
+
+test("business members can cancel and reprogram future bookings with audit history", async () => {
+  const cancelled = await fetch(`${baseUrl}/api/appointments/${existingAppointmentId}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", Cookie: authCookie },
+    body: JSON.stringify({ action: "cancel" }),
+  });
+  assert.equal(cancelled.status, 200);
+
+  const afterCancel = await fetch(`${baseUrl}/api/availability?${new URLSearchParams({
+    slug: "booking-test-a",
+    date,
+    serviceId: serviceA,
+    professionalId: professionalA,
+  })}`).then((response) => response.json());
+  assert.equal(afterCancel.availableSlots.includes("09:00"), true, "cancellation releases its occupied interval");
+
+  const created = await postBooking(bookingPayload({ time: "09:00" }));
+  const newAppointment = await created.json();
+  assert.equal(created.status, 200);
+
+  const rescheduled = await fetch(`${baseUrl}/api/appointments/${newAppointment.appointment.id}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", Cookie: authCookie },
+    body: JSON.stringify({ action: "reschedule", date, time: "11:00" }),
+  });
+  const rescheduledData = await rescheduled.json();
+  assert.equal(rescheduled.status, 200);
+  assert.equal(new Date(rescheduledData.dateTime).toISOString(), localMinuteToUtc(date, 11 * 60, timeZone).toISOString());
+
+  const audit = execFileSync("npx", ["wrangler",
+    "d1", "execute", "agenda-link-db", "--local", "--command",
+    `SELECT COUNT(*) AS events FROM AppointmentAudit WHERE appointmentId IN ('${existingAppointmentId}','${newAppointment.appointment.id}');`,
+  ], { encoding: "utf8" });
+  assert.match(audit.toString(), /"events"\s*:\s*2/);
 });
 
 test("client payment claims are ignored and concurrent requests cannot double-book a professional", async () => {
