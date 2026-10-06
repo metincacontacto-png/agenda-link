@@ -22,7 +22,7 @@ Los handlers no deben confiar en `businessId`, `userId`, precio, estado de pago 
 
 ## Ejemplo ya aplicado
 
-La reserva pública valida sus campos con `features/booking/validation.ts`, resuelve los slots con `features/booking/availability.ts` y convierte la hora local a UTC usando `features/schedule/time.ts`. `POST /api/appointments` verifica que servicio y profesional pertenecen al negocio, determina precio/estado de pago en servidor y hace el chequeo final de solapamiento en una sola sentencia D1 atómica. La disponibilidad pública se proyecta mediante `PublicBusinessDTO`.
+La reserva pública valida sus campos con `features/booking/validation.ts`, invoca el caso de uso `features/booking/create-booking.ts`, resuelve slots con `features/booking/availability.ts` y convierte la hora local a UTC usando `features/schedule/time.ts`. `POST /api/appointments` es un adaptador HTTP delgado; el caso de uso verifica pertenencia, determina precio/estado de pago en servidor y hace el chequeo final de solapamiento en una sola sentencia D1 atómica. La disponibilidad pública se proyecta mediante `PublicBusinessDTO`.
 
 Las rutas administrativas llaman a `server/authorize.ts`; el endpoint de Super Admin exige rol global. El cliente solo recibe páginas limitadas de citas y datos privados reducidos según su rol.
 
