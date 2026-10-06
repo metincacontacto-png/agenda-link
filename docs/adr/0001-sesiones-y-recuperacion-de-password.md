@@ -21,6 +21,10 @@ Usar una cookie de sesión firmada con HMAC-SHA-256, validada con `crypto.subtle
 - Rotar la clave invalida todas las cookies existentes. La revocación individual antes de `exp` no está disponible en la estrategia stateless.
 - Rechazar firmas inválidas, payload malformado, expiración vencida y timestamps futuros fuera de una tolerancia pequeña. Comparar firmas en tiempo constante cuando la API del runtime lo permita.
 
+### Hash de contraseña
+
+Usar PBKDF2-HMAC-SHA-256 con salt aleatorio de 16 bytes y 100.000 iteraciones. Cloudflare Workers rechaza más de 100.000 iteraciones por operación Web Crypto; el límite se adopta para mantener compatibilidad con el runtime. Mantener límites de intentos y revisar el costo cuando cambie la plataforma. El formato persistido incluye algoritmo e iteraciones para permitir una migración futura.
+
 ### Recuperación de contraseña
 
 Posponer los enlaces de recuperación hasta integrar email transaccional. Durante el MVP, el restablecimiento será manual por el superadmin mediante un flujo autenticado que obligue a establecer una contraseña nueva; nunca enviar ni registrar contraseñas en logs. Registrar como mínimo quién realizó el cambio y cuándo, si el mecanismo de auditoría ya está disponible.

@@ -2,10 +2,11 @@ import { getCloudflareContext } from "@opennextjs/cloudflare";
 
 const SESSION_COOKIE = "agenda_session";
 const SESSION_TTL_SECONDS = 8 * 60 * 60;
-const PBKDF2_ITERATIONS = 600_000;
+// Cloudflare Workers currently caps PBKDF2 at 100,000 iterations per call.
+const PBKDF2_ITERATIONS = 100_000;
 const encoder = new TextEncoder();
 const DUMMY_PASSWORD_HASH =
-  "pbkdf2-sha256$600000$MDEyMzQ1Njc4OWFiY2RlZg$AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+  "pbkdf2-sha256$100000$MDEyMzQ1Njc4OWFiY2RlZg$AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 
 export interface SessionClaims {
   sub: string;
