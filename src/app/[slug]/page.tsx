@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import styles from "./page.module.css";
 import Calendar from "@/components/Calendar";
 import OtpModal from "@/components/OtpModal";
 import PaymentModal from "@/components/PaymentModal";
+import { dateStringAtTimeZone } from "@/lib/schedule";
 
 interface Professional {
   id: string;
@@ -26,6 +27,7 @@ interface Business {
   name: string;
   category: string;
   currency: string;
+  timezone: string;
   services: Service[];
   professionals: Professional[];
   logoUrl?: string | null;
@@ -44,21 +46,14 @@ interface Business {
 export default function BookingPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = React.use(params);
   
-  const getLocalDateString = () => {
-    const d = new Date();
-    const year = d.getFullYear();
-    const month = String(d.getMonth() + 1).padStart(2, "0");
-    const day = String(d.getDate()).padStart(2, "0");
-    return `${year}-${month}-${day}`;
-  };
-
   const [business, setBusiness] = useState<Business | null>(null);
   const [professionals, setProfessionals] = useState<Professional[]>([]);
   const [selectedService, setSelectedService] = useState<Service | null>(null);
   const [selectedProfessional, setSelectedProfessional] = useState<Professional | null>(null);
-  const [selectedDate, setSelectedDate] = useState(getLocalDateString());
+  const [selectedDate, setSelectedDate] = useState(() => dateStringAtTimeZone(new Date(), "America/Santiago"));
   const [selectedTime, setSelectedTime] = useState("");
   const [slots, setSlots] = useState<string[]>([]);
+  const initializedBusinessTimeZone = useRef(false);
   
   const [loading, setLoading] = useState(true);
   const [showPayment, setShowPayment] = useState(false);
@@ -73,7 +68,10 @@ export default function BookingPage({ params }: { params: Promise<{ slug: string
     
     async function loadData() {
       try {
-        const res = await fetch(`/api/availability?slug=${slug}&date=${selectedDate}`);
+        const query = new URLSearchParams({ slug, date: selectedDate });
+        if (selectedService?.id) query.set("serviceId", selectedService.id);
+        if (selectedProfessional?.id) query.set("professionalId", selectedProfessional.id);
+        const res = await fetch(`/api/availability?${query.toString()}`);
         if (!res.ok) {
           setBusiness(null);
           setLoading(false);
@@ -83,6 +81,10 @@ export default function BookingPage({ params }: { params: Promise<{ slug: string
         
         setBusiness(data.business);
         setSlots(data.availableSlots || []);
+        if (!initializedBusinessTimeZone.current) {
+          setSelectedDate(dateStringAtTimeZone(new Date(), data.business.timezone || "America/Santiago"));
+          initializedBusinessTimeZone.current = true;
+        }
         const bizProfs = data.business?.professionals || [];
         setProfessionals(bizProfs);
         
@@ -100,7 +102,7 @@ export default function BookingPage({ params }: { params: Promise<{ slug: string
 
     loadData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [slug, selectedDate]);
+  }, [slug, selectedDate, selectedService?.id, selectedProfessional?.id]);
 
   const handleBookClick = () => {
     if (!selectedService || !selectedProfessional || !selectedDate || !selectedTime) return;
@@ -438,7 +440,10 @@ export default function BookingPage({ params }: { params: Promise<{ slug: string
                 <button
                   key={service.id}
                   type="button"
-                  onClick={() => setSelectedService(service)}
+                  onClick={() => {
+                    setSelectedService(service);
+                    setSelectedTime("");
+                  }}
                   className={`${styles.serviceItem} ${selectedService?.id === service.id ? styles.serviceItemActive : ""}`}
                 >
                   <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
@@ -468,7 +473,10 @@ export default function BookingPage({ params }: { params: Promise<{ slug: string
                   <button
                     key={prof.id}
                     type="button"
-                    onClick={() => setSelectedProfessional(prof)}
+                    onClick={() => {
+                      setSelectedProfessional(prof);
+                      setSelectedTime("");
+                    }}
                     className={`${styles.profItem} ${selectedProfessional?.id === prof.id ? styles.profItemActive : ""}`}
                   >
                     <div className={styles.profAvatar}>
@@ -486,9 +494,10 @@ export default function BookingPage({ params }: { params: Promise<{ slug: string
               <h2 className={styles.sectionTitle}>
                 {professionals.length > 1 ? "3. Elige Fecha y Hora" : "2. Elige Fecha y Hora"}
               </h2>
-              <Calendar
-                slug={slug}
-                selectedDate={selectedDate}
+                <Calendar
+                  slug={slug}
+                  timeZone={business.timezone || "America/Santiago"}
+                  selectedDate={selectedDate}
                 onSelectDate={setSelectedDate}
                 selectedTime={selectedTime}
                 onSelectTime={setSelectedTime}

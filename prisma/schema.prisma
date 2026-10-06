@@ -9,11 +9,12 @@ generator client {
 }
 
 model Business {
-  id                       String           @id @default(uuid())
+  id                       String             @id @default(uuid())
   name                     String
-  slug                     String           @unique
+  slug                     String             @unique
   ownerName                String
-  email                    String           @default("")
+  email                    String             @default("")
+  timezone                 String             @default("America/Santiago")
   category                 String
   teamSize                 String
   country                  String
@@ -29,15 +30,17 @@ model Business {
   landingHours             String?
   landingFeaturesJson      String?
   landingTestimonialsJson  String?
-  plan                     String           @default("INDIVIDUAL")
-  billingBypass            Boolean          @default(false)
-  customDomain             String?          @unique
-  createdAt                DateTime         @default(now())
-  updatedAt                DateTime         @updatedAt
+  plan                     String             @default("INDIVIDUAL")
+  billingBypass            Boolean            @default(false)
+  customDomain             String?            @unique
+  createdAt                DateTime           @default(now())
+  updatedAt                DateTime           @updatedAt
   services                 Service[]
   professionals            Professional[]
   appointments             Appointment[]
   members                  BusinessMember[]
+  schedules                BusinessSchedule[]
+  scheduleBlocks           ScheduleBlock[]
 }
 
 model User {
@@ -63,6 +66,56 @@ model BusinessMember {
   @@index([userId])
 }
 
+model BusinessSchedule {
+  id          String   @id @default(uuid())
+  businessId  String
+  dayOfWeek   Int
+  startMinute Int
+  endMinute   Int
+  business    Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@unique([businessId, dayOfWeek, startMinute, endMinute])
+  @@index([businessId, dayOfWeek])
+}
+
+model ProfessionalSchedule {
+  id             String       @id @default(uuid())
+  professionalId String
+  dayOfWeek      Int
+  startMinute    Int
+  endMinute      Int
+  professional   Professional @relation(fields: [professionalId], references: [id], onDelete: Cascade)
+
+  @@unique([professionalId, dayOfWeek, startMinute, endMinute])
+  @@index([professionalId, dayOfWeek])
+}
+
+model ProfessionalBreak {
+  id             String       @id @default(uuid())
+  professionalId String
+  dayOfWeek      Int
+  startMinute    Int
+  endMinute      Int
+  label          String?
+  professional   Professional @relation(fields: [professionalId], references: [id], onDelete: Cascade)
+
+  @@index([professionalId, dayOfWeek])
+}
+
+model ScheduleBlock {
+  id             String        @id @default(uuid())
+  businessId     String
+  professionalId String?
+  startsAt       DateTime
+  endsAt         DateTime
+  reason         String?
+  business       Business      @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  professional   Professional? @relation(fields: [professionalId], references: [id], onDelete: Cascade)
+
+  @@index([businessId, startsAt, endsAt])
+  @@index([professionalId, startsAt, endsAt])
+}
+
 model Service {
   id           String        @id @default(uuid())
   businessId   String
@@ -76,13 +129,16 @@ model Service {
 }
 
 model Professional {
-  id           String        @id @default(uuid())
-  businessId   String
-  business     Business      @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  name         String
-  avatar       String?
-  createdAt    DateTime      @default(now())
-  appointments Appointment[]
+  id             String                 @id @default(uuid())
+  businessId     String
+  business       Business               @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  name           String
+  avatar         String?
+  createdAt      DateTime               @default(now())
+  appointments   Appointment[]
+  schedules      ProfessionalSchedule[]
+  breaks         ProfessionalBreak[]
+  scheduleBlocks ScheduleBlock[]
 }
 
 model Appointment {

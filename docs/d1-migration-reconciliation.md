@@ -73,6 +73,8 @@ No mezclar esa limpieza con una migracion funcional de producto.
 
 La migración `20261005200000_identity_membership` añade `User` y `BusinessMember`, crea usuarios sin credenciales para emails de negocio no vacíos (normalizados con `LOWER(TRIM(email))`) y los asocia como `OWNER`. `passwordHash` queda nulo hasta provisionar credenciales mediante el proceso manual autorizado; no se inventan passwords ni se habilita un reclamo de cuenta solo por conocer el email. Los negocios sin email quedan sin membresía hasta completar una asociación manual verificada. En la auditoría previa había 4 negocios sin email.
 
+La migración `20261006200000_professional_schedules_timezone` añade la zona IANA de negocio, horarios semanales de negocio/profesional, descansos recurrentes y bloqueos puntuales. Para preservar la disponibilidad existente, se inicializaron los negocios y profesionales previos con horario diario 09:00–18:00 en hora local. Los bloqueos puntuales se guardan en UTC; las ventanas semanales se expresan en minutos de la hora civil local.
+
 1. Cambiar `prisma/schema.prisma`.
 2. Generar y revisar el SQL de diferencia:
 

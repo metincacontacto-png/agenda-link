@@ -2,6 +2,7 @@
 
 import React, { useEffect } from "react";
 import styles from "./Calendar.module.css";
+import { dateStringAtTimeZone } from "@/lib/schedule";
 
 interface Props {
   slug: string;
@@ -10,27 +11,23 @@ interface Props {
   selectedTime: string;
   onSelectTime: (time: string) => void;
   slots: string[];
+  timeZone: string;
 }
 
-export default function Calendar({ selectedDate, onSelectDate, selectedTime, onSelectTime, slots }: Props) {
+export default function Calendar({ selectedDate, onSelectDate, selectedTime, onSelectTime, slots, timeZone }: Props) {
   const days = React.useMemo(() => {
     const list = [];
-    const today = new Date();
+    const today = dateStringAtTimeZone(new Date(), timeZone).split("-").map(Number);
+    const [year, month, day] = today;
     for (let i = 0; i < 7; i++) {
-      const d = new Date();
-      d.setDate(today.getDate() + i);
-      
-      const year = d.getFullYear();
-      const month = String(d.getMonth() + 1).padStart(2, "0");
-      const day = String(d.getDate()).padStart(2, "0");
-      const dateStr = `${year}-${month}-${day}`;
-
-      const dayName = d.toLocaleDateString("es-ES", { weekday: "short" });
-      const dayNum = d.getDate();
+      const d = new Date(Date.UTC(year, month - 1, day + i, 12));
+      const dateStr = d.toISOString().slice(0, 10);
+      const dayName = d.toLocaleDateString("es-ES", { weekday: "short", timeZone: "UTC" });
+      const dayNum = d.getUTCDate();
       list.push({ dateStr, dayName, dayNum });
     }
     return list;
-  }, []);
+  }, [timeZone]);
 
   useEffect(() => {
     if (!selectedDate && days.length > 0) {

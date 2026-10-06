@@ -41,16 +41,19 @@ export default async function SuccessPage({
     );
   }
 
-  const dateFormatted = new Date(appointment.dateTime).toLocaleDateString("es-ES", {
+  const appointmentDate = new Date(appointment.dateTime);
+  const dateFormatted = appointmentDate.toLocaleDateString("es-ES", {
     weekday: "long",
     day: "numeric",
     month: "long",
     year: "numeric",
+    timeZone: appointment.business.timezone,
   });
 
-  const timeFormatted = new Date(appointment.dateTime).toLocaleTimeString("es-ES", {
+  const timeFormatted = appointmentDate.toLocaleTimeString("es-ES", {
     hour: "2-digit",
     minute: "2-digit",
+    timeZone: appointment.business.timezone,
   });
 
   const formatPrice = (price: number, currency: string) => {
