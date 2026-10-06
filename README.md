@@ -4,7 +4,7 @@ AgendaLink permite que negocios publiquen sus servicios, profesionales y disponi
 
 ## Requisitos
 
-- Node.js 20 o superior y npm.
+- Node.js 22.6 o superior y npm (la suite usa el test runner integrado y el strip de tipos de Node).
 - Wrangler autenticado con Cloudflare para preview/deploy, D1 remota y secretos.
 - Acceso al proyecto Cloudflare `agenda-link` para operaciones de producción.
 
@@ -25,6 +25,7 @@ Abre <http://localhost:3000> para probar la aplicación.
 ## Validaciones
 
 ```bash
+npm test
 npm run lint
 npx tsc --noEmit
 npm run build
@@ -32,7 +33,7 @@ npm run build:cloudflare
 npm run preview
 ```
 
-`npm run preview` compila y ejecuta localmente el Worker generado por OpenNext. La suite de tests se añadirá junto con las funciones que requieran pruebas automatizadas.
+`npm test` ejecuta las pruebas de horarios/DST y un journey de reserva contra D1 local aislada por fixtures que se eliminan al finalizar. `npm run preview` compila y ejecuta localmente el Worker generado por OpenNext.
 
 ## Cloudflare y despliegue
 
