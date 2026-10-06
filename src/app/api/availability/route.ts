@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getAvailableSlotsForProfessional } from "@/features/booking/availability";
+import type { PublicBusinessDTO } from "@/features/booking/public-business-dto";
 import { parseAvailabilityQuery } from "@/features/booking/validation";
 
 export async function GET(request: Request) {
@@ -12,25 +13,46 @@ export async function GET(request: Request) {
 
     const business = await prisma.business.findUnique({
       where: { slug },
-      include: { professionals: true, services: true },
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        category: true,
+        currency: true,
+        timezone: true,
+        logoUrl: true,
+        landingTitle: true,
+        landingSubtitle: true,
+        landingAbout: true,
+        landingCoverUrl: true,
+        landingSecondaryCoverUrl: true,
+        landingPhone: true,
+        landingAddress: true,
+        landingHours: true,
+        landingFeaturesJson: true,
+        landingTestimonialsJson: true,
+        professionals: { select: { id: true, name: true, avatar: true } },
+        services: { select: { id: true, name: true, duration: true, price: true, imageUrl: true } },
+      },
     });
     if (!business) {
       return NextResponse.json({ error: "Negocio no encontrado" }, { status: 404 });
     }
+    const publicBusiness: PublicBusinessDTO = business;
 
     let availableSlots: string[] = [];
     if (serviceId && professionalId) {
-      const service = business.services.find((item) => item.id === serviceId);
-      const professional = business.professionals.find((item) => item.id === professionalId);
+      const service = publicBusiness.services.find((item) => item.id === serviceId);
+      const professional = publicBusiness.professionals.find((item) => item.id === professionalId);
       if (!service || !professional) {
         return NextResponse.json({ error: "Servicio o profesional no encontrado" }, { status: 404 });
       }
 
       availableSlots = await getAvailableSlotsForProfessional({
-        businessId: business.id,
+        businessId: publicBusiness.id,
         professionalId,
         date,
-        timeZone: business.timezone,
+        timeZone: publicBusiness.timezone,
         serviceDurationMinutes: service.duration,
       });
     }
@@ -38,7 +60,6 @@ export async function GET(request: Request) {
     return NextResponse.json({
       business,
       availableSlots,
-      professionals: business.professionals,
     });
   } catch (error) {
     console.error("Error al calcular disponibilidad:", error);
