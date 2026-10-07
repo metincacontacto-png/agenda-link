@@ -32,9 +32,11 @@ Antes de un deploy remoto, validar el bundle sin subirlo:
 npm run deploy -- --dry-run
 ```
 
-## Estado de Pages y cutover
+## Estado actual de Pages y Worker Routes
 
-El proyecto Pages `agenda-link` sigue atendiendo `agenda-link.pages.dev`, `agendalink.cl` y `www.agendalink.cl`. Esta tarjeta no cambia DNS, dominios ni el deploy activo.
+El proyecto Pages `agenda-link` conserva `agenda-link.pages.dev` y la asociación de `agendalink.cl` / `www.agendalink.cl`. Desde el deploy de Worker Routes, el Worker intercepta tráfico de esos dos hostnames; Pages permanece asociado para rollback. No se borraron ni cambiaron registros DNS.
+
+`workers.dev` queda deshabilitado por Wrangler al configurar rutas, salvo que se habilite explícitamente. En el deployment de producción no se habilitó, para no mantener una URL alternativa sobre los mismos bindings D1/R2.
 
 Un cutover reversible mediante Worker Routes debe:
 
@@ -46,13 +48,13 @@ Un cutover reversible mediante Worker Routes debe:
 
 No adjuntar un Worker **Custom Domain** al mismo hostname mientras siga configurado como dominio personalizado de Pages. Para un cutover reversible, usar **Worker Routes** sobre los hostnames proxied que ya sirven Pages.
 
-## Runbook de cutover reversible Pages a Worker Routes
+## Runbook reversible Pages a Worker Routes
 
-No activar estas rutas sin una ventana de cambio aprobada: capturan el tráfico de producción. El Worker de prueba actual está disponible en `https://agenda-link.metincacontacto.workers.dev`; Pages conserva los dominios y el origen para rollback.
+Las rutas de producción ya están activas. Este runbook registra la activación y sirve para futuros cambios/rollback. Todo `npm run deploy` con estas rutas configuradas actualiza el Worker que atiende tráfico real; requiere revisión de release.
 
 ### Preflight
 
-1. Confirmar que el Worker responde en su URL `workers.dev` y que `/api/maintenance-check` devuelve el estado esperado.
+1. Antes de activar rutas, probar el Worker con `npm run preview` o con `workers.dev` solo si está habilitado explícitamente. Con rutas activas, comprobar `/api/maintenance-check` en ambos dominios de producción.
 2. Confirmar los secretos que corresponden a cada deployment, sin leer sus valores:
 
    ```bash
@@ -91,7 +93,7 @@ No activar estas rutas sin una ventana de cambio aprobada: capturan el tráfico 
    npm run deploy
    ```
 
-4. Validar ambos dominios: landing, reserva, assets, APIs y `/api/maintenance-check`. Iniciar sesión con la cuenta Super Admin y comprobar que `GET /api/super-admin` devuelve `200`; sin sesión debe devolver `401` y con una sesión sin el rol global debe devolver `403`. Confirmar que `agenda-link.pages.dev` sigue disponible para diagnóstico.
+4. Validar ambos dominios: landing, reserva, assets, APIs y `/api/maintenance-check`. Iniciar sesión con la cuenta Super Admin y comprobar que `GET /api/super-admin` devuelve `200`; sin sesión debe devolver `401` y con una sesión sin el rol global debe devolver `403`. `agenda-link.pages.dev` sigue apuntando directamente a Pages y sirve de comparación/diagnóstico.
 
 ### Rollback
 

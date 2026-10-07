@@ -1,6 +1,6 @@
 # Checklist de release
 
-Usar esta lista para cada publicación del Worker. El Worker de prueba usa `agenda-link.metincacontacto.workers.dev`; mover `agendalink.cl` o `www.agendalink.cl` requiere una ventana de cambio aprobada y el procedimiento separado de [Cloudflare deployment](../cloudflare-deployment.md).
+Usar esta lista para cada publicación del Worker. Las rutas `agendalink.cl/*` y `www.agendalink.cl/*` están activas: todo deploy del Worker afecta producción. `workers.dev` está deshabilitado en esta configuración. Pages conserva sus asociaciones como fallback; el procedimiento de rollback está en [Cloudflare deployment](../cloudflare-deployment.md).
 
 ## Antes de desplegar
 
@@ -32,13 +32,14 @@ Usar esta lista para cada publicación del Worker. El Worker de prueba usa `agen
 
 ## Publicación y smoke test del Worker
 
-- [ ] Ejecutar `npm run deploy` solo para el Worker sin dominios de producción asociados.
-- [ ] Comprobar que la URL `workers.dev` responde `200` y `/api/maintenance-check` devuelve el estado esperado.
+- [ ] Para cambios locales sin publicar, ejecutar `npm run build:cloudflare` y `npm run deploy -- --dry-run`.
+- [ ] Para un deploy autorizado, recordar que Worker Routes activas enrutan ambos dominios de producción al Worker.
+- [ ] Comprobar `agendalink.cl`, `www.agendalink.cl` y `/api/maintenance-check`. La URL `workers.dev` responde `404` si no se habilita explícitamente.
 - [ ] Probar una landing y disponibilidad pública de un negocio de prueba; confirmar que servicios, profesionales, horarios y zona horaria coinciden.
 - [ ] Confirmar que `/api/super-admin` devuelve `401` sin sesión y que una sesión sin rol Super Admin no obtiene acceso.
 - [ ] Confirmar que una ruta `/api/media/<key>` inexistente devuelve `404` y que una imagen existente usa un tipo MIME seguro.
 - [ ] Revisar Workers Logs por errores 5xx y confirmar que los logs no incluyan contraseñas, cookies, tokens ni PII innecesaria.
-- [ ] Confirmar que `agendalink.cl` y `www.agendalink.cl` siguen atendidos por Pages durante las pruebas del Worker.
+- [ ] Confirmar que Pages mantiene los dominios asociados para que el rollback por retirada de rutas sea inmediato.
 
 ## Cutover de dominios
 
