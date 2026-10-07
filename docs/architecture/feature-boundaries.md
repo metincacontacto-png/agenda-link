@@ -3,9 +3,9 @@
 ## Estructura
 
 - `src/app/`: convenciones de Next.js, páginas y adaptadores HTTP (`route.ts`).
-- `src/features/<dominio>/`: esquemas, reglas y operaciones propias de un dominio. Booking y horarios viven en `features/booking` y `features/schedule`; las reglas de imágenes públicas, en `features/media`.
+- `src/features/<dominio>/`: esquemas, contratos, reglas y operaciones propias de un dominio. `booking`, `schedule`, `businesses`, `catalog`, `team`, `branding`, `media` y `platform` contienen lógica de producto sin depender de páginas cliente.
 - `src/server/`: sesión, autorización, rate limiting, errores y logging seguro. Solo se importa desde código de servidor.
-- `src/lib/`: adaptadores técnicos compartidos sin política de producto, como Prisma/D1 y Cloudflare R2.
+- `src/lib/`: adaptadores técnicos compartidos sin política de producto: Prisma/D1, bindings de Cloudflare y operaciones R2 de bajo nivel.
 
 No crear carpetas vacías. Mover código a un límite cuando exista un caso de uso real, no como reescritura global.
 
@@ -22,9 +22,13 @@ Los handlers no deben confiar en `businessId`, `userId`, precio, estado de pago 
 
 ## Ejemplo ya aplicado
 
-La reserva pública valida sus campos con `features/booking/validation.ts`, invoca el caso de uso `features/booking/create-booking.ts`, resuelve slots con `features/booking/availability.ts` y convierte la hora local a UTC usando `features/schedule/time.ts`. `POST /api/appointments` es un adaptador HTTP delgado; el caso de uso verifica pertenencia, determina precio/estado de pago en servidor y hace el chequeo final de solapamiento en una sola sentencia D1 atómica. La disponibilidad pública se proyecta mediante `PublicBusinessDTO`.
+La reserva pública valida sus campos con `features/booking/validation.ts`, invoca `features/booking/create-booking.ts` y convierte la hora local a UTC usando `features/schedule/time.ts`. El caso de uso depende del puerto `BookingRepository` y del puerto `Clock`; el handler inyecta `prismaBookingRepository`, cuya escritura final usa una sola sentencia D1 atómica. Los tests unitarios ejercitan el caso de uso con repositorio y reloj falsos, sin cargar Prisma ni Cloudflare. La disponibilidad se calcula en `features/booking/availability.ts` y la salida pública se proyecta mediante `PublicBusinessDTO`.
 
 Las rutas administrativas llaman a `server/authorize.ts`; el endpoint de Super Admin exige rol global. El cliente solo recibe páginas limitadas de citas y datos privados reducidos según su rol.
+
+El onboarding orquesta la creación de negocio y owner en una operación D1 atómica; los defaults de profesional y horario se preparan en `features/team`. El catálogo valida servicios en `features/catalog`, y el perfil/branding en `features/branding`. Los DTOs administrativos y públicos viven en sus features y se importan como tipos por la UI.
+
+`features/media` valida URLs, inspecciona el contenido de imágenes, define claves seguras y coordina lectura/escritura. `lib/r2.ts` solo resuelve el binding técnico. `features/platform/routing.ts` consulta los settings de mantenimiento y el dominio mediante una interfaz D1 y decide si continuar, mostrar mantenimiento o reescribir al slug; `middleware.ts` adapta esa decisión a `NextResponse`.
 
 ## Regla de imports
 
@@ -32,3 +36,5 @@ Las rutas administrativas llaman a `server/authorize.ts`; el endpoint de Super A
 - Un Route Handler puede importar `server/`, `features/` y `lib/`.
 - `server/` y `lib/` no deben importar páginas o componentes de `app/`.
 - `lib/` no define autorización ni reglas de horarios, pagos o reservas.
+- Los casos de uso de negocio no deben leer bindings Cloudflare directamente; reciben el adaptador necesario por parámetro o usan un adaptador `lib/` dedicado.
+- Las interfaces de puertos viven junto al dominio que las necesita; la implementación Prisma/R2 se conecta en el borde del handler o en un adaptador de `lib/`.

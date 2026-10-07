@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createBooking } from "@/features/booking/create-booking";
 import { parseCreateBookingInput } from "@/features/booking/validation";
+import { prismaBookingRepository } from "@/lib/prisma-booking-repository";
 import { logServerError } from "@/server/observability";
 import { enforceRateLimit } from "@/server/rate-limit";
 
@@ -21,7 +22,7 @@ export async function POST(request: Request) {
   if (!parsed.ok) return NextResponse.json({ error: parsed.error }, { status: 400 });
 
   try {
-    const result = await createBooking(parsed.value);
+    const result = await createBooking(parsed.value, { repository: prismaBookingRepository });
     if (!result.ok) return NextResponse.json({ error: result.error }, { status: result.status });
     return NextResponse.json({ success: true, appointment: result.appointment });
   } catch (error) {

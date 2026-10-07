@@ -1,5 +1,7 @@
 # Design Specification: Simulated Google Login and Auto-Seeding
 
+> Historical proposal only. The simulated login and `/api/auth/google-seed` endpoint were not retained in the production flow; the seed route has been removed.
+
 Add a simulated Google Login button and flow in the "Iniciar Sesión" (Sign In) modal, allowing users to select a Google account and log in or auto-create a mock business in the database (e.g. `me-tinca`) if it doesn't already exist.
 
 ## 1. Goal & Requirements

@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { uploadBase64ToR2, deleteFromR2 } from "@/lib/r2";
 import { requireBusinessMembership, requireSession } from "@/server/authorize";
 import { MediaValidationError } from "@/features/media/validation";
+import { parseBusinessProfileInput } from "@/features/branding/validation";
+import { updateBusinessProfile } from "@/features/branding/update-business-profile";
+import type { BusinessAdminDTO } from "@/features/businesses/contracts";
 import { logServerError } from "@/server/observability";
 
 export async function GET(request: Request) {
@@ -105,20 +107,22 @@ export async function GET(request: Request) {
     const rows = appointmentRows.slice(0, limit);
     const appointments = rows.map((appointment) => ({
       ...appointment,
+      dateTime: appointment.dateTime.toISOString(),
       clientWhatsApp: canViewSensitive
         ? appointment.clientWhatsApp
         : `••••${appointment.clientWhatsApp.replace(/\D/g, "").slice(-4)}`,
       paymentMethod: canViewSensitive ? appointment.paymentMethod : null,
       paymentAmount: canViewSensitive ? appointment.paymentAmount : null,
     }));
+    const businessDTO = {
+      ...business,
+      billingBypass: canViewSensitive ? business.billingBypass : false,
+      appointments,
+    } satisfies BusinessAdminDTO;
 
     return NextResponse.json({
       success: true,
-      business: {
-        ...business,
-        billingBypass: canViewSensitive ? business.billingBypass : false,
-        appointments,
-      },
+      business: businessDTO,
       appointmentsPagination: {
         total: totalAppointments,
         limit,
@@ -139,30 +143,18 @@ export async function POST(request: Request) {
     const session = await requireSession(request);
     if (!session.ok) return session.response;
 
-    const body = await request.json();
-    const {
-      slug,
-      name,
-      category,
-      teamSize,
-      currency,
-      logoUrl,
-      landingTitle,
-      landingSubtitle,
-      landingAbout,
-      landingCoverUrl,
-      landingSecondaryCoverUrl,
-      landingPhone,
-      landingAddress,
-      landingHours,
-      landingFeaturesJson,
-      landingTestimonialsJson,
-      plan,
-    } = body;
-
-    if (!slug) {
+    let body: unknown;
+    try {
+      body = await request.json();
+    } catch {
+      return NextResponse.json({ error: "Solicitud inválida" }, { status: 400 });
+    }
+    if (typeof body !== "object" || body === null || !("slug" in body) || typeof body.slug !== "string") {
       return NextResponse.json({ error: "Falta el parámetro slug" }, { status: 400 });
     }
+    const slug = body.slug.trim();
+    const parsed = parseBusinessProfileInput(body);
+    if (!parsed.ok) return NextResponse.json({ error: parsed.error }, { status: 400 });
 
     const businessRef = await prisma.business.findUnique({ where: { slug }, select: { id: true } });
     if (!businessRef) {
@@ -179,105 +171,11 @@ export async function POST(request: Request) {
         });
     const canViewSensitive = session.user.globalRole === "SUPER_ADMIN" ||
       membership?.role === "OWNER" || membership?.role === "ADMIN";
-
-    // Leer los archivos existentes solo después de comprobar la membresía.
-    const existing = await prisma.business.findUnique({
-      where: { id: businessRef.id },
-      select: { logoUrl: true, landingCoverUrl: true, landingSecondaryCoverUrl: true },
-    });
-    if (!existing) {
-      return NextResponse.json({ error: "Negocio no encontrado" }, { status: 404 });
+    if (parsed.value.plan !== undefined && !canViewSensitive) {
+      return NextResponse.json({ error: "Tu rol no puede cambiar el plan del negocio" }, { status: 403 });
     }
-
-    let finalLogoUrl = logoUrl;
-    let finalCoverUrl = landingCoverUrl;
-    let finalSecondaryCoverUrl = landingSecondaryCoverUrl;
-
-    if (logoUrl !== undefined) {
-      if (logoUrl !== null && logoUrl !== "") {
-        if (typeof logoUrl !== "string") {
-          return NextResponse.json({ error: "Imagen de logo inválida" }, { status: 400 });
-        }
-        finalLogoUrl = await uploadBase64ToR2(logoUrl, `logo_${slug}`);
-        if (existing?.logoUrl && existing.logoUrl !== finalLogoUrl) await deleteFromR2(existing.logoUrl);
-      } else if ((logoUrl === null || logoUrl === "") && existing?.logoUrl) {
-        await deleteFromR2(existing.logoUrl);
-        finalLogoUrl = null;
-      }
-    }
-
-    if (landingCoverUrl !== undefined) {
-      if (landingCoverUrl !== null && landingCoverUrl !== "") {
-        if (typeof landingCoverUrl !== "string") {
-          return NextResponse.json({ error: "Imagen de portada inválida" }, { status: 400 });
-        }
-        finalCoverUrl = await uploadBase64ToR2(landingCoverUrl, `cover_${slug}`);
-        if (existing?.landingCoverUrl && existing.landingCoverUrl !== finalCoverUrl) await deleteFromR2(existing.landingCoverUrl);
-      } else if ((landingCoverUrl === null || landingCoverUrl === "") && existing?.landingCoverUrl) {
-        await deleteFromR2(existing.landingCoverUrl);
-        finalCoverUrl = null;
-      }
-    }
-
-    if (landingSecondaryCoverUrl !== undefined) {
-      if (landingSecondaryCoverUrl !== null && landingSecondaryCoverUrl !== "") {
-        if (typeof landingSecondaryCoverUrl !== "string") {
-          return NextResponse.json({ error: "Imagen secundaria inválida" }, { status: 400 });
-        }
-        finalSecondaryCoverUrl = await uploadBase64ToR2(landingSecondaryCoverUrl, `seccover_${slug}`);
-        if (existing?.landingSecondaryCoverUrl && existing.landingSecondaryCoverUrl !== finalSecondaryCoverUrl) await deleteFromR2(existing.landingSecondaryCoverUrl);
-      } else if ((landingSecondaryCoverUrl === null || landingSecondaryCoverUrl === "") && existing?.landingSecondaryCoverUrl) {
-        await deleteFromR2(existing.landingSecondaryCoverUrl);
-        finalSecondaryCoverUrl = null;
-      }
-    }
-
-    const business = await prisma.business.update({
-      where: { slug },
-      data: {
-        name,
-        category,
-        teamSize,
-        currency,
-        logoUrl: finalLogoUrl === undefined ? undefined : finalLogoUrl,
-        landingTitle: landingTitle === undefined ? undefined : landingTitle,
-        landingSubtitle: landingSubtitle === undefined ? undefined : landingSubtitle,
-        landingAbout: landingAbout === undefined ? undefined : landingAbout,
-        landingCoverUrl: finalCoverUrl === undefined ? undefined : finalCoverUrl,
-        landingSecondaryCoverUrl: finalSecondaryCoverUrl === undefined ? undefined : finalSecondaryCoverUrl,
-        landingPhone: landingPhone === undefined ? undefined : landingPhone,
-        landingAddress: landingAddress === undefined ? undefined : landingAddress,
-        landingHours: landingHours === undefined ? undefined : landingHours,
-        landingFeaturesJson: landingFeaturesJson === undefined ? undefined : landingFeaturesJson,
-        landingTestimonialsJson: landingTestimonialsJson === undefined ? undefined : landingTestimonialsJson,
-        plan: plan === undefined ? undefined : plan,
-      },
-      select: {
-        id: true,
-        name: true,
-        slug: true,
-        ownerName: true,
-        category: true,
-        country: true,
-        teamSize: true,
-        currency: true,
-        timezone: true,
-        plan: true,
-        billingBypass: true,
-        customDomain: true,
-        logoUrl: true,
-        landingTitle: true,
-        landingSubtitle: true,
-        landingAbout: true,
-        landingCoverUrl: true,
-        landingSecondaryCoverUrl: true,
-        landingPhone: true,
-        landingAddress: true,
-        landingHours: true,
-        landingFeaturesJson: true,
-        landingTestimonialsJson: true,
-      },
-    });
+    const business = await updateBusinessProfile(businessRef.id, slug, parsed.value);
+    if (!business) return NextResponse.json({ error: "Negocio no encontrado" }, { status: 404 });
 
     return NextResponse.json({
       success: true,

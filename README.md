@@ -26,6 +26,7 @@ Abre <http://localhost:3000> para probar la aplicación.
 
 ```bash
 npm test
+npm run test:e2e
 npm run lint
 npx tsc --noEmit
 npm run build
@@ -33,7 +34,7 @@ npm run build:cloudflare
 npm run preview
 ```
 
-`npm test` ejecuta las pruebas de horarios/DST y un journey de reserva contra D1 local aislada por fixtures que se eliminan al finalizar. `npm run preview` compila y ejecuta localmente el Worker generado por OpenNext.
+`npm test` ejecuta pruebas unitarias con dependencias falsas, casos de horarios/DST y journeys API contra D1 local aislada por fixtures. `npm run test:e2e` ejecuta journeys de navegador con Playwright y Chromium; el primer setup local requiere `npx playwright install chromium`. Ninguna suite conecta con D1 de producción. `npm run preview` compila y ejecuta localmente el Worker generado por OpenNext.
 
 ## Cloudflare y despliegue
 
@@ -46,7 +47,9 @@ La salida objetivo de producción es un Cloudflare Worker construido con OpenNex
 - [Rate limiting por operación](docs/api/rate-limiting.md)
 - [Logs estructurados y runbook de incidentes](docs/operations/observability.md)
 - [Límites de features y server](docs/architecture/feature-boundaries.md)
+- [Checklist de release y rollback](docs/operations/release-checklist.md)
 - [Plan técnico por escalones](docs/plan-mejora-agendalink.md)
+- [ADR-0001: sesiones y recuperación](docs/adr/0001-sesiones-y-recuperacion-de-password.md) · [ADR-0002: zona horaria y reservas UTC](docs/adr/0002-zona-horaria-y-reservas-utc.md) · [ADR-0003: cancelación y reprogramación](docs/adr/0003-cancelacion-y-reprogramacion.md)
 
 ### Migraciones D1
 
@@ -67,9 +70,9 @@ No agregar credenciales a `.env.example`, al código ni a archivos versionados. 
 ## Estructura principal
 
 - `src/app/`: páginas, API routes y middleware de Next.js.
-- `src/features/`: reglas por dominio, incluyendo booking, schedule y media.
+- `src/features/`: validación, contratos y casos de uso de booking, schedule, businesses, catalog, team, branding, media y platform.
 - `src/server/`: auth, autorización, rate limiting, errores y logs seguros.
-- `src/lib/`: acceso a datos y adaptadores de infraestructura.
+- `src/lib/`: adaptadores Prisma/D1 y acceso directo a bindings Cloudflare, incluido R2.
 - `prisma/schema.prisma`: esquema compartido entre SQLite local y D1.
 - `prisma/migrations/`: secuencia canónica de migraciones D1.
 - `docs/`: decisiones, contratos API, arquitectura, operación y roadmap.

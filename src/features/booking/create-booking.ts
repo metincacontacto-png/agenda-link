@@ -1,7 +1,8 @@
-import { prisma } from "@/lib/db";
-import { getAvailableSlotsForProfessional } from "@/features/booking/availability";
-import type { CreateBookingInput } from "@/features/booking/validation";
-import { localMinuteToUtc, parseLocalTime } from "@/features/schedule/time";
+import type { Clock } from "../schedule/clock.ts";
+import { systemClock } from "../schedule/clock.ts";
+import { localMinuteToUtc, parseLocalTime } from "../schedule/time.ts";
+import type { BookingRepository } from "./ports.ts";
+import type { CreateBookingInput } from "./validation.ts";
 
 export interface BookingReceipt {
   id: string;
@@ -19,26 +20,30 @@ export type CreateBookingResult =
   | { ok: true; appointment: BookingReceipt }
   | { ok: false; status: 400 | 404 | 409; error: string };
 
+export interface CreateBookingDependencies {
+  repository: BookingRepository;
+  clock?: Clock;
+  createId?: () => string;
+}
+
 function rejected(status: 400 | 404 | 409, error: string): CreateBookingResult {
   return { ok: false, status, error };
 }
 
-export async function createBooking(input: CreateBookingInput): Promise<CreateBookingResult> {
-  const business = await prisma.business.findUnique({
-    where: { slug: input.slug },
-    select: { id: true, slug: true, name: true, currency: true, timezone: true },
-  });
+export async function createBooking(
+  input: CreateBookingInput,
+  dependencies: CreateBookingDependencies,
+): Promise<CreateBookingResult> {
+  const { repository } = dependencies;
+  const clock = dependencies.clock ?? systemClock;
+  const createId = dependencies.createId ?? (() => crypto.randomUUID());
+
+  const business = await repository.findBusinessBySlug(input.slug);
   if (!business) return rejected(404, "Negocio no encontrado");
 
   const [service, professional] = await Promise.all([
-    prisma.service.findUnique({
-      where: { id: input.serviceId },
-      select: { id: true, businessId: true, name: true, duration: true, price: true },
-    }),
-    prisma.professional.findUnique({
-      where: { id: input.professionalId },
-      select: { id: true, businessId: true, name: true },
-    }),
+    repository.findServiceById(input.serviceId),
+    repository.findProfessionalById(input.professionalId),
   ]);
   if (
     !service ||
@@ -53,9 +58,9 @@ export async function createBooking(input: CreateBookingInput): Promise<CreateBo
   if (minuteOfDay === null) return rejected(400, "Fecha u hora inválida");
   const dateTime = localMinuteToUtc(input.date, minuteOfDay, business.timezone);
   if (!dateTime) return rejected(400, "La hora elegida no existe en la zona horaria del negocio");
-  if (dateTime.getTime() <= Date.now()) return rejected(400, "La reserva debe ser futura");
+  if (dateTime.getTime() <= clock.now().getTime()) return rejected(400, "La reserva debe ser futura");
 
-  const availableSlots = await getAvailableSlotsForProfessional({
+  const availableSlots = await repository.getAvailableSlots({
     businessId: business.id,
     professionalId: professional.id,
     date: input.date,
@@ -66,46 +71,24 @@ export async function createBooking(input: CreateBookingInput): Promise<CreateBo
     return rejected(409, "El horario ya no está disponible");
   }
 
-  const appointmentId = crypto.randomUUID();
-  const instant = dateTime.toISOString();
-  const inserted = await prisma.$queryRaw<Array<{ id: string }>>`
-    INSERT INTO "Appointment" (
-      "id", "businessId", "serviceId", "professionalId", "clientName",
-      "clientWhatsApp", "dateTime", "status", "paymentStatus",
-      "paymentMethod", "paymentAmount"
-    )
-    SELECT
-      ${appointmentId}, ${business.id}, ${service.id}, ${professional.id},
-      ${input.clientName}, ${input.clientWhatsApp}, ${instant},
-      'CONFIRMED', 'PENDING', NULL, NULL
-    WHERE NOT EXISTS (
-      SELECT 1
-      FROM "Appointment" AS existing
-      INNER JOIN "Service" AS existingService ON existingService."id" = existing."serviceId"
-      WHERE existing."businessId" = ${business.id}
-        AND existing."professionalId" = ${professional.id}
-        AND existing."status" NOT IN ('CANCELLED', 'CANCELED')
-        AND julianday(existing."dateTime") < julianday(${instant}) + (${service.duration} / 1440.0)
-        AND julianday(existing."dateTime") + (existingService."duration" / 1440.0) > julianday(${instant})
-    )
-    AND NOT EXISTS (
-      SELECT 1
-      FROM "ScheduleBlock" AS block
-      WHERE block."businessId" = ${business.id}
-        AND (block."professionalId" IS NULL OR block."professionalId" = ${professional.id})
-        AND julianday(block."startsAt") < julianday(${instant}) + (${service.duration} / 1440.0)
-        AND julianday(block."endsAt") > julianday(${instant})
-    )
-    RETURNING "id"
-  `;
-  if (inserted.length === 0) {
-    return rejected(409, "El horario acaba de dejar de estar disponible");
-  }
+  const appointmentId = createId();
+  const dateTimeIso = dateTime.toISOString();
+  const inserted = await repository.insertIfAvailable({
+    id: appointmentId,
+    businessId: business.id,
+    serviceId: service.id,
+    professionalId: professional.id,
+    clientName: input.clientName,
+    clientWhatsApp: input.clientWhatsApp,
+    dateTime: dateTimeIso,
+    serviceDurationMinutes: service.duration,
+  });
+  if (!inserted) return rejected(409, "El horario acaba de dejar de estar disponible");
 
   return {
     ok: true,
     appointment: {
-      id: inserted[0].id,
+      id: appointmentId,
       dateTime,
       status: "CONFIRMED",
       paymentStatus: "PENDING",

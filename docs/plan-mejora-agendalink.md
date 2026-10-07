@@ -1,5 +1,14 @@
 # Plan de mejora de AgendaLink
 
+## Estado al 2026-10-07
+
+- Los escalones 0-3 están implementados y verificados localmente; los cambios recientes también están publicados en el Worker de prueba `agenda-link.metincacontacto.workers.dev`.
+- El escalón 4 tiene límites `features/`, `server/` y `lib/`; la extracción vertical de booking, businesses, catálogo, team, branding, media y platform está aplicada.
+- El escalón 5 está parcial: `BookingRepository` y `Clock` están inyectados y probados con fakes; faltan providers para otros dominios.
+- El escalón 6 está implementado: las vistas del admin son componentes independientes, los hooks de carga, agenda, reservas y branding están extraídos, y `src/app/admin/[slug]/page.tsx` quedó como guardas, shell y composición de tabs (355 líneas).
+- El escalón 7 tiene 33 pruebas unitarias/integración y E2E de onboarding, login, acceso al panel, reservas, ventas/clientes, acceso cruzado y mantenimiento; pasan localmente. El workflow CI está configurado, pero todavía falta confirmar CI remoto verde para el commit de release.
+- Pages conserva los dominios de producción. Las Worker Routes reversibles están preparadas en `wrangler.toml` y pasan `--dry-run`; falta aprobación para activarlas y validar los dominios en vivo. Ver [runbook](cloudflare-deployment.md#runbook-de-cutover-reversible-pages-a-worker-routes).
+
 ## Decisiones base
 
 - Autenticación propia con email y password.
@@ -18,18 +27,18 @@ Convertir el prototipo actual en una aplicación mantenible y segura para reserv
 - La D1 remota fue auditada, preservada y registrada con una baseline reproducible. Ver `docs/d1-migration-reconciliation.md`.
 - El build usa OpenNext 1.20.8 y la salida nativa `.open-next` para Cloudflare Workers; no depende de scripts de parche ni de una salida Pages manual. Ver `docs/cloudflare-deployment.md`.
 
-### Pendiente
+### Hallazgos iniciales resueltos
 
-- No existe una guía de configuración ni `.env.example`.
-- El password de superadmin por defecto (`Giovanni2026`) está comprometido en el historial de git.
-- `npm run lint` falla con 6 errores bloqueantes además de warnings.
+- La guía de configuración, `.env.example` y runbook están disponibles en `README.md` y `docs/`.
+- El password de superadmin por defecto (`Giovanni2026`) se trató como comprometido: el fallback fue retirado y el secreto legado de Pages se rotó. El Worker autoriza por sesión y rol global.
+- Los errores bloqueantes de lint y typecheck fueron resueltos; quedan warnings no bloqueantes registrados por ESLint.
 
-### Acciones
+### Acciones completadas
 
-1. Rotar `SUPER_ADMIN_PASSWORD`: el valor actual está en el historial de git y debe tratarse como expuesto. Configurar uno nuevo como variable/secreto en Cloudflare.
-2. Resolver los errores bloqueantes de lint actuales (son pocos y baratos): `require()` prohibidos y `any` explícitos.
-3. Crear `.env.example` con las variables necesarias, incluyendo `SUPER_ADMIN_PASSWORD`.
-4. Documentar el entorno local:
+1. Rotar y retirar el fallback de `SUPER_ADMIN_PASSWORD`; la estrategia por deployment y `SESSION_SIGNING_SECRET` están en [gestión de secretos](secrets.md).
+2. Resolver los errores bloqueantes de lint (`require()` prohibidos y `any` explícitos).
+3. Crear `.env.example` sin secretos.
+4. Documentar el entorno local en `README.md`:
    - `npm ci`
    - `npx prisma generate`
    - `npx prisma db push`
@@ -44,41 +53,43 @@ Convertir el prototipo actual en una aplicación mantenible y segura para reserv
 
 ## Escalón 1 - Seguridad y autenticación propia
 
-### Riesgos actuales
+### Riesgos identificados al iniciar el trabajo
 
 - El panel de un negocio es accesible con solo conocer su `slug`.
 - Endpoints administrativos exponen datos sin comprobar una sesión.
 - Superadmin usa password por query string/header y tiene un fallback hardcodeado.
 - El endpoint `google-seed` crea negocios demo sin autenticación.
 
+El Worker actual usa sesiones, membresías y rol global. La ruta experimental `google-seed` fue retirada; Pages sigue atendiendo dominios de producción hasta que se apruebe y complete el cutover.
+
 ### Decisiones adoptadas
 
 Las decisiones de sesión y recuperación están aceptadas en [ADR-0001](adr/0001-sesiones-y-recuperacion-de-password.md): cookie HMAC stateless con expiración máxima de 8 horas, roles/membresías consultados en D1 y restablecimiento manual temporal hasta disponer de email transaccional. No se crea modelo `Session` para este MVP.
 
-### Modelo mínimo
+### Modelo implementado
 
-Agregar los modelos:
+Se agregaron los modelos:
 
 - `User`: email, hash de password, nombre y rol global.
 - `BusinessMember`: relación entre usuario, negocio y rol dentro del negocio.
-- `Session`: solo si se elige sesión con estado en D1. Si se usan cookies firmadas, este modelo no se crea.
+- No se creó `Session`: el ADR eligió cookies HMAC stateless.
 
-### Acciones
+### Acciones implementadas en el Worker
 
-1. Implementar hash y verificación de password con WebCrypto compatible con Cloudflare Workers.
-2. Implementar sesiones mediante cookies `httpOnly`, `Secure` y `SameSite=Lax` según la estrategia decidida.
-3. Crear endpoints:
+1. Hash y verificación de password con WebCrypto compatible con Cloudflare Workers.
+2. Sesiones mediante cookies `httpOnly`, `Secure` y `SameSite=Lax` según la estrategia decidida.
+3. Endpoints implementados:
    - `POST /api/auth/register`
    - `POST /api/auth/login`
    - `POST /api/auth/logout`
    - `GET /api/auth/me`
-4. Crear helpers de servidor:
+4. Helpers de servidor implementados:
    - `requireSession()`
    - `requireBusinessAccess(businessId)`
    - `requireSuperAdmin()`
-5. Proteger `/api/admin`, `/api/services`, `/api/appointments`, `/api/super-admin`, `/admin/[slug]` y `/super-admin`.
-6. Eliminar password en URL, headers como mecanismo de autorización y cuentas demo fijas.
-7. Limitar o eliminar `google-seed` en producción.
+5. `/api/admin`, `/api/services`, `/api/appointments`, `/api/super-admin`, `/admin/[slug]` y `/super-admin` requieren sesión y autorización correspondiente en el Worker.
+6. Se retiró la autorización por password en URL/header del Worker y las cuentas demo fijas.
+7. Se eliminó `/api/auth/google-seed`; la creación de cuentas y negocios usa el flujo validado de onboarding.
 
 ### Criterio de aceptación
 
@@ -88,7 +99,9 @@ Agregar los modelos:
 
 ## Escalón 2 - Reservas correctas
 
-### Problemas actuales
+Estado: completado. El modelo UTC/DST, disponibilidad, validación de pertenencia, persistencia atómica, DTO público, cancelación/reprogramación y cobertura correspondiente están implementados.
+
+### Problemas identificados al iniciar el trabajo
 
 - Se puede reservar un servicio o profesional de otro negocio.
 - Dos reservas concurrentes pueden tomar el mismo horario.
@@ -101,17 +114,17 @@ Agregar los modelos:
 
 La decisión quedó aceptada en [ADR-0002](adr/0002-zona-horaria-y-reservas-utc.md): zona IANA por negocio, citas persistidas como instantes UTC, resolución determinista de horas DST inexistentes/repetidas y citas existentes que conservan su instante al cambiar la zona.
 
-### Acciones
+### Acciones implementadas
 
-1. Validar el input de disponibilidad y reserva con schemas tipados.
-2. Verificar que el servicio y profesional pertenecen al negocio solicitado.
-3. Validar fecha futura, horario de atención y duración del servicio.
-4. Crear la cita en una transacción con un segundo chequeo de conflicto.
-5. Añadir una restricción o control de unicidad para `businessId`, `professionalId` y `dateTime`.
-6. Guardar fechas en UTC y definir la zona horaria del negocio.
-7. Devolver DTOs públicos limitados, sin email, plan, bypass ni otros flags internos.
-8. Implementar cancelación y reprogramación autenticadas, con auditoría y re-chequeo atómico. Ver [ADR-0003](adr/0003-cancelacion-y-reprogramacion.md).
-9. Escribir en este mismo escalón los tests de reserva: válida, inválida, servicio de otro negocio y doble reserva concurrente. Los tests no se diferiran a un escalón posterior porque validan el núcleo del producto.
+1. Se valida el input de disponibilidad y reserva con schemas tipados.
+2. Se comprueba que el servicio y profesional pertenecen al negocio solicitado.
+3. Se validan la fecha futura, el horario de atención y la duración del servicio.
+4. La cita se crea con un chequeo atómico final de conflicto.
+5. La escritura D1 serializada impide solapamientos para `businessId`, `professionalId` y `dateTime`.
+6. Las citas se guardan como instantes UTC con la zona IANA del negocio.
+7. Se devuelven DTOs públicos limitados, sin email, plan, bypass ni otros flags internos.
+8. Se implementaron la cancelación y reprogramación autenticadas, con auditoría y re-chequeo atómico. Ver [ADR-0003](adr/0003-cancelacion-y-reprogramacion.md).
+9. La suite cubre reservas válidas/inválidas, servicio de otro negocio, concurrencia y DST.
 
 ### Criterio de aceptación
 
@@ -122,20 +135,19 @@ La decisión quedó aceptada en [ADR-0002](adr/0002-zona-horaria-y-reservas-utc.
 
 ## Escalón 3 - Datos, archivos y plataforma
 
-### Acciones
+El escalón quedó implementado: PII administrativa paginada por rol, archivos validados, límites de petición, routing de dominios/mantenimiento y logging estructurado. Ver `docs/api/`, `docs/operations/observability.md` y `docs/architecture/feature-boundaries.md`.
 
-1. Paginar citas y clientes en los endpoints administrativos.
-2. Restringir la exposición de WhatsApp y datos personales según el rol.
-3. Validar uploads por MIME real, tamaño máximo y extensión permitida.
-4. Sanitizar la `key` usada por `/api/media/[key]`.
-5. Mantener Base64 solo como fallback de desarrollo; exigir R2 en producción.
-6. Añadir rate limiting a login, onboarding, reservas y superadmin.
-7. Revisar `domain-lookup`, `maintenance-check` y `middleware` para reducir llamadas internas por request.
-8. Definir una política de logs, errores y datos personales.
-9. Añadir observabilidad mínima:
-   - Logs estructurados (`console` con formato JSON en Workers).
-   - Error tracking centralizado (Sentry u otro compatible con Workers).
-   - Revisión periódica de Workers Logs / Cloudflare dashboard.
+### Acciones implementadas
+
+1. Citas y clientes se paginan en los endpoints administrativos.
+2. WhatsApp y datos personales se restringen según el rol.
+3. Los uploads se validan por MIME real, tamaño máximo y formato permitido.
+4. La `key` de `/api/media/[key]` se valida antes de leer R2.
+5. Base64 se conserva como fallback de desarrollo; producción requiere el binding R2.
+6. Login, onboarding, reservas y Super Admin usan rate limiting.
+7. El routing evita self-fetch y combina mantenimiento/dominio en una lectura D1.
+8. Logs y errores tienen una política que excluye secretos y PII innecesaria.
+9. La observabilidad incluye logs estructurados, correlación por request y un runbook de Workers Logs/dashboard; el proveedor externo de error tracking queda pendiente.
 
 ### Criterio de aceptación
 
@@ -156,7 +168,6 @@ src/
     super-admin/
     [slug]/
   features/
-    auth/
     booking/
     businesses/
     catalog/
@@ -164,20 +175,14 @@ src/
     schedule/
     branding/
     media/
-    admin/
     platform/
-    billing/
-    notifications/
   server/
     auth.ts
     authorize.ts
-    validation.ts
-    errors.ts
   lib/
     db.ts
     cloudflare.ts
     r2.ts
-    rate-limit.ts
 ```
 
 ### Responsabilidades
@@ -199,6 +204,8 @@ Cada `route.ts` debe:
 No debe contener consultas Prisma largas, reglas de disponibilidad, ni lógica de almacenamiento de archivos.
 
 ## Escalón 5 - Hexagonal pragmática
+
+Estado: parcial. `features/booking/create-booking.ts` ya recibe un `BookingRepository` y `Clock`; `lib/prisma-booking-repository.ts` conecta Prisma/D1 y el caso de uso se prueba con fakes. Quedan por introducir providers intercambiables para pagos y mensajería cuando exista una implementación real adicional.
 
 Usar puertos y adaptadores solo donde reduzcan acoplamiento real:
 

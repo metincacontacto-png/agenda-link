@@ -21,6 +21,7 @@ const testUserId = randomUUID();
 const memberUserId = randomUUID();
 const existingAppointmentId = randomUUID();
 const historicalAppointmentId = randomUUID();
+const onboardingTestEmail = `onboarding-${randomUUID()}@example.invalid`;
 const date = dateStringAtTimeZone(new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), timeZone);
 const dayOfWeek = weekdayForDate(date);
 const port = 32_000 + Math.floor(Math.random() * 10_000);
@@ -30,6 +31,7 @@ let testEmail;
 let authCookie;
 let memberEmail;
 let memberCookie;
+let onboardingBusinessId;
 
 function runWrangler(args) {
   execFileSync("npx", ["wrangler", ...args], { stdio: "ignore" });
@@ -169,7 +171,7 @@ after(() => {
   }
   runWrangler([
     "d1", "execute", "agenda-link-db", "--local", "--command",
-    `DELETE FROM Business WHERE id IN ('${businessA}','${businessB}'); DELETE FROM User WHERE id = '${testUserId}';`,
+    `DELETE FROM Business WHERE id IN ('${businessA}','${businessB}'${onboardingBusinessId ? `,'${onboardingBusinessId}'` : ""}); DELETE FROM User WHERE id IN ('${testUserId}','${memberUserId}') OR email = '${onboardingTestEmail}';`,
   ]);
 });
 
@@ -243,6 +245,34 @@ test("administrative appointments paginate and redact client/payment details by 
   assert.equal(crossBusiness.status, 403);
 });
 
+test("business profile updates validate branding and restrict plan changes by role", async () => {
+  const update = await fetch(`${baseUrl}/api/admin`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Cookie: authCookie },
+    body: JSON.stringify({ slug: "booking-test-a", landingTitle: "Updated landing title" }),
+  });
+  const updatedData = await update.json();
+  assert.equal(update.status, 200);
+  assert.equal(updatedData.business.landingTitle, "Updated landing title");
+
+  const memberPlanUpdate = await fetch(`${baseUrl}/api/admin`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Cookie: memberCookie },
+    body: JSON.stringify({ slug: "booking-test-a", plan: "NEGOCIO" }),
+  });
+  assert.equal(memberPlanUpdate.status, 403);
+
+  const invalidImage = await fetch(`${baseUrl}/api/admin`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Cookie: authCookie },
+    body: JSON.stringify({
+      slug: "booking-test-a",
+      landingCoverUrl: "data:image/jpeg;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/f9sAAAAASUVORK5CYII=",
+    }),
+  });
+  assert.equal(invalidImage.status, 400);
+});
+
 test("booking rejects foreign IDs, malformed/past input, and slots outside schedules", async () => {
   const crossBusiness = await postBooking(bookingPayload({
     serviceId: serviceB,
@@ -305,6 +335,56 @@ test("business members can cancel and reprogram future bookings with audit histo
   assert.equal(rescheduled.status, 200);
   assert.equal(new Date(rescheduledData.dateTime).toISOString(), localMinuteToUtc(date, 11 * 60, timeZone).toISOString());
   assert.equal(rescheduledData.auditRecorded, true);
+});
+
+test("business onboarding creates an account, owner membership, and default schedules", async () => {
+  const response = await fetch(`${baseUrl}/api/onboarding`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      name: `Onboarding ${randomUUID().slice(0, 8)}`,
+      ownerName: "New Owner",
+      email: onboardingTestEmail,
+      password: "OnboardingTestPassword123!",
+      category: "Salud",
+      teamSize: "1 persona",
+      country: "Chile",
+      serviceName: "Consulta de prueba",
+      serviceDuration: 60,
+      servicePrice: 25000,
+    }),
+  });
+  const result = await response.json();
+  assert.equal(response.status, 201);
+  onboardingBusinessId = result.business.id;
+  const cookie = response.headers.get("set-cookie")?.split(";")[0];
+  assert.ok(cookie);
+
+  const session = await fetch(`${baseUrl}/api/auth/me`, { headers: { Cookie: cookie } }).then((res) => res.json());
+  assert.equal(session.user.email, onboardingTestEmail);
+  assert.equal(session.user.memberships[0].role, "OWNER");
+  assert.equal(session.user.memberships[0].business.slug, result.business.slug);
+
+  const publicData = await fetch(`${baseUrl}/api/availability?${new URLSearchParams({
+    slug: result.business.slug,
+    date,
+  })}`).then((res) => res.json());
+  assert.equal(publicData.business.timezone, timeZone);
+  assert.equal(publicData.business.services.length, 1);
+  assert.equal(publicData.business.professionals.length, 1);
+
+  const defaultSlots = await fetch(`${baseUrl}/api/availability?${new URLSearchParams({
+    slug: result.business.slug,
+    date,
+    serviceId: publicData.business.services[0].id,
+    professionalId: publicData.business.professionals[0].id,
+  })}`).then((res) => res.json());
+  assert.ok(defaultSlots.availableSlots.length > 0, "the default professional is provisioned with a weekly schedule");
+
+  const adminData = await fetch(`${baseUrl}/api/admin?slug=${result.business.slug}`, {
+    headers: { Cookie: cookie },
+  });
+  assert.equal(adminData.status, 200);
 });
 
 test("client payment claims are ignored and concurrent requests cannot double-book a professional", async () => {

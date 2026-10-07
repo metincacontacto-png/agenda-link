@@ -3,6 +3,14 @@ main = ".open-next/worker.js"
 compatibility_date = "2026-10-01"
 compatibility_flags = ["nodejs_compat", "global_fetch_strictly_public"]
 
+[[routes]]
+pattern = "agendalink.cl/*"
+zone_name = "agendalink.cl"
+
+[[routes]]
+pattern = "www.agendalink.cl/*"
+zone_name = "agendalink.cl"
+
 [assets]
 directory = ".open-next/assets"
 binding = "ASSETS"

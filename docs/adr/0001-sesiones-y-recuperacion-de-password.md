@@ -17,7 +17,7 @@ Usar una cookie de sesión firmada con HMAC-SHA-256, validada con `crypto.subtle
 - Expiración máxima: 8 horas desde el inicio de sesión, sin refresh silencioso en el MVP.
 - Cookie: `HttpOnly`, `Secure` en producción, `SameSite=Lax`, `Path=/` y `Max-Age` alineado con `exp`.
 - Logout: expirar la cookie inmediatamente.
-- Clave HMAC: `SESSION_SIGNING_SECRET`, aleatoria, independiente de `SUPER_ADMIN_PASSWORD`, configurada como secreto de Cloudflare; nunca en el repositorio ni en el bundle cliente.
+- Clave HMAC: `SESSION_SIGNING_SECRET`, aleatoria e independiente de las contraseñas de usuario y de cualquier secreto legado, configurada como secreto de Cloudflare; nunca en el repositorio ni en el bundle cliente.
 - Rotar la clave invalida todas las cookies existentes. La revocación individual antes de `exp` no está disponible en la estrategia stateless.
 - Rechazar firmas inválidas, payload malformado, expiración vencida y timestamps futuros fuera de una tolerancia pequeña. Comparar firmas en tiempo constante cuando la API del runtime lo permita.
 

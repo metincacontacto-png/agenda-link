@@ -36,29 +36,31 @@ npm run deploy -- --dry-run
 
 El proyecto Pages `agenda-link` sigue atendiendo `agenda-link.pages.dev`, `agendalink.cl` y `www.agendalink.cl`. Esta tarjeta no cambia DNS, dominios ni el deploy activo.
 
-Un futuro cutover debe:
+Un cutover reversible mediante Worker Routes debe:
 
-1. Desplegar y probar el Worker sin rutas de produccion.
-2. Configurar los dominios de la zona de AgendaLink en el Worker.
-3. Verificar landing, reserva, D1, R2 y rutas administrativas.
-4. Retirar los dominios del proyecto Pages solo despues de confirmar el Worker.
-5. Volver a asociar los dominios a Pages si falla la validacion.
+1. Desplegar y probar el Worker en `workers.dev` sin rutas de producción.
+2. Confirmar que los DNS de `agendalink.cl` y `www.agendalink.cl` siguen proxied.
+3. Añadir rutas Worker delante del origen Pages y desplegar.
+4. Verificar landing, reserva, D1, R2 y rutas administrativas en ambos dominios.
+5. Si falla una validación, retirar las rutas Worker; Pages permanece asociado como origen.
 
-No se deben configurar dominios Pages y Worker simultaneamente para el mismo hostname.
+No adjuntar un Worker **Custom Domain** al mismo hostname mientras siga configurado como dominio personalizado de Pages. Para un cutover reversible, usar **Worker Routes** sobre los hostnames proxied que ya sirven Pages.
 
-## Runbook de cutover Pages a Worker
+## Runbook de cutover reversible Pages a Worker Routes
 
-No ejecutar estos pasos sin una ventana de cambio aprobada. El Worker de prueba actual esta disponible en `https://agenda-link.metincacontacto.workers.dev` y no tiene dominios de produccion asociados.
+No activar estas rutas sin una ventana de cambio aprobada: capturan el tráfico de producción. El Worker de prueba actual está disponible en `https://agenda-link.metincacontacto.workers.dev`; Pages conserva los dominios y el origen para rollback.
 
 ### Preflight
 
 1. Confirmar que el Worker responde en su URL `workers.dev` y que `/api/maintenance-check` devuelve el estado esperado.
-2. Confirmar que `SUPER_ADMIN_PASSWORD` aparece en ambos listados, sin intentar leer su valor:
+2. Confirmar los secretos que corresponden a cada deployment, sin leer sus valores:
 
    ```bash
    npx wrangler secret list
    npx wrangler pages secret list --project-name agenda-link
    ```
+
+   El Worker debe tener `SESSION_SIGNING_SECRET`; Pages conserva `SUPER_ADMIN_PASSWORD` solo mientras siga ejecutando el flujo legado. El Worker no usa `SUPER_ADMIN_PASSWORD`.
 
 3. Guardar el deployment y version activos antes del cambio:
 
@@ -66,18 +68,21 @@ No ejecutar estos pasos sin una ventana de cambio aprobada. El Worker de prueba 
    npx wrangler deployments list
    ```
 
-4. Tener disponible la credencial de superadmin en un gestor de contraseñas para validar la API mediante el header `x-super-admin-password`.
+4. Tener disponible la contraseña de una cuenta con `globalRole = SUPER_ADMIN` y confirmar que esa cuenta existe en la D1 enlazada al Worker.
 
-### Cambio
+### Cambio de tráfico
 
-1. En el dashboard de Cloudflare, abrir **Workers & Pages > agenda-link > Custom domains** y retirar `agendalink.cl` y `www.agendalink.cl` del proyecto Pages.
-2. Añadir los dominios al Worker en `wrangler.toml`:
+1. Confirmar en **DNS > Records** que los hostnames siguen proxied y que Pages conserva `agendalink.cl` y `www.agendalink.cl`. No borrar CNAME ni retirar los dominios de Pages.
+2. Confirmar que `wrangler.toml` contiene las rutas Worker:
 
    ```toml
-   routes = [
-     { pattern = "agendalink.cl", custom_domain = true },
-     { pattern = "www.agendalink.cl", custom_domain = true },
-   ]
+   [[routes]]
+   pattern = "agendalink.cl/*"
+   zone_name = "agendalink.cl"
+
+   [[routes]]
+   pattern = "www.agendalink.cl/*"
+   zone_name = "agendalink.cl"
    ```
 
 3. Desplegar el Worker y comprobar que el nuevo deployment conserva los bindings `DB`, `BUCKET`, `ASSETS` y `WORKER_SELF_REFERENCE`:
@@ -86,18 +91,19 @@ No ejecutar estos pasos sin una ventana de cambio aprobada. El Worker de prueba 
    npm run deploy
    ```
 
-4. Validar ambos dominios: landing, reserva, `/api/maintenance-check`, una petición de superadmin con el header de autenticación y un intento inválido que devuelva `401`.
+4. Validar ambos dominios: landing, reserva, assets, APIs y `/api/maintenance-check`. Iniciar sesión con la cuenta Super Admin y comprobar que `GET /api/super-admin` devuelve `200`; sin sesión debe devolver `401` y con una sesión sin el rol global debe devolver `403`. Confirmar que `agenda-link.pages.dev` sigue disponible para diagnóstico.
 
 ### Rollback
 
-1. Si falla una validación de dominio, retirar los custom domains del Worker en el dashboard de Cloudflare.
-2. Volver a añadir los dominios al proyecto Pages desde **Workers & Pages > agenda-link > Custom domains**.
-3. Validar Pages antes de cerrar el incidente.
-4. Si el problema es una versión del Worker y no el dominio, volver a una versión anterior:
+1. Retirar ambos bloques `[[routes]]` de `wrangler.toml` y desplegar de nuevo, o desactivar las rutas de `agenda-link` desde **Workers & Pages > agenda-link > Triggers > Routes**.
+2. Confirmar que los dos hostnames vuelven a servir Pages y validar sus rutas públicas principales.
+3. Si el problema es solo el código del Worker y no las rutas, volver a una versión anterior:
 
    ```bash
    npx wrangler rollback <version-id> --name agenda-link
    ```
+
+4. Mantener los dominios asociados a Pages durante el rollback; no hace falta reconstruir DNS ni esperar certificados nuevos.
 
 ## Dominios de clientes
 
@@ -114,4 +120,4 @@ No agregar secretos al archivo de configuración. Los secretos de Worker se gest
 
 ## Proxy de mantenimiento y dominios
 
-El Proxy lee `maintenanceMode` y `customDomain` con una sola consulta D1 directa. No hace self-fetch a `/api/maintenance-check` ni `/api/domain-lookup`, y mantiene fuera del lookup los hosts del sistema, assets, rutas API y paneles administrativos. Los custom domains se reescriben una sola vez al slug resuelto. Los errores se registran con Ray ID y ruta, sin query string ni datos del cliente.
+El Proxy delega la política de maintenance y custom domains a `features/platform/routing.ts`, que lee ambos valores con una sola consulta D1 parametrizada. No hace self-fetch a `/api/maintenance-check` ni `/api/domain-lookup`, y mantiene fuera del lookup los hosts del sistema, assets, rutas API y paneles administrativos. Los custom domains se reescriben una sola vez al slug resuelto. Los errores se registran con Ray ID y ruta, sin query string ni datos del cliente.

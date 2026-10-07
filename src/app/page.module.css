@@ -337,7 +337,11 @@
   background: var(--primary-hover);
 }
 
-/* Mockups CSS Visuales */
+.heroVisual {
+  min-width: 0;
+}
+
+/* Ilustración CSS de la experiencia, no datos reales del sistema. */
 .mockupContainer {
   display: flex;
   justify-content: center;
@@ -347,9 +351,16 @@
 }
 
 @media (max-width: 768px) {
-  .mockupContainer {
+  .heroVisual {
     display: none;
   }
+}
+
+.mockupCaption {
+  margin: -8px 0 0;
+  color: var(--text-secondary);
+  font-size: 11px;
+  text-align: center;
 }
 
 .phoneMockup {
@@ -1315,4 +1326,3 @@
   color: var(--foreground);
   background-color: rgba(0, 0, 0, 0.04);
 }
-

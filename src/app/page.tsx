@@ -8,11 +8,11 @@ import QrDownloader from "@/components/QrDownloader";
 export default function LandingAndOnboardingPage() {
   const [heroSlug, setHeroSlug] = useState("");
   const [step, setStep] = useState(1);
-  const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("monthly");
   const [formData, setFormData] = useState({
     name: "",
     ownerName: "",
     email: "",
+    password: "",
     category: "Peluquería",
     teamSize: "1 persona",
     country: "Chile",
@@ -30,9 +30,6 @@ export default function LandingAndOnboardingPage() {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
-
-  const nextStep = () => setStep((prev) => prev + 1);
-  const prevStep = () => setStep((prev) => prev - 1);
 
   const handleSubmit = async () => {
     setLoading(true);
@@ -270,11 +267,11 @@ export default function LandingAndOnboardingPage() {
           <h1 className={styles.heroTitle}>
             Un solo link.<br />
             <span style={{ background: "var(--brand-gradient)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-              Todo tu negocio resuelto.
+              Tu negocio, más fácil de agendar.
             </span>
           </h1>
           <p className={styles.heroSubtitle}>
-            Dale un link a tus clientes para ver tus servicios, agendar, pagar con tarjeta o Apple Pay y recibir recordatorios en WhatsApp. Configuración en menos de 10 minutos.
+            Comparte un link para que tus clientes consulten servicios, revisen horarios y soliciten una reserva. Los pagos y mensajes automatizados aún no están habilitados.
           </p>
           <form onSubmit={handleHeroSubmit} className={styles.heroForm}>
             <div className={styles.heroInputWrapper}>
@@ -293,30 +290,31 @@ export default function LandingAndOnboardingPage() {
           </form>
         </div>
 
-        {/* Mockups CSS Visuales */}
+        <div className={styles.heroVisual}>
+        {/* Representación visual ilustrativa; no muestra datos reales. */}
         <div className={styles.mockupContainer}>
           {/* Teléfono */}
           <div className={styles.phoneMockup}>
             <div className={styles.phoneScreen}>
-              <div style={{ width: "32px", height: "32px", borderRadius: "50%", background: "#0066ff", color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "11px", fontWeight: "bold", margin: "0 auto 8px auto" }}>KL</div>
-              <div style={{ fontSize: "12px", fontWeight: "800", textAlign: "center" }}>KineActive</div>
-              <div style={{ fontSize: "9px", color: "gray", textAlign: "center", marginBottom: "14px" }}>Kinesiología y Rehabilitación</div>
+              <div style={{ width: "32px", height: "32px", borderRadius: "50%", background: "#0066ff", color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "11px", fontWeight: "bold", margin: "0 auto 8px auto" }}>AL</div>
+              <div style={{ fontSize: "12px", fontWeight: "800", textAlign: "center" }}>Página del negocio</div>
+              <div style={{ fontSize: "9px", color: "gray", textAlign: "center", marginBottom: "14px" }}>Servicios y disponibilidad</div>
               
               <div style={{ border: "1px solid #0066ff", borderRadius: "8px", padding: "8px", background: "rgba(0, 102, 255, 0.03)", display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
-                <span style={{ fontSize: "10px", fontWeight: "bold" }}>Sesión Kinesiológica</span>
-                <span style={{ fontSize: "10px", fontWeight: "bold", color: "#0066ff" }}>$25.000</span>
+                <span style={{ fontSize: "10px", fontWeight: "bold" }}>Servicio disponible</span>
+                <span style={{ fontSize: "10px", fontWeight: "bold", color: "#0066ff" }}>Consultar</span>
               </div>
               <div style={{ border: "1px solid rgba(0,0,0,0.06)", borderRadius: "8px", padding: "8px", background: "white", display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px", opacity: 0.8 }}>
-                <span style={{ fontSize: "10px" }}>Evaluación Inicial</span>
-                <span style={{ fontSize: "10px", fontWeight: "bold" }}>$30.000</span>
+                <span style={{ fontSize: "10px" }}>Otro servicio</span>
+                <span style={{ fontSize: "10px", fontWeight: "bold" }}>Consultar</span>
               </div>
               <div style={{ border: "1px solid rgba(0,0,0,0.06)", borderRadius: "8px", padding: "8px", background: "white", display: "flex", justifyContent: "space-between", alignItems: "center", opacity: 0.6 }}>
-                <span style={{ fontSize: "10px" }}>Terapia Manual</span>
-                <span style={{ fontSize: "10px", fontWeight: "bold" }}>$20.000</span>
+                <span style={{ fontSize: "10px" }}>Horario disponible</span>
+                <span style={{ fontSize: "10px", fontWeight: "bold" }}>Consultar</span>
               </div>
 
-              <div style={{ marginTop: "auto", background: "black", color: "white", padding: "10px", borderRadius: "20px", fontSize: "11px", fontWeight: "bold", textAlign: "center", cursor: "pointer" }}>
-                 Pay
+              <div style={{ marginTop: "auto", background: "#0066ff", color: "white", padding: "10px", borderRadius: "20px", fontSize: "11px", fontWeight: "bold", textAlign: "center" }}>
+                Solicitar reserva
               </div>
             </div>
           </div>
@@ -336,18 +334,20 @@ export default function LandingAndOnboardingPage() {
                 <div style={{ display: "flex", gap: "4px" }}>
                   <span style={{ fontSize: "8px", width: "22px", color: "gray" }}>09:00</span>
                   <div style={{ flex: 1, background: "rgba(52, 199, 89, 0.08)", borderLeft: "2px solid #34c759", padding: "2px 4px", borderRadius: "3px", fontSize: "8px", textAlign: "left" }}>
-                    <strong>Juan Pérez</strong> · Evaluación (✓ Pago)
+                    <strong>Reserva</strong> · Pendiente
                   </div>
                 </div>
                 <div style={{ display: "flex", gap: "4px" }}>
                   <span style={{ fontSize: "8px", width: "22px", color: "gray" }}>10:00</span>
                   <div style={{ flex: 1, background: "rgba(0, 102, 255, 0.08)", borderLeft: "2px solid #0066ff", padding: "2px 4px", borderRadius: "3px", fontSize: "8px", textAlign: "left" }}>
-                    <strong>María Gómez</strong> · Sesión Kine
+                    <strong>Reserva</strong> · Pendiente
                   </div>
                 </div>
               </div>
             </div>
           </div>
+        </div>
+        <p className={styles.mockupCaption}>Representación ilustrativa; no es una captura del sistema.</p>
         </div>
       </section>
 
@@ -360,48 +360,40 @@ export default function LandingAndOnboardingPage() {
               <span className={styles.diffBadge}>🔗 ATRIBUTO CLAVE</span>
               <h3 className={styles.diffTitle}>Tu negocio completo en un solo link.</h3>
               <p className={styles.diffText}>
-                Olvídate de coordinar horas por chats interminables. Un único link para que tus clientes vean tus servicios o carta, elijan profesional, revisen turnos libres y confirmen de inmediato.
+                Comparte una página donde tus clientes pueden revisar servicios y horarios disponibles y enviar una solicitud de reserva.
               </p>
               <div className={styles.diffLabel}>agendalink.cl/tu-marca ➔</div>
             </div>
             <div className={styles.diffVisualLink} style={{ display: "flex", flexDirection: "column", gap: "16px", alignItems: "center", width: "100%" }}>
-              <div style={{ width: "100%", aspectRatio: "1.1 / 1", borderRadius: "18px", overflow: "hidden", border: "1px solid rgba(0, 102, 255, 0.12)", boxShadow: "var(--shadow-subtle)" }}>
-                <img src="/qr_mockup.png" alt="Código QR para reservas" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-              </div>
               <div className={styles.visualLinkCard}>
                 <span className={styles.visualLinkIcon}>🔗</span>
-                <span className={styles.visualLinkLabel}>agendalink.cl/tu-negocio</span>
+                <span className={styles.visualLinkLabel}>Tu página y link propios</span>
               </div>
+              <p className={styles.featureText}>Al crear tu cuenta puedes descargar un QR vinculado a tu página.</p>
             </div>
           </div>
 
           {/* Grid de 2 columnas para Rapidez y Facilidad */}
           <div className={styles.diffSubGrid}>
             {/* Banner 2: Rapidez */}
-            <div className={`${styles.diffCard} ${styles.diffCardSpeed}`} style={{ justifyContent: "space-between", minHeight: "440px" }}>
+            <div className={`${styles.diffCard} ${styles.diffCardSpeed}`} style={{ justifyContent: "flex-start", gap: "24px" }}>
               <div>
                 <span className={styles.diffCardBadge}>⚡️ ULTRA RÁPIDO</span>
-                <h3 className={styles.diffCardTitle}>Reserva en menos de 20 segundos</h3>
+                <h3 className={styles.diffCardTitle}>Solicitud de reserva en pocos pasos</h3>
                 <p className={styles.diffCardText} style={{ marginBottom: "24px" }}>
-                  Removimos toda la fricción. Tus clientes no necesitan crear contraseñas ni descargar apps. Entran a tu link, seleccionan en 4 clics, pagan y listo.
+                  Tus clientes pueden consultar servicios y horarios desde el link del negocio y enviar sus datos para solicitar una reserva. No necesitan crear una cuenta ni descargar una app.
                 </p>
-              </div>
-              <div style={{ width: "100%", aspectRatio: "1.2 / 1", borderRadius: "16px", overflow: "hidden", border: "1px solid rgba(0, 102, 255, 0.08)", boxShadow: "0 4px 12px rgba(0,0,0,0.02)" }}>
-                <img src="/easy_booking.png" alt="Reserva rápida en smartphone" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
               </div>
             </div>
 
             {/* Banner 3: Facilidad */}
-            <div className={`${styles.diffCard} ${styles.diffCardEasy}`} style={{ justifyContent: "space-between", minHeight: "440px" }}>
+            <div className={`${styles.diffCard} ${styles.diffCardEasy}`} style={{ justifyContent: "flex-start", gap: "24px" }}>
               <div>
-                <span className={styles.diffCardBadge}>✨ 100% INTUITIVO</span>
-                <h3 className={styles.diffCardTitle}>Tan simple que se explica solo</h3>
+                <span className={styles.diffCardBadge}>✨ GESTIÓN CENTRALIZADA</span>
+                <h3 className={styles.diffCardTitle}>Gestiona tus solicitudes desde un panel</h3>
                 <p className={styles.diffCardText} style={{ marginBottom: "24px" }}>
-                  Creado pensando en la comodidad móvil. Administra tus turnos, actualiza servicios y ve tus ingresos diarios desde una interfaz limpia y libre de complicaciones.
+                  Consulta y actualiza reservas, servicios, horarios y datos públicos del negocio. Los pagos y los ingresos no se procesan desde la plataforma.
                 </p>
-              </div>
-              <div style={{ width: "100%", aspectRatio: "1.2 / 1", borderRadius: "16px", overflow: "hidden", border: "1px solid rgba(0, 102, 255, 0.08)", boxShadow: "0 4px 12px rgba(0,0,0,0.02)" }}>
-                <img src="/admin_dashboard.png" alt="Panel de control intuitivo" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
               </div>
             </div>
           </div>
@@ -418,13 +410,10 @@ export default function LandingAndOnboardingPage() {
                 <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
               </svg>
             </div>
-            <h3 className={styles.featureTitle}>Reserva en 4 clics</h3>
+            <h3 className={styles.featureTitle}>Solicitudes de reserva</h3>
             <p className={styles.featureText}>
-              Sin contraseñas, sin descargar nada, sin recordar cuentas. Tus clientes entran a tu link, eligen el servicio, pagan y confirman de inmediato.
+              Tus clientes revisan servicios y horarios disponibles y envían sus datos para solicitar una reserva. La plataforma no procesa pagos.
             </p>
-            <div className={styles.featureImageContainer}>
-              <img src="/booking_mockup.png" alt="Reserva en 4 clics" className={styles.featureImage} />
-            </div>
           </div>
 
           <div className={styles.featureCard}>
@@ -433,13 +422,10 @@ export default function LandingAndOnboardingPage() {
                 <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
               </svg>
             </div>
-            <h3 className={styles.featureTitle}>Asistentes Linki IA</h3>
+            <h3 className={styles.featureTitle}>Mensajería automática</h3>
             <p className={styles.featureText}>
-              Secretary responde en WhatsApp 24/7 para agendar citas; Marketing reactiva clientes inactivos de forma automática y Business te asesora estratégicamente.
+              Los recordatorios y campañas no están habilitados hasta conectar un proveedor de mensajería.
             </p>
-            <div className={styles.featureImageContainer}>
-              <img src="/whatsapp_mockup.png" alt="Asistentes Linki IA" className={styles.featureImage} />
-            </div>
           </div>
 
           <div className={styles.featureCard}>
@@ -451,13 +437,10 @@ export default function LandingAndOnboardingPage() {
                 <rect x="3" y="14" width="7" height="7" />
               </svg>
             </div>
-            <h3 className={styles.featureTitle}>QR e Imprenta listos</h3>
+            <h3 className={styles.featureTitle}>Código QR para tu página</h3>
             <p className={styles.featureText}>
-              Te generamos un cartel A4 listo para pegar en tu vitrina y tarjetas de presentación con código QR para que tus clientes agenden al instante.
+              Descarga un código QR que dirige a la página pública de tu negocio. Impresión de carteles y tarjetas no está incluida.
             </p>
-            <div className={styles.featureImageContainer}>
-              <img src="/qr_mockup.png" alt="QR e Imprenta listos" className={styles.featureImage} />
-            </div>
           </div>
         </div>
       </section>
@@ -465,66 +448,21 @@ export default function LandingAndOnboardingPage() {
       {/* 4. Planes de Precios */}
       <section id="pricing" className={styles.pricingSection}>
         <h2 className={styles.sectionHeading}>Planes adaptados a tu etapa de crecimiento</h2>
-        
-        {/* Toggle Facturación */}
-        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "12px", marginBottom: "32px" }}>
-          <span style={{ fontSize: "14px", fontWeight: billingCycle === "monthly" ? "700" : "500", color: billingCycle === "monthly" ? "var(--foreground)" : "var(--text-secondary)" }}>
-            Mensual
-          </span>
-          <button 
-            type="button"
-            onClick={() => setBillingCycle(prev => prev === "monthly" ? "yearly" : "monthly")}
-            style={{
-              width: "50px",
-              height: "26px",
-              borderRadius: "13px",
-              background: "var(--primary)",
-              border: "none",
-              cursor: "pointer",
-              position: "relative",
-              padding: "3px",
-              transition: "background 0.3s"
-            }}
-          >
-            <div 
-              style={{
-                width: "20px",
-                height: "20px",
-                borderRadius: "50%",
-                background: "white",
-                transition: "transform 0.3s",
-                transform: billingCycle === "yearly" ? "translateX(24px)" : "translateX(0px)"
-              }}
-            />
-          </button>
-          <span style={{ fontSize: "14px", fontWeight: billingCycle === "yearly" ? "700" : "500", color: billingCycle === "yearly" ? "var(--foreground)" : "var(--text-secondary)", display: "flex", alignItems: "center", gap: "6px" }}>
-            Anual <span style={{ background: "rgba(52, 199, 89, 0.15)", color: "#34c759", fontSize: "11px", fontWeight: "700", padding: "2px 6px", borderRadius: "20px" }}>Ahorra 20%</span>
-          </span>
-        </div>
+        <p style={{ maxWidth: 680, margin: "-16px auto 24px", textAlign: "center", color: "var(--text-secondary)", fontSize: 13 }}>
+          Precios mensuales referenciales. El plan inicial depende del tamaño del equipo; el registro no realiza cargos y la facturación recurrente aún no está habilitada.
+        </p>
 
         <div className={styles.pricingGrid}>
           {/* Plan Individual */}
           <div className={styles.pricingCard}>
             <h3 className={styles.planName}>Plan Individual</h3>
-            <div className={styles.planPrice}>
-              {billingCycle === "monthly" ? (
-                <>$9.900<span> / mes</span></>
-              ) : (
-                <>
-                  $7.900<span> / mes</span>
-                  <span style={{ display: "block", fontSize: "11px", color: "var(--success)", fontWeight: "600", marginTop: "4px" }}>
-                    Facturado anual ($94.800/año)
-                  </span>
-                </>
-              )}
-            </div>
+            <div className={styles.planPrice}>$9.900<span> / mes</span></div>
             <ul className={styles.planFeatures}>
-              <li className={styles.planFeatureItem}>✓ 1 Profesional / Sucursal</li>
-              <li className={styles.planFeatureItem}>✓ Link de Reservas público personalizado</li>
-              <li className={styles.planFeatureItem}>✓ Panel de administración básico</li>
-              <li className={styles.planFeatureItem}>✓ Carta digital básica (Hasta 10 platos)</li>
-              <li className={styles.planFeatureItem}>✓ Generación de código QR descargable</li>
-              <li className={styles.planFeatureItem}>✓ Soporte estándar</li>
+              <li className={styles.planFeatureItem}>✓ Registro de un profesional</li>
+              <li className={styles.planFeatureItem}>✓ Link público para consultar y solicitar reservas</li>
+              <li className={styles.planFeatureItem}>✓ Catálogo de servicios y disponibilidad</li>
+              <li className={styles.planFeatureItem}>✓ Panel para consultar y gestionar citas</li>
+              <li className={styles.planFeatureItem}>✓ Código QR descargable</li>
             </ul>
             <button onClick={() => handleSelectPlan("1 persona")} className={styles.planBtn}>
               Elegir Plan
@@ -535,26 +473,12 @@ export default function LandingAndOnboardingPage() {
           <div className={`${styles.pricingCard} ${styles.pricingCardPopular}`}>
             <div className={styles.popularBadge}>Más Popular</div>
             <h3 className={styles.planName}>Plan Equipo</h3>
-            <div className={styles.planPrice}>
-              {billingCycle === "monthly" ? (
-                <>$19.990<span> / mes</span></>
-              ) : (
-                <>
-                  $15.990<span> / mes</span>
-                  <span style={{ display: "block", fontSize: "11px", color: "var(--success)", fontWeight: "600", marginTop: "4px" }}>
-                    Facturado anual ($191.880/año)
-                  </span>
-                </>
-              )}
-            </div>
+            <div className={styles.planPrice}>$19.990<span> / mes</span></div>
             <ul className={styles.planFeatures}>
-              <li className={styles.planFeatureItem}>✓ 2 a 5 Profesionales / Sucursales</li>
-              <li className={styles.planFeatureItem}>✓ Landing page para cada profesional</li>
-              <li className={styles.planFeatureItem}>✓ Panel completo (Turnos, Reservas, Clientes)</li>
-              <li className={styles.planFeatureItem}>✓ Caja diaria, control de arqueo y propinas</li>
-              <li className={styles.planFeatureItem}>✓ Emisión de Gift Cards y Membresías</li>
-              <li className={styles.planFeatureItem}>✓ Recordatorios de WhatsApp (Confirmación e inmediata)</li>
-              <li className={styles.planFeatureItem}>✓ Linki Secretary IA (Hasta 100 chats/mes)</li>
+              <li className={styles.planFeatureItem}>✓ Tamaño de equipo configurable en el registro</li>
+              <li className={styles.planFeatureItem}>✓ Link público y catálogo de servicios</li>
+              <li className={styles.planFeatureItem}>✓ Panel de citas y clientes</li>
+              <li className={styles.planFeatureItem}>— Pagos, membresías y mensajería: no habilitados</li>
             </ul>
             <button onClick={() => handleSelectPlan("2-5 personas")} className={`${styles.planBtn} ${styles.planBtnPrimary}`}>
               Elegir Plan
@@ -564,27 +488,12 @@ export default function LandingAndOnboardingPage() {
           {/* Plan Negocio */}
           <div className={styles.pricingCard}>
             <h3 className={styles.planName}>Plan Negocio</h3>
-            <div className={styles.planPrice}>
-              {billingCycle === "monthly" ? (
-                <>$39.990<span> / mes</span></>
-              ) : (
-                <>
-                  $31.990<span> / mes</span>
-                  <span style={{ display: "block", fontSize: "11px", color: "var(--success)", fontWeight: "600", marginTop: "4px" }}>
-                    Facturado anual ($383.880/año)
-                  </span>
-                </>
-              )}
-            </div>
+            <div className={styles.planPrice}>$39.990<span> / mes</span></div>
             <ul className={styles.planFeatures}>
-              <li className={styles.planFeatureItem}>✓ 6 o más Profesionales / Multi-sucursal</li>
-              <li className={styles.planFeatureItem}>✓ Landing page para cada profesional</li>
-              <li className={styles.planFeatureItem}>✓ Mapa interactivo visual de Mesas</li>
-              <li className={styles.planFeatureItem}>✓ Linki Secretary IA (WhatsApp ilimitado)</li>
-              <li className={styles.planFeatureItem}>✓ Linki Marketing IA (Reactivación de clientes)</li>
-              <li className={styles.planFeatureItem}>✓ Linki Business IA (Consultoría estratégica)</li>
-              <li className={styles.planFeatureItem}>✓ Programa de Puntos IA y Retención avanzada</li>
-              <li className={styles.planFeatureItem}>✓ Soporte prioritario 24/7</li>
+              <li className={styles.planFeatureItem}>✓ Tamaño de equipo configurable en el registro</li>
+              <li className={styles.planFeatureItem}>✓ Link público y catálogo de servicios</li>
+              <li className={styles.planFeatureItem}>✓ Panel de citas y clientes</li>
+              <li className={styles.planFeatureItem}>— Pagos, dominios personalizados y automatización: no habilitados</li>
             </ul>
             <button onClick={() => handleSelectPlan("6+ personas")} className={styles.planBtn}>
               Elegir Plan
@@ -603,7 +512,7 @@ export default function LandingAndOnboardingPage() {
             </div>
 
             {step === 1 && (
-              <form onSubmit={(e) => { e.preventDefault(); if (!loading && formData.name && formData.ownerName && formData.email) handleSubmit(); }}>
+              <form onSubmit={(e) => { e.preventDefault(); if (!loading && formData.name && formData.ownerName && formData.email && formData.password) handleSubmit(); }}>
                 <div className={styles.formGroup}>
                   <label className={styles.label}>Nombre de tu Negocio</label>
                   <input
@@ -649,6 +558,21 @@ export default function LandingAndOnboardingPage() {
                   />
                 </div>
                 <div className={styles.formGroup}>
+                  <label className={styles.label}>Contraseña para tu cuenta</label>
+                  <input
+                    type="password"
+                    name="password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    placeholder="Al menos 12 caracteres"
+                    className={styles.input}
+                    autoComplete="new-password"
+                    minLength={12}
+                    maxLength={128}
+                    required
+                  />
+                </div>
+                <div className={styles.formGroup}>
                   <label className={styles.label}>Rubro</label>
                   <select name="category" value={formData.category} onChange={handleChange} className={styles.select}>
                     <option value="Peluquería">Peluquería</option>
@@ -676,7 +600,7 @@ export default function LandingAndOnboardingPage() {
                 <div className={styles.buttonRow}>
                   <button
                     type="submit"
-                    disabled={loading || !formData.name || !formData.ownerName || !formData.email}
+                    disabled={loading || !formData.name || !formData.ownerName || !formData.email || formData.password.length < 12}
                     className={`${styles.btn} ${styles.btnPrimary}`}
                   >
                     {loading ? "Creando..." : "Crear mi link"}
@@ -690,7 +614,7 @@ export default function LandingAndOnboardingPage() {
                 <div style={{ fontSize: "36px", marginBottom: "16px" }}>🎉</div>
                 <h2 className={styles.successTitle}>¡Tu AgendaLink está lista!</h2>
                 <p className={styles.successText}>
-                  Ya puedes compartir este link con tus clientes para agendar y recibir pagos.
+                  Ya puedes compartir este link para que tus clientes consulten servicios y soliciten reservas. Los pagos en línea aún no están habilitados.
                 </p>
 
                 <div className={styles.linkBox}>

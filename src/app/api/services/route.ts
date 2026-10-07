@@ -1,39 +1,40 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { uploadBase64ToR2, deleteFromR2 } from "@/lib/r2";
+import { createCatalogService, deleteCatalogService } from "@/features/catalog/services";
+import { parseCreateServiceInput } from "@/features/catalog/validation";
 import { requireBusinessMembership, requireSession } from "@/server/authorize";
 import { MediaValidationError } from "@/features/media/validation";
 import { logServerError } from "@/server/observability";
 
 export async function POST(request: Request) {
+  const session = await requireSession(request);
+  if (!session.ok) return session.response;
+
+  let body: unknown;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: "Solicitud inválida" }, { status: 400 });
+  }
+  if (typeof body !== "object" || body === null || !("slug" in body) || typeof body.slug !== "string") {
+    return NextResponse.json({ error: "Falta el slug del negocio" }, { status: 400 });
+  }
+  const parsed = parseCreateServiceInput(body);
+  if (!parsed.ok) return NextResponse.json({ error: parsed.error }, { status: 400 });
+
   let businessId: string | undefined;
   try {
-    const session = await requireSession(request);
-    if (!session.ok) return session.response;
-
-    const body = await request.json();
-    const { slug, name, price, duration, imageUrl } = body;
-    if (!slug || !name || price === undefined || duration === undefined) {
-      return NextResponse.json({ error: "Datos incompletos" }, { status: 400 });
-    }
-    const business = await prisma.business.findUnique({ where: { slug } });
-    if (!business) {
-      return NextResponse.json({ error: "Negocio no encontrado" }, { status: 404 });
-    }
+    const business = await prisma.business.findUnique({
+      where: { slug: body.slug },
+      select: { id: true, slug: true },
+    });
+    if (!business) return NextResponse.json({ error: "Negocio no encontrado" }, { status: 404 });
     businessId = business.id;
+
     const authorization = await requireBusinessMembership(session.user, business.id);
     if (!authorization.ok) return authorization.response;
 
-    const finalImageUrl = await uploadBase64ToR2(imageUrl, `service_${slug}`);
-    const service = await prisma.service.create({
-      data: {
-        businessId: business.id,
-        name,
-        price: parseFloat(price),
-        duration: parseInt(duration, 10),
-        imageUrl: finalImageUrl || null,
-      },
-    });
+    const service = await createCatalogService(business.id, business.slug, parsed.value);
     return NextResponse.json({ success: true, service });
   } catch (error) {
     if (error instanceof MediaValidationError) {
@@ -45,28 +46,25 @@ export async function POST(request: Request) {
 }
 
 export async function DELETE(request: Request) {
+  const session = await requireSession(request);
+  if (!session.ok) return session.response;
+
+  const id = new URL(request.url).searchParams.get("id");
+  if (!id || id.length > 100) {
+    return NextResponse.json({ error: "Falta un id de servicio válido" }, { status: 400 });
+  }
+
   let businessId: string | undefined;
   try {
-    const session = await requireSession(request);
-    if (!session.ok) return session.response;
-
-    const { searchParams } = new URL(request.url);
-    const id = searchParams.get("id");
-    if (!id) {
-      return NextResponse.json({ error: "Falta el parámetro id" }, { status: 400 });
-    }
-    const service = await prisma.service.findUnique({ where: { id } });
-    if (!service) {
-      return NextResponse.json({ error: "Servicio no encontrado" }, { status: 404 });
-    }
+    const service = await prisma.service.findUnique({ where: { id }, select: { businessId: true } });
+    if (!service) return NextResponse.json({ error: "Servicio no encontrado" }, { status: 404 });
     businessId = service.businessId;
+
     const authorization = await requireBusinessMembership(session.user, service.businessId);
     if (!authorization.ok) return authorization.response;
 
-    if (service?.imageUrl) {
-      await deleteFromR2(service.imageUrl);
-    }
-    await prisma.service.delete({ where: { id } });
+    const deleted = await deleteCatalogService(id);
+    if (!deleted) return NextResponse.json({ error: "Servicio no encontrado" }, { status: 404 });
     return NextResponse.json({ success: true });
   } catch (error) {
     if (error instanceof MediaValidationError) {

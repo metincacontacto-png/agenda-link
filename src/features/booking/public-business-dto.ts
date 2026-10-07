@@ -1,3 +1,5 @@
+import type { ProfessionalDTO } from "@/features/team/contracts";
+
 /** Public-only contract returned by GET /api/availability. */
 export interface PublicBusinessDTO {
   id: string;
@@ -24,9 +26,5 @@ export interface PublicBusinessDTO {
     price: number;
     imageUrl: string | null;
   }>;
-  professionals: Array<{
-    id: string;
-    name: string;
-    avatar: string | null;
-  }>;
+  professionals: ProfessionalDTO[];
 }

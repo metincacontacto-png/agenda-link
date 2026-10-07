@@ -71,7 +71,7 @@ export default async function SuccessPage({
         <div className={styles.successIcon}>✓</div>
         <h1 className={styles.title}>¡Reserva Confirmada!</h1>
         <p className={styles.subtitle}>
-          Recibirás la confirmación por WhatsApp en unos instantes.
+          Tu reserva quedó registrada. El pago está pendiente; el negocio podrá contactarte para coordinar los siguientes pasos.
         </p>
 
         <div className={styles.detailsList}>
@@ -99,7 +99,7 @@ export default async function SuccessPage({
             <span className={styles.label}>Pago:</span>
             <span className={styles.value} style={{ fontWeight: "700", color: appointment.paymentStatus === "PAID" ? "var(--success)" : "var(--text-secondary)" }}>
               {appointment.paymentStatus === "PAID"
-                ? `✓ ${formatPrice(appointment.paymentAmount || appointment.service.price, appointment.business.currency)} PAGADO (${appointment.paymentMethod || "Tarjeta"})`
+                ? `✓ ${formatPrice(appointment.paymentAmount || appointment.service.price, appointment.business.currency)} PAGADO (${appointment.paymentMethod || "método no registrado"})`
                 : `Pendiente · ${formatPrice(appointment.service.price, appointment.business.currency)}`}
             </span>
           </div>

@@ -1,143 +1,63 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
+import { createBusinessForOwner } from "@/features/businesses/onboarding";
+import { parseOnboardingInput } from "@/features/businesses/validation";
 import { enforceRateLimit } from "@/server/rate-limit";
+import { createSessionToken, getSessionCookie, hasSessionSigningSecret, hashPassword, sessionCookie } from "@/server/auth";
+import { requireSession } from "@/server/authorize";
 import { logServerError } from "@/server/observability";
 
-const RESERVED_SLUGS = ["admin", "api", "public", "auth", "static", "login", "register", "success"];
+function isUniqueConstraintError(error: unknown): boolean {
+  return typeof error === "object" && error !== null && "code" in error && error.code === "P2002";
+}
 
 export async function POST(request: Request) {
   const rateLimitResponse = await enforceRateLimit(request, "ONBOARDING_RATE_LIMITER", "onboarding");
   if (rateLimitResponse) return rateLimitResponse;
 
+  let body: unknown;
   try {
-    const body = await request.json();
-    const {
-      name,
-      ownerName,
-      email,
-      category,
-      teamSize,
-      country,
-      serviceName,
-      serviceDuration,
-      servicePrice,
-    } = body;
-    // Verificar presencia de campos requeridos (permitiendo precios en 0)
-    if (
-      !name ||
-      !ownerName ||
-      !email ||
-      !category ||
-      !teamSize ||
-      !country
-    ) {
-      return NextResponse.json({ error: "Faltan campos obligatorios" }, { status: 400 });
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: "Solicitud inválida" }, { status: 400 });
+  }
+  const parsed = parseOnboardingInput(body);
+  if (!parsed.ok) return NextResponse.json({ error: parsed.error }, { status: 400 });
+
+  const sessionToken = getSessionCookie(request);
+  let owner: { userId: string } | { name: string; email: string; passwordHash: string };
+  let newUser = false;
+  if (sessionToken) {
+    const session = await requireSession(request);
+    if (!session.ok) return session.response;
+    owner = { userId: session.user.id };
+  } else {
+    if (!parsed.value.password) {
+      return NextResponse.json({ error: "Crea una contraseña para administrar tu negocio" }, { status: 400 });
     }
-
-    // Default service values based on category
-    let finalServiceName = serviceName || "";
-    let finalServiceDuration = serviceDuration ? parseInt(serviceDuration, 10) : 30;
-    let finalServicePrice = servicePrice !== undefined && servicePrice !== "" ? parseFloat(servicePrice) : 0;
-
-    if (!finalServiceName) {
-      if (category === "Peluquería") {
-        finalServiceName = "Corte de Cabello Caballero";
-        finalServiceDuration = 30;
-        finalServicePrice = 12000;
-      } else if (category === "Salud") {
-        finalServiceName = "Consulta General";
-        finalServiceDuration = 30;
-        finalServicePrice = 25000;
-      } else if (category === "Fitness") {
-        finalServiceName = "Evaluación o Clase Personalizada";
-        finalServiceDuration = 60;
-        finalServicePrice = 15000;
-      } else if (category === "Profesionales") {
-        finalServiceName = "Asesoría o Consultoría Inicial";
-        finalServiceDuration = 45;
-        finalServicePrice = 30000;
-      } else {
-        finalServiceName = "Servicio General";
-        finalServiceDuration = 30;
-        finalServicePrice = 15000;
-      }
+    if (!hasSessionSigningSecret()) {
+      return NextResponse.json({ error: "El servicio de autenticación no está configurado" }, { status: 503 });
     }
+    owner = {
+      name: parsed.value.ownerName,
+      email: parsed.value.email,
+      passwordHash: await hashPassword(parsed.value.password),
+    };
+    newUser = true;
+  }
 
-    // Validar precio y duración final
-    if (isNaN(finalServicePrice) || finalServicePrice < 0 || isNaN(finalServiceDuration) || finalServiceDuration <= 0) {
-      return NextResponse.json({ error: "Precio o duración inválidos" }, { status: 400 });
-    }
+  try {
+    const created = await createBusinessForOwner(parsed.value, owner);
 
-    // Generar slug único del negocio (removiendo acentos en español)
-    let slug = name
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "") // Remueve tildes de forma segura
-      .toLowerCase()
-      .trim()
-      .replace(/[^\w\s-]/g, "") // Remueve caracteres especiales
-      .replace(/[\s_]+/g, "-")
-      .replace(/^-+|-+$/g, "");
-
-    // Evitar slug vacío
-    if (!slug) {
-      slug = "negocio";
-    }
-
-    // Evitar slugs reservados
-    if (RESERVED_SLUGS.includes(slug)) {
-      slug = `${slug}-negocio`;
-    }
-
-    // Loop de unicidad para evitar colisiones
-    let finalSlug = slug;
-    let collision = true;
-    let attempts = 0;
-    while (collision && attempts < 100) {
-      const existing = await prisma.business.findUnique({ where: { slug: finalSlug } });
-      if (existing) {
-        finalSlug = `${slug}-${Math.floor(1000 + Math.random() * 9000)}`;
-        attempts++;
-      } else {
-        collision = false;
-      }
-    }
-
-    // Determinar la moneda por país
-    const currency = country === "Chile" ? "CLP" : country === "México" ? "MXN" : "USD";
-
-    // Crear negocio, servicio por defecto y profesional por defecto (el dueño)
-    const business = await prisma.business.create({
-      data: {
-        name,
-        slug: finalSlug,
-        ownerName,
-        email: email.trim().toLowerCase(),
-        category,
-        teamSize,
-        country,
-        currency,
-        services: {
-          create: {
-            name: finalServiceName,
-            duration: finalServiceDuration,
-            price: finalServicePrice,
-          },
-        },
-        professionals: {
-          create: {
-            name: ownerName,
-            avatar: ownerName.substring(0, 2).toUpperCase(),
-          },
-        },
-      },
-      include: {
-        services: true,
-        professionals: true,
-      },
-    });
-
-    return NextResponse.json({ success: true, slug: business.slug, business });
+    const headers = new Headers();
+    if (newUser) headers.set("Set-Cookie", sessionCookie(await createSessionToken(created.ownerUserId)));
+    return NextResponse.json(
+      { success: true, slug: created.business.slug, business: created.business },
+      { status: 201, headers },
+    );
   } catch (error) {
+    if (isUniqueConstraintError(error)) {
+      return NextResponse.json({ error: "No se pudo completar el registro" }, { status: 400 });
+    }
     logServerError(request, "onboarding.create.failed", error);
     return NextResponse.json({ error: "Error interno del servidor" }, { status: 500 });
   }
