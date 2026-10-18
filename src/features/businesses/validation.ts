@@ -4,7 +4,7 @@ export interface OnboardingInput {
   email: string;
   category: string;
   teamSize: string;
-  country: "Chile" | "México";
+  country: "Chile";
   serviceName: string;
   serviceDuration: number;
   servicePrice: number;
@@ -49,7 +49,7 @@ export function parseOnboardingInput(body: unknown): OnboardingInputResult {
   if (!name || !ownerName || !category || !teamSize || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length > 254) {
     return { ok: false, error: "Revisa el nombre, el contacto y los datos del negocio" };
   }
-  if (!new Set(["Chile", "México"]).has(String(country))) {
+  if (String(country) !== "Chile") {
     return { ok: false, error: "País no soportado" };
   }
   if (!new Set(["1 persona", "2-5 personas", "6+ personas"]).has(teamSize)) {
@@ -93,7 +93,7 @@ export function parseOnboardingInput(body: unknown): OnboardingInputResult {
       email,
       category,
       teamSize,
-      country: country as "Chile" | "México",
+      country: "Chile",
       serviceName: serviceName || defaultName,
       serviceDuration,
       servicePrice,

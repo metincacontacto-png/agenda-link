@@ -40,8 +40,8 @@ export async function createBusinessForOwner(input: OnboardingInput, owner: Busi
   const serviceId = crypto.randomUUID();
   const defaultTeam = prepareDefaultTeam(database, businessId, input.ownerName);
   const ownerUserId = "userId" in owner ? owner.userId : crypto.randomUUID();
-  const currency = input.country === "Chile" ? "CLP" : "MXN";
-  const timezone = input.country === "Chile" ? "America/Santiago" : "America/Mexico_City";
+  const currency = "CLP";
+  const timezone = "America/Santiago";
   const plan = input.teamSize === "1 persona"
     ? "INDIVIDUAL"
     : input.teamSize === "2-5 personas"

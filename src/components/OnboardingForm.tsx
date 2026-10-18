@@ -218,7 +218,6 @@ export default function OnboardingForm({
               País
               <select name="country" value={formData.country} onChange={handleChange}>
                 <option value="Chile">Chile</option>
-                <option value="México">México</option>
               </select>
             </label>
 

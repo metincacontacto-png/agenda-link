@@ -275,7 +275,7 @@ export default function HomePage() {
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                   <path d="M5 12l5 5L20 7" />
                 </svg>
-                Chile y México
+                Todo Chile
               </div>
             </div>
           </div>
@@ -1243,7 +1243,7 @@ export default function HomePage() {
               <Link href="/" className={styles.logoLink}>
                 <img src="/logo-horizontal-blanco.png" alt="AgendaLink" className={styles.logoImg} />
               </Link>
-              <p>Un link. Todo resuelto. Agenda, pagos, clientes e IA para negocios de servicios en Chile y México.</p>
+              <p>Un link. Todo resuelto. Agenda, pagos, clientes e IA para negocios de servicios en Chile.</p>
             </div>
             <div>
               <h6>Producto</h6>
@@ -1416,7 +1416,6 @@ export default function HomePage() {
                       onChange={(e) => setRegFormData({ ...regFormData, country: e.target.value })}
                     >
                       <option value="Chile">Chile</option>
-                      <option value="México">México</option>
                     </select>
                   </div>
 
