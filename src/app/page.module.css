@@ -250,19 +250,6 @@
     radial-gradient(500px 300px at 50% 120%, rgba(124, 58, 237, 0.25), transparent 70%);
 }
 
-.hero::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  background-image: 
-    linear-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.045) 1px, transparent 1px);
-  background-size: 56px 56px;
-  mask-image: radial-gradient(ellipse 80% 70% at 60% 30%, #000 30%, transparent 80%);
-  -webkit-mask-image: radial-gradient(ellipse 80% 70% at 60% 30%, #000 30%, transparent 80%);
-}
-
 .heroGrid {
   display: grid;
   grid-template-columns: 1.05fr 0.95fr;
