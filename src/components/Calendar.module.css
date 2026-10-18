@@ -55,29 +55,95 @@
 .slotsGrid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
+  gap: 10px;
   margin-top: 12px;
 }
 
 .slotBtn {
-  padding: 12px 6px;
-  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 10px 6px;
+  border-radius: 12px;
   background: var(--input-bg);
   border: 1px solid var(--input-border);
   color: var(--foreground);
-  font-size: 13px;
-  font-weight: 600;
+  font-size: 13.5px;
+  font-weight: 700;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   text-align: center;
 }
 
-.slotBtnActive {
-  background: var(--foreground);
-  border-color: var(--foreground);
-  color: var(--background);
+.slotTime {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
 }
 
-.slotBtn:hover:not(.slotBtnActive) {
-  border-color: var(--foreground);
+.slotStatus {
+  font-size: 9.5px;
+  font-weight: 600;
+  color: #16a34a;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.slotBtnActive {
+  background: #0066ff !important;
+  border-color: #0066ff !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 14px rgba(0, 102, 255, 0.3);
+}
+
+.slotBtnActive .slotTime {
+  color: #ffffff !important;
+}
+
+.slotBtnActive .slotStatus {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+.slotBtn:hover:not(.slotBtnActive):not(.slotBtnBooked) {
+  border-color: #0066ff;
+  background: rgba(0, 102, 255, 0.04);
+  transform: translateY(-1px);
+}
+
+.slotBtnBooked {
+  background: #fef2f2;
+  border-color: rgba(239, 68, 68, 0.25);
+  color: #ef4444;
+  cursor: not-allowed;
+  opacity: 0.9;
+  user-select: none;
+}
+
+.slotBtnBooked .slotTime {
+  color: #dc2626;
+  text-decoration: line-through;
+  opacity: 0.75;
+}
+
+.slotBtnBooked .slotStatus {
+  color: #ef4444;
+  font-weight: 750;
+  font-size: 9px;
+}
+
+.dayBtnClosed {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: rgba(0, 0, 0, 0.02);
+  border-style: dashed;
+}
+
+.closedLabel {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #ef4444;
+  margin-top: 2px;
 }

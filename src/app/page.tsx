@@ -1,14 +1,81 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import styles from "./page.module.css";
 import QrDownloader from "@/components/QrDownloader";
 
-export default function LandingAndOnboardingPage() {
-  const [heroSlug, setHeroSlug] = useState("");
-  const [step, setStep] = useState(1);
-  const [formData, setFormData] = useState({
+const convos = [
+  {
+    n: "Linki Secretary",
+    m: [
+      { type: "in", text: "Hola! ¿tienen hora para corte mañana en la tarde?" },
+      { type: "out", text: "¡Hola! 👋 Sí, mañana martes tengo 15:30 y 18:30 con Pía. El corte + brushing cuesta $18.000." },
+      { type: "in", text: "Las 18:30 porfa" },
+      { type: "out", text: "Listo ✅ Reserva tu hora aquí en 20 segundos: agendalink.cl/valentina. Te recordaré un día antes." },
+    ],
+  },
+  {
+    n: "Linki Marketing",
+    m: [
+      { type: "out", text: "📊 Detecté 23 clientes que no vienen hace más de 60 días." },
+      { type: "out", text: 'Te propongo enviarles: "¡Te echamos de menos! 15% en tu próxima visita esta semana" 💙' },
+      { type: "in", text: "Dale, envíalo" },
+      { type: "out", text: "Enviado por WhatsApp. Te aviso cuando lleguen las reservas. 🚀" },
+    ],
+  },
+  {
+    n: "Linki Business",
+    m: [
+      { type: "in", text: "¿Cómo me fue este mes?" },
+      { type: "out", text: "Vendiste más que el mes pasado y tu servicio estrella fue Color completo. 📈" },
+      { type: "out", text: "Ojo: los martes en la mañana tienes 40% de horas libres. Una promo ese bloque podría llenarlo." },
+      { type: "in", text: "Buena idea, armemos la promo" },
+    ],
+  },
+];
+
+const faqs = [
+  {
+    q: "¿Mis clientes necesitan descargar una app o crear cuenta?",
+    a: "No. Entran a tu link desde Instagram, WhatsApp o un QR, eligen servicio, día y hora, y reservan en unos 20 segundos. Sin registro ni descargas.",
+  },
+  {
+    q: "¿Necesito saber de tecnología para configurarlo?",
+    a: "No. El panel te guía en 5 pasos: personalizar tu landing, cargar servicios, vincular WhatsApp, instalar la app en tu celular y compartir tu link. Se hace en una tarde.",
+  },
+  {
+    q: "¿Cómo funcionan los recordatorios por WhatsApp?",
+    a: "Al vincular tu WhatsApp, recibes un aviso con cada reserva nueva y tus clientes reciben recordatorios antes de su cita. Así bajan las inasistencias.",
+  },
+  {
+    q: "¿Qué hacen los asistentes Linki IA?",
+    a: "Linki Secretary responde consultas de tus clientes, Linki Marketing te ayuda a reactivar clientes que dejaron de venir y Linki Business analiza tu negocio para darte recomendaciones concretas.",
+  },
+  {
+    q: "¿Puedo cobrar al momento de la reserva?",
+    a: "Sí. Puedes recibir pagos con tarjeta y Apple Pay directamente desde tu link, para asegurar la hora y reducir cancelaciones.",
+  },
+  {
+    q: "¿Puedo cambiar de plan o cancelar?",
+    a: "Sí. Puedes subir o bajar de plan a medida que tu equipo crece, y cancelar cuando quieras. El plan anual tiene un 20% de descuento.",
+  },
+];
+
+export default function HomePage() {
+  const [scrolled, setScrolled] = useState(false);
+  const [billingPeriod, setBillingPeriod] = useState<"monthly" | "yearly">("monthly");
+  const [activeAgent, setActiveAgent] = useState(0);
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [finalSlug, setFinalSlug] = useState("");
+
+  // Modales
+  const [registerModalOpen, setRegisterModalOpen] = useState(false);
+  const [loginModalOpen, setLoginModalOpen] = useState(false);
+
+  // Registro Form State
+  const [regStep, setRegStep] = useState(1);
+  const [regFormData, setRegFormData] = useState({
     name: "",
     ownerName: "",
     email: "",
@@ -16,656 +83,1482 @@ export default function LandingAndOnboardingPage() {
     category: "Peluquería",
     teamSize: "1 persona",
     country: "Chile",
-    serviceName: "",
-    serviceDuration: "30",
-    servicePrice: "",
   });
-
-  const [loading, setLoading] = useState(false);
-  const [slug, setSlug] = useState("");
+  const [regLoading, setRegLoading] = useState(false);
+  const [createdSlug, setCreatedSlug] = useState("");
   const [copied, setCopied] = useState(false);
-  const [segmentsOpen, setSegmentsOpen] = useState(false);
+  const [regError, setRegError] = useState("");
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+  // Login Form State
+  const [loginSlug, setLoginSlug] = useState("");
+  const [loginLoading, setLoginLoading] = useState(false);
+  const [loginError, setLoginError] = useState("");
+
+  // Scroll listener
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  // Intersection Observer for .rv elements
+  const containerRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const elements = containerRef.current.querySelectorAll(`.${styles.rv}`);
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add(styles.rvIn);
+            io.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.12 }
+    );
+    elements.forEach((el, i) => {
+      (el as HTMLElement).style.transitionDelay = `${(i % 4) * 70}ms`;
+      io.observe(el);
+    });
+    return () => io.disconnect();
+  }, []);
+
+  // Auto cycle agent chat
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setActiveAgent((prev) => (prev + 1) % convos.length);
+    }, 7000);
+    return () => clearTimeout(timer);
+  }, [activeAgent]);
+
+  // Open register modal with optional prefill
+  const openRegister = (plan?: string, initialSlug?: string) => {
+    if (plan) {
+      if (plan === "individual") setRegFormData((prev) => ({ ...prev, teamSize: "1 persona" }));
+      if (plan === "equipo") setRegFormData((prev) => ({ ...prev, teamSize: "2-5 personas" }));
+      if (plan === "business") setRegFormData((prev) => ({ ...prev, teamSize: "6+ personas" }));
+    }
+    if (initialSlug) {
+      setRegFormData((prev) => ({ ...prev, name: initialSlug }));
+    }
+    setRegStep(1);
+    setRegError("");
+    setRegisterModalOpen(true);
   };
 
-  const handleSubmit = async () => {
-    setLoading(true);
+  const handleRegisterSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!regFormData.password || regFormData.password.length < 8) {
+      setRegError("La contraseña debe tener al menos 8 caracteres.");
+      return;
+    }
+    setRegLoading(true);
+    setRegError("");
     try {
       const res = await fetch("/api/onboarding", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(regFormData),
       });
       const data = await res.json();
-      if (data.success) {
-        setSlug(data.slug);
-        setStep(3);
+      if (data.success && data.slug) {
+        setCreatedSlug(data.slug);
+        setRegStep(3);
       } else {
-        alert(data.error || "Algo salió mal");
+        setRegError(data.error || "No se pudo crear el negocio. Inténtalo de nuevo.");
       }
     } catch (err) {
       console.error(err);
-      alert("Error al enviar la configuración");
+      setRegError("Error de conexión al procesar el registro.");
     } finally {
-      setLoading(false);
+      setRegLoading(false);
     }
   };
 
-  const fallbackCopyText = (text: string) => {
-    try {
-      const textArea = document.createElement("textarea");
-      textArea.value = text;
-      textArea.style.top = "0";
-      textArea.style.left = "0";
-      textArea.style.position = "fixed";
-      textArea.style.opacity = "0";
-      document.body.appendChild(textArea);
-      textArea.focus();
-      textArea.select();
-      const successful = document.execCommand("copy");
-      document.body.removeChild(textArea);
-      if (successful) {
+  const copyCreatedLink = () => {
+    const url = `${window.location.origin}/${createdSlug}`;
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(url).then(() => {
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
-      } else {
-        alert("No se pudo copiar automáticamente. Por favor, selecciona y copia el link manualmente.");
-      }
-    } catch (err) {
-      console.error("Fallback de copia falló:", err);
-      alert("No se pudo copiar automáticamente. Por favor, selecciona y copia el link manualmente.");
+      });
     }
   };
 
-  const copyLink = () => {
-    const url = `${window.location.origin}/${slug}`;
-    if (typeof navigator !== "undefined" && navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(url)
-        .then(() => {
-          setCopied(true);
-          setTimeout(() => setCopied(false), 2000);
-        })
-        .catch((err) => {
-          console.error("Error al copiar usando navigator.clipboard:", err);
-          fallbackCopyText(url);
-        });
-    } else {
-      fallbackCopyText(url);
-    }
-  };
-
-  const handleHeroSubmit = (e: React.FormEvent) => {
+  const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!heroSlug) return;
-    setFormData((prev) => ({ ...prev, name: heroSlug }));
-    document.getElementById("registro")?.scrollIntoView({ behavior: "smooth" });
-  };
-
-  const handleSelectPlan = (teamSize: string) => {
-    setFormData((prev) => ({ ...prev, teamSize }));
-    document.getElementById("registro")?.scrollIntoView({ behavior: "smooth" });
-  };
-
-  const scrollToSection = (id: string) => {
-    document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
-  };
-
-  const handleSegmentClick = (categoryVal: string) => {
-    setSegmentsOpen(false);
-    setFormData((prev) => ({
-      ...prev,
-      category: categoryVal,
-    }));
-    scrollToSection("registro");
+    if (!loginSlug) return;
+    setLoginLoading(true);
+    setLoginError("");
+    try {
+      window.location.href = `/admin/${loginSlug}`;
+    } catch (err) {
+      console.error(err);
+      setLoginError("Error de conexión. Inténtalo de nuevo.");
+      setLoginLoading(false);
+    }
   };
 
   return (
-    <div className={styles.landingWrapper}>
-      {/* Background Glowing Orbs */}
-      <div className={styles.glowOrb1} />
-      <div className={styles.glowOrb2} />
-      <div className={styles.glowOrb3} />
-
-      {/* 1. Cabecera */}
-      <header className={styles.header}>
-        <div style={{ display: "flex", alignItems: "center", gap: "10px", cursor: "pointer" }} onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>
-          <img src="/logo.png" alt="AgendaLink Logo" style={{ height: "32px", width: "auto" }} />
-          <span style={{ fontWeight: "800", fontSize: "22px", color: "#000000", fontFamily: "'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif", letterSpacing: "-0.04em" }}>agenda link</span>
-        </div>
-        <nav className={styles.headerNav}>
-          <div
-            className={styles.dropdownContainer}
-            onMouseEnter={() => setSegmentsOpen(true)}
-            onMouseLeave={() => setSegmentsOpen(false)}
-          >
-            <button className={`${styles.headerLink} ${segmentsOpen ? styles.headerLinkActive : ""}`}>
-              Negocios <span className={styles.caret}>{segmentsOpen ? "▲" : "▼"}</span>
+    <div className={styles.landingPage} ref={containerRef}>
+      {/* ===== NAV ===== */}
+      <nav className={`${styles.nav} ${scrolled ? styles.navScrolled : ""}`}>
+        <div className={styles.wrap}>
+          <Link href="/" className={styles.logoLink}>
+            <img src="/logo-horizontal-blanco.png" alt="AgendaLink" className={styles.logoImg} />
+          </Link>
+          <div className={styles.navLinks}>
+            <a href="#como-funciona">Cómo funciona</a>
+            <a href="#funcionalidades">Funcionalidades</a>
+            <a href="#linki">Linki IA</a>
+            <a href="#precios">Precios</a>
+            <a href="#faq">Preguntas</a>
+          </div>
+          <div className={styles.navCta}>
+            <button className={styles.loginBtn} onClick={() => setLoginModalOpen(true)}>
+              Iniciar sesión
             </button>
-            
-            {segmentsOpen && (
-              <div className={styles.dropdownMenu}>
-                <div className={styles.dropdownColumn}>
-                  <div className={styles.columnTitle}>Estética y Belleza</div>
-                  <div className={styles.columnItems}>
-                    <div className={styles.columnItem} onClick={() => handleSegmentClick("Peluquería")}>
-                      <svg className={styles.columnIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <circle cx="6" cy="6" r="3" />
-                        <circle cx="6" cy="18" r="3" />
-                        <line x1="9.8" y1="8.2" x2="21" y2="19.4" />
-                        <line x1="9.8" y1="15.8" x2="21" y2="4.6" />
-                      </svg>
-                      <span>Salones de belleza</span>
-                    </div>
-                    <div className={styles.columnItem} onClick={() => handleSegmentClick("Peluquería")}>
-                      <svg className={styles.columnIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M2 12s3-4 5-4c2 0 3 2 5 4 2-2 3-4 5-4 2 0 5 4 5 4-2 4-5 4-7 2-2 2-4 2-6 0-2 2-5 2-7-2Z" />
-                      </svg>
-                      <span>Barberías</span>
-                    </div>
-                    <div className={styles.columnItem} onClick={() => handleSegmentClick("Peluquería")}>
-                      <svg className={styles.columnIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M12 3c-1.2 3.4-3 6-6 8.5 3 2.5 4.8 5.1 6 8.5 1.2-3.4 3-6 6-8.5-3-2.5-4.8-5.1-6-8.5Z" />
-                      </svg>
-                      <span>Spas y Estética</span>
-                    </div>
-                    <div className={styles.columnItem} onClick={() => handleSegmentClick("Peluquería")}>
-                      <svg className={styles.columnIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M12 2a4 4 0 0 0-4 4v12a4 4 0 0 0 8 0V6a4 4 0 0 0-4-4Zm0 10a2 2 0 1 1 0-4 2 2 0 0 1 0 4Z" />
-                      </svg>
-                      <span>Manicure y Pedicure</span>
-                    </div>
-                  </div>
-                </div>
+            <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={() => openRegister()}>
+              Crear mi link gratis
+            </button>
+          </div>
+        </div>
+      </nav>
 
-                <div className={styles.dropdownColumn}>
-                  <div className={styles.columnTitle}>Salud y Bienestar</div>
-                  <div className={styles.columnItems}>
-                    <div className={styles.columnItem} onClick={() => handleSegmentClick("Salud")}>
-                      <svg className={styles.columnIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M19 10h-5V5a1 1 0 0 0-1-1h-2a1 1 0 0 0-1 1v5H5a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h5v5a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1v-5h5a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1Z" />
-                      </svg>
-                      <span>Centros médicos</span>
-                    </div>
-                    <div className={styles.columnItem} onClick={() => handleSegmentClick("Salud")}>
-                      <svg className={styles.columnIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
-                      </svg>
-                      <span>Kinesiología</span>
-                    </div>
-                    <div className={styles.columnItem} onClick={() => handleSegmentClick("Fitness")}>
-                      <svg className={styles.columnIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M6.5 6.5h11M6.5 17.5h11M18 5v14M6 5v14M3 8v8M21 8v8" />
-                      </svg>
-                      <span>Centros deportivos</span>
-                    </div>
-                    <div className={styles.columnItem} onClick={() => handleSegmentClick("Salud")}>
-                      <svg className={styles.columnIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10Z"/><path d="M12 2v4M12 2c0 2-2 3-4 3" />
-                      </svg>
-                      <span>Nutricionistas</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className={styles.dropdownColumn}>
-                  <div className={styles.columnTitle}>Servicios Profesionales</div>
-                  <div className={styles.columnItems}>
-                    <div className={styles.columnItem} onClick={() => handleSegmentClick("Profesionales")}>
-                      <svg className={styles.columnIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                        <circle cx="9" cy="7" r="4" />
-                        <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-                        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-                      </svg>
-                      <span>Consultores y Asesores</span>
-                    </div>
-                    <div className={styles.columnItem} onClick={() => handleSegmentClick("Profesionales")}>
-                      <svg className={styles.columnIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                        <path d="M12 8v4M12 16h.01" />
-                      </svg>
-                      <span>Abogados y Legal</span>
-                    </div>
-                    <div className={styles.columnItem} onClick={() => handleSegmentClick("Profesionales")}>
-                      <svg className={styles.columnIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M4.5 16.5c-1.5 1.26-2.5 3.19-2.5 5.5h20c0-2.31-1-4.24-2.5-5.5" />
-                        <path d="M12 2a5 5 0 0 0-5 5c0 4 5 9 5 9s5-5 5-5a5 5 0 0 0-5-5z" />
-                      </svg>
-                      <span>Psicólogos y Terapeutas</span>
-                    </div>
-                    <div className={styles.columnItem} onClick={() => handleSegmentClick("Profesionales")}>
-                      <svg className={styles.columnIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
-                        <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
-                      </svg>
-                      <span>Clases y Tutorías</span>
-                    </div>
-                  </div>
-                </div>
-
+      {/* ===== HERO ===== */}
+      <header className={styles.hero}>
+        <div className={`${styles.wrap} ${styles.heroGrid}`}>
+          <div className={styles.rv}>
+            <div className={styles.pill}>
+              <span>NUEVO</span> Linki IA: tu secretaria que responde WhatsApp 24/7
+            </div>
+            <h1 className={styles.heroH1}>
+              Tu negocio agenda solo.
+              <br />
+              <span className={styles.gradText}>Tú solo atiendes.</span>
+            </h1>
+            <p className={styles.lead}>
+              Reservas online, pagos, recordatorios por WhatsApp y un panel para ver cuánto vendes. Todo desde un solo link
+              que tus clientes usan en 20 segundos, sin descargar nada.
+            </p>
+            <div className={styles.heroCtas}>
+              <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={() => openRegister()}>
+                Crear mi link ahora
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M5 12h14M13 5l7 7-7 7" />
+                </svg>
+              </button>
+              <a href="#como-funciona" className={`${styles.btn} ${styles.btnGhost}`}>
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M8 5v14l11-7z" />
+                </svg>
+                Ver cómo funciona
+              </a>
+            </div>
+            <div className={styles.heroProof}>
+              <div>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <path d="M5 12l5 5L20 7" />
+                </svg>
+                Listo en 5 pasos
               </div>
-            )}
+              <div>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <path d="M5 12l5 5L20 7" />
+                </svg>
+                Sin contratos
+              </div>
+              <div>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <path d="M5 12l5 5L20 7" />
+                </svg>
+                Chile y México
+              </div>
+            </div>
           </div>
 
-          <button className={styles.headerLink} onClick={() => scrollToSection("features")}>Funcionalidades</button>
-          <button className={styles.headerLink} onClick={() => scrollToSection("pricing")}>Precios</button>
-        </nav>
-        <div className={styles.headerActions}>
-          <Link href="/login" className={styles.headerLink}>Iniciar Sesión</Link>
-          <button className={styles.heroBtn} style={{ padding: "8px 16px", fontSize: "13px" }} onClick={() => scrollToSection("registro")}>Registrar negocio</button>
+          <div className={`${styles.stage} ${styles.rv}`}>
+            <div className={styles.phone}>
+              <div className={styles.screen}>
+                <div className={styles.notch} />
+                <div className={styles.scrHead}>
+                  <div className={styles.avatar}>VS</div>
+                  <h4>Valentina Studio</h4>
+                  <small>Disponible hoy</small>
+                </div>
+                <div className={styles.scrBody}>
+                  <div className={styles.cardS}>
+                    <div className={styles.lbl}>1 · Elige servicio</div>
+                    <div className={`${styles.svc} ${styles.svcSel}`}>
+                      <div>
+                        <b>Corte + brushing</b>
+                        <em>60 min</em>
+                      </div>
+                      <span className={styles.pr}>$18.000</span>
+                    </div>
+                    <div className={styles.svc}>
+                      <div>
+                        <b>Color completo</b>
+                        <em>120 min</em>
+                      </div>
+                      <span className={styles.pr}>$45.000</span>
+                    </div>
+                  </div>
+                  <div className={styles.cardS}>
+                    <div className={styles.lbl}>2 · Día y hora</div>
+                    <div className={styles.days}>
+                      <div>
+                        Lun<b>12</b>
+                      </div>
+                      <div className={styles.dayOn}>
+                        Mar<b>13</b>
+                      </div>
+                      <div>
+                        Mié<b>14</b>
+                      </div>
+                      <div>
+                        Jue<b>15</b>
+                      </div>
+                      <div>
+                        Vie<b>16</b>
+                      </div>
+                    </div>
+                    <div className={styles.slots}>
+                      <span className={styles.slotOff}>10:00</span>
+                      <span className={styles.slotOn}>11:30</span>
+                      <span>13:00</span>
+                      <span>15:30</span>
+                      <span className={styles.slotOff}>17:00</span>
+                      <span>18:30</span>
+                    </div>
+                  </div>
+                  <div className={styles.bookBtn}>Confirmar reserva →</div>
+                </div>
+              </div>
+            </div>
+
+            <div className={`${styles.float} ${styles.f1}`}>
+              <div className={styles.ic}>
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2a10 10 0 00-8.6 15.1L2 22l5-1.3A10 10 0 1012 2zm5.3 14.2c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .1-3.3-.8-2.8-1.1-4.5-4-4.7-4.2-.1-.2-1.1-1.5-1.1-2.9s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.4 0 .5l-.4.6-.4.4c-.1.2-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.3 2.4 1.5.3.1.5.1.6-.1l.9-1.1c.2-.3.4-.2.6-.1l1.9.9c.3.1.5.2.5.3.1.2.1.7-.1 1.2z" />
+                </svg>
+              </div>
+              <div>
+                <b>Nueva reserva</b>
+                <small>Camila · Mar 13, 11:30</small>
+              </div>
+            </div>
+
+            <div className={`${styles.float} ${styles.f2}`}>
+              <div className={styles.ic}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                  <path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" />
+                </svg>
+              </div>
+              <div>
+                <b>+$18.000 pagado</b>
+                <small>Tarjeta · Apple Pay</small>
+              </div>
+            </div>
+
+            <div className={`${styles.float} ${styles.f3}`}>
+              <div className={styles.ic}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
+                  <path d="M12 3l1.9 5.8L20 10l-5 3.6 1.9 6L12 16l-4.9 3.6 1.9-6L4 10l6.1-1.2z" />
+                </svg>
+              </div>
+              <div>
+                <b>Linki recordó la cita</b>
+                <small>Cero inasistencias hoy</small>
+              </div>
+            </div>
+          </div>
         </div>
       </header>
 
-      {/* 2. Hero Section */}
-      <section className={styles.heroSection}>
-        <div className={styles.heroContent}>
-          <div className={styles.techBadge}>
-            <span>⚡️</span> AgendaLink 2.0 • Plataforma Inteligente
+      {/* ===== RUBROS MARQUEE ===== */}
+      <div className={styles.rubros}>
+        <p>Hecho para negocios que viven de su agenda</p>
+        <div className={styles.marqueeOuter}>
+          <div className={styles.track}>
+            <span>✂️ Barberías</span>
+            <span>💇 Peluquerías</span>
+            <span>💅 Manicure</span>
+            <span>✨ Centros de estética</span>
+            <span>🖋️ Tatuajes</span>
+            <span>🦴 Kinesiología</span>
+            <span>🧠 Psicología</span>
+            <span>🥗 Nutrición</span>
+            <span>🏋️ Entrenadores</span>
+            <span>📸 Fotografía</span>
+            <span>🐾 Peluquería canina</span>
+            <span>🎨 Estudios creativos</span>
+            <span>💆 Masajes y spa</span>
+            <span>🦷 Consultas</span>
+            <span>✂️ Barberías</span>
+            <span>💇 Peluquerías</span>
+            <span>💅 Manicure</span>
+            <span>✨ Centros de estética</span>
+            <span>🖋️ Tatuajes</span>
+            <span>🦴 Kinesiología</span>
+            <span>🧠 Psicología</span>
+            <span>🥗 Nutrición</span>
+            <span>🏋️ Entrenadores</span>
+            <span>📸 Fotografía</span>
+            <span>🐾 Peluquería canina</span>
+            <span>🎨 Estudios creativos</span>
+            <span>💆 Masajes y spa</span>
+            <span>🦷 Consultas</span>
           </div>
-          <h1 className={styles.heroTitle}>
-            Un solo link.<br />
-            <span style={{ background: "var(--brand-gradient)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-              Tu negocio, más fácil de agendar.
-            </span>
-          </h1>
-          <p className={styles.heroSubtitle}>
-            Comparte un link para que tus clientes consulten servicios, revisen horarios y soliciten una reserva. Los pagos y mensajes automatizados aún no están habilitados.
+        </div>
+      </div>
+
+      {/* ===== STATS ===== */}
+      <div className={`${styles.wrap} ${styles.stats}`}>
+        <div className={`${styles.stat} ${styles.rv}`}>
+          <b>20s</b>
+          <span>para que tu cliente reserve, sin crear cuenta</span>
+        </div>
+        <div className={`${styles.stat} ${styles.rv}`}>
+          <b>24/7</b>
+          <span>tu agenda abierta, aunque estés atendiendo o durmiendo</span>
+        </div>
+        <div className={`${styles.stat} ${styles.rv}`}>
+          <b>3</b>
+          <span>asistentes con IA trabajando para tu negocio</span>
+        </div>
+        <div className={`${styles.stat} ${styles.rv}`}>
+          <b>0</b>
+          <span>apps que tu cliente tenga que descargar</span>
+        </div>
+      </div>
+
+      {/* ===== PROBLEMA / SOLUCIÓN ===== */}
+      <section className={styles.section}>
+        <div className={`${styles.wrap} ${styles.center} ${styles.rv}`}>
+          <span className={styles.eyebrow}>El problema</span>
+          <h2 className={styles.h2}>
+            Deja de agendar por WhatsApp
+            <br />
+            a las 11 de la noche.
+          </h2>
+          <p className={styles.lead}>
+            Cada mensaje de &quot;¿tienes hora mañana?&quot; es tiempo que no estás cobrando. AgendaLink se encarga de eso.
           </p>
-          <form onSubmit={handleHeroSubmit} className={styles.heroForm}>
-            <div className={styles.heroInputWrapper}>
-              <span>agendalink.cl/</span>
-              <input
-                type="text"
-                placeholder="tu-negocio"
-                className={styles.heroInput}
-                value={heroSlug}
-                onChange={(e) => setHeroSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))}
-              />
+        </div>
+        <div className={`${styles.wrap} ${styles.vs}`}>
+          <div className={`${styles.vsCol} ${styles.vsBad} ${styles.rv}`}>
+            <h3>
+              Sin AgendaLink <span className={styles.tag} style={{ background: "#fee2e2", color: "#dc2626" }}>Hoy</span>
+            </h3>
+            <ul>
+              <li>
+                <i>✕</i>Respondes mensajes todo el día para cuadrar una hora
+              </li>
+              <li>
+                <i>✕</i>Clientes que no llegan y nadie les recordó
+              </li>
+              <li>
+                <i>✕</i>La agenda en un cuaderno, la caja en otro y los clientes en tu memoria
+              </li>
+              <li>
+                <i>✕</i>No sabes cuánto vendiste en el mes hasta que sacas la cuenta
+              </li>
+              <li>
+                <i>✕</i>Clientes que vinieron una vez y nunca más volvieron
+              </li>
+            </ul>
+          </div>
+          <div className={`${styles.vsCol} ${styles.vsGood} ${styles.rv}`}>
+            <h3>
+              Con AgendaLink <span className={styles.tag} style={{ background: "var(--blue)", color: "#fff" }}>Desde hoy</span>
+            </h3>
+            <ul>
+              <li>
+                <i>✓</i>Tus clientes eligen servicio, día y hora solos desde tu link
+              </li>
+              <li>
+                <i>✓</i>Recordatorios automáticos por WhatsApp que bajan las inasistencias
+              </li>
+              <li>
+                <i>✓</i>Calendario, reservas, ventas y clientes en un solo panel
+              </li>
+              <li>
+                <i>✓</i>Ves tus ventas y caja del día en tiempo real, desde el celular
+              </li>
+              <li>
+                <i>✓</i>Linki Marketing reactiva a los clientes que dejaron de venir
+              </li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      {/* ===== CÓMO FUNCIONA ===== */}
+      <section className={`${styles.section} ${styles.stepsSec}`} id="como-funciona">
+        <div className={`${styles.wrap} ${styles.center} ${styles.rv}`}>
+          <span className={styles.eyebrow}>Cómo funciona</span>
+          <h2 className={styles.h2}>Tu negocio online en una tarde.</h2>
+          <p className={styles.lead}>
+            Sin programadores ni diseñadores. El panel te guía paso a paso hasta dejar tu AgendaLink al 100%.
+          </p>
+        </div>
+        <div className={`${styles.wrap} ${styles.steps}`}>
+          <div className={`${styles.step} ${styles.rv}`}>
+            <span className={styles.time}>~10 min</span>
+            <div className={styles.num}>1</div>
+            <h3>Crea tu página</h3>
+            <p>Sube tu logo, fotos, historia, dirección y horario. Tu landing queda lista con vista previa en vivo mientras editas.</p>
+          </div>
+          <div className={`${styles.step} ${styles.rv}`}>
+            <span className={styles.time}>~10 min</span>
+            <div className={styles.num}>2</div>
+            <h3>Carga tus servicios</h3>
+            <p>Agrega servicios, precios y duración. Conecta tu WhatsApp para recibir cada reserva al instante.</p>
+          </div>
+          <div className={`${styles.step} ${styles.rv}`}>
+            <span className={styles.time}>~5 min</span>
+            <div className={styles.num}>3</div>
+            <h3>Comparte tu link</h3>
+            <p>Ponlo en tu bio de Instagram, en WhatsApp o imprime tu código QR. Desde ahí, las reservas llegan solas.</p>
+          </div>
+        </div>
+      </section>
+
+      {/* ===== FUNCIONALIDADES (BENTO) ===== */}
+      <section className={styles.section} id="funcionalidades">
+        <div className={`${styles.wrap} ${styles.center} ${styles.rv}`}>
+          <span className={styles.eyebrow}>Todo incluido</span>
+          <h2 className={styles.h2}>
+            Una sola herramienta.
+            <br />
+            Todo tu negocio.
+          </h2>
+          <p className={styles.lead}>
+            Deja de pagar y saltar entre cinco apps distintas. Agenda, cobros, clientes y marketing en un mismo lugar.
+          </p>
+        </div>
+        <div className={`${styles.wrap} ${styles.bento}`}>
+          <div className={`${styles.b} ${styles.b4} ${styles.bWide} ${styles.rv}`}>
+            <div className={styles.ico}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <rect x="3" y="4" width="18" height="17" rx="3" />
+                <path d="M3 9h18M8 2v4M16 2v4" />
+              </svg>
             </div>
-            <button type="submit" className={styles.heroBtn}>
+            <h3>Calendario inteligente</h3>
+            <p>Vista por día y semana, bloqueo de horas, varios profesionales y cero choques de horario.</p>
+            <div className={styles.miniCal}>
+              <span />
+              <span className={styles.mh}>Pía</span>
+              <span className={styles.mh}>Tomás</span>
+              <span className={styles.mh}>Javi</span>
+              <span className={styles.mh}>Fran</span>
+              <span className={styles.mt}>10:00</span>
+              <div className={`${styles.ev} ${styles.evA}`}>Corte · Diego</div>
+              <div className={styles.mc} />
+              <div className={`${styles.ev} ${styles.evC}`}>Barba · Leo</div>
+              <div className={styles.mc} />
+              <span className={styles.mt}>11:00</span>
+              <div className={styles.mc} />
+              <div className={`${styles.ev} ${styles.evB}`}>Color · Ana</div>
+              <div className={styles.mc} />
+              <div className={`${styles.ev} ${styles.evD}`}>Uñas · Sofi</div>
+              <span className={styles.mt}>12:00</span>
+              <div className={`${styles.ev} ${styles.evA}`}>Brushing · Mía</div>
+              <div className={styles.mc} />
+              <div className={styles.mc} />
+              <div className={`${styles.ev} ${styles.evC}`}>Corte · Raúl</div>
+            </div>
+          </div>
+
+          <div className={`${styles.b} ${styles.b2} ${styles.bDark} ${styles.rv}`}>
+            <div className={styles.ico}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" />
+              </svg>
+            </div>
+            <h3>Ventas y caja</h3>
+            <p>Lo que entra hoy, esta semana y este mes. Sin planillas.</p>
+            <div className={styles.money}>
+              $486.000<small>↑ hoy</small>
+            </div>
+            <div className={styles.bars}>
+              <i style={{ height: "40%" }} />
+              <i style={{ height: "62%" }} />
+              <i style={{ height: "48%" }} />
+              <i style={{ height: "80%" }} />
+              <i style={{ height: "66%" }} />
+              <i style={{ height: "92%" }} />
+              <i style={{ height: "100%" }} />
+            </div>
+          </div>
+
+          <div className={`${styles.b} ${styles.b2} ${styles.rv}`}>
+            <div className={styles.ico}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <rect x="2" y="5" width="20" height="14" rx="3" />
+                <path d="M2 10h20M6 15h4" />
+              </svg>
+            </div>
+            <h3>Pagos online</h3>
+            <p>Cobra con tarjeta o Apple Pay al reservar. Asegura la hora y reduce las cancelaciones.</p>
+          </div>
+
+          <div className={`${styles.b} ${styles.b2} ${styles.rv}`}>
+            <div className={styles.ico}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <circle cx="9" cy="8" r="4" />
+                <path d="M2 21c0-4 3-6 7-6s7 2 7 6M17 11a3 3 0 100-6M22 21c0-3-2-5-5-5.5" />
+              </svg>
+            </div>
+            <h3>Base de clientes</h3>
+            <p>Historial, frecuencia y datos de cada cliente. Sabes quién viene seguido y quién dejó de venir.</p>
+          </div>
+
+          <div className={`${styles.b} ${styles.b2} ${styles.rv}`}>
+            <div className={styles.ico}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <path d="M20 12v9H4v-9M2 7h20v5H2zM12 21V7M12 7H8a2.5 2.5 0 110-5c3 0 4 5 4 5zM12 7h4a2.5 2.5 0 100-5c-3 0-4 5-4 5z" />
+              </svg>
+            </div>
+            <h3>Gift cards y fidelización</h3>
+            <p>Vende tarjetas de regalo y premia a tus clientes frecuentes para que vuelvan.</p>
+          </div>
+
+          <div className={`${styles.b} ${styles.b3} ${styles.rv}`}>
+            <div className={styles.ico}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <rect x="3" y="3" width="18" height="18" rx="3" />
+                <path d="M3 9h18M9 21V9" />
+              </svg>
+            </div>
+            <h3>Tu propia landing page</h3>
+            <p>Una página profesional con tu marca, historia, fotos, ventajas y contacto. Mejor que un sitio web que nadie actualiza.</p>
+            <div className={styles.chips}>
+              <span>Logo y colores</span>
+              <span>Sobre nosotros</span>
+              <span>¿Por qué elegirnos?</span>
+              <span>Ubicación y horario</span>
+            </div>
+          </div>
+
+          <div className={`${styles.b} ${styles.b3} ${styles.rv}`} style={{ paddingRight: "120px" }}>
+            <div className={styles.ico}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <rect x="3" y="3" width="7" height="7" rx="1" />
+                <rect x="14" y="3" width="7" height="7" rx="1" />
+                <rect x="3" y="14" width="7" height="7" rx="1" />
+                <path d="M14 14h3v3M21 14v7h-4M14 18v3" />
+              </svg>
+            </div>
+            <h3>QR e impresos automáticos</h3>
+            <p>Se generan solos: QR para tu mesón, vitrina o tarjetas, y enlaces listos para Instagram y WhatsApp.</p>
+            <div className={styles.qrMock} />
+          </div>
+
+          <div className={`${styles.b} ${styles.bWide} ${styles.rv}`} style={{ gridColumn: "1/-1", display: "flex", gap: "28px", alignItems: "center", flexWrap: "wrap" }}>
+            <div className={styles.ico} style={{ margin: 0 }}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <rect x="6" y="2" width="12" height="20" rx="3" />
+                <path d="M11 18h2" />
+              </svg>
+            </div>
+            <div style={{ flex: 1, minWidth: "240px" }}>
+              <h3>App en tu celular, sin tiendas</h3>
+              <p>Instala AgendaLink en la pantalla de inicio y gestiona reservas, caja y clientes desde donde estés.</p>
+            </div>
+            <button className={`${styles.btn} ${styles.btnLight}`} onClick={() => openRegister()}>
+              Probar ahora →
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* ===== LINKI IA ===== */}
+      <section className={`${styles.section} ${styles.ai}`} id="linki">
+        <div className={`${styles.wrap} ${styles.center} ${styles.rv}`}>
+          <span className={styles.eyebrow}>Asistentes Linki IA</span>
+          <h2 className={styles.h2}>
+            Un equipo con inteligencia artificial,
+            <br />
+            <span className={styles.gradText}>incluido en tu plan.</span>
+          </h2>
+          <p className={styles.lead}>
+            Tres asistentes que trabajan por ti: atienden, venden y te ayudan a tomar mejores decisiones.
+          </p>
+        </div>
+        <div className={`${styles.wrap} ${styles.aiGrid}`}>
+          <div className={`${styles.agents} ${styles.rv}`}>
+            <button
+              type="button"
+              className={`${styles.agent} ${activeAgent === 0 ? styles.agentOn : ""}`}
+              onClick={() => setActiveAgent(0)}
+            >
+              <div className={styles.ico} style={{ background: "rgba(37,211,102,.15)", color: "#4ade80" }}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                  <path d="M21 12a8 8 0 01-11.6 7.1L4 20l1-4.6A8 8 0 1121 12z" />
+                </svg>
+              </div>
+              <div>
+                <h3>Linki Secretary</h3>
+                <p>Responde dudas por WhatsApp, entrega precios y horarios, y lleva al cliente a reservar. 24/7.</p>
+              </div>
+            </button>
+
+            <button
+              type="button"
+              className={`${styles.agent} ${activeAgent === 1 ? styles.agentOn : ""}`}
+              onClick={() => setActiveAgent(1)}
+            >
+              <div className={styles.ico} style={{ background: "rgba(124,58,237,.2)", color: "#c4b5fd" }}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                  <path d="M3 17l6-6 4 4 8-8M15 7h6v6" />
+                </svg>
+              </div>
+              <div>
+                <h3>Linki Marketing</h3>
+                <p>Detecta clientes que dejaron de venir y te propone campañas para traerlos de vuelta.</p>
+              </div>
+            </button>
+
+            <button
+              type="button"
+              className={`${styles.agent} ${activeAgent === 2 ? styles.agentOn : ""}`}
+              onClick={() => setActiveAgent(2)}
+            >
+              <div className={styles.ico} style={{ background: "rgba(34,211,238,.15)", color: "var(--cyan)" }}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                  <path d="M9 18h6M10 22h4M12 2a7 7 0 00-4 12.7V17h8v-2.3A7 7 0 0012 2z" />
+                </svg>
+              </div>
+              <div>
+                <h3>Linki Business</h3>
+                <p>Tu consultor: analiza tus ventas y servicios y te dice dónde está la oportunidad.</p>
+              </div>
+            </button>
+          </div>
+
+          <div className={`${styles.chat} ${styles.rv}`}>
+            <div className={styles.chatTop}>
+              <div className={styles.av}>L</div>
+              <div>
+                <b>{convos[activeAgent].n}</b>
+                <small>● en línea</small>
+              </div>
+            </div>
+            <div className={styles.msgs}>
+              {convos[activeAgent].m.map((msg, idx) => (
+                <div
+                  key={`${activeAgent}-${idx}`}
+                  className={`${styles.msg} ${msg.type === "in" ? styles.msgIn : styles.msgOut}`}
+                  style={{ animationDelay: `${idx * 0.4}s` }}
+                >
+                  {msg.text}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ===== PANEL ===== */}
+      <section className={styles.section}>
+        <div className={`${styles.wrap} ${styles.center} ${styles.rv}`}>
+          <span className={styles.eyebrow}>Tu panel</span>
+          <h2 className={styles.h2}>Todo tu negocio, en una pantalla.</h2>
+          <p className={styles.lead}>
+            Reservas, ocupación, clientes nuevos y ventas de la semana. Claro, rápido y pensado para usarlo entre un cliente y otro.
+          </p>
+        </div>
+        <div className={styles.wrap}>
+          <div className={`${styles.dashWrap} ${styles.rv}`}>
+            <div className={styles.browser}>
+              <div className={styles.bbar}>
+                <i />
+                <i />
+                <i />
+                <span>agendalink.cl/panel</span>
+              </div>
+              <div className={styles.dash}>
+                <aside>
+                  <img src="/logo-horizontal.png" alt="AgendaLink" className={styles.sidebarLogo} />
+                  <h6>OPERACIÓN</h6>
+                  <a className={styles.dashOn}>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M6 20v-6M12 20V4M18 20v-10" />
+                    </svg>
+                    Dashboard Resumen
+                  </a>
+                  <a>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="3" y="4" width="18" height="17" rx="2" />
+                      <path d="M3 9h18M8 2v4M16 2v4" />
+                    </svg>
+                    Vista Calendario
+                  </a>
+                  <a>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="5" y="3" width="14" height="18" rx="2" />
+                      <path d="M9 3v2h6V3M9 11h6M9 15h6" />
+                    </svg>
+                    Lista de Reservas
+                  </a>
+                  <a>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" />
+                    </svg>
+                    Ventas y Caja
+                  </a>
+                  <a>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="9" cy="8" r="4" />
+                      <path d="M2 21c0-4 3-6 7-6s7 2 7 6M17 11a3 3 0 100-6M22 21c0-3-2-5-5-5.5" />
+                    </svg>
+                    Base de Clientes
+                  </a>
+                  <h6>ASISTENTES LINKI IA</h6>
+                  <a>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
+                    </svg>
+                    Linki Secretary
+                  </a>
+                  <a>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M3 17l6-6 4 4 8-8M15 7h6v6" />
+                    </svg>
+                    Linki Marketing
+                  </a>
+                  <a>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M12 2v6M9 8h6l-1 6h-4zM12 14v8" />
+                    </svg>
+                    Linki Business
+                  </a>
+                  <h6>CONFIGURACIÓN</h6>
+                  <a>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="3" y="3" width="18" height="18" rx="2" />
+                      <path d="M3 9h18M9 21V9" />
+                    </svg>
+                    Personalizar Landing
+                  </a>
+                  <a>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="12" cy="12" r="3" />
+                      <path d="M19.4 15a1.7 1.7 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.8-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 11-4 0v-.1a1.7 1.7 0 00-1.1-1.5 1.7 1.7 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.8 1.7 1.7 0 00-1.5-1H3a2 2 0 110-4h.1a1.7 1.7 0 001.5-1.1 1.7 1.7 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.8.3H9a1.7 1.7 0 001-1.5V3a2 2 0 114 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.8V9a1.7 1.7 0 001.5 1H21a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z" />
+                    </svg>
+                    Ajustes de Negocio
+                  </a>
+                </aside>
+                <main>
+                  <div className={styles.dh}>
+                    <div>
+                      <h4>Valentina Studio</h4>
+                      <p>
+                        Panel de Administración · Plan Equipo: 2–5 personas <span className={styles.ok}>Activo</span>
+                      </p>
+                    </div>
+                    <div className={styles.dhR}>
+                      <span className={styles.vlink}>Ver link público ↗</span>
+                      <span className={styles.gear}>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <circle cx="12" cy="12" r="3" />
+                          <path d="M19.4 15a1.7 1.7 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.8-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 11-4 0v-.1a1.7 1.7 0 00-1.1-1.5 1.7 1.7 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.8 1.7 1.7 0 00-1.5-1H3a2 2 0 110-4h.1a1.7 1.7 0 001.5-1.1 1.7 1.7 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.8.3H9a1.7 1.7 0 001-1.5V3a2 2 0 114 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.8V9a1.7 1.7 0 001.5 1H21a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z" />
+                        </svg>
+                      </span>
+                      <span className={styles.dashAv}>VS</span>
+                    </div>
+                  </div>
+
+                  <div className={styles.onb}>
+                    <div className={styles.onbH}>
+                      <div>
+                        <b>Primeros Pasos para lanzar tu Negocio</b>
+                        <small>Completa estos 5 pasos esenciales para dejar tu AgendaLink lista al 100%.</small>
+                      </div>
+                      <div className={styles.onbP}>
+                        60% completado{" "}
+                        <span>
+                          <i />
+                        </span>
+                      </div>
+                    </div>
+                    <div className={styles.osteps}>
+                      <div className={`${styles.os} ${styles.osDone}`}>
+                        <small>PASO 1</small>
+                        <span className={styles.ck} />
+                        <b>Personalizar Landing Page</b>
+                        <em>Imágenes, historia y contacto.</em>
+                      </div>
+                      <div className={`${styles.os} ${styles.osDone}`}>
+                        <small>PASO 2</small>
+                        <span className={styles.ck} />
+                        <b>Catálogo de Servicios</b>
+                        <em>Agrega tus servicios y precios.</em>
+                      </div>
+                      <div className={`${styles.os} ${styles.osDone}`}>
+                        <small>PASO 3</small>
+                        <span className={styles.ck} />
+                        <b>Vincular WhatsApp</b>
+                        <em>Recibe avisos de reservas al instante.</em>
+                      </div>
+                      <div className={styles.os}>
+                        <small>PASO 4</small>
+                        <span className={styles.ck} />
+                        <b>Instalar App en el Celular</b>
+                        <em>Descargar a pantalla de inicio</em>
+                      </div>
+                      <div className={styles.os}>
+                        <small>PASO 5</small>
+                        <span className={styles.ck} />
+                        <b>Compartir con Clientes</b>
+                        <em>Publica en Instagram y WhatsApp.</em>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className={styles.per}>PERIODO DE TIEMPO</div>
+                  <div className={styles.selPeriod}>
+                    Esta semana <span>⌄</span>
+                  </div>
+
+                  <div className={styles.kp}>
+                    <div className={`${styles.k} ${styles.kBlk}`}>
+                      <small>Total de reservas</small>
+                      <b>48</b>
+                      <em>Ver detalles</em>
+                    </div>
+                    <div className={styles.k}>
+                      <small>Factor de ocupación</small>
+                      <b>82%</b>
+                      <em>
+                        <i>↑12%</i> vs periodo anterior
+                      </em>
+                    </div>
+                    <div className={styles.k}>
+                      <small>Nuevos clientes</small>
+                      <b>9</b>
+                      <em>
+                        <i>↑28%</i> vs periodo anterior
+                      </em>
+                    </div>
+                    <div className={styles.k}>
+                      <small>Ventas facturadas</small>
+                      <b>$1.284.000</b>
+                      <em>
+                        <i>↑18%</i> vs periodo anterior
+                      </em>
+                    </div>
+                  </div>
+
+                  <div className={styles.today}>
+                    <div className={styles.todayH}>
+                      Ver detalle de reservas de hoy (3)<span>▾</span>
+                    </div>
+                    <div className={styles.tr}>
+                      <span className={styles.h}>11:30</span>
+                      <span className={styles.n}>
+                        Camila Rojas<small>Corte + brushing · Pía</small>
+                      </span>
+                      <span className={styles.st}>Pagada</span>
+                    </div>
+                    <div className={styles.tr}>
+                      <span className={styles.h}>12:00</span>
+                      <span className={styles.n}>
+                        Diego Fuentes<small>Barba · Tomás</small>
+                      </span>
+                      <span className={`${styles.st} ${styles.stB}`}>Confirmada</span>
+                    </div>
+                    <div className={styles.tr}>
+                      <span className={styles.h}>13:00</span>
+                      <span className={styles.n}>
+                        Sofía Muñoz<small>Manicure · Fran</small>
+                      </span>
+                      <span className={`${styles.st} ${styles.stP}`}>Recordada</span>
+                    </div>
+                  </div>
+
+                  <div className={styles.cards3}>
+                    <div className={styles.c3}>
+                      <div className={styles.c3H}>
+                        <span>
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" />
+                          </svg>
+                        </span>
+                        <b>Pagos en línea</b>
+                      </div>
+                      <p>Estado de tus transacciones y métodos de pago en el periodo.</p>
+                      <div className={styles.mbBars}>
+                        <i style={{ height: "45%" }} />
+                        <i style={{ height: "70%" }} />
+                        <i style={{ height: "52%" }} />
+                        <i style={{ height: "88%" }} />
+                        <i style={{ height: "64%" }} />
+                        <i style={{ height: "100%" }} />
+                        <i style={{ height: "78%" }} />
+                      </div>
+                    </div>
+
+                    <div className={styles.c3}>
+                      <div className={styles.c3H}>
+                        <span>
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M21 12A9 9 0 1112 3v9z" />
+                            <path d="M12 3a9 9 0 019 9h-9z" />
+                          </svg>
+                        </span>
+                        <b>Factor de ocupación</b>
+                      </div>
+                      <p>Uso de capacidad operativa (profesionales) esta semana.</p>
+                      <div className={styles.dnChart}>
+                        <svg viewBox="0 0 42 42">
+                          <circle cx="21" cy="21" r="15.9" fill="none" stroke="#eef1f6" strokeWidth="6" />
+                          <circle cx="21" cy="21" r="15.9" fill="none" stroke="#2563eb" strokeWidth="6" strokeDasharray="82 18" strokeDashoffset="25" />
+                        </svg>
+                        <div className={styles.lgList}>
+                          <span>
+                            <i className={styles.lgDot} style={{ background: "#2563eb" }} /> Ocupado 82%
+                          </span>
+                          <span>
+                            <i className={styles.lgDot} style={{ background: "#e2e8f0" }} /> Libre 18%
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className={styles.c3}>
+                      <div className={styles.c3H}>
+                        <span>
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <circle cx="12" cy="12" r="9" />
+                            <circle cx="12" cy="12" r="4" />
+                          </svg>
+                        </span>
+                        <b>Origen de las reservas</b>
+                      </div>
+                      <p>Desde dónde llegan tus clientes.</p>
+                      <div className={styles.dnChart}>
+                        <svg viewBox="0 0 42 42">
+                          <circle cx="21" cy="21" r="15.9" fill="none" stroke="#eef1f6" strokeWidth="6" />
+                          <circle cx="21" cy="21" r="15.9" fill="none" stroke="#2563eb" strokeWidth="6" strokeDasharray="55 45" strokeDashoffset="25" />
+                          <circle cx="21" cy="21" r="15.9" fill="none" stroke="#22d3ee" strokeWidth="6" strokeDasharray="30 70" strokeDashoffset="-30" />
+                          <circle cx="21" cy="21" r="15.9" fill="none" stroke="#7c3aed" strokeWidth="6" strokeDasharray="15 85" strokeDashoffset="-60" />
+                        </svg>
+                        <div className={styles.lgList}>
+                          <span>
+                            <i className={styles.lgDot} style={{ background: "#2563eb" }} /> Reservas en línea
+                          </span>
+                          <span>
+                            <i className={styles.lgDot} style={{ background: "#22d3ee" }} /> Instagram
+                          </span>
+                          <span>
+                            <i className={styles.lgDot} style={{ background: "#7c3aed" }} /> Manual
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </main>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ===== PRECIOS ===== */}
+      <section className={`${styles.section} ${styles.pricing}`} id="precios">
+        <div className={`${styles.wrap} ${styles.center} ${styles.rv}`}>
+          <span className={styles.eyebrow}>Precios</span>
+          <h2 className={styles.h2}>
+            Menos que lo que pierdes
+            <br />
+            con un cliente que no llega.
+          </h2>
+          <p className={styles.lead}>
+            Todos los planes incluyen agenda, landing, pagos, recordatorios y los asistentes Linki IA.
+          </p>
+          <div className={styles.toggle}>
+            <button
+              type="button"
+              className={billingPeriod === "monthly" ? styles.toggleOn : ""}
+              onClick={() => setBillingPeriod("monthly")}
+            >
+              Mensual
+            </button>
+            <button
+              type="button"
+              className={billingPeriod === "yearly" ? styles.toggleOn : ""}
+              onClick={() => setBillingPeriod("yearly")}
+            >
+              Anual <span className={styles.save}>-20%</span>
+            </button>
+          </div>
+        </div>
+
+        <div className={`${styles.wrap} ${styles.plans}`}>
+          {/* Individual */}
+          <div className={`${styles.plan} ${styles.rv}`}>
+            <h3>Individual</h3>
+            <p className={styles.who}>Para profesionales independientes</p>
+            <div className={styles.price}>
+              {billingPeriod === "monthly" ? "$9.900" : "$7.920"}
+              <small> /mes</small>
+            </div>
+            <p className={styles.priceNote}>
+              {billingPeriod === "yearly" ? "$95.040 facturado anual" : ""}
+            </p>
+            <ul>
+              <li>1 profesional</li>
+              <li>Link y landing personalizada</li>
+              <li>Reservas ilimitadas</li>
+              <li>Recordatorios por WhatsApp</li>
+              <li>Pagos con tarjeta y Apple Pay</li>
+              <li>QR y material impreso</li>
+            </ul>
+            <button className={`${styles.btn} ${styles.btnLight}`} onClick={() => openRegister("individual")}>
+              Empezar
+            </button>
+          </div>
+
+          {/* Equipo */}
+          <div className={`${styles.plan} ${styles.planPop} ${styles.rv}`}>
+            <span className={styles.badge}>⚡ Más elegido</span>
+            <h3>Equipo</h3>
+            <p className={styles.who}>Para equipos de 2 a 5 personas</p>
+            <div className={styles.price}>
+              {billingPeriod === "monthly" ? "$19.990" : "$15.992"}
+              <small> /mes</small>
+            </div>
+            <p className={styles.priceNote}>
+              {billingPeriod === "yearly" ? "$191.904 facturado anual" : ""}
+            </p>
+            <ul>
+              <li>Hasta 5 profesionales</li>
+              <li>Todo lo del plan Individual</li>
+              <li>Calendario por profesional</li>
+              <li>Ventas y caja del equipo</li>
+              <li>Gift cards y fidelización</li>
+              <li>Linki Secretary, Marketing y Business</li>
+            </ul>
+            <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={() => openRegister("equipo")}>
               Crear mi link
             </button>
-          </form>
-        </div>
-
-        <div className={styles.heroVisual}>
-        {/* Representación visual ilustrativa; no muestra datos reales. */}
-        <div className={styles.mockupContainer}>
-          {/* Teléfono */}
-          <div className={styles.phoneMockup}>
-            <div className={styles.phoneScreen}>
-              <div style={{ width: "32px", height: "32px", borderRadius: "50%", background: "#0066ff", color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "11px", fontWeight: "bold", margin: "0 auto 8px auto" }}>AL</div>
-              <div style={{ fontSize: "12px", fontWeight: "800", textAlign: "center" }}>Página del negocio</div>
-              <div style={{ fontSize: "9px", color: "gray", textAlign: "center", marginBottom: "14px" }}>Servicios y disponibilidad</div>
-              
-              <div style={{ border: "1px solid #0066ff", borderRadius: "8px", padding: "8px", background: "rgba(0, 102, 255, 0.03)", display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
-                <span style={{ fontSize: "10px", fontWeight: "bold" }}>Servicio disponible</span>
-                <span style={{ fontSize: "10px", fontWeight: "bold", color: "#0066ff" }}>Consultar</span>
-              </div>
-              <div style={{ border: "1px solid rgba(0,0,0,0.06)", borderRadius: "8px", padding: "8px", background: "white", display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px", opacity: 0.8 }}>
-                <span style={{ fontSize: "10px" }}>Otro servicio</span>
-                <span style={{ fontSize: "10px", fontWeight: "bold" }}>Consultar</span>
-              </div>
-              <div style={{ border: "1px solid rgba(0,0,0,0.06)", borderRadius: "8px", padding: "8px", background: "white", display: "flex", justifyContent: "space-between", alignItems: "center", opacity: 0.6 }}>
-                <span style={{ fontSize: "10px" }}>Horario disponible</span>
-                <span style={{ fontSize: "10px", fontWeight: "bold" }}>Consultar</span>
-              </div>
-
-              <div style={{ marginTop: "auto", background: "#0066ff", color: "white", padding: "10px", borderRadius: "20px", fontSize: "11px", fontWeight: "bold", textAlign: "center" }}>
-                Solicitar reserva
-              </div>
-            </div>
           </div>
 
-          {/* Mac */}
-          <div className={styles.macMockup}>
-            <div className={styles.macHeader}>
-              <div className={styles.macDot} style={{ background: "#ff5f56" }} />
-              <div className={styles.macDot} style={{ background: "#ffbd2e" }} />
-              <div className={styles.macDot} style={{ background: "#27c93f" }} />
+          {/* Business */}
+          <div className={`${styles.plan} ${styles.rv}`}>
+            <h3>Business</h3>
+            <p className={styles.who}>Para negocios de 6 o más personas</p>
+            <div className={styles.price}>
+              {billingPeriod === "monthly" ? "$39.990" : "$31.992"}
+              <small> /mes</small>
             </div>
-            <div className={styles.macScreen}>
-              <div style={{ display: "flex", justifyContent: "space-between", fontSize: "9px", borderBottom: "1px solid #eee", paddingBottom: "4px", marginBottom: "4px" }}>
-                <span style={{ fontWeight: "bold" }}>Agenda Semanal</span>
-              </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: "3px" }}>
-                <div style={{ display: "flex", gap: "4px" }}>
-                  <span style={{ fontSize: "8px", width: "22px", color: "gray" }}>09:00</span>
-                  <div style={{ flex: 1, background: "rgba(52, 199, 89, 0.08)", borderLeft: "2px solid #34c759", padding: "2px 4px", borderRadius: "3px", fontSize: "8px", textAlign: "left" }}>
-                    <strong>Reserva</strong> · Pendiente
-                  </div>
-                </div>
-                <div style={{ display: "flex", gap: "4px" }}>
-                  <span style={{ fontSize: "8px", width: "22px", color: "gray" }}>10:00</span>
-                  <div style={{ flex: 1, background: "rgba(0, 102, 255, 0.08)", borderLeft: "2px solid #0066ff", padding: "2px 4px", borderRadius: "3px", fontSize: "8px", textAlign: "left" }}>
-                    <strong>Reserva</strong> · Pendiente
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <p className={styles.mockupCaption}>Representación ilustrativa; no es una captura del sistema.</p>
-        </div>
-      </section>
-
-      {/* Seccion Diferenciadores Comerciales */}
-      <section className={styles.differentiatorsSection}>
-        <div className={styles.differentiatorBannerGrid}>
-          {/* Banner 1: Un solo link */}
-          <div className={`${styles.diffBanner} ${styles.diffBannerLink}`}>
-            <div className={styles.diffBannerContent}>
-              <span className={styles.diffBadge}>🔗 ATRIBUTO CLAVE</span>
-              <h3 className={styles.diffTitle}>Tu negocio completo en un solo link.</h3>
-              <p className={styles.diffText}>
-                Comparte una página donde tus clientes pueden revisar servicios y horarios disponibles y enviar una solicitud de reserva.
-              </p>
-              <div className={styles.diffLabel}>agendalink.cl/tu-marca ➔</div>
-            </div>
-            <div className={styles.diffVisualLink} style={{ display: "flex", flexDirection: "column", gap: "16px", alignItems: "center", width: "100%" }}>
-              <div className={styles.visualLinkCard}>
-                <span className={styles.visualLinkIcon}>🔗</span>
-                <span className={styles.visualLinkLabel}>Tu página y link propios</span>
-              </div>
-              <p className={styles.featureText}>Al crear tu cuenta puedes descargar un QR vinculado a tu página.</p>
-            </div>
-          </div>
-
-          {/* Grid de 2 columnas para Rapidez y Facilidad */}
-          <div className={styles.diffSubGrid}>
-            {/* Banner 2: Rapidez */}
-            <div className={`${styles.diffCard} ${styles.diffCardSpeed}`} style={{ justifyContent: "flex-start", gap: "24px" }}>
-              <div>
-                <span className={styles.diffCardBadge}>⚡️ ULTRA RÁPIDO</span>
-                <h3 className={styles.diffCardTitle}>Solicitud de reserva en pocos pasos</h3>
-                <p className={styles.diffCardText} style={{ marginBottom: "24px" }}>
-                  Tus clientes pueden consultar servicios y horarios desde el link del negocio y enviar sus datos para solicitar una reserva. No necesitan crear una cuenta ni descargar una app.
-                </p>
-              </div>
-            </div>
-
-            {/* Banner 3: Facilidad */}
-            <div className={`${styles.diffCard} ${styles.diffCardEasy}`} style={{ justifyContent: "flex-start", gap: "24px" }}>
-              <div>
-                <span className={styles.diffCardBadge}>✨ GESTIÓN CENTRALIZADA</span>
-                <h3 className={styles.diffCardTitle}>Gestiona tus solicitudes desde un panel</h3>
-                <p className={styles.diffCardText} style={{ marginBottom: "24px" }}>
-                  Consulta y actualiza reservas, servicios, horarios y datos públicos del negocio. Los pagos y los ingresos no se procesan desde la plataforma.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 3. Características Grid */}
-      <section id="features" className={styles.featuresSection}>
-        <h2 className={styles.sectionHeading}>La plataforma más rápida y simple para agendar</h2>
-        <div className={styles.featuresGrid}>
-          <div className={styles.featureCard}>
-            <div className={styles.featureIconWrapper}>
-              <svg className={styles.flatBlueIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
-              </svg>
-            </div>
-            <h3 className={styles.featureTitle}>Solicitudes de reserva</h3>
-            <p className={styles.featureText}>
-              Tus clientes revisan servicios y horarios disponibles y envían sus datos para solicitar una reserva. La plataforma no procesa pagos.
+            <p className={styles.priceNote}>
+              {billingPeriod === "yearly" ? "$383.904 facturado anual" : ""}
             </p>
-          </div>
-
-          <div className={styles.featureCard}>
-            <div className={styles.featureIconWrapper}>
-              <svg className={styles.flatBlueIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-              </svg>
-            </div>
-            <h3 className={styles.featureTitle}>Mensajería automática</h3>
-            <p className={styles.featureText}>
-              Los recordatorios y campañas no están habilitados hasta conectar un proveedor de mensajería.
-            </p>
-          </div>
-
-          <div className={styles.featureCard}>
-            <div className={styles.featureIconWrapper}>
-              <svg className={styles.flatBlueIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="3" y="3" width="7" height="7" />
-                <rect x="14" y="3" width="7" height="7" />
-                <rect x="14" y="14" width="7" height="7" />
-                <rect x="3" y="14" width="7" height="7" />
-              </svg>
-            </div>
-            <h3 className={styles.featureTitle}>Código QR para tu página</h3>
-            <p className={styles.featureText}>
-              Descarga un código QR que dirige a la página pública de tu negocio. Impresión de carteles y tarjetas no está incluida.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* 4. Planes de Precios */}
-      <section id="pricing" className={styles.pricingSection}>
-        <h2 className={styles.sectionHeading}>Planes adaptados a tu etapa de crecimiento</h2>
-        <p style={{ maxWidth: 680, margin: "-16px auto 24px", textAlign: "center", color: "var(--text-secondary)", fontSize: 13 }}>
-          Precios mensuales referenciales. El plan inicial depende del tamaño del equipo; el registro no realiza cargos y la facturación recurrente aún no está habilitada.
-        </p>
-
-        <div className={styles.pricingGrid}>
-          {/* Plan Individual */}
-          <div className={styles.pricingCard}>
-            <h3 className={styles.planName}>Plan Individual</h3>
-            <div className={styles.planPrice}>$9.900<span> / mes</span></div>
-            <ul className={styles.planFeatures}>
-              <li className={styles.planFeatureItem}>✓ Registro de un profesional</li>
-              <li className={styles.planFeatureItem}>✓ Link público para consultar y solicitar reservas</li>
-              <li className={styles.planFeatureItem}>✓ Catálogo de servicios y disponibilidad</li>
-              <li className={styles.planFeatureItem}>✓ Panel para consultar y gestionar citas</li>
-              <li className={styles.planFeatureItem}>✓ Código QR descargable</li>
+            <ul>
+              <li>6 o más profesionales</li>
+              <li>Todo lo del plan Equipo</li>
+              <li>Reportes avanzados</li>
+              <li>Base de clientes completa</li>
+              <li>Campañas de reactivación</li>
+              <li>Soporte prioritario</li>
             </ul>
-            <button onClick={() => handleSelectPlan("1 persona")} className={styles.planBtn}>
-              Elegir Plan
-            </button>
-          </div>
-
-          {/* Plan Equipo */}
-          <div className={`${styles.pricingCard} ${styles.pricingCardPopular}`}>
-            <div className={styles.popularBadge}>Más Popular</div>
-            <h3 className={styles.planName}>Plan Equipo</h3>
-            <div className={styles.planPrice}>$19.990<span> / mes</span></div>
-            <ul className={styles.planFeatures}>
-              <li className={styles.planFeatureItem}>✓ Tamaño de equipo configurable en el registro</li>
-              <li className={styles.planFeatureItem}>✓ Link público y catálogo de servicios</li>
-              <li className={styles.planFeatureItem}>✓ Panel de citas y clientes</li>
-              <li className={styles.planFeatureItem}>— Pagos, membresías y mensajería: no habilitados</li>
-            </ul>
-            <button onClick={() => handleSelectPlan("2-5 personas")} className={`${styles.planBtn} ${styles.planBtnPrimary}`}>
-              Elegir Plan
-            </button>
-          </div>
-
-          {/* Plan Negocio */}
-          <div className={styles.pricingCard}>
-            <h3 className={styles.planName}>Plan Negocio</h3>
-            <div className={styles.planPrice}>$39.990<span> / mes</span></div>
-            <ul className={styles.planFeatures}>
-              <li className={styles.planFeatureItem}>✓ Tamaño de equipo configurable en el registro</li>
-              <li className={styles.planFeatureItem}>✓ Link público y catálogo de servicios</li>
-              <li className={styles.planFeatureItem}>✓ Panel de citas y clientes</li>
-              <li className={styles.planFeatureItem}>— Pagos, dominios personalizados y automatización: no habilitados</li>
-            </ul>
-            <button onClick={() => handleSelectPlan("6+ personas")} className={styles.planBtn}>
-              Elegir Plan
+            <button className={`${styles.btn} ${styles.btnLight}`} onClick={() => openRegister("business")}>
+              Empezar
             </button>
           </div>
         </div>
+        <p className={styles.plansFoot}>Precios en pesos chilenos, IVA incluido. Cancela cuando quieras.</p>
       </section>
 
-      {/* 5. Onboarding / Registro integrado */}
-      <section id="registro" className={styles.registerSection}>
-        <div className={styles.container} style={{ margin: "0 auto", padding: 0 }}>
-          <div className={styles.card}>
-            <div className={styles.header} style={{ display: "block", textAlign: "center", border: "none", padding: "0 0 20px 0" }}>
-              <h2 style={{ fontSize: "22px", fontWeight: "800", color: "var(--foreground)" }}>Configura tu AgendaLink</h2>
-              <p className={styles.subtitle} style={{ marginTop: "4px" }}>Toma menos de 10 minutos empezar.</p>
+      {/* ===== FAQ ===== */}
+      <section className={styles.section} id="faq">
+        <div className={`${styles.wrap} ${styles.center} ${styles.rv}`}>
+          <span className={styles.eyebrow}>Preguntas frecuentes</span>
+          <h2 className={styles.h2}>Resolvamos tus dudas.</h2>
+        </div>
+        <div className={`${styles.wrap} ${styles.faq}`}>
+          {faqs.map((item, idx) => (
+            <div key={idx} className={`${styles.q} ${openFaq === idx ? styles.qOpen : ""} ${styles.rv}`}>
+              <button
+                type="button"
+                onClick={() => setOpenFaq((prev) => (prev === idx ? null : idx))}
+              >
+                {item.q}
+                <span>+</span>
+              </button>
+              <div className={styles.a}>
+                <p>{item.a}</p>
+              </div>
             </div>
+          ))}
+        </div>
+      </section>
 
-            {step === 1 && (
-              <form onSubmit={(e) => { e.preventDefault(); if (!loading && formData.name && formData.ownerName && formData.email && formData.password && formData.password.length >= 8) handleSubmit(); }}>
-                <div className={styles.formGroup}>
-                  <label className={styles.label}>Nombre de tu Negocio</label>
-                  <input
-                    type="text"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleChange}
-                    placeholder={
-                      formData.category === "Profesionales"
-                        ? "Ej. Consultoría Inmobiliaria o Estudio Jurídico"
-                        : formData.category === "Salud"
-                        ? "Ej. Centro Médico Alameda"
-                        : formData.category === "Fitness"
-                        ? "Ej. Gimnasio UpFit"
-                        : "Ej. Peluquería Bella Vista"
-                    }
-                    className={styles.input}
-                    required
-                  />
-                </div>
-                <div className={styles.formGroup}>
-                  <label className={styles.label}>Tu Nombre</label>
-                  <input
-                    type="text"
-                    name="ownerName"
-                    value={formData.ownerName}
-                    onChange={handleChange}
-                    placeholder="Ej. Juan Pérez"
-                    className={styles.input}
-                    required
-                  />
-                </div>
-                <div className={styles.formGroup}>
-                  <label className={styles.label}>Correo Electrónico</label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    placeholder="Ej. juan.perez@correo.com"
-                    className={styles.input}
-                    required
-                  />
-                </div>
-                <div className={styles.formGroup}>
-                  <label className={styles.label}>Contraseña para tu cuenta</label>
-                  <input
-                    type="password"
-                    name="password"
-                    value={formData.password}
-                    onChange={handleChange}
-                    placeholder="Mínimo 8 caracteres"
-                    className={styles.input}
-                    autoComplete="new-password"
-                    minLength={8}
-                    maxLength={128}
-                    required
-                  />
-                  <div style={{ marginTop: "6px", fontSize: "12px", lineHeight: "1.4" }}>
-                    {!formData.password ? (
-                      <span style={{ color: "var(--muted, #64748b)" }}>
-                        Mínimo 8 caracteres (puedes combinar letras, números y símbolos)
-                      </span>
-                    ) : formData.password.length < 8 ? (
-                      <span style={{ color: "#f59e0b", fontWeight: "600" }}>
-                        ⚠️ Debe tener al menos 8 caracteres (llevas {formData.password.length} de 8)
-                      </span>
-                    ) : (
-                      <span style={{ color: "#22c55e", fontWeight: "600" }}>
-                        ✓ Contraseña válida ({formData.password.length} caracteres)
-                      </span>
-                    )}
+      {/* ===== FINAL CTA ===== */}
+      <div className={styles.final}>
+        <div className={styles.wrap}>
+          <div className={`${styles.finalBox} ${styles.rv}`}>
+            <h2>
+              Tu próxima reserva puede llegar <span className={styles.gradText}>mientras lees esto.</span>
+            </h2>
+            <p className={styles.lead}>Elige el nombre de tu link y empieza a recibir reservas hoy.</p>
+            <form
+              className={styles.linkDemo}
+              onSubmit={(e) => {
+                e.preventDefault();
+                openRegister(undefined, finalSlug);
+              }}
+            >
+              <span className={styles.base}>agendalink.cl/</span>
+              <input
+                name="slug"
+                placeholder="tunegocio"
+                autoComplete="off"
+                aria-label="Nombre de tu link"
+                value={finalSlug}
+                onChange={(e) => setFinalSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))}
+              />
+              <button className={`${styles.btn} ${styles.btnPrimary}`} type="submit">
+                Crear mi link
+              </button>
+            </form>
+            <small>Listo en 5 pasos · Sin contratos · Cancela cuando quieras</small>
+          </div>
+        </div>
+      </div>
+
+      {/* ===== FOOTER ===== */}
+      <footer className={styles.footer}>
+        <div className={styles.wrap}>
+          <div className={styles.foot}>
+            <div>
+              <Link href="/" className={styles.logoLink}>
+                <img src="/logo-horizontal-blanco.png" alt="AgendaLink" className={styles.logoImg} />
+              </Link>
+              <p>Un link. Todo resuelto. Agenda, pagos, clientes e IA para negocios de servicios en Chile y México.</p>
+            </div>
+            <div>
+              <h6>Producto</h6>
+              <a href="#funcionalidades">Funcionalidades</a>
+              <a href="#linki">Linki IA</a>
+              <a href="#precios">Precios</a>
+            </div>
+            <div>
+              <h6>Cuenta</h6>
+              <a
+                href="#login"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setLoginModalOpen(true);
+                }}
+              >
+                Iniciar sesión
+              </a>
+              <a
+                href="#registro"
+                onClick={(e) => {
+                  e.preventDefault();
+                  openRegister();
+                }}
+              >
+                Registrar negocio
+              </a>
+            </div>
+            <div>
+              <h6>Ayuda</h6>
+              <a href="#faq">Preguntas frecuentes</a>
+              <a href="https://wa.me/56985967325" target="_blank" rel="noopener noreferrer">
+                WhatsApp
+              </a>
+            </div>
+            <div>
+              <h6>Legal</h6>
+              <Link href="/terminos">Términos del Servicio</Link>
+              <Link href="/privacidad">Política de Privacidad</Link>
+              <Link href="/legal">Resguardo Legal e IA</Link>
+            </div>
+          </div>
+          <div className={styles.footB}>
+            <span>© {new Date().getFullYear()} AgendaLink. Todos los derechos reservados.</span>
+            <span>
+              Un producto de{" "}
+              <a href="https://ganimides.cl" target="_blank" rel="noopener noreferrer" style={{ color: "#fff", textDecoration: "underline" }}>
+                Ganímedes
+              </a>
+            </span>
+          </div>
+        </div>
+      </footer>
+
+      {/* ===== MODAL DE REGISTRO / ONBOARDING ===== */}
+      {registerModalOpen && (
+        <div className={styles.modalOverlay} onClick={() => setRegisterModalOpen(false)}>
+          <div className={styles.modalBox} onClick={(e) => e.stopPropagation()}>
+            <button className={styles.modalCloseBtn} onClick={() => setRegisterModalOpen(false)}>
+              ✕
+            </button>
+
+            {regStep === 1 && (
+              <>
+                <h3 className={styles.modalTitle}>Crea tu AgendaLink</h3>
+                <p className={styles.modalSubtitle}>Empieza gratis. Tu link quedará listo en segundos.</p>
+
+                {regError && <div className={styles.modalError}>{regError}</div>}
+
+                <form onSubmit={handleRegisterSubmit}>
+                  <div className={styles.formGroup}>
+                    <label>Nombre de tu Negocio</label>
+                    <input
+                      type="text"
+                      className={styles.formInput}
+                      placeholder="Ej. Valentina Studio"
+                      value={regFormData.name}
+                      onChange={(e) => setRegFormData({ ...regFormData, name: e.target.value })}
+                      required
+                    />
                   </div>
-                </div>
-                <div className={styles.formGroup}>
-                  <label className={styles.label}>Rubro</label>
-                  <select name="category" value={formData.category} onChange={handleChange} className={styles.select}>
-                    <option value="Peluquería">Peluquería</option>
-                    <option value="Salud">Salud y Bienestar</option>
-                    <option value="Fitness">Fitness y Deporte</option>
-                    <option value="Profesionales">Servicios Profesionales</option>
-                    <option value="Otros">Otros servicios</option>
-                  </select>
-                </div>
-                <div className={styles.formGroup}>
-                  <label className={styles.label}>¿Cuántas personas trabajan en tu negocio?</label>
-                  <select name="teamSize" value={formData.teamSize} onChange={handleChange} className={styles.select}>
-                    <option value="1 persona">Solo yo (Plan Link Individual)</option>
-                    <option value="2-5 personas">2 a 5 personas (Plan Link Equipo)</option>
-                    <option value="6+ personas">6 o más personas (Plan Link Negocio)</option>
-                  </select>
-                </div>
-                <div className={styles.formGroup}>
-                  <label className={styles.label}>País</label>
-                  <select name="country" value={formData.country} onChange={handleChange} className={styles.select}>
-                    <option value="Chile">Chile</option>
-                    <option value="México">México</option>
-                  </select>
-                </div>
-                <div className={styles.buttonRow}>
+
+                  <div className={styles.formGroup}>
+                    <label>Tu Nombre</label>
+                    <input
+                      type="text"
+                      className={styles.formInput}
+                      placeholder="Ej. Valentina Morales"
+                      value={regFormData.ownerName}
+                      onChange={(e) => setRegFormData({ ...regFormData, ownerName: e.target.value })}
+                      required
+                    />
+                  </div>
+
+                  <div className={styles.formGroup}>
+                    <label>Correo Electrónico</label>
+                    <input
+                      type="email"
+                      className={styles.formInput}
+                      placeholder="Ej. contacto@valentina.cl"
+                      value={regFormData.email}
+                      onChange={(e) => setRegFormData({ ...regFormData, email: e.target.value })}
+                      required
+                    />
+                  </div>
+
+                  <div className={styles.formGroup}>
+                    <label>Contraseña para tu cuenta</label>
+                    <input
+                      type="password"
+                      className={styles.formInput}
+                      placeholder="Mínimo 8 caracteres"
+                      value={regFormData.password}
+                      onChange={(e) => setRegFormData({ ...regFormData, password: e.target.value })}
+                      autoComplete="new-password"
+                      minLength={8}
+                      maxLength={128}
+                      required
+                    />
+                    <div style={{ marginTop: "6px", fontSize: "12px", lineHeight: "1.4" }}>
+                      {!regFormData.password ? (
+                        <span style={{ color: "var(--muted, #94a3b8)" }}>
+                          Mínimo 8 caracteres (puedes combinar letras, números y símbolos)
+                        </span>
+                      ) : regFormData.password.length < 8 ? (
+                        <span style={{ color: "#f59e0b", fontWeight: "600" }}>
+                          ⚠️ Debe tener al menos 8 caracteres (llevas {regFormData.password.length} de 8)
+                        </span>
+                      ) : (
+                        <span style={{ color: "#22c55e", fontWeight: "600" }}>
+                          ✓ Contraseña válida ({regFormData.password.length} caracteres)
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className={styles.formGroup}>
+                    <label>Rubro</label>
+                    <select
+                      className={styles.formSelect}
+                      value={regFormData.category}
+                      onChange={(e) => setRegFormData({ ...regFormData, category: e.target.value })}
+                    >
+                      <option value="Peluquería">Peluquería & Barbería</option>
+                      <option value="Salud">Salud & Bienestar</option>
+                      <option value="Fitness">Fitness & Deporte</option>
+                      <option value="Profesionales">Servicios Profesionales</option>
+                      <option value="Otros">Otros servicios</option>
+                    </select>
+                  </div>
+
+                  <div className={styles.formGroup}>
+                    <label>Equipo / Plan</label>
+                    <select
+                      className={styles.formSelect}
+                      value={regFormData.teamSize}
+                      onChange={(e) => setRegFormData({ ...regFormData, teamSize: e.target.value })}
+                    >
+                      <option value="1 persona">Solo yo (Plan Individual)</option>
+                      <option value="2-5 personas">2 a 5 personas (Plan Equipo)</option>
+                      <option value="6+ personas">6 o más personas (Plan Business)</option>
+                    </select>
+                  </div>
+
+                  <div className={styles.formGroup}>
+                    <label>País</label>
+                    <select
+                      className={styles.formSelect}
+                      value={regFormData.country}
+                      onChange={(e) => setRegFormData({ ...regFormData, country: e.target.value })}
+                    >
+                      <option value="Chile">Chile</option>
+                      <option value="México">México</option>
+                    </select>
+                  </div>
+
                   <button
                     type="submit"
-                    disabled={loading || !formData.name || !formData.ownerName || !formData.email || formData.password.length < 8}
                     className={`${styles.btn} ${styles.btnPrimary}`}
+                    style={{ width: "100%", marginTop: "16px" }}
+                    disabled={
+                      regLoading ||
+                      !regFormData.name ||
+                      !regFormData.ownerName ||
+                      !regFormData.email ||
+                      regFormData.password.length < 8
+                    }
                   >
-                    {loading ? "Creando..." : "Crear mi link"}
+                    {regLoading ? "Creando tu link..." : "Crear mi link gratis"}
                   </button>
-                </div>
-              </form>
+
+                  <p style={{ fontSize: "11px", color: "var(--muted)", textAlign: "center", marginTop: "14px", lineHeight: "1.4" }}>
+                    Al registrarte, aceptas los{" "}
+                    <Link href="/terminos" target="_blank" style={{ textDecoration: "underline", color: "inherit", fontWeight: "600" }}>
+                      Términos
+                    </Link>
+                    , la{" "}
+                    <Link href="/privacidad" target="_blank" style={{ textDecoration: "underline", color: "inherit", fontWeight: "600" }}>
+                      Privacidad
+                    </Link>{" "}
+                    y el{" "}
+                    <Link href="/legal" target="_blank" style={{ textDecoration: "underline", color: "inherit", fontWeight: "600" }}>
+                      Resguardo de IA
+                    </Link>
+                    .
+                  </p>
+                </form>
+              </>
             )}
 
-            {step === 3 && (
+            {regStep === 3 && (
               <div style={{ textAlign: "center" }}>
-                <div style={{ fontSize: "36px", marginBottom: "16px" }}>🎉</div>
-                <h2 className={styles.successTitle}>¡Tu AgendaLink está lista!</h2>
-                <p className={styles.successText}>
-                  Ya puedes compartir este link para que tus clientes consulten servicios y soliciten reservas. Los pagos en línea aún no están habilitados.
-                </p>
+                <div style={{ fontSize: "38px", marginBottom: "12px" }}>🎉</div>
+                <h3 className={styles.modalTitle}>¡Tu AgendaLink está lista!</h3>
+                <p className={styles.modalSubtitle}>Ya puedes compartir este link con tus clientes para agendar citas.</p>
 
                 <div className={styles.linkBox}>
                   <span className={styles.linkText}>
-                    {window.location.origin}/{slug}
+                    {typeof window !== "undefined" ? window.location.origin : "https://agendalink.cl"}/{createdSlug}
                   </span>
-                  <button onClick={copyLink} className={styles.copyBtn}>
+                  <button onClick={copyCreatedLink} className={styles.copyBtn}>
                     {copied ? "¡Copiado!" : "Copiar"}
                   </button>
                 </div>
 
-                <div className={styles.qrContainer}>
-                  <p style={{ fontSize: "13px", fontWeight: "600", marginBottom: "12px" }}>Tu código QR de reservas</p>
-                  <QrDownloader slug={slug} businessName={formData.name} />
+                <div style={{ margin: "20px 0" }}>
+                  <p style={{ fontSize: "12px", fontWeight: "700", color: "var(--muted)", marginBottom: "10px" }}>
+                    CÓDIGO QR OFICIAL
+                  </p>
+                  <QrDownloader slug={createdSlug} businessName={regFormData.name} />
                 </div>
 
                 <div style={{ display: "flex", gap: "10px", marginTop: "24px" }}>
-                  <Link href={`/${slug}`} className={`${styles.btn} ${styles.btnSecondary}`} style={{ textDecoration: "none" }}>
+                  <Link
+                    href={`/${createdSlug}`}
+                    className={`${styles.btn} ${styles.btnLight}`}
+                    style={{ flex: 1, textDecoration: "none" }}
+                  >
                     Ver link público
                   </Link>
-                  <Link href={`/admin/${slug}`} className={`${styles.btn} ${styles.btnPrimary}`} style={{ textDecoration: "none" }}>
-                    Panel de Control
+                  <Link
+                    href={`/admin/${createdSlug}`}
+                    className={`${styles.btn} ${styles.btnPrimary}`}
+                    style={{ flex: 1, textDecoration: "none" }}
+                  >
+                    Ir al Panel →
                   </Link>
                 </div>
               </div>
             )}
           </div>
         </div>
-      </section>
-      
-      {/* 6. Pie de Página */}
-      <footer style={{ padding: "40px 0", borderTop: "1px solid var(--card-border)", textAlign: "center", fontSize: "12px", color: "var(--text-secondary)" }}>
-        <p>© 2026 AgendaLink. Todos los derechos reservados.</p>
-        <p style={{ marginTop: "8px", opacity: 0.7, letterSpacing: "0.05em" }}>AgendaLink es una plataforma de <a href="https://ganimides.cl" target="_blank" rel="noopener noreferrer" style={{ color: "inherit", textDecoration: "underline", fontWeight: "bold" }}>GANIMIDES.CL</a></p>
-      </footer>
+      )}
 
+      {/* ===== MODAL DE INICIO DE SESIÓN ===== */}
+      {loginModalOpen && (
+        <div
+          className={styles.modalOverlay}
+          onClick={() => {
+            setLoginModalOpen(false);
+          }}
+        >
+          <div className={styles.modalBox} onClick={(e) => e.stopPropagation()}>
+            <button
+              className={styles.modalCloseBtn}
+              onClick={() => {
+                setLoginModalOpen(false);
+              }}
+            >
+              ✕
+            </button>
+
+            <h3 className={styles.modalTitle}>Iniciar Sesión</h3>
+            <p className={styles.modalSubtitle}>Accede al panel de control de tu negocio en AgendaLink</p>
+
+            {loginError && <div className={styles.modalError}>{loginError}</div>}
+
+            <Link
+              href="/login"
+              className={`${styles.btn} ${styles.btnPrimary}`}
+              style={{ width: "100%", justifyContent: "center", marginBottom: "16px", textDecoration: "none", display: "inline-flex" }}
+            >
+              Iniciar sesión con Email y Contraseña →
+            </Link>
+
+            <div className={styles.divider}>o ir directo con el link de tu negocio</div>
+
+            <form onSubmit={handleLoginSubmit}>
+              <div className={styles.formGroup}>
+                <label>Link de tu negocio</label>
+                <div style={{ display: "flex", alignItems: "center", background: "#f8fafc", border: "1px solid var(--line)", borderRadius: "12px", padding: "0 14px", height: "46px" }}>
+                  <span style={{ fontSize: "14px", fontWeight: "600", color: "var(--muted)" }}>agendalink.cl/</span>
+                  <input
+                    type="text"
+                    placeholder="tunegocio"
+                    style={{ border: "none", background: "none", outline: "none", padding: "8px 4px", fontSize: "14px", fontWeight: "700", flex: 1, color: "var(--text)" }}
+                    value={loginSlug}
+                    onChange={(e) => setLoginSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))}
+                    required
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                className={`${styles.btn} ${styles.btnPrimary}`}
+                style={{ width: "100%", marginTop: "16px" }}
+                disabled={loginLoading || !loginSlug}
+              >
+                {loginLoading ? "Verificando..." : "Ingresar a mi Panel"}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
