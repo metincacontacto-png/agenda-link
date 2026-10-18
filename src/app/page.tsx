@@ -512,7 +512,7 @@ export default function LandingAndOnboardingPage() {
             </div>
 
             {step === 1 && (
-              <form onSubmit={(e) => { e.preventDefault(); if (!loading && formData.name && formData.ownerName && formData.email && formData.password) handleSubmit(); }}>
+              <form onSubmit={(e) => { e.preventDefault(); if (!loading && formData.name && formData.ownerName && formData.email && formData.password && formData.password.length >= 8) handleSubmit(); }}>
                 <div className={styles.formGroup}>
                   <label className={styles.label}>Nombre de tu Negocio</label>
                   <input
@@ -564,13 +564,28 @@ export default function LandingAndOnboardingPage() {
                     name="password"
                     value={formData.password}
                     onChange={handleChange}
-                    placeholder="Al menos 12 caracteres"
+                    placeholder="Mínimo 8 caracteres"
                     className={styles.input}
                     autoComplete="new-password"
-                    minLength={12}
+                    minLength={8}
                     maxLength={128}
                     required
                   />
+                  <div style={{ marginTop: "6px", fontSize: "12px", lineHeight: "1.4" }}>
+                    {!formData.password ? (
+                      <span style={{ color: "var(--muted, #64748b)" }}>
+                        Mínimo 8 caracteres (puedes combinar letras, números y símbolos)
+                      </span>
+                    ) : formData.password.length < 8 ? (
+                      <span style={{ color: "#f59e0b", fontWeight: "600" }}>
+                        ⚠️ Debe tener al menos 8 caracteres (llevas {formData.password.length} de 8)
+                      </span>
+                    ) : (
+                      <span style={{ color: "#22c55e", fontWeight: "600" }}>
+                        ✓ Contraseña válida ({formData.password.length} caracteres)
+                      </span>
+                    )}
+                  </div>
                 </div>
                 <div className={styles.formGroup}>
                   <label className={styles.label}>Rubro</label>
@@ -600,7 +615,7 @@ export default function LandingAndOnboardingPage() {
                 <div className={styles.buttonRow}>
                   <button
                     type="submit"
-                    disabled={loading || !formData.name || !formData.ownerName || !formData.email || formData.password.length < 12}
+                    disabled={loading || !formData.name || !formData.ownerName || !formData.email || formData.password.length < 8}
                     className={`${styles.btn} ${styles.btnPrimary}`}
                   >
                     {loading ? "Creando..." : "Crear mi link"}

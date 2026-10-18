@@ -81,8 +81,8 @@ export function parseOnboardingInput(body: unknown): OnboardingInputResult {
     return { ok: false, error: "Precio o duración del servicio inválidos" };
   }
   const password = typeof data.password === "string" && data.password.length > 0 ? data.password : null;
-  if (password !== null && (password.length < 12 || password.length > 128)) {
-    return { ok: false, error: "La contraseña debe tener entre 12 y 128 caracteres" };
+  if (password !== null && (password.length < 8 || password.length > 128)) {
+    return { ok: false, error: "La contraseña debe tener entre 8 y 128 caracteres" };
   }
 
   return {

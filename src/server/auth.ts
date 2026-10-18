@@ -190,7 +190,7 @@ export function validEmail(email: string): boolean {
 }
 
 export function validPassword(password: string): boolean {
-  return password.length >= 12 && password.length <= 128;
+  return password.length >= 8 && password.length <= 128;
 }
 
 export function genericAuthError(status = 401): Response {
