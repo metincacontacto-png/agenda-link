@@ -53,7 +53,7 @@ const faqs = [
   },
   {
     q: "¿Qué hacen los asistentes Linki IA?",
-    a: "Linki IA llega próximamente. Linki Secretary responderá consultas de tus clientes, Linki Marketing te ayudará a reactivar clientes que dejaron de venir y Linki Business analizará tu negocio con recomendaciones concretas.",
+    a: "Linki Secretary responde consultas de tus clientes y los guía a reservar, Linki Marketing te ayuda a reactivar clientes que dejaron de venir y Linki Business analiza tus ventas y métricas para darte consejos estratégicos concretos.",
   },
   {
     q: "¿Puedo cobrar al momento de la reserva?",
@@ -429,9 +429,7 @@ export default function HomePage() {
         </div>
         <div className={`${styles.stat} ${styles.rv}`}>
           <b>3</b>
-          <span>
-            asistentes con IA para tu negocio <ProximamenteBadge style={{ marginLeft: 6 }} />
-          </span>
+          <span>asistentes con IA trabajando para tu negocio</span>
         </div>
         <div className={`${styles.stat} ${styles.rv}`}>
           <b>0</b>
@@ -1159,12 +1157,9 @@ export default function HomePage() {
               <li>1 profesional</li>
               <li>Link y landing personalizada</li>
               <li>Solicitudes de reserva ilimitadas</li>
-              <li>
-                Recordatorios por WhatsApp en 1 clic
-              </li>
-              <li>
-                Pagos online con Mercado Pago (Redcompra / Tarjetas)
-              </li>
+              <li>Recordatorios por WhatsApp en 1 clic</li>
+              <li>Asistentes Linki IA incluidos</li>
+              <li>Pagos online con Mercado Pago o en el local</li>
               <li>QR y material listo para imprimir</li>
             </ul>
           </div>
@@ -1199,6 +1194,7 @@ export default function HomePage() {
               <li>Ventas y caja en tiempo real</li>
               <li>Base de clientes e historial</li>
               <li>Recordatorios por WhatsApp en 1 clic</li>
+              <li>Asistentes Linki IA (Secretary y Marketing)</li>
             </ul>
           </div>
 
@@ -1234,6 +1230,7 @@ export default function HomePage() {
               <li>Seguimiento de pacientes y clientes</li>
               <li>Reportes avanzados de ventas y métricas</li>
               <li>Múltiples turnos y bloqueos simultáneos</li>
+              <li>Suite completa Linki IA (incluye Linki Business)</li>
               <li>Soporte prioritario dedicado</li>
             </ul>
           </div>
