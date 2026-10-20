@@ -55,6 +55,9 @@ export async function POST(request: Request) {
       { status: 201, headers },
     );
   } catch (error) {
+    if (error instanceof Error && error.message === "Ese link no está disponible. Prueba con otro.") {
+      return NextResponse.json({ error: error.message }, { status: 400 });
+    }
     if (isUniqueConstraintError(error)) {
       return NextResponse.json({ error: "No se pudo completar el registro" }, { status: 400 });
     }

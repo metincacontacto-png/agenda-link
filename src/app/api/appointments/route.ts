@@ -4,6 +4,7 @@ import { parseCreateBookingInput } from "@/features/booking/validation";
 import { prismaBookingRepository } from "@/lib/prisma-booking-repository";
 import { logServerError } from "@/server/observability";
 import { enforceRateLimit } from "@/server/rate-limit";
+import { sendBookingNotifications } from "@/server/email";
 
 // Public POST is the customer-facing booking flow; administrative appointment
 // reads/changes must use authenticated, business-scoped routes.
@@ -24,6 +25,24 @@ export async function POST(request: Request) {
   try {
     const result = await createBooking(parsed.value, { repository: prismaBookingRepository });
     if (!result.ok) return NextResponse.json({ error: result.error }, { status: result.status });
+
+    // Disparar notificaciones de correo de forma segura sin bloquear si falla
+    try {
+      await sendBookingNotifications({
+        appointmentId: result.appointment.id,
+        clientName: parsed.value.clientName,
+        clientWhatsApp: parsed.value.clientWhatsApp,
+        clientEmail: parsed.value.clientEmail || "",
+        date: parsed.value.date,
+        time: parsed.value.time,
+        service: result.appointment.service,
+        professional: result.appointment.professional,
+        business: result.appointment.business,
+      });
+    } catch (emailError) {
+      logServerError(request, "appointments.email.failed", emailError);
+    }
+
     return NextResponse.json({ success: true, appointment: result.appointment });
   } catch (error) {
     logServerError(request, "appointments.create.failed", error);

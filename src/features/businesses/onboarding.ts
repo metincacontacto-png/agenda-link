@@ -2,23 +2,14 @@ import { prisma } from "@/lib/db";
 import { getD1Database, type D1PreparedStatement } from "@/lib/cloudflare";
 import { prepareDefaultTeam } from "@/features/team/default-team";
 import type { OnboardingInput } from "@/features/businesses/validation";
-
-const RESERVED_SLUGS = new Set(["admin", "api", "public", "auth", "static", "login", "register", "success"]);
+import { RESERVED_SLUGS, SLUG_REGEX, cleanSlugInput } from "@/lib/reserved-slugs";
 
 export type BusinessOwner =
   | { userId: string }
   | { name: string; email: string; passwordHash: string };
 
 export function businessSlugBase(name: string): string {
-  const slug = name
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .trim()
-    .replace(/[^\w\s-]/g, "")
-    .replace(/[\s_]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .slice(0, 80);
+  const slug = cleanSlugInput(name);
   const safeSlug = slug || "negocio";
   return RESERVED_SLUGS.has(safeSlug) ? `${safeSlug}-negocio` : safeSlug;
 }
@@ -34,7 +25,20 @@ async function uniqueBusinessSlug(name: string): Promise<string> {
 }
 
 export async function createBusinessForOwner(input: OnboardingInput, owner: BusinessOwner) {
-  const slug = await uniqueBusinessSlug(input.name);
+  let slug: string;
+  if (input.slug) {
+    const candidate = cleanSlugInput(input.slug);
+    if (!SLUG_REGEX.test(candidate) || RESERVED_SLUGS.has(candidate)) {
+      throw new Error("Ese link no está disponible. Prueba con otro.");
+    }
+    const existing = await prisma.business.findUnique({ where: { slug: candidate }, select: { id: true } });
+    if (existing) {
+      throw new Error("Ese link no está disponible. Prueba con otro.");
+    }
+    slug = candidate;
+  } else {
+    slug = await uniqueBusinessSlug(input.name);
+  }
   const database = getD1Database();
   const businessId = crypto.randomUUID();
   const serviceId = crypto.randomUUID();

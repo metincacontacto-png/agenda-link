@@ -25,6 +25,30 @@ test("accepts and normalizes valid public booking fields, ignoring client paymen
   assert.equal("paymentAmount" in result.value, false);
 });
 
+test("accepts and normalizes clientEmail when provided, and rejects invalid email formats", () => {
+  const base = {
+    slug: "demo-business",
+    serviceId: "service-1",
+    professionalId: "professional-1",
+    clientName: "Test Client",
+    clientWhatsApp: "+56 9 1234 5678",
+    date: "2026-01-05",
+    time: "10:30",
+  };
+
+  const valid = parseCreateBookingInput({ ...base, clientEmail: "  Maria.Gonzalez@Ejemplo.com  " });
+  assert.equal(valid.ok, true);
+  if (valid.ok) {
+    assert.equal(valid.value.clientEmail, "maria.gonzalez@ejemplo.com");
+  }
+
+  const invalidFormat = parseCreateBookingInput({ ...base, clientEmail: "correo-invalido" });
+  assert.equal(invalidFormat.ok, false);
+  if (!invalidFormat.ok) {
+    assert.equal(invalidFormat.error, "Correo electrónico inválido");
+  }
+});
+
 test("rejects malformed or out-of-range booking data", () => {
   const base = {
     slug: "demo-business",

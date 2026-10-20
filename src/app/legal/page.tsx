@@ -1,8 +1,16 @@
-"use client";
-
 import React from "react";
 import Link from "next/link";
+import type { Metadata } from "next";
 import styles from "../page.module.css";
+import { LEGAL } from "@/lib/legal";
+
+export const metadata: Metadata = {
+  title: "Resguardo Legal e IA",
+  description: "Descargo de Responsabilidad y Cláusulas de Inteligencia Artificial de AgendaLink.",
+  alternates: {
+    canonical: "/legal",
+  },
+};
 
 export default function LegalPage() {
   return (
@@ -34,7 +42,7 @@ export default function LegalPage() {
             Descargo de Responsabilidad y Cláusulas de IA
           </h1>
           <p style={{ color: "var(--muted)", fontSize: "14px", marginBottom: "32px" }}>
-            Documento de protección legal complementario para usuarios, negocios y terceros · <strong>Ganímedes SpA</strong>
+            Documento de protección legal complementario para usuarios, negocios y terceros · <strong>{LEGAL.razonSocial}</strong> (RUT {LEGAL.rut}, {LEGAL.domicilio}, Chile)
           </p>
 
           <div style={{ lineHeight: "1.75", fontSize: "15px", color: "#334155" }}>
@@ -44,7 +52,7 @@ export default function LegalPage() {
                   ⚖️ Cláusula de Indemnidad y No Responsabilidad
                 </h3>
                 <p>
-                  AgendaLink es una herramienta tecnológica provista en modalidad <strong>&quot;tal cual&quot; (as-is)</strong> y <strong>&quot;según disponibilidad&quot; (as-available)</strong>. Bajo ninguna circunstancia AgendaLink ni su empresa matriz Ganímedes SpA responderán por reclamos, demandas civiles, laborales, comerciales, tributarias o penales derivadas del uso directo o indirecto de la plataforma, de los servicios prestados por los negocios registrados, ni de los mensajes generados por sistemas automatizados.
+                  AgendaLink es una herramienta tecnológica provista en modalidad <strong>&quot;tal cual&quot; (as-is)</strong> y <strong>&quot;según disponibilidad&quot; (as-available)</strong>. Bajo ninguna circunstancia AgendaLink ni su empresa titular {LEGAL.razonSocial} responderán por reclamos, demandas civiles, laborales, comerciales, tributarias o penales derivadas del uso directo o indirecto de la plataforma, de los servicios prestados por los negocios registrados, ni de los mensajes generados por sistemas automatizados.
                 </p>
               </div>
             </section>
@@ -60,7 +68,7 @@ export default function LegalPage() {
                 <li><strong>Sin Garantía de Exactitud:</strong> La inteligencia artificial puede cometer errores, generar respuestas inexactas o interpretaciones imprecisas (&quot;alucinaciones&quot;). AgendaLink no garantiza que los textos generados sean 100% correctos ni infalibles.</li>
                 <li><strong>No Constituye Asesoramiento Profesional:</strong> Ninguna respuesta de Linki IA debe considerarse asesoría médica, jurídica, legal, contable ni financiera.</li>
                 <li><strong>Responsabilidad del Negocio Emisor:</strong> El negocio o usuario titular asume plena y exclusiva responsabilidad por el contenido de los mensajes, promociones, respuestas automáticas por WhatsApp y decisiones comerciales que adopte a partir de los datos de la IA.</li>
-                <li><strong>Renuncia a Demandas:</strong> El uso de Linki IA implica la renuncia expresa del usuario a interponer demandas o reclamos de indemnización contra AgendaLink o Ganímedes SpA por cualquier perjuicio atribuido a las funciones de inteligencia artificial.</li>
+                <li><strong>Renuncia a Demandas:</strong> El uso de Linki IA implica la renuncia expresa del usuario a interponer demandas o reclamos de indemnización contra AgendaLink o {LEGAL.razonSocial} por cualquier perjuicio atribuido a las funciones de inteligencia artificial.</li>
               </ul>
             </section>
 
@@ -105,7 +113,7 @@ export default function LegalPage() {
 
             <section style={{ marginTop: "36px", paddingTop: "24px", borderTop: "1px solid #e2e8f0" }}>
               <p style={{ fontSize: "14px", color: "var(--muted)" }}>
-                Para comunicaciones legales o notificaciones formales: <strong>Ganímedes SpA</strong> · <a href="mailto:legal@ganimides.cl" style={{ color: "var(--blue)", fontWeight: "600" }}>legal@ganimides.cl</a> · Santiago, Chile.
+                Para comunicaciones legales o notificaciones formales: <strong>{LEGAL.razonSocial}</strong> · <a href={`mailto:${LEGAL.email}`} style={{ color: "var(--blue)", fontWeight: "600" }}>{LEGAL.email}</a> · {LEGAL.domicilio}, Chile.
               </p>
             </section>
           </div>
@@ -115,7 +123,7 @@ export default function LegalPage() {
       {/* Footer */}
       <footer className={styles.footer} style={{ borderTop: "1px solid rgba(255,255,255,0.08)" }}>
         <div className={styles.wrap} style={{ textAlign: "center", fontSize: "13px" }}>
-          <span>© {new Date().getFullYear()} AgendaLink. Todos los derechos reservados · Un producto de <a href="https://ganimides.cl" target="_blank" rel="noopener noreferrer" style={{ color: "#fff", textDecoration: "underline" }}>Ganímedes</a></span>
+          <span>© {new Date().getFullYear()} AgendaLink. Todos los derechos reservados · Un producto de <strong>{LEGAL.marcaMatriz}</strong></span>
         </div>
       </footer>
     </div>

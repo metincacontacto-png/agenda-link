@@ -1,8 +1,16 @@
-"use client";
-
 import React from "react";
 import Link from "next/link";
+import type { Metadata } from "next";
 import styles from "../page.module.css";
+import { LEGAL } from "@/lib/legal";
+
+export const metadata: Metadata = {
+  title: "Política de Privacidad",
+  description: "Política de Privacidad y Protección de Datos de la plataforma AgendaLink.",
+  alternates: {
+    canonical: "/privacidad",
+  },
+};
 
 export default function PrivacidadPage() {
   return (
@@ -34,7 +42,7 @@ export default function PrivacidadPage() {
             Política de Privacidad
           </h1>
           <p style={{ color: "var(--muted)", fontSize: "14px", marginBottom: "32px" }}>
-            En conformidad con la <strong>Ley Nº 19.628 sobre Protección de la Vida Privada</strong> (Chile) y normativas internacionales de protección de datos.
+            En conformidad con la <strong>Ley Nº 19.628 sobre Protección de la Vida Privada</strong> (Chile) · Operado por <strong>{LEGAL.razonSocial}</strong> (RUT {LEGAL.rut}, {LEGAL.domicilio}, Chile)
           </p>
 
           <div style={{ lineHeight: "1.75", fontSize: "15px", color: "#334155" }}>
@@ -47,7 +55,7 @@ export default function PrivacidadPage() {
               </p>
               <ul style={{ paddingLeft: "20px", marginTop: "8px", display: "flex", flexDirection: "column", gap: "8px" }}>
                 <li><strong>Datos de Negocios y Profesionales:</strong> Nombre, correo electrónico, número de teléfono/WhatsApp, rubro, servicios ofrecidos y horarios configurados.</li>
-                <li><strong>Datos de Clientes Finales (al agendar):</strong> Nombre, número de WhatsApp/teléfono, correo electrónico y notas específicas del servicio agendado.</li>
+                <li><strong>Datos de Clientes Finales (al agendar):</strong> Nombre, número de WhatsApp/teléfono, correo electrónico y notas específicas del servicio solicitado.</li>
                 <li><strong>Datos Técnicos:</strong> Registros de acceso, dirección IP anónima y cookies técnicas necesarias para el funcionamiento de la sesión.</li>
               </ul>
             </section>
@@ -60,8 +68,8 @@ export default function PrivacidadPage() {
                 Los datos recopilados son utilizados exclusivamente con las siguientes finalidades:
               </p>
               <ul style={{ paddingLeft: "20px", marginTop: "8px", display: "flex", flexDirection: "column", gap: "8px" }}>
-                <li>Gestionar y confirmar citas entre los clientes y los negocios.</li>
-                <li>Enviar notificaciones y recordatorios automáticos por WhatsApp o Email para reducir inasistencias.</li>
+                <li>Gestionar y registrar solicitudes de citas entre los clientes y los negocios.</li>
+                <li>Enviar notificaciones y avisos automáticos por WhatsApp o Email para reducir inasistencias cuando estén configurados.</li>
                 <li>Proveer métricas y analíticas agregadas en el Panel de Administración del negocio.</li>
                 <li>Garantizar la seguridad y prevención de fraudes en la plataforma.</li>
               </ul>
@@ -72,7 +80,7 @@ export default function PrivacidadPage() {
                 3. No Comercialización de Datos Personales
               </h2>
               <div style={{ background: "#ecfdf5", color: "#065f46", padding: "16px 20px", borderRadius: "12px", margin: "14px 0", borderLeft: "4px solid #10b981", fontSize: "14px" }}>
-                <strong>Compromiso de Privacidad:</strong> AgendaLink y Ganímedes SpA <u>NUNCA</u> venden, arriendan, transfieren ni comercializan bases de datos personales o contactos de clientes a terceros, agencias de publicidad o entidades externas.
+                <strong>Compromiso de Privacidad:</strong> AgendaLink y {LEGAL.razonSocial} <u>NUNCA</u> venden, arriendan, transfieren ni comercializan bases de datos personales o contactos de clientes a terceros, agencias de publicidad o entidades externas.
               </div>
             </section>
 
@@ -90,7 +98,7 @@ export default function PrivacidadPage() {
                 5. Derechos del Titular (Acceso, Rectificación y Supresión)
               </h2>
               <p>
-                En todo momento, tanto los administradores de negocios como los clientes finales pueden solicitar el acceso, rectificación, eliminación o portabilidad de sus datos personales enviando un correo a <a href="mailto:privacidad@ganimides.cl" style={{ color: "var(--blue)", fontWeight: "600" }}>privacidad@ganimides.cl</a>.
+                En todo momento, tanto los administradores de negocios como los clientes finales pueden solicitar el acceso, rectificación, eliminación o portabilidad de sus datos personales enviando un correo a <a href={`mailto:${LEGAL.email}`} style={{ color: "var(--blue)", fontWeight: "600" }}>{LEGAL.email}</a>.
               </p>
             </section>
 
@@ -106,7 +114,7 @@ export default function PrivacidadPage() {
       {/* Footer */}
       <footer className={styles.footer} style={{ borderTop: "1px solid rgba(255,255,255,0.08)" }}>
         <div className={styles.wrap} style={{ textAlign: "center", fontSize: "13px" }}>
-          <span>© {new Date().getFullYear()} AgendaLink. Todos los derechos reservados · Un producto de <a href="https://ganimides.cl" target="_blank" rel="noopener noreferrer" style={{ color: "#fff", textDecoration: "underline" }}>Ganímedes</a></span>
+          <span>© {new Date().getFullYear()} AgendaLink. Todos los derechos reservados · Un producto de <strong>{LEGAL.marcaMatriz}</strong></span>
         </div>
       </footer>
     </div>

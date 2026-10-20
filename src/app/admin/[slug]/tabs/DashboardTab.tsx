@@ -152,11 +152,11 @@ export default function DashboardTab({
                 <line x1="12" y1="10" x2="12" y2="10" /><line x1="12" y1="14" x2="12" y2="14" />
               </svg>
             </div>
-            <h3 className={styles.reportCardTitle}>Ventas Facturadas</h3>
+            <h3 className={styles.reportCardTitle}>Ventas Registradas</h3>
           </div>
           <div style={{ margin: "20px 0 10px 0" }}>
             <div style={{ fontSize: "28px", fontWeight: "800", color: "var(--foreground)" }}>{formatPrice(metrics.totalSales, businessCurrency)}</div>
-            <p style={{ fontSize: "12px", color: "var(--text-secondary)", marginTop: "4px" }}>Suma de importes de las citas registradas como pagadas entre las citas cargadas.</p>
+            <p style={{ fontSize: "12px", color: "var(--text-secondary)", marginTop: "4px" }}>Suma de importes de las citas registradas entre las citas cargadas.</p>
           </div>
         </div>
         <div className={styles.reportCard}>

@@ -6,6 +6,7 @@ export interface CreateBookingInput {
   professionalId: string;
   clientName: string;
   clientWhatsApp: string;
+  clientEmail?: string;
   date: string;
   time: string;
 }
@@ -45,6 +46,7 @@ export function parseCreateBookingInput(input: unknown): BookingInputResult {
   const professionalId = boundedString(record.professionalId, 1, 100);
   const clientName = boundedString(record.clientName, 1, 100);
   const clientWhatsApp = boundedString(record.clientWhatsApp, 7, 32);
+  const rawEmail = boundedString(record.clientEmail, 3, 254);
   const date = boundedString(record.date, 10, 10);
   const time = boundedString(record.time, 5, 5);
 
@@ -60,13 +62,30 @@ export function parseCreateBookingInput(input: unknown): BookingInputResult {
   if (!clientWhatsApp || !/^\+?[0-9\s().-]{7,32}$/.test(clientWhatsApp)) {
     return { ok: false, error: "WhatsApp o teléfono inválido" };
   }
+  let clientEmail: string | undefined;
+  if (rawEmail) {
+    const normalized = rawEmail.toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized)) {
+      return { ok: false, error: "Correo electrónico inválido" };
+    }
+    clientEmail = normalized;
+  }
   if (!date || !isValidDateOnly(date) || !time || parseLocalTime(time) === null) {
     return { ok: false, error: "Fecha u hora inválida" };
   }
 
   return {
     ok: true,
-    value: { slug, serviceId, professionalId, clientName, clientWhatsApp, date, time },
+    value: {
+      slug,
+      serviceId,
+      professionalId,
+      clientName,
+      clientWhatsApp,
+      ...(clientEmail ? { clientEmail } : {}),
+      date,
+      time,
+    },
   };
 }
 

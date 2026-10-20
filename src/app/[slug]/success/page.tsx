@@ -69,9 +69,9 @@ export default async function SuccessPage({
     <main className={styles.container}>
       <div className={styles.card}>
         <div className={styles.successIcon}>✓</div>
-        <h1 className={styles.title}>¡Reserva Confirmada!</h1>
+        <h1 className={styles.title}>¡Solicitud Enviada!</h1>
         <p className={styles.subtitle}>
-          Tu reserva quedó registrada. El pago está pendiente; el negocio podrá contactarte para coordinar los siguientes pasos.
+          Tu solicitud de reserva quedó registrada. El negocio revisará los detalles y podrá contactarte para coordinar tu atención.
         </p>
 
         <div className={styles.detailsList}>
@@ -96,11 +96,11 @@ export default async function SuccessPage({
             <span className={styles.value}>{timeFormatted}</span>
           </div>
           <div className={styles.row}>
-            <span className={styles.label}>Pago:</span>
+            <span className={styles.label}>Estado de pago:</span>
             <span className={styles.value} style={{ fontWeight: "700", color: appointment.paymentStatus === "PAID" ? "var(--success)" : "var(--text-secondary)" }}>
               {appointment.paymentStatus === "PAID"
-                ? `✓ ${formatPrice(appointment.paymentAmount || appointment.service.price, appointment.business.currency)} PAGADO (${appointment.paymentMethod || "método no registrado"})`
-                : `Pendiente · ${formatPrice(appointment.service.price, appointment.business.currency)}`}
+                ? `✓ ${formatPrice(appointment.paymentAmount || appointment.service.price, appointment.business.currency)} registrado`
+                : `Pago directo en local · ${formatPrice(appointment.service.price, appointment.business.currency)}`}
             </span>
           </div>
         </div>

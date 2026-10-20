@@ -1,5 +1,8 @@
+import { RESERVED_SLUGS, SLUG_REGEX, cleanSlugInput } from "@/lib/reserved-slugs";
+
 export interface OnboardingInput {
   name: string;
+  slug?: string | null;
   ownerName: string;
   email: string;
   category: string;
@@ -85,10 +88,20 @@ export function parseOnboardingInput(body: unknown): OnboardingInputResult {
     return { ok: false, error: "La contraseña debe tener entre 8 y 128 caracteres" };
   }
 
+  let customSlug: string | null = null;
+  if (typeof data.slug === "string" && data.slug.trim()) {
+    const candidate = cleanSlugInput(data.slug);
+    if (!candidate || !SLUG_REGEX.test(candidate) || RESERVED_SLUGS.has(candidate)) {
+      return { ok: false, error: "Ese link no está disponible. Prueba con otro." };
+    }
+    customSlug = candidate;
+  }
+
   return {
     ok: true,
     value: {
       name,
+      slug: customSlug,
       ownerName,
       email,
       category,

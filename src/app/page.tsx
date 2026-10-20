@@ -3,7 +3,10 @@
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import styles from "./page.module.css";
-import QrDownloader from "@/components/QrDownloader";
+import { FEATURES } from "@/lib/features";
+import ProximamenteBadge from "@/components/ProximamenteBadge";
+import RegistroForm from "@/components/RegistroForm";
+import { LEGAL } from "@/lib/legal";
 
 const convos = [
   {
@@ -12,7 +15,7 @@ const convos = [
       { type: "in", text: "Hola! ¿tienen hora para corte mañana en la tarde?" },
       { type: "out", text: "¡Hola! 👋 Sí, mañana martes tengo 15:30 y 18:30 con Pía. El corte + brushing cuesta $18.000." },
       { type: "in", text: "Las 18:30 porfa" },
-      { type: "out", text: "Listo ✅ Reserva tu hora aquí en 20 segundos: agendalink.cl/valentina. Te recordaré un día antes." },
+      { type: "out", text: "Listo ✅ Envía tu solicitud aquí en 20 segundos: agendalink.cl/valentina. Te avisaremos apenas se confirme." },
     ],
   },
   {
@@ -21,14 +24,14 @@ const convos = [
       { type: "out", text: "📊 Detecté 23 clientes que no vienen hace más de 60 días." },
       { type: "out", text: 'Te propongo enviarles: "¡Te echamos de menos! 15% en tu próxima visita esta semana" 💙' },
       { type: "in", text: "Dale, envíalo" },
-      { type: "out", text: "Enviado por WhatsApp. Te aviso cuando lleguen las reservas. 🚀" },
+      { type: "out", text: "Enviado por WhatsApp. Te aviso cuando lleguen las solicitudes. 🚀" },
     ],
   },
   {
     n: "Linki Business",
     m: [
       { type: "in", text: "¿Cómo me fue este mes?" },
-      { type: "out", text: "Vendiste más que el mes pasado y tu servicio estrella fue Color completo. 📈" },
+      { type: "out", text: "Registraste más ventas que el mes pasado y tu servicio estrella fue Color completo. 📈" },
       { type: "out", text: "Ojo: los martes en la mañana tienes 40% de horas libres. Una promo ese bloque podría llenarlo." },
       { type: "in", text: "Buena idea, armemos la promo" },
     ],
@@ -38,7 +41,7 @@ const convos = [
 const faqs = [
   {
     q: "¿Mis clientes necesitan descargar una app o crear cuenta?",
-    a: "No. Entran a tu link desde Instagram, WhatsApp o un QR, eligen servicio, día y hora, y reservan en unos 20 segundos. Sin registro ni descargas.",
+    a: "No. Entran a tu link desde Instagram, WhatsApp o un QR, eligen servicio, día y hora, y envían su solicitud en unos 20 segundos. Sin registro ni descargas.",
   },
   {
     q: "¿Necesito saber de tecnología para configurarlo?",
@@ -46,15 +49,21 @@ const faqs = [
   },
   {
     q: "¿Cómo funcionan los recordatorios por WhatsApp?",
-    a: "Al vincular tu WhatsApp, recibes un aviso con cada reserva nueva y tus clientes reciben recordatorios antes de su cita. Así bajan las inasistencias.",
+    a: FEATURES.whatsappAutomatico
+      ? "Al vincular tu WhatsApp, recibes un aviso con cada reserva nueva y tus clientes reciben recordatorios antes de su cita. Así bajan las inasistencias."
+      : "Los recordatorios automáticos por WhatsApp están en desarrollo y llegan próximamente. Mientras tanto, ves todas tus solicitudes en el panel y puedes contactar a cada cliente con un clic.",
   },
   {
     q: "¿Qué hacen los asistentes Linki IA?",
-    a: "Linki Secretary responde consultas de tus clientes, Linki Marketing te ayuda a reactivar clientes que dejaron de venir y Linki Business analiza tu negocio para darte recomendaciones concretas.",
+    a:
+      (FEATURES.linkiIA ? "" : "Linki IA llega próximamente. ") +
+      "Linki Secretary responde consultas de tus clientes, Linki Marketing te ayuda a reactivar clientes que dejaron de venir y Linki Business analiza tu negocio para darte recomendaciones concretas.",
   },
   {
     q: "¿Puedo cobrar al momento de la reserva?",
-    a: "Sí. Puedes recibir pagos con tarjeta y Apple Pay directamente desde tu link, para asegurar la hora y reducir cancelaciones.",
+    a: FEATURES.pagosOnline
+      ? "Sí. Puedes recibir pagos con tarjeta y Apple Pay directamente desde tu link, para asegurar la hora y reducir cancelaciones."
+      : "Todavía no. Los pagos online están en desarrollo. Por ahora tus clientes envían su solicitud y pagan directamente en tu negocio.",
   },
   {
     q: "¿Puedo cambiar de plan o cancelar?",
@@ -71,23 +80,12 @@ export default function HomePage() {
 
   // Modales
   const [registerModalOpen, setRegisterModalOpen] = useState(false);
+  const [registerModalPlan, setRegisterModalPlan] = useState<string | undefined>(undefined);
+  const [registerModalSlug, setRegisterModalSlug] = useState<string | undefined>(undefined);
   const [loginModalOpen, setLoginModalOpen] = useState(false);
 
-  // Registro Form State
-  const [regStep, setRegStep] = useState(1);
-  const [regFormData, setRegFormData] = useState({
-    name: "",
-    ownerName: "",
-    email: "",
-    password: "",
-    category: "Peluquería",
-    teamSize: "1 persona",
-    country: "Chile",
-  });
-  const [regLoading, setRegLoading] = useState(false);
-  const [createdSlug, setCreatedSlug] = useState("");
-  const [copied, setCopied] = useState(false);
-  const [regError, setRegError] = useState("");
+  // Focus reference for accessibility
+  const triggerRef = useRef<HTMLElement | null>(null);
 
   // Login Form State
   const [loginSlug, setLoginSlug] = useState("");
@@ -134,58 +132,39 @@ export default function HomePage() {
     return () => clearTimeout(timer);
   }, [activeAgent]);
 
+  // Escape key handler for accessible modal closing
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        if (registerModalOpen) {
+          setRegisterModalOpen(false);
+          triggerRef.current?.focus();
+        }
+        if (loginModalOpen) {
+          setLoginModalOpen(false);
+          triggerRef.current?.focus();
+        }
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [registerModalOpen, loginModalOpen]);
+
   // Open register modal with optional prefill
   const openRegister = (plan?: string, initialSlug?: string) => {
-    if (plan) {
-      if (plan === "individual") setRegFormData((prev) => ({ ...prev, teamSize: "1 persona" }));
-      if (plan === "equipo") setRegFormData((prev) => ({ ...prev, teamSize: "2-5 personas" }));
-      if (plan === "business") setRegFormData((prev) => ({ ...prev, teamSize: "6+ personas" }));
-    }
-    if (initialSlug) {
-      setRegFormData((prev) => ({ ...prev, name: initialSlug }));
-    }
-    setRegStep(1);
-    setRegError("");
+    setRegisterModalPlan(plan);
+    setRegisterModalSlug(initialSlug);
     setRegisterModalOpen(true);
   };
 
-  const handleRegisterSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!regFormData.password || regFormData.password.length < 8) {
-      setRegError("La contraseña debe tener al menos 8 caracteres.");
-      return;
-    }
-    setRegLoading(true);
-    setRegError("");
-    try {
-      const res = await fetch("/api/onboarding", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(regFormData),
-      });
-      const data = await res.json();
-      if (data.success && data.slug) {
-        setCreatedSlug(data.slug);
-        setRegStep(3);
-      } else {
-        setRegError(data.error || "No se pudo crear el negocio. Inténtalo de nuevo.");
-      }
-    } catch (err) {
-      console.error(err);
-      setRegError("Error de conexión al procesar el registro.");
-    } finally {
-      setRegLoading(false);
-    }
+  const closeRegisterModal = () => {
+    setRegisterModalOpen(false);
+    triggerRef.current?.focus();
   };
 
-  const copyCreatedLink = () => {
-    const url = `${window.location.origin}/${createdSlug}`;
-    if (navigator.clipboard) {
-      navigator.clipboard.writeText(url).then(() => {
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-      });
-    }
+  const closeLoginModal = () => {
+    setLoginModalOpen(false);
+    triggerRef.current?.focus();
   };
 
   const handleLoginSubmit = async (e: React.FormEvent) => {
@@ -218,10 +197,24 @@ export default function HomePage() {
             <a href="#faq">Preguntas</a>
           </div>
           <div className={styles.navCta}>
-            <button className={styles.loginBtn} onClick={() => setLoginModalOpen(true)}>
-              Iniciar sesión
+            <button
+              className={styles.loginBtn}
+              onClick={(e) => {
+                triggerRef.current = e.currentTarget;
+                setLoginModalOpen(true);
+              }}
+              aria-label="Iniciar sesión"
+            >
+              <span className={styles.loginTextDesktop}>Iniciar sesión</span>
+              <span className={styles.loginTextMobile}>Entrar</span>
             </button>
-            <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={() => openRegister()}>
+            <button
+              className={`${styles.btn} ${styles.btnPrimary}`}
+              onClick={(e) => {
+                triggerRef.current = e.currentTarget;
+                openRegister();
+              }}
+            >
               Crear mi link gratis
             </button>
           </div>
@@ -233,19 +226,24 @@ export default function HomePage() {
         <div className={`${styles.wrap} ${styles.heroGrid}`}>
           <div className={styles.rv}>
             <div className={styles.pill}>
-              <span>NUEVO</span> Linki IA: tu secretaria que responde WhatsApp 24/7
+              <span>NUEVO</span> Tu agenda online en un solo link
             </div>
             <h1 className={styles.heroH1}>
-              Tu negocio agenda solo.
+              Tu negocio agenda&nbsp;solo.
               <br />
               <span className={styles.gradText}>Tú solo atiendes.</span>
             </h1>
             <p className={styles.lead}>
-              Reservas online, pagos, recordatorios por WhatsApp y un panel para ver cuánto vendes. Todo desde un solo link
-              que tus clientes usan en 20 segundos, sin descargar nada.
+              Tus clientes eligen servicio, día y hora y te envían su solicitud de reserva. Tú la ves en tu panel. Todo desde un solo link que usan en 20 segundos, sin descargar nada.
             </p>
             <div className={styles.heroCtas}>
-              <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={() => openRegister()}>
+              <button
+                className={`${styles.btn} ${styles.btnPrimary}`}
+                onClick={(e) => {
+                  triggerRef.current = e.currentTarget;
+                  openRegister();
+                }}
+              >
                 Crear mi link ahora
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M5 12h14M13 5l7 7-7 7" />
@@ -335,7 +333,7 @@ export default function HomePage() {
                       <span>18:30</span>
                     </div>
                   </div>
-                  <div className={styles.bookBtn}>Confirmar reserva →</div>
+                  <div className={styles.bookBtn}>Enviar solicitud →</div>
                 </div>
               </div>
             </div>
@@ -347,7 +345,7 @@ export default function HomePage() {
                 </svg>
               </div>
               <div>
-                <b>Nueva reserva</b>
+                <b>Nueva solicitud</b>
                 <small>Camila · Mar 13, 11:30</small>
               </div>
             </div>
@@ -359,8 +357,17 @@ export default function HomePage() {
                 </svg>
               </div>
               <div>
-                <b>+$18.000 pagado</b>
-                <small>Tarjeta · Apple Pay</small>
+                {FEATURES.pagosOnline ? (
+                  <>
+                    <b>+$18.000 pagado</b>
+                    <small>Tarjeta · Apple Pay</small>
+                  </>
+                ) : (
+                  <>
+                    <b>Cliente nuevo</b>
+                    <small>Camila se sumó a tu base</small>
+                  </>
+                )}
               </div>
             </div>
 
@@ -371,8 +378,17 @@ export default function HomePage() {
                 </svg>
               </div>
               <div>
-                <b>Linki recordó la cita</b>
-                <small>Cero inasistencias hoy</small>
+                {FEATURES.linkiIA ? (
+                  <>
+                    <b>Linki recordó la cita</b>
+                    <small>Cero inasistencias hoy</small>
+                  </>
+                ) : (
+                  <>
+                    <b>Agenda de hoy</b>
+                    <small>6 horas tomadas</small>
+                  </>
+                )}
               </div>
             </div>
           </div>
@@ -427,8 +443,17 @@ export default function HomePage() {
           <span>tu agenda abierta, aunque estés atendiendo o durmiendo</span>
         </div>
         <div className={`${styles.stat} ${styles.rv}`}>
-          <b>3</b>
-          <span>asistentes con IA trabajando para tu negocio</span>
+          {FEATURES.linkiIA ? (
+            <>
+              <b>3</b>
+              <span>asistentes con IA trabajando para tu negocio</span>
+            </>
+          ) : (
+            <>
+              <b>1</b>
+              <span>1 link para tu Instagram, WhatsApp y QR</span>
+            </>
+          )}
         </div>
         <div className={`${styles.stat} ${styles.rv}`}>
           <b>0</b>
@@ -481,16 +506,18 @@ export default function HomePage() {
                 <i>✓</i>Tus clientes eligen servicio, día y hora solos desde tu link
               </li>
               <li>
-                <i>✓</i>Recordatorios automáticos por WhatsApp que bajan las inasistencias
+                <i>✓</i>Recordatorios automáticos por WhatsApp que bajan las inasistencias{" "}
+                {!FEATURES.whatsappAutomatico && <ProximamenteBadge style={{ marginLeft: 6 }} />}
               </li>
               <li>
-                <i>✓</i>Calendario, reservas, ventas y clientes en un solo panel
+                <i>✓</i>Calendario, solicitudes de reserva, ventas y clientes en un solo panel
               </li>
               <li>
                 <i>✓</i>Ves tus ventas y caja del día en tiempo real, desde el celular
               </li>
               <li>
-                <i>✓</i>Linki Marketing reactiva a los clientes que dejaron de venir
+                <i>✓</i>Linki Marketing reactiva a los clientes que dejaron de venir{" "}
+                {!FEATURES.linkiIA && <ProximamenteBadge style={{ marginLeft: 6 }} />}
               </li>
             </ul>
           </div>
@@ -517,13 +544,18 @@ export default function HomePage() {
             <span className={styles.time}>~10 min</span>
             <div className={styles.num}>2</div>
             <h3>Carga tus servicios</h3>
-            <p>Agrega servicios, precios y duración. Conecta tu WhatsApp para recibir cada reserva al instante.</p>
+            <p>
+              Agrega servicios, precios y duración.{" "}
+              {FEATURES.whatsappAutomatico
+                ? "Conecta tu WhatsApp para recibir cada reserva al instante."
+                : "Comparte tu WhatsApp de contacto para que tus clientes te ubiquen."}
+            </p>
           </div>
           <div className={`${styles.step} ${styles.rv}`}>
             <span className={styles.time}>~5 min</span>
             <div className={styles.num}>3</div>
             <h3>Comparte tu link</h3>
-            <p>Ponlo en tu bio de Instagram, en WhatsApp o imprime tu código QR. Desde ahí, las reservas llegan solas.</p>
+            <p>Ponlo en tu bio de Instagram, en WhatsApp o imprime tu código QR. Desde ahí, las solicitudes llegan solas.</p>
           </div>
         </div>
       </section>
@@ -538,7 +570,7 @@ export default function HomePage() {
             Todo tu negocio.
           </h2>
           <p className={styles.lead}>
-            Deja de pagar y saltar entre cinco apps distintas. Agenda, cobros, clientes y marketing en un mismo lugar.
+            Deja de pagar y saltar entre cinco apps distintas. Agenda, clientes y panel en un mismo lugar.
           </p>
         </div>
         <div className={`${styles.wrap} ${styles.bento}`}>
@@ -582,7 +614,7 @@ export default function HomePage() {
               </svg>
             </div>
             <h3>Ventas y caja</h3>
-            <p>Lo que entra hoy, esta semana y este mes. Sin planillas.</p>
+            <p>Lo que entra hoy, esta semana y este mes. Ventas registradas sin planillas.</p>
             <div className={styles.money}>
               $486.000<small>↑ hoy</small>
             </div>
@@ -604,8 +636,14 @@ export default function HomePage() {
                 <path d="M2 10h20M6 15h4" />
               </svg>
             </div>
-            <h3>Pagos online</h3>
-            <p>Cobra con tarjeta o Apple Pay al reservar. Asegura la hora y reduce las cancelaciones.</p>
+            <h3>
+              Pagos online {!FEATURES.pagosOnline && <ProximamenteBadge style={{ marginLeft: 8 }} />}
+            </h3>
+            <p>
+              {FEATURES.pagosOnline
+                ? "Cobra con tarjeta o Apple Pay al reservar. Asegura la hora y reduce las cancelaciones."
+                : "Próximamente: cobra con tarjeta al reservar para asegurar la hora y reducir cancelaciones."}
+            </p>
           </div>
 
           <div className={`${styles.b} ${styles.b2} ${styles.rv}`}>
@@ -625,7 +663,9 @@ export default function HomePage() {
                 <path d="M20 12v9H4v-9M2 7h20v5H2zM12 21V7M12 7H8a2.5 2.5 0 110-5c3 0 4 5 4 5zM12 7h4a2.5 2.5 0 100-5c-3 0-4 5-4 5z" />
               </svg>
             </div>
-            <h3>Gift cards y fidelización</h3>
+            <h3>
+              Gift cards y fidelización {!FEATURES.giftCards && <ProximamenteBadge style={{ marginLeft: 8 }} />}
+            </h3>
             <p>Vende tarjetas de regalo y premia a tus clientes frecuentes para que vuelvan.</p>
           </div>
 
@@ -669,9 +709,15 @@ export default function HomePage() {
             </div>
             <div style={{ flex: 1, minWidth: "240px" }}>
               <h3>App en tu celular, sin tiendas</h3>
-              <p>Instala AgendaLink en la pantalla de inicio y gestiona reservas, caja y clientes desde donde estés.</p>
+              <p>Instala AgendaLink en la pantalla de inicio y gestiona solicitudes, caja y clientes desde donde estés.</p>
             </div>
-            <button className={`${styles.btn} ${styles.btnLight}`} onClick={() => openRegister()}>
+            <button
+              className={`${styles.btn} ${styles.btnLight}`}
+              onClick={(e) => {
+                triggerRef.current = e.currentTarget;
+                openRegister();
+              }}
+            >
               Probar ahora →
             </button>
           </div>
@@ -681,11 +727,15 @@ export default function HomePage() {
       {/* ===== LINKI IA ===== */}
       <section className={`${styles.section} ${styles.ai}`} id="linki">
         <div className={`${styles.wrap} ${styles.center} ${styles.rv}`}>
-          <span className={styles.eyebrow}>Asistentes Linki IA</span>
+          <span className={styles.eyebrow}>
+            Asistentes Linki IA {!FEATURES.linkiIA && <ProximamenteBadge style={{ marginLeft: 8 }} />}
+          </span>
           <h2 className={styles.h2}>
             Un equipo con inteligencia artificial,
             <br />
-            <span className={styles.gradText}>incluido en tu plan.</span>
+            <span className={styles.gradText}>
+              {FEATURES.linkiIA ? "incluido en tu plan." : "Muy pronto en tu plan."}
+            </span>
           </h2>
           <p className={styles.lead}>
             Tres asistentes que trabajan por ti: atienden, venden y te ayudan a tomar mejores decisiones.
@@ -705,7 +755,7 @@ export default function HomePage() {
               </div>
               <div>
                 <h3>Linki Secretary</h3>
-                <p>Responde dudas por WhatsApp, entrega precios y horarios, y lleva al cliente a reservar. 24/7.</p>
+                <p>Responde dudas por WhatsApp, entrega precios y horarios, y lleva al cliente a solicitar hora. 24/7.</p>
               </div>
             </button>
 
@@ -771,7 +821,7 @@ export default function HomePage() {
           <span className={styles.eyebrow}>Tu panel</span>
           <h2 className={styles.h2}>Todo tu negocio, en una pantalla.</h2>
           <p className={styles.lead}>
-            Reservas, ocupación, clientes nuevos y ventas de la semana. Claro, rápido y pensado para usarlo entre un cliente y otro.
+            Solicitudes, ocupación, clientes nuevos y ventas de la semana. Claro, rápido y pensado para usarlo entre un cliente y otro.
           </p>
         </div>
         <div className={styles.wrap}>
@@ -805,7 +855,7 @@ export default function HomePage() {
                       <rect x="5" y="3" width="14" height="18" rx="2" />
                       <path d="M9 3v2h6V3M9 11h6M9 15h6" />
                     </svg>
-                    Lista de Reservas
+                    Lista de Solicitudes
                   </a>
                   <a>
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -820,7 +870,9 @@ export default function HomePage() {
                     </svg>
                     Base de Clientes
                   </a>
-                  <h6>ASISTENTES LINKI IA</h6>
+                  <h6>
+                    ASISTENTES LINKI IA {!FEATURES.linkiIA && <ProximamenteBadge style={{ marginLeft: 6 }} />}
+                  </h6>
                   <a>
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
@@ -905,7 +957,7 @@ export default function HomePage() {
                         <small>PASO 3</small>
                         <span className={styles.ck} />
                         <b>Vincular WhatsApp</b>
-                        <em>Recibe avisos de reservas al instante.</em>
+                        <em>Recibe avisos de solicitudes al instante.</em>
                       </div>
                       <div className={styles.os}>
                         <small>PASO 4</small>
@@ -929,7 +981,7 @@ export default function HomePage() {
 
                   <div className={styles.kp}>
                     <div className={`${styles.k} ${styles.kBlk}`}>
-                      <small>Total de reservas</small>
+                      <small>Total de solicitudes</small>
                       <b>48</b>
                       <em>Ver detalles</em>
                     </div>
@@ -948,7 +1000,7 @@ export default function HomePage() {
                       </em>
                     </div>
                     <div className={styles.k}>
-                      <small>Ventas facturadas</small>
+                      <small>Ventas registradas</small>
                       <b>$1.284.000</b>
                       <em>
                         <i>↑18%</i> vs periodo anterior
@@ -958,14 +1010,14 @@ export default function HomePage() {
 
                   <div className={styles.today}>
                     <div className={styles.todayH}>
-                      Ver detalle de reservas de hoy (3)<span>▾</span>
+                      Ver detalle de solicitudes de hoy (3)<span>▾</span>
                     </div>
                     <div className={styles.tr}>
                       <span className={styles.h}>11:30</span>
                       <span className={styles.n}>
                         Camila Rojas<small>Corte + brushing · Pía</small>
                       </span>
-                      <span className={styles.st}>Pagada</span>
+                      <span className={styles.st}>Confirmada</span>
                     </div>
                     <div className={styles.tr}>
                       <span className={styles.h}>12:00</span>
@@ -979,7 +1031,7 @@ export default function HomePage() {
                       <span className={styles.n}>
                         Sofía Muñoz<small>Manicure · Fran</small>
                       </span>
-                      <span className={`${styles.st} ${styles.stP}`}>Recordada</span>
+                      <span className={`${styles.st} ${styles.stP}`}>Pendiente</span>
                     </div>
                   </div>
 
@@ -991,7 +1043,9 @@ export default function HomePage() {
                             <path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" />
                           </svg>
                         </span>
-                        <b>Pagos en línea</b>
+                        <b>
+                          Pagos en línea {!FEATURES.pagosOnline && <ProximamenteBadge style={{ marginLeft: 6 }} />}
+                        </b>
                       </div>
                       <p>Estado de tus transacciones y métodos de pago en el periodo.</p>
                       <div className={styles.mbBars}>
@@ -1081,7 +1135,7 @@ export default function HomePage() {
             con un cliente que no llega.
           </h2>
           <p className={styles.lead}>
-            Todos los planes incluyen agenda, landing, pagos, recordatorios y los asistentes Linki IA.
+            Todos los planes incluyen agenda, landing, solicitudes de reserva ilimitadas y QR. Pagos online, recordatorios por WhatsApp y Linki IA llegan próximamente.
           </p>
           <div className={styles.toggle}>
             <button
@@ -1111,17 +1165,29 @@ export default function HomePage() {
               <small> /mes</small>
             </div>
             <p className={styles.priceNote}>
-              {billingPeriod === "yearly" ? "$95.040 facturado anual" : ""}
+              {billingPeriod === "yearly" ? "$95.040 al año" : ""}
             </p>
             <ul>
               <li>1 profesional</li>
               <li>Link y landing personalizada</li>
-              <li>Reservas ilimitadas</li>
-              <li>Recordatorios por WhatsApp</li>
-              <li>Pagos con tarjeta y Apple Pay</li>
+              <li>Solicitudes de reserva ilimitadas</li>
+              <li>
+                Recordatorios por WhatsApp{" "}
+                {!FEATURES.whatsappAutomatico && <ProximamenteBadge style={{ marginLeft: 6 }} />}
+              </li>
+              <li>
+                Pagos con tarjeta y Apple Pay{" "}
+                {!FEATURES.pagosOnline && <ProximamenteBadge style={{ marginLeft: 6 }} />}
+              </li>
               <li>QR y material impreso</li>
             </ul>
-            <button className={`${styles.btn} ${styles.btnLight}`} onClick={() => openRegister("individual")}>
+            <button
+              className={`${styles.btn} ${styles.btnLight}`}
+              onClick={(e) => {
+                triggerRef.current = e.currentTarget;
+                openRegister("individual");
+              }}
+            >
               Empezar
             </button>
           </div>
@@ -1136,17 +1202,29 @@ export default function HomePage() {
               <small> /mes</small>
             </div>
             <p className={styles.priceNote}>
-              {billingPeriod === "yearly" ? "$191.904 facturado anual" : ""}
+              {billingPeriod === "yearly" ? "$191.904 al año" : ""}
             </p>
             <ul>
               <li>Hasta 5 profesionales</li>
               <li>Todo lo del plan Individual</li>
               <li>Calendario por profesional</li>
               <li>Ventas y caja del equipo</li>
-              <li>Gift cards y fidelización</li>
-              <li>Linki Secretary, Marketing y Business</li>
+              <li>
+                Gift cards y fidelización{" "}
+                {!FEATURES.giftCards && <ProximamenteBadge style={{ marginLeft: 6 }} />}
+              </li>
+              <li>
+                Linki Secretary, Marketing y Business{" "}
+                {!FEATURES.linkiIA && <ProximamenteBadge style={{ marginLeft: 6 }} />}
+              </li>
             </ul>
-            <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={() => openRegister("equipo")}>
+            <button
+              className={`${styles.btn} ${styles.btnPrimary}`}
+              onClick={(e) => {
+                triggerRef.current = e.currentTarget;
+                openRegister("equipo");
+              }}
+            >
               Crear mi link
             </button>
           </div>
@@ -1160,17 +1238,26 @@ export default function HomePage() {
               <small> /mes</small>
             </div>
             <p className={styles.priceNote}>
-              {billingPeriod === "yearly" ? "$383.904 facturado anual" : ""}
+              {billingPeriod === "yearly" ? "$383.904 al año" : ""}
             </p>
             <ul>
               <li>6 o más profesionales</li>
               <li>Todo lo del plan Equipo</li>
               <li>Reportes avanzados</li>
               <li>Base de clientes completa</li>
-              <li>Campañas de reactivación</li>
+              <li>
+                Campañas de reactivación{" "}
+                {!FEATURES.linkiIA && <ProximamenteBadge style={{ marginLeft: 6 }} />}
+              </li>
               <li>Soporte prioritario</li>
             </ul>
-            <button className={`${styles.btn} ${styles.btnLight}`} onClick={() => openRegister("business")}>
+            <button
+              className={`${styles.btn} ${styles.btnLight}`}
+              onClick={(e) => {
+                triggerRef.current = e.currentTarget;
+                openRegister("business");
+              }}
+            >
               Empezar
             </button>
           </div>
@@ -1207,13 +1294,14 @@ export default function HomePage() {
         <div className={styles.wrap}>
           <div className={`${styles.finalBox} ${styles.rv}`}>
             <h2>
-              Tu próxima reserva puede llegar <span className={styles.gradText}>mientras lees esto.</span>
+              Tu próxima solicitud puede llegar <span className={styles.gradText}>mientras lees esto.</span>
             </h2>
-            <p className={styles.lead}>Elige el nombre de tu link y empieza a recibir reservas hoy.</p>
+            <p className={styles.lead}>Elige el nombre de tu link y empieza a recibir solicitudes de reserva hoy.</p>
             <form
               className={styles.linkDemo}
               onSubmit={(e) => {
                 e.preventDefault();
+                triggerRef.current = e.currentTarget;
                 openRegister(undefined, finalSlug);
               }}
             >
@@ -1243,7 +1331,7 @@ export default function HomePage() {
               <Link href="/" className={styles.logoLink}>
                 <img src="/logo-horizontal-blanco.png" alt="AgendaLink" className={styles.logoImg} />
               </Link>
-              <p>Un link. Todo resuelto. Agenda, pagos, clientes e IA para negocios de servicios en Chile.</p>
+              <p>Un link. Todo resuelto. Agenda, clientes y panel para negocios de servicios en Chile.</p>
             </div>
             <div>
               <h6>Producto</h6>
@@ -1253,24 +1341,26 @@ export default function HomePage() {
             </div>
             <div>
               <h6>Cuenta</h6>
-              <a
-                href="#login"
+              <Link
+                href="/login"
                 onClick={(e) => {
                   e.preventDefault();
+                  triggerRef.current = e.currentTarget;
                   setLoginModalOpen(true);
                 }}
               >
                 Iniciar sesión
-              </a>
-              <a
-                href="#registro"
+              </Link>
+              <Link
+                href="/registro"
                 onClick={(e) => {
                   e.preventDefault();
+                  triggerRef.current = e.currentTarget;
                   openRegister();
                 }}
               >
                 Registrar negocio
-              </a>
+              </Link>
             </div>
             <div>
               <h6>Ayuda</h6>
@@ -1289,210 +1379,36 @@ export default function HomePage() {
           <div className={styles.footB}>
             <span>© {new Date().getFullYear()} AgendaLink. Todos los derechos reservados.</span>
             <span>
-              Un producto de{" "}
-              <a href="https://ganimides.cl" target="_blank" rel="noopener noreferrer" style={{ color: "#fff", textDecoration: "underline" }}>
-                Ganímedes
-              </a>
+              Un producto de <strong>{LEGAL.marcaMatriz}</strong>
             </span>
           </div>
         </div>
       </footer>
 
-      {/* ===== MODAL DE REGISTRO / ONBOARDING ===== */}
+      {/* ===== MODAL DE REGISTRO UNIFICADO ===== */}
       {registerModalOpen && (
-        <div className={styles.modalOverlay} onClick={() => setRegisterModalOpen(false)}>
+        <div
+          className={styles.modalOverlay}
+          onClick={closeRegisterModal}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="registro-title"
+        >
           <div className={styles.modalBox} onClick={(e) => e.stopPropagation()}>
-            <button className={styles.modalCloseBtn} onClick={() => setRegisterModalOpen(false)}>
+            <button
+              className={styles.modalCloseBtn}
+              onClick={closeRegisterModal}
+              aria-label="Cerrar"
+            >
               ✕
             </button>
 
-            {regStep === 1 && (
-              <>
-                <h3 className={styles.modalTitle}>Crea tu AgendaLink</h3>
-                <p className={styles.modalSubtitle}>Empieza gratis. Tu link quedará listo en segundos.</p>
-
-                {regError && <div className={styles.modalError}>{regError}</div>}
-
-                <form onSubmit={handleRegisterSubmit}>
-                  <div className={styles.formGroup}>
-                    <label>Nombre de tu Negocio</label>
-                    <input
-                      type="text"
-                      className={styles.formInput}
-                      placeholder="Ej. Valentina Studio"
-                      value={regFormData.name}
-                      onChange={(e) => setRegFormData({ ...regFormData, name: e.target.value })}
-                      required
-                    />
-                  </div>
-
-                  <div className={styles.formGroup}>
-                    <label>Tu Nombre</label>
-                    <input
-                      type="text"
-                      className={styles.formInput}
-                      placeholder="Ej. Valentina Morales"
-                      value={regFormData.ownerName}
-                      onChange={(e) => setRegFormData({ ...regFormData, ownerName: e.target.value })}
-                      required
-                    />
-                  </div>
-
-                  <div className={styles.formGroup}>
-                    <label>Correo Electrónico</label>
-                    <input
-                      type="email"
-                      className={styles.formInput}
-                      placeholder="Ej. contacto@valentina.cl"
-                      value={regFormData.email}
-                      onChange={(e) => setRegFormData({ ...regFormData, email: e.target.value })}
-                      required
-                    />
-                  </div>
-
-                  <div className={styles.formGroup}>
-                    <label>Contraseña para tu cuenta</label>
-                    <input
-                      type="password"
-                      className={styles.formInput}
-                      placeholder="Mínimo 8 caracteres"
-                      value={regFormData.password}
-                      onChange={(e) => setRegFormData({ ...regFormData, password: e.target.value })}
-                      autoComplete="new-password"
-                      minLength={8}
-                      maxLength={128}
-                      required
-                    />
-                    <div style={{ marginTop: "6px", fontSize: "12px", lineHeight: "1.4" }}>
-                      {!regFormData.password ? (
-                        <span style={{ color: "var(--muted, #94a3b8)" }}>
-                          Mínimo 8 caracteres (puedes combinar letras, números y símbolos)
-                        </span>
-                      ) : regFormData.password.length < 8 ? (
-                        <span style={{ color: "#f59e0b", fontWeight: "600" }}>
-                          ⚠️ Debe tener al menos 8 caracteres (llevas {regFormData.password.length} de 8)
-                        </span>
-                      ) : (
-                        <span style={{ color: "#22c55e", fontWeight: "600" }}>
-                          ✓ Contraseña válida ({regFormData.password.length} caracteres)
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className={styles.formGroup}>
-                    <label>Rubro</label>
-                    <select
-                      className={styles.formSelect}
-                      value={regFormData.category}
-                      onChange={(e) => setRegFormData({ ...regFormData, category: e.target.value })}
-                    >
-                      <option value="Peluquería">Peluquería & Barbería</option>
-                      <option value="Salud">Salud & Bienestar</option>
-                      <option value="Fitness">Fitness & Deporte</option>
-                      <option value="Profesionales">Servicios Profesionales</option>
-                      <option value="Otros">Otros servicios</option>
-                    </select>
-                  </div>
-
-                  <div className={styles.formGroup}>
-                    <label>Equipo / Plan</label>
-                    <select
-                      className={styles.formSelect}
-                      value={regFormData.teamSize}
-                      onChange={(e) => setRegFormData({ ...regFormData, teamSize: e.target.value })}
-                    >
-                      <option value="1 persona">Solo yo (Plan Individual)</option>
-                      <option value="2-5 personas">2 a 5 personas (Plan Equipo)</option>
-                      <option value="6+ personas">6 o más personas (Plan Business)</option>
-                    </select>
-                  </div>
-
-                  <div className={styles.formGroup}>
-                    <label>País</label>
-                    <select
-                      className={styles.formSelect}
-                      value={regFormData.country}
-                      onChange={(e) => setRegFormData({ ...regFormData, country: e.target.value })}
-                    >
-                      <option value="Chile">Chile</option>
-                    </select>
-                  </div>
-
-                  <button
-                    type="submit"
-                    className={`${styles.btn} ${styles.btnPrimary}`}
-                    style={{ width: "100%", marginTop: "16px" }}
-                    disabled={
-                      regLoading ||
-                      !regFormData.name ||
-                      !regFormData.ownerName ||
-                      !regFormData.email ||
-                      regFormData.password.length < 8
-                    }
-                  >
-                    {regLoading ? "Creando tu link..." : "Crear mi link gratis"}
-                  </button>
-
-                  <p style={{ fontSize: "11px", color: "var(--muted)", textAlign: "center", marginTop: "14px", lineHeight: "1.4" }}>
-                    Al registrarte, aceptas los{" "}
-                    <Link href="/terminos" target="_blank" style={{ textDecoration: "underline", color: "inherit", fontWeight: "600" }}>
-                      Términos
-                    </Link>
-                    , la{" "}
-                    <Link href="/privacidad" target="_blank" style={{ textDecoration: "underline", color: "inherit", fontWeight: "600" }}>
-                      Privacidad
-                    </Link>{" "}
-                    y el{" "}
-                    <Link href="/legal" target="_blank" style={{ textDecoration: "underline", color: "inherit", fontWeight: "600" }}>
-                      Resguardo de IA
-                    </Link>
-                    .
-                  </p>
-                </form>
-              </>
-            )}
-
-            {regStep === 3 && (
-              <div style={{ textAlign: "center" }}>
-                <div style={{ fontSize: "38px", marginBottom: "12px" }}>🎉</div>
-                <h3 className={styles.modalTitle}>¡Tu AgendaLink está lista!</h3>
-                <p className={styles.modalSubtitle}>Ya puedes compartir este link con tus clientes para agendar citas.</p>
-
-                <div className={styles.linkBox}>
-                  <span className={styles.linkText}>
-                    {typeof window !== "undefined" ? window.location.origin : "https://agendalink.cl"}/{createdSlug}
-                  </span>
-                  <button onClick={copyCreatedLink} className={styles.copyBtn}>
-                    {copied ? "¡Copiado!" : "Copiar"}
-                  </button>
-                </div>
-
-                <div style={{ margin: "20px 0" }}>
-                  <p style={{ fontSize: "12px", fontWeight: "700", color: "var(--muted)", marginBottom: "10px" }}>
-                    CÓDIGO QR OFICIAL
-                  </p>
-                  <QrDownloader slug={createdSlug} businessName={regFormData.name} />
-                </div>
-
-                <div style={{ display: "flex", gap: "10px", marginTop: "24px" }}>
-                  <Link
-                    href={`/${createdSlug}`}
-                    className={`${styles.btn} ${styles.btnLight}`}
-                    style={{ flex: 1, textDecoration: "none" }}
-                  >
-                    Ver link público
-                  </Link>
-                  <Link
-                    href={`/admin/${createdSlug}`}
-                    className={`${styles.btn} ${styles.btnPrimary}`}
-                    style={{ flex: 1, textDecoration: "none" }}
-                  >
-                    Ir al Panel →
-                  </Link>
-                </div>
-              </div>
-            )}
+            <RegistroForm
+              isModal
+              initialPlan={registerModalPlan}
+              initialSlug={registerModalSlug}
+              onClose={closeRegisterModal}
+            />
           </div>
         </div>
       )}
@@ -1501,29 +1417,39 @@ export default function HomePage() {
       {loginModalOpen && (
         <div
           className={styles.modalOverlay}
-          onClick={() => {
-            setLoginModalOpen(false);
-          }}
+          onClick={closeLoginModal}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="login-modal-title"
         >
           <div className={styles.modalBox} onClick={(e) => e.stopPropagation()}>
             <button
               className={styles.modalCloseBtn}
-              onClick={() => {
-                setLoginModalOpen(false);
-              }}
+              onClick={closeLoginModal}
+              aria-label="Cerrar"
             >
               ✕
             </button>
 
-            <h3 className={styles.modalTitle}>Iniciar Sesión</h3>
-            <p className={styles.modalSubtitle}>Accede al panel de control de tu negocio en AgendaLink</p>
+            <h3 id="login-modal-title" className={styles.modalTitle}>
+              Iniciar Sesión
+            </h3>
+            <p className={styles.modalSubtitle}>
+              Accede al panel de control de tu negocio en AgendaLink
+            </p>
 
             {loginError && <div className={styles.modalError}>{loginError}</div>}
 
             <Link
               href="/login"
               className={`${styles.btn} ${styles.btnPrimary}`}
-              style={{ width: "100%", justifyContent: "center", marginBottom: "16px", textDecoration: "none", display: "inline-flex" }}
+              style={{
+                width: "100%",
+                justifyContent: "center",
+                marginBottom: "16px",
+                textDecoration: "none",
+                display: "inline-flex",
+              }}
             >
               Iniciar sesión con Email y Contraseña →
             </Link>
@@ -1532,15 +1458,40 @@ export default function HomePage() {
 
             <form onSubmit={handleLoginSubmit}>
               <div className={styles.formGroup}>
-                <label>Link de tu negocio</label>
-                <div style={{ display: "flex", alignItems: "center", background: "#f8fafc", border: "1px solid var(--line)", borderRadius: "12px", padding: "0 14px", height: "46px" }}>
-                  <span style={{ fontSize: "14px", fontWeight: "600", color: "var(--muted)" }}>agendalink.cl/</span>
+                <label htmlFor="login-modal-slug">Link de tu negocio</label>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    background: "#f8fafc",
+                    border: "1px solid var(--line)",
+                    borderRadius: "12px",
+                    padding: "0 14px",
+                    height: "46px",
+                  }}
+                >
+                  <span style={{ fontSize: "14px", fontWeight: "600", color: "var(--muted)" }}>
+                    agendalink.cl/
+                  </span>
                   <input
+                    id="login-modal-slug"
                     type="text"
+                    autoComplete="off"
                     placeholder="tunegocio"
-                    style={{ border: "none", background: "none", outline: "none", padding: "8px 4px", fontSize: "14px", fontWeight: "700", flex: 1, color: "var(--text)" }}
+                    style={{
+                      border: "none",
+                      background: "none",
+                      outline: "none",
+                      padding: "8px 4px",
+                      fontSize: "14px",
+                      fontWeight: "700",
+                      flex: 1,
+                      color: "var(--text)",
+                    }}
                     value={loginSlug}
-                    onChange={(e) => setLoginSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))}
+                    onChange={(e) =>
+                      setLoginSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))
+                    }
                     required
                   />
                 </div>

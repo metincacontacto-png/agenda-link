@@ -1,15 +1,19 @@
 import React, { Suspense } from "react";
-import OnboardingForm from "@/components/OnboardingForm";
+import type { Metadata } from "next";
+import RegistroForm from "@/components/RegistroForm";
 
-export const metadata = {
-  title: "Crea tu AgendaLink | AgendaLink",
+export const metadata: Metadata = {
+  title: "Crea tu AgendaLink gratis",
   description: "Configura tu página y empieza a recibir solicitudes de reserva en menos de 10 minutos.",
+  alternates: {
+    canonical: "/registro",
+  },
 };
 
 export default function RegistroPage() {
   return (
-    <Suspense fallback={<div style={{ minHeight: "100vh", background: "#0b1220" }} />}>
-      <OnboardingForm />
+    <Suspense fallback={<div style={{ minHeight: "100vh", background: "#f8fafc" }} />}>
+      <RegistroForm />
     </Suspense>
   );
 }

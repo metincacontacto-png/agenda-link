@@ -13,7 +13,7 @@ export interface BookingReceipt {
   paymentMethod: null;
   service: { name: string; duration: number; price: number };
   professional: { name: string };
-  business: { id: string; slug: string; name: string; currency: string; timezone: string };
+  business: { id: string; slug: string; name: string; currency: string; timezone: string; email?: string };
 }
 
 export type CreateBookingResult =

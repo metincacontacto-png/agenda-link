@@ -75,7 +75,7 @@ export default function BookingPage({ params }: { params: Promise<{ slug: string
     setShowBookingContact(true);
   };
 
-  const handleBookingSubmit = async (clientName: string, clientWhatsApp: string) => {
+  const handleBookingSubmit = async (clientName: string, clientWhatsApp: string, clientEmail: string) => {
     if (!selectedService || !selectedProfessional) return;
     setSubmitting(true);
     
@@ -86,6 +86,7 @@ export default function BookingPage({ params }: { params: Promise<{ slug: string
         professionalId: selectedProfessional.id,
         clientName,
         clientWhatsApp,
+        clientEmail,
         date: selectedDate,
         time: selectedTime,
       };

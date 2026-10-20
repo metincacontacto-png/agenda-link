@@ -142,10 +142,10 @@ export default function BookingFlow({
           className={styles.bookBtn}
         >
           {submitting
-            ? "Reservando..."
+            ? "Enviando..."
             : !selectedTime
               ? "Selecciona fecha y hora"
-              : "Confirmar Reserva"}
+              : "Enviar Solicitud"}
         </button>
       </div>
     </>

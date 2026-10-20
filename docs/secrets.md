@@ -27,10 +27,11 @@ npx wrangler pages secret list --project-name agenda-link
 
 ## Worker de prueba y futuros despliegues
 
-El Worker usa la sesión firmada y el rol global almacenado en D1. Solo requiere:
+El Worker usa la sesión firmada y el rol global almacenado en D1. Requiere:
 
 ```bash
 npx wrangler secret put SESSION_SIGNING_SECRET
+npx wrangler secret put RESEND_API_KEY
 ```
 
 No configurar `SUPER_ADMIN_PASSWORD` en el Worker ni asumir que los secretos de Pages se transfieren al Worker. Para habilitar una cuenta Super Admin, asignar `globalRole = SUPER_ADMIN` y guardar su contraseña como hash en D1 con `scripts/set-super-admin-password.mjs`.

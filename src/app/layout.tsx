@@ -1,21 +1,39 @@
 import "./globals.css";
 import React from "react";
+import type { Metadata } from "next";
 
-export const metadata = {
+export const metadata: Metadata = {
   metadataBase: new URL("https://agendalink.cl"),
-  title: "Agenda Link",
-  description: "Un link. Todo resuelto.",
+  title: {
+    default: "AgendaLink — Un link. Todo resuelto.",
+    template: "%s | AgendaLink",
+  },
+  description:
+    "La forma más simple de recibir reservas y organizar tu negocio en Chile. Tu link personalizado listo en 30 segundos.",
+  alternates: {
+    canonical: "/",
+  },
   openGraph: {
-    title: "Agenda Link",
-    description: "Un link. Todo resuelto.",
+    type: "website",
+    locale: "es_CL",
+    url: "https://agendalink.cl",
+    siteName: "AgendaLink",
+    title: "AgendaLink — Un link. Todo resuelto.",
+    description: "La forma más simple de recibir reservas y organizar tu negocio en Chile.",
     images: [
       {
-        url: "/logo.png",
-        width: 512,
-        height: 512,
-        alt: "Agenda Link Logo",
+        url: "/og.png",
+        width: 1200,
+        height: 630,
+        alt: "AgendaLink",
       },
     ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "AgendaLink — Un link. Todo resuelto.",
+    description: "La forma más simple de recibir reservas y organizar tu negocio en Chile.",
+    images: ["/og.png"],
   },
 };
 

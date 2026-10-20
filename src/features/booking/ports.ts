@@ -4,6 +4,7 @@ export interface BookingBusiness {
   name: string;
   currency: string;
   timezone: string;
+  email?: string;
 }
 
 export interface BookingService {
