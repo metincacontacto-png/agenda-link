@@ -1,4 +1,6 @@
 import React from "react";
+import { notFound } from "next/navigation";
+import { isValidSlug } from "@/lib/reserved-slugs";
 import { prisma } from "@/lib/db";
 import styles from "./success.module.css";
 import Link from "next/link";
@@ -25,9 +27,22 @@ export default async function SuccessPage({
   const { slug } = await params;
   const { appId } = await searchParams;
 
+  if (!isValidSlug(slug)) {
+    notFound();
+  }
+
+  const business = await prisma.business.findUnique({
+    where: { slug },
+    select: { id: true },
+  });
+
+  if (!business) {
+    notFound();
+  }
+
   const appointment = await getAppointment(appId);
 
-  if (!appointment) {
+  if (!appointment || appointment.business.slug !== slug) {
     return (
       <main className={styles.container}>
         <div className={styles.card}>

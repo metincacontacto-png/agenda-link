@@ -62,6 +62,8 @@ export default function RegistroForm({
   });
   const [loading, setLoading] = useState(false);
   const [formError, setFormError] = useState("");
+  const [honeypot, setHoneypot] = useState("");
+  const [formStartedAt] = useState(() => Date.now());
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [createdSlug, setCreatedSlug] = useState("");
   const [copied, setCopied] = useState(false);
@@ -123,6 +125,8 @@ export default function RegistroForm({
     try {
       const payload = {
         ...formData,
+        website_hp: honeypot,
+        formStartedAt,
         termsAccepted: true,
         termsAcceptedAt: new Date().toISOString(),
         termsVersion: "2026-10-20",
@@ -166,7 +170,8 @@ export default function RegistroForm({
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      alert("Copia el link manualmente: " + url);
+      setCopied(false);
+      setFormError("Copia el link manualmente: " + url);
     }
   };
 
@@ -186,6 +191,18 @@ export default function RegistroForm({
           {formError && <div className={styles.errorBanner}>{formError}</div>}
 
           <form onSubmit={handleSubmit} className={styles.form}>
+            {/* Honeypot anti-spam field */}
+            <div style={{ display: "none", position: "absolute", left: "-9999px" }} aria-hidden="true">
+              <input
+                type="text"
+                name="website_hp"
+                value={honeypot}
+                onChange={(e) => setHoneypot(e.target.value)}
+                tabIndex={-1}
+                autoComplete="off"
+              />
+            </div>
+
             {/* Nombre del negocio */}
             <div className={styles.formGroup}>
               <label htmlFor="reg-name" className={styles.label}>

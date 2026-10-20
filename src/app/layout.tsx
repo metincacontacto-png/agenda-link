@@ -22,10 +22,12 @@ export const metadata: Metadata = {
     description: "La forma más simple de recibir reservas y organizar tu negocio en Chile.",
     images: [
       {
-        url: "/og.png",
+        url: "https://agendalink.cl/og.png",
+        secureUrl: "https://agendalink.cl/og.png",
         width: 1200,
         height: 630,
-        alt: "AgendaLink",
+        type: "image/png",
+        alt: "AgendaLink — Un link. Todo resuelto.",
       },
     ],
   },
@@ -33,7 +35,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "AgendaLink — Un link. Todo resuelto.",
     description: "La forma más simple de recibir reservas y organizar tu negocio en Chile.",
-    images: ["/og.png"],
+    images: ["https://agendalink.cl/og.png"],
   },
 };
 

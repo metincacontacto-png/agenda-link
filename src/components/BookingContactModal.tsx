@@ -7,12 +7,13 @@ import { FEATURES } from "@/lib/features";
 
 interface BookingContactModalProps {
   businessName?: string;
+  errorMessage?: string;
   submitting: boolean;
   onClose: () => void;
   onSubmit: (name: string, phone: string, email: string, paymentChoice: "mercadopago" | "local") => void;
 }
 
-export default function BookingContactModal({ businessName, submitting, onClose, onSubmit }: BookingContactModalProps) {
+export default function BookingContactModal({ businessName, errorMessage, submitting, onClose, onSubmit }: BookingContactModalProps) {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
@@ -50,6 +51,23 @@ export default function BookingContactModal({ businessName, submitting, onClose,
         <p className={styles.text}>
           El negocio usará esta información para gestionar tu solicitud de reserva y enviarte tu comprobante.
         </p>
+        {errorMessage && (
+          <div
+            role="alert"
+            style={{
+              background: "#fef2f2",
+              color: "#b91c1c",
+              padding: "10px 14px",
+              borderRadius: "8px",
+              fontSize: "13px",
+              fontWeight: "600",
+              marginBottom: "14px",
+              border: "1px solid #fecaca",
+            }}
+          >
+            {errorMessage}
+          </div>
+        )}
         <form onSubmit={handleSubmit}>
           <div className={styles.formGroup}>
             <label className={styles.label} htmlFor="booking-client-name">

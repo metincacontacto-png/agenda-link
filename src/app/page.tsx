@@ -377,6 +377,9 @@ export default function HomePage() {
               </div>
             </div>
           </div>
+          <p style={{ fontSize: "11px", color: "rgba(255, 255, 255, 0.45)", textAlign: "center", marginTop: "14px", letterSpacing: "0.02em" }}>
+            * Imagen referencial
+          </p>
         </div>
       </header>
 
@@ -1095,6 +1098,9 @@ export default function HomePage() {
                 </main>
               </div>
             </div>
+            <p style={{ fontSize: "11px", color: "var(--text-muted, #64748b)", textAlign: "center", marginTop: "14px", letterSpacing: "0.02em" }}>
+              * Imagen referencial
+            </p>
           </div>
         </div>
       </section>
@@ -1202,7 +1208,7 @@ export default function HomePage() {
           <div className={`${styles.plan} ${styles.planPremium} ${styles.rv}`}>
             <div className={styles.planHeaderRow}>
               <h3 style={{ margin: 0 }}>Premium</h3>
-              <span className={styles.badgePopular}>Más popular</span>
+              <span className={styles.badgePopular}>Recomendado</span>
             </div>
             <p className={styles.who}>Para empresas que buscan tener el control y llevar un seguimiento de pacientes/clientes personalizable.</p>
             <div className={styles.price}>

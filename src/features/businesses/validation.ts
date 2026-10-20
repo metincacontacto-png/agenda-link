@@ -44,6 +44,15 @@ export function parseOnboardingInput(body: unknown): OnboardingInputResult {
     return { ok: false, error: "Solicitud inválida" };
   }
   const data = body as Record<string, unknown>;
+
+  // Anti-spam protections: Honeypot field and submission timing
+  if (typeof data.website_hp === "string" && data.website_hp.trim().length > 0) {
+    return { ok: false, error: "Solicitud no válida" };
+  }
+  if (typeof data.formStartedAt === "number" && Date.now() - data.formStartedAt < 1200) {
+    return { ok: false, error: "Envío demasiado rápido. Por favor intenta de nuevo." };
+  }
+
   const name = trimmedString(data.name, 100);
   const ownerName = trimmedString(data.ownerName, 100);
   const email = typeof data.email === "string" ? data.email.trim().toLowerCase() : "";

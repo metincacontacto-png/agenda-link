@@ -30,30 +30,37 @@ export default function OnboardingForm({
     servicePrice: "",
   });
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [honeypot, setHoneypot] = useState("");
+  const [formStartedAt] = useState(() => Date.now());
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [createdSlug, setCreatedSlug] = useState("");
   const [copied, setCopied] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
+    setError(null);
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (loading) return;
+    setError(null);
     if (formData.password.length < 8) {
-      alert("La contraseña debe tener al menos 8 caracteres");
+      setError("La contraseña debe tener al menos 8 caracteres.");
       return;
     }
     if (!termsAccepted) {
-      alert("Debes aceptar los Términos del Servicio y la Política de Privacidad");
+      setError("Debes aceptar los Términos del Servicio y la Política de Privacidad.");
       return;
     }
     setLoading(true);
     try {
       const payload = {
         ...formData,
+        website_hp: honeypot,
+        formStartedAt,
         termsAccepted: true,
         termsAcceptedAt: new Date().toISOString(),
         termsVersion: "2026-10-20",
@@ -68,11 +75,11 @@ export default function OnboardingForm({
         setCreatedSlug(data.slug);
         setStep(3);
       } else {
-        alert(data.error || "Algo salió mal al crear tu AgendaLink");
+        setError(data.error || "Algo salió mal al crear tu AgendaLink");
       }
     } catch (err) {
       console.error(err);
-      alert("Error al enviar la configuración");
+      setError("Error de red al enviar la configuración. Intenta nuevamente.");
     } finally {
       setLoading(false);
     }
@@ -99,7 +106,7 @@ export default function OnboardingForm({
       window.setTimeout(() => setCopied(false), 2000);
     } catch (err) {
       console.error("Error al copiar el link:", err);
-      alert("No se pudo copiar automáticamente. Por favor, selecciona y copia el link manualmente.");
+      setError("No se pudo copiar automáticamente. Por favor, selecciona y copia el link manualmente.");
     }
   };
 
@@ -141,6 +148,39 @@ export default function OnboardingForm({
 
         {step === 1 ? (
           <form onSubmit={handleSubmit} className={styles.form}>
+            {/* Honeypot anti-spam field */}
+            <div style={{ display: "none", position: "absolute", left: "-9999px" }} aria-hidden="true">
+              <input
+                type="text"
+                name="website_hp"
+                value={honeypot}
+                onChange={(e) => setHoneypot(e.target.value)}
+                tabIndex={-1}
+                autoComplete="off"
+              />
+            </div>
+
+            {error && (
+              <div
+                role="alert"
+                style={{
+                  background: "#fef2f2",
+                  border: "1px solid #fecaca",
+                  color: "#b91c1c",
+                  padding: "10px 14px",
+                  borderRadius: "10px",
+                  fontSize: "13px",
+                  fontWeight: 600,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                }}
+              >
+                <span aria-hidden="true">⚠️</span>
+                <span>{error}</span>
+              </div>
+            )}
+
             <label>
               Nombre de tu negocio
               <input

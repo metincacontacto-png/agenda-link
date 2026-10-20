@@ -6,6 +6,7 @@ import Link from "next/link";
 export default function LoginForm() {
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [showRecoveryModal, setShowRecoveryModal] = useState(false);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -46,6 +47,10 @@ export default function LoginForm() {
       setSubmitting(false);
     }
   }
+
+  const recoveryWhatsAppUrl = `https://wa.me/56985967325?text=${encodeURIComponent(
+    "Hola Soporte AgendaLink, necesito restablecer la contraseña de mi cuenta.\n\n• Correo registrado:\n• Link de mi negocio: agendalink.cl/"
+  )}`;
 
   return (
     <main
@@ -115,14 +120,23 @@ export default function LoginForm() {
               <label htmlFor="login-password" style={{ fontSize: 13, fontWeight: 700, color: "#334155" }}>
                 Contraseña
               </label>
-              <a
-                href="https://wa.me/56985967325?text=Hola,%20olvid%C3%A9%20mi%20contrase%C3%B1a%20de%20AgendaLink"
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ fontSize: 12, fontWeight: 600, color: "#0066FF", textDecoration: "none" }}
+              <button
+                type="button"
+                onClick={() => setShowRecoveryModal(true)}
+                style={{
+                  background: "none",
+                  border: 0,
+                  padding: 0,
+                  fontSize: 12,
+                  fontWeight: 600,
+                  color: "#0066FF",
+                  cursor: "pointer",
+                  fontFamily: "inherit",
+                  textDecoration: "none",
+                }}
               >
                 ¿Olvidaste tu contraseña?
-              </a>
+              </button>
             </div>
             <input
               id="login-password"
@@ -176,6 +190,134 @@ export default function LoginForm() {
           </Link>
         </div>
       </section>
+
+      {/* Modal Protocolo de Recuperación de Identidad */}
+      {showRecoveryModal && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="recovery-modal-title"
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(15, 23, 42, 0.65)",
+            backdropFilter: "blur(4px)",
+            display: "grid",
+            placeItems: "center",
+            padding: 20,
+            zIndex: 9999,
+          }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setShowRecoveryModal(false);
+          }}
+        >
+          <div
+            style={{
+              background: "#ffffff",
+              borderRadius: 20,
+              maxWidth: 460,
+              width: "100%",
+              padding: "28px 24px",
+              boxShadow: "0 20px 48px rgba(0, 0, 0, 0.2)",
+              border: "1px solid #e2e8f0",
+              animation: "fadeIn 0.2s ease-out",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
+              <div
+                style={{
+                  width: 36,
+                  height: 36,
+                  borderRadius: 10,
+                  background: "#eff6ff",
+                  color: "#0066FF",
+                  display: "grid",
+                  placeItems: "center",
+                  fontSize: 18,
+                  fontWeight: 800,
+                }}
+              >
+                🔒
+              </div>
+              <div>
+                <h3 id="recovery-modal-title" style={{ margin: 0, fontSize: 18, fontWeight: 800, color: "#0f172a" }}>
+                  Recuperación Segura
+                </h3>
+                <span style={{ fontSize: 12, color: "#64748b" }}>Protocolo de comprobación de identidad</span>
+              </div>
+            </div>
+
+            <p style={{ fontSize: 13, color: "#475569", lineHeight: 1.5, margin: "0 0 16px" }}>
+              Para resguardar los datos de tu negocio y evitar que terceros suplanten tu identidad, seguimos 3 pasos de verificación antes de restablecer tu acceso:
+            </p>
+
+            <ol
+              style={{
+                margin: "0 0 20px",
+                paddingLeft: 20,
+                fontSize: 13,
+                color: "#334155",
+                lineHeight: 1.6,
+                display: "grid",
+                gap: 8,
+              }}
+            >
+              <li>
+                <strong>Solicitud:</strong> Escríbenos a soporte vía WhatsApp indicando tu correo registrado y el link de tu negocio.
+              </li>
+              <li>
+                <strong>Código de verificación:</strong> Nuestro equipo enviará un código de seguridad único a tu <em>correo registrado</em>.
+              </li>
+              <li>
+                <strong>Confirmación:</strong> Tras confirmar dicho código, generaremos un enlace seguro para crear tu nueva clave.
+              </li>
+            </ol>
+
+            <div style={{ display: "grid", gap: 10 }}>
+              <a
+                href={recoveryWhatsAppUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 8,
+                  padding: "13px 18px",
+                  background: "#25D366",
+                  color: "#ffffff",
+                  borderRadius: 12,
+                  fontWeight: 700,
+                  fontSize: 14,
+                  textDecoration: "none",
+                  textAlign: "center",
+                }}
+              >
+                <span>💬</span>
+                <span>Contactar a Soporte por WhatsApp</span>
+              </a>
+
+              <button
+                type="button"
+                onClick={() => setShowRecoveryModal(false)}
+                style={{
+                  padding: "11px 18px",
+                  background: "#f1f5f9",
+                  color: "#475569",
+                  border: 0,
+                  borderRadius: 12,
+                  fontWeight: 600,
+                  fontSize: 13,
+                  cursor: "pointer",
+                  fontFamily: "inherit",
+                }}
+              >
+                Volver al inicio de sesión
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
