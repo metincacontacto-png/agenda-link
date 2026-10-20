@@ -203,6 +203,7 @@ export default function AdminDashboard({ params }: { params: Promise<{ slug: str
             pagination={appointmentPagination}
             timezone={business.timezone}
             currency={business.currency}
+            businessName={business.name}
             reschedulingId={appointmentActions.reschedulingAppointmentId}
             rescheduleDate={appointmentActions.rescheduleDate}
             rescheduleTime={appointmentActions.rescheduleTime}

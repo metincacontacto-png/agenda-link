@@ -1010,6 +1010,29 @@
   background: rgba(0, 102, 255, 0.05);
 }
 
+.waReminderBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: #25d366;
+  color: #ffffff !important;
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: 9999px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 6px rgba(37, 211, 102, 0.25);
+}
+
+.waReminderBtn:hover {
+  background: #20ba5a;
+  box-shadow: 0 4px 10px rgba(37, 211, 102, 0.35);
+  transform: translateY(-1px);
+}
+
 /* Grid de Reportes Widgets */
 .reportGrid {
   display: grid;

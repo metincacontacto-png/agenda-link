@@ -307,9 +307,9 @@ export default function SuperAdminPage() {
                           className={styles.tableSelect}
                           style={biz.plan === "NEGOCIO" ? { borderColor: "var(--primary)", fontWeight: "bold" } : {}}
                         >
-                          <option value="INDIVIDUAL">Individual ($9.900)</option>
-                          <option value="EQUIPO">Equipo ($19.990)</option>
-                          <option value="NEGOCIO">Negocio ($39.990)</option>
+                          <option value="INDIVIDUAL">Individual ($10.000)</option>
+                          <option value="EQUIPO">Básico ($29.000)</option>
+                          <option value="NEGOCIO">Premium ($49.000)</option>
                         </select>
                         {isPlanLoading && <span className={styles.actionSpinner} />}
                       </td>

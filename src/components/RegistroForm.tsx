@@ -24,8 +24,8 @@ export default function RegistroForm({
   const mapPlanToTeamSize = (plan?: string) => {
     if (!plan) return "1 persona";
     const p = plan.toLowerCase();
-    if (p.includes("equipo")) return "2-5 personas";
-    if (p.includes("business") || p.includes("negocio")) return "6+ personas";
+    if (p.includes("basico") || p.includes("básico") || p.includes("equipo")) return "2-5 personas";
+    if (p.includes("premium") || p.includes("business") || p.includes("negocio")) return "6+ personas";
     return "1 persona";
   };
 
@@ -324,9 +324,9 @@ export default function RegistroForm({
                   onChange={(e) => setFormData({ ...formData, teamSize: e.target.value })}
                   className={styles.select}
                 >
-                  <option value="1 persona">Plan Individual (Solo yo)</option>
-                  <option value="2-5 personas">Plan Equipo (2 a 5 personas)</option>
-                  <option value="6+ personas">Plan Business (6 o más personas)</option>
+                  <option value="1 persona">Plan Individual (1 profesional - $10.000/mes + IVA)</option>
+                  <option value="2-5 personas">Plan Básico (2 profesionales - $29.000/mes + IVA)</option>
+                  <option value="6+ personas">Plan Premium (5 profesionales - $49.000/mes + IVA)</option>
                 </select>
               </div>
             </div>

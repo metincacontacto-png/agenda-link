@@ -1135,7 +1135,7 @@ export default function HomePage() {
             con un cliente que no llega.
           </h2>
           <p className={styles.lead}>
-            Todos los planes incluyen agenda, landing, solicitudes de reserva ilimitadas y QR. Pagos online, recordatorios por WhatsApp y Linki IA llegan próximamente.
+            Comienza con 14 días de prueba gratis sin tarjeta. Elige el plan ideal para el tamaño de tu equipo.
           </p>
           <div className={styles.toggle}>
             <button
@@ -1150,7 +1150,7 @@ export default function HomePage() {
               className={billingPeriod === "yearly" ? styles.toggleOn : ""}
               onClick={() => setBillingPeriod("yearly")}
             >
-              Anual <span className={styles.save}>-20%</span>
+              Anual <span className={styles.save}>(Obtén 2 meses Gratis)</span>
             </button>
           </div>
         </div>
@@ -1159,110 +1159,110 @@ export default function HomePage() {
           {/* Individual */}
           <div className={`${styles.plan} ${styles.rv}`}>
             <h3>Individual</h3>
-            <p className={styles.who}>Para profesionales independientes</p>
+            <p className={styles.who}>Para independientes que necesitan de un aliado para controlar y hacer crecer su negocio.</p>
             <div className={styles.price}>
-              {billingPeriod === "monthly" ? "$9.900" : "$7.920"}
-              <small> /mes</small>
+              {billingPeriod === "monthly" ? "$10.000" : "$8.333"}
+              <small> CLP/mes + IVA</small>
             </div>
             <p className={styles.priceNote}>
-              {billingPeriod === "yearly" ? "$95.040 al año" : ""}
+              {billingPeriod === "yearly" ? "$100.000 al año + IVA (ahorras 2 meses)" : "Plan mensual sin permanencia"}
             </p>
-            <ul>
-              <li>1 profesional</li>
-              <li>Link y landing personalizada</li>
-              <li>Solicitudes de reserva ilimitadas</li>
-              <li>
-                Recordatorios por WhatsApp{" "}
-                {!FEATURES.whatsappAutomatico && <ProximamenteBadge style={{ marginLeft: 6 }} />}
-              </li>
-              <li>
-                Pagos con tarjeta y Apple Pay{" "}
-                {!FEATURES.pagosOnline && <ProximamenteBadge style={{ marginLeft: 6 }} />}
-              </li>
-              <li>QR y material impreso</li>
-            </ul>
+            <div className={styles.planPill}>
+              👤 1 profesional
+            </div>
             <button
-              className={`${styles.btn} ${styles.btnLight}`}
+              className={`${styles.btn} ${styles.btnPurple}`}
               onClick={(e) => {
                 triggerRef.current = e.currentTarget;
                 openRegister("individual");
               }}
             >
-              Empezar
+              Prueba Gratis
             </button>
-          </div>
-
-          {/* Equipo */}
-          <div className={`${styles.plan} ${styles.planPop} ${styles.rv}`}>
-            <span className={styles.badge}>⚡ Más elegido</span>
-            <h3>Equipo</h3>
-            <p className={styles.who}>Para equipos de 2 a 5 personas</p>
-            <div className={styles.price}>
-              {billingPeriod === "monthly" ? "$19.990" : "$15.992"}
-              <small> /mes</small>
-            </div>
-            <p className={styles.priceNote}>
-              {billingPeriod === "yearly" ? "$191.904 al año" : ""}
-            </p>
-            <ul>
-              <li>Hasta 5 profesionales</li>
-              <li>Todo lo del plan Individual</li>
-              <li>Calendario por profesional</li>
-              <li>Ventas y caja del equipo</li>
+            <ul style={{ marginTop: 24 }}>
+              <li>1 profesional</li>
+              <li>Link y landing personalizada</li>
+              <li>Solicitudes de reserva ilimitadas</li>
               <li>
-                Gift cards y fidelización{" "}
-                {!FEATURES.giftCards && <ProximamenteBadge style={{ marginLeft: 6 }} />}
+                Recordatorios por WhatsApp en 1 clic
               </li>
               <li>
-                Linki Secretary, Marketing y Business{" "}
-                {!FEATURES.linkiIA && <ProximamenteBadge style={{ marginLeft: 6 }} />}
+                Pagos online con Mercado Pago (Redcompra / Tarjetas)
               </li>
+              <li>QR y material listo para imprimir</li>
             </ul>
-            <button
-              className={`${styles.btn} ${styles.btnPrimary}`}
-              onClick={(e) => {
-                triggerRef.current = e.currentTarget;
-                openRegister("equipo");
-              }}
-            >
-              Crear mi link
-            </button>
           </div>
 
-          {/* Business */}
+          {/* Básico */}
           <div className={`${styles.plan} ${styles.rv}`}>
-            <h3>Business</h3>
-            <p className={styles.who}>Para negocios de 6 o más personas</p>
+            <h3>Básico</h3>
+            <p className={styles.who}>Para negocios que buscan organizarse, controlar su administración y hacer crecer sus ventas.</p>
             <div className={styles.price}>
-              {billingPeriod === "monthly" ? "$39.990" : "$31.992"}
-              <small> /mes</small>
+              {billingPeriod === "monthly" ? "$29.000" : "$24.167"}
+              <small> CLP/mes + IVA</small>
             </div>
             <p className={styles.priceNote}>
-              {billingPeriod === "yearly" ? "$383.904 al año" : ""}
+              {billingPeriod === "yearly" ? "$290.000 al año + IVA (ahorras 2 meses)" : "Plan mensual sin permanencia"}
             </p>
-            <ul>
-              <li>6 o más profesionales</li>
-              <li>Todo lo del plan Equipo</li>
-              <li>Reportes avanzados</li>
-              <li>Base de clientes completa</li>
-              <li>
-                Campañas de reactivación{" "}
-                {!FEATURES.linkiIA && <ProximamenteBadge style={{ marginLeft: 6 }} />}
-              </li>
-              <li>Soporte prioritario</li>
-            </ul>
+            <div className={styles.planPill}>
+              👥 2 profesionales
+            </div>
             <button
-              className={`${styles.btn} ${styles.btnLight}`}
+              className={`${styles.btn} ${styles.btnPurple}`}
               onClick={(e) => {
                 triggerRef.current = e.currentTarget;
-                openRegister("business");
+                openRegister("basico");
               }}
             >
-              Empezar
+              Prueba Gratis
             </button>
+            <ul style={{ marginTop: 24 }}>
+              <li>Hasta 2 profesionales</li>
+              <li>Todo lo del plan Individual</li>
+              <li>Calendario compartido por profesional</li>
+              <li>Ventas y caja en tiempo real</li>
+              <li>Base de clientes e historial</li>
+              <li>Recordatorios por WhatsApp en 1 clic</li>
+            </ul>
+          </div>
+
+          {/* Premium */}
+          <div className={`${styles.plan} ${styles.planPremium} ${styles.rv}`}>
+            <div className={styles.planHeaderRow}>
+              <h3 style={{ margin: 0 }}>Premium</h3>
+              <span className={styles.badgePopular}>Más popular</span>
+            </div>
+            <p className={styles.who}>Para empresas que buscan tener el control y llevar un seguimiento de pacientes/clientes personalizable.</p>
+            <div className={styles.price}>
+              {billingPeriod === "monthly" ? "$49.000" : "$40.833"}
+              <small> CLP/mes + IVA</small>
+            </div>
+            <p className={styles.priceNote}>
+              {billingPeriod === "yearly" ? "$490.000 al año + IVA (ahorras 2 meses)" : "Plan mensual sin permanencia"}
+            </p>
+            <div className={styles.planPill}>
+              🏢 5 profesionales
+            </div>
+            <button
+              className={`${styles.btn} ${styles.btnPurple}`}
+              onClick={(e) => {
+                triggerRef.current = e.currentTarget;
+                openRegister("premium");
+              }}
+            >
+              Prueba Gratis
+            </button>
+            <ul style={{ marginTop: 24 }}>
+              <li>Hasta 5 profesionales</li>
+              <li>Todo lo del plan Básico</li>
+              <li>Seguimiento de pacientes y clientes</li>
+              <li>Reportes avanzados de ventas y métricas</li>
+              <li>Múltiples turnos y bloqueos simultáneos</li>
+              <li>Soporte prioritario dedicado</li>
+            </ul>
           </div>
         </div>
-        <p className={styles.plansFoot}>Precios en pesos chilenos, IVA incluido. Cancela cuando quieras.</p>
+        <p className={styles.plansFoot}>Precios en pesos chilenos más IVA. Cancela o cambia de plan cuando quieras.</p>
       </section>
 
       {/* ===== FAQ ===== */}

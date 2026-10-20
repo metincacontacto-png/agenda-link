@@ -3,6 +3,7 @@
 import type { AdminAppointmentsPaginationDTO, BusinessAppointmentDTO } from "@/features/businesses/contracts";
 import type { AppointmentChangeInput } from "@/features/booking/validation";
 import { dateStringAtTimeZone } from "@/features/schedule/time";
+import { buildWhatsAppReminderUrl } from "@/lib/whatsapp";
 import styles from "../admin.module.css";
 
 interface ReservationsTabProps {
@@ -10,6 +11,7 @@ interface ReservationsTabProps {
   pagination: AdminAppointmentsPaginationDTO;
   timezone: string;
   currency: string;
+  businessName?: string;
   reschedulingId: string | null;
   rescheduleDate: string;
   rescheduleTime: string;
@@ -29,6 +31,7 @@ export default function ReservationsTab({
   pagination,
   timezone,
   currency,
+  businessName,
   reschedulingId,
   rescheduleDate,
   rescheduleTime,
@@ -83,7 +86,29 @@ export default function ReservationsTab({
                   )}
                 </div>
                 {appointment.status === "CONFIRMED" && (
-                  <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 10 }}>
+                  <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", flexWrap: "wrap", gap: 8, marginTop: 10 }}>
+                    <a
+                      href={buildWhatsAppReminderUrl({
+                        clientName: appointment.clientName,
+                        clientWhatsApp: appointment.clientWhatsApp,
+                        serviceName: appointment.service.name,
+                        professionalName: appointment.professional.name,
+                        dateTime: appointment.dateTime,
+                        businessName: businessName,
+                        timezone,
+                        price: appointment.paymentAmount || appointment.service.price || 0,
+                        currency,
+                      })}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={styles.waReminderBtn}
+                      title="Enviar recordatorio por WhatsApp con 1 clic"
+                    >
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0 0 12.04 2z" />
+                      </svg>
+                      Recordar
+                    </a>
                     {reschedulingId === appointment.id ? (
                       <>
                         <input

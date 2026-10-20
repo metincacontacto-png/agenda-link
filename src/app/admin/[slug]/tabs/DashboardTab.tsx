@@ -169,8 +169,11 @@ export default function DashboardTab({
           <h3 className={styles.reportCardTitle}>Recordatorios WhatsApp</h3>
           </div>
           <div style={{ margin: "20px 0 10px 0" }}>
-            <div style={{ fontSize: "15px", fontWeight: "700", color: "var(--text-secondary)" }}>Integración no conectada</div>
-            <p style={{ fontSize: "12px", color: "var(--text-secondary)", marginTop: "4px" }}>No se registran envíos de WhatsApp hasta configurar un proveedor.</p>
+            <div style={{ fontSize: "15px", fontWeight: "700", color: "#16a34a", display: "flex", alignItems: "center", gap: 6 }}>
+              <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#16a34a" }} />
+              1 Clic Activo (Gratis)
+            </div>
+            <p style={{ fontSize: "12px", color: "var(--text-secondary)", marginTop: "4px" }}>Envía recordatorios redactados automáticamente desde la pestaña de Reservas.</p>
           </div>
         </div>
         <div className={styles.reportCard}>

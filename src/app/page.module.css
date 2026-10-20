@@ -1931,16 +1931,54 @@
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2360a5fa' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12l5 5L20 7'/%3E%3C/svg%3E");
 }
 
-.badge {
-  position: absolute;
-  top: -13px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: linear-gradient(135deg, var(--blue), var(--violet));
+.planHeaderRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 2px;
+}
+
+.planPill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  padding: 10px 14px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 99px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #334155;
+  margin: 12px 0 16px;
+}
+
+.btnPurple {
+  background: #7c3aed !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 14px rgba(124, 58, 237, 0.25) !important;
+}
+
+.btnPurple:hover {
+  background: #6d28d9 !important;
+  transform: translateY(-1px);
+}
+
+.planPremium {
+  border: 2px solid #7c3aed !important;
+  background: #ffffff !important;
+  position: relative;
+  box-shadow: 0 12px 36px rgba(124, 58, 237, 0.08);
+}
+
+.badgePopular {
+  background: #7c3aed;
   color: #fff;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
-  padding: 6px 14px;
+  padding: 4px 10px;
   border-radius: 99px;
   white-space: nowrap;
 }
