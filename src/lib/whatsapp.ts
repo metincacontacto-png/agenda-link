@@ -86,3 +86,8 @@ export function buildWhatsAppReminderUrl({
   const message = lines.join("\n");
   return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
 }
+
+export function buildDirectWhatsAppUrl(phone: string, text: string): string {
+  const normalizedPhone = formatChileanWhatsApp(phone);
+  return `https://wa.me/${normalizedPhone}?text=${encodeURIComponent(text)}`;
+}

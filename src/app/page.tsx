@@ -49,9 +49,7 @@ const faqs = [
   },
   {
     q: "¿Cómo funcionan los recordatorios por WhatsApp?",
-    a: FEATURES.whatsappAutomatico
-      ? "Al vincular tu WhatsApp, recibes un aviso con cada reserva nueva y tus clientes reciben recordatorios antes de su cita. Así bajan las inasistencias."
-      : "Los recordatorios automáticos por WhatsApp están en desarrollo y llegan próximamente. Mientras tanto, ves todas tus solicitudes en el panel y puedes contactar a cada cliente con un clic.",
+    a: "Desde tu panel de administración, envías un recordatorio personalizado a cada cliente por WhatsApp con un solo clic. Es 100% gratuito, sin límites ni costos adicionales por mensaje.",
   },
   {
     q: "¿Qué hacen los asistentes Linki IA?",
@@ -506,7 +504,7 @@ export default function HomePage() {
                 <i>✓</i>Tus clientes eligen servicio, día y hora solos desde tu link
               </li>
               <li>
-                <i>✓</i>Recordatorios automáticos por WhatsApp que bajan las inasistencias{" "}
+                <i>✓</i>Recordatorios por WhatsApp en 1 clic que bajan las inasistencias{" "}
                 {!FEATURES.whatsappAutomatico && <ProximamenteBadge style={{ marginLeft: 6 }} />}
               </li>
               <li>
@@ -755,7 +753,7 @@ export default function HomePage() {
               </div>
               <div>
                 <h3>Linki Secretary</h3>
-                <p>Responde dudas por WhatsApp, entrega precios y horarios, y lleva al cliente a solicitar hora. 24/7.</p>
+                <p>Atiende consultas online, entrega precios y horarios, y guía a tus clientes a reservar 24/7.</p>
               </div>
             </button>
 

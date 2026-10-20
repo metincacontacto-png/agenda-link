@@ -11,10 +11,11 @@ import AgendaTab from "./tabs/AgendaTab";
 import AdminHeader from "./tabs/AdminHeader";
 import AdminSidebar from "./tabs/AdminSidebar";
 import BrandingTab from "./tabs/BrandingTab";
-import BusinessOverviewTab from "./tabs/BusinessOverviewTab";
 import ClientsTab from "./tabs/ClientsTab";
 import DashboardTab from "./tabs/DashboardTab";
-import IntegrationStatusTab from "./tabs/IntegrationStatusTab";
+import BusinessAiTab from "./tabs/BusinessAiTab";
+import MarketingAiTab from "./tabs/MarketingAiTab";
+import SecretaryAiTab from "./tabs/SecretaryAiTab";
 import ReservationsTab from "./tabs/ReservationsTab";
 import SalesTab from "./tabs/SalesTab";
 import SettingsTab from "./tabs/SettingsTab";
@@ -47,33 +48,6 @@ export default function AdminDashboard({ params }: { params: Promise<{ slug: str
     return business.ownerName.substring(0, 2).toUpperCase();
   })();
 
-  const isFeatureRestricted = (requiredPlan: "EQUIPO" | "NEGOCIO"): boolean => {
-    if (!business) return true;
-    if (business.billingBypass) return false;
-    
-    if (requiredPlan === "EQUIPO") {
-      return business.plan === "INDIVIDUAL";
-    }
-    if (requiredPlan === "NEGOCIO") {
-      return business.plan === "INDIVIDUAL" || business.plan === "EQUIPO";
-    }
-    return false;
-  };
-
-  const renderUpgradePrompt = (planRequired: "EQUIPO" | "NEGOCIO", featureName: string) => {
-    return (
-      <section className={styles.glassCard} style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "60px 24px", textAlign: "center" }}>
-        <div style={{ fontSize: "54px", marginBottom: "16px" }}>🔒</div>
-        <h2 style={{ fontSize: "20px", fontWeight: "800", marginBottom: "8px", color: "var(--foreground)" }}>
-          {featureName} no está habilitado
-        </h2>
-        <p style={{ fontSize: "14px", color: "var(--text-secondary)", maxWidth: "480px", lineHeight: "1.5", marginBottom: "24px" }}>
-          Esta función requiere configuración adicional y un proveedor real. No se activará automáticamente al cambiar el plan.
-        </p>
-        <span role="status" style={{ fontSize: "12px", color: "var(--text-secondary)" }}>Plan actual: {business?.plan} · Plan requerido: {planRequired}</span>
-      </section>
-    );
-  };
   const [activeTab, setActiveTab] = useState<AdminTabKey>("dashboard");
   const [adminSubTab, setAdminSubTab] = useState<AdminSettingsSubTab>("servicios");
   const [todayReservationsCollapsed, setTodayReservationsCollapsed] = useState(false);
@@ -242,25 +216,29 @@ export default function AdminDashboard({ params }: { params: Promise<{ slug: str
         )}
 
         {activeTab === "secretary" && (
-          isFeatureRestricted("EQUIPO")
-            ? renderUpgradePrompt("EQUIPO", "Linki Secretary")
-            : <IntegrationStatusTab title="Linki Secretary" description="El asistente de WhatsApp no está conectado. No se envían mensajes ni se confirman reservas automáticamente." />
+          <SecretaryAiTab
+            slug={slug}
+            businessName={business.name}
+            serviceCount={business.services.length}
+            services={business.services}
+          />
         )}
 
         {activeTab === "marketing" && (
-          isFeatureRestricted("EQUIPO")
-            ? renderUpgradePrompt("EQUIPO", "Linki Marketing")
-            : <IntegrationStatusTab title="Linki Marketing" description="Las campañas y los mensajes promocionales no están disponibles hasta conectar y configurar un proveedor de mensajería." />
+          <MarketingAiTab
+            slug={slug}
+            businessName={business.name}
+          />
         )}
 
         {activeTab === "business" && (
-          isFeatureRestricted("NEGOCIO")
-            ? renderUpgradePrompt("NEGOCIO", "Linki Business")
-            : <BusinessOverviewTab
-                metrics={dashboardMetrics}
-                serviceCount={business.services.length}
-                professionalCount={business.professionals.length}
-              />
+          <BusinessAiTab
+            slug={slug}
+            metrics={dashboardMetrics}
+            serviceCount={business.services.length}
+            professionalCount={business.professionals.length}
+            currency={business.currency}
+          />
         )}
 
         {/* --- VISTA: PERSONALIZAR LANDING --- */}
