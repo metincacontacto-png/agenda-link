@@ -1,5 +1,5 @@
 export const FEATURES = {
-  pagosOnline: false,        // tarjeta / Apple Pay / Mercado Pago al reservar
+  pagosOnline: true,         // tarjeta / Apple Pay / Mercado Pago al reservar
   whatsappAutomatico: false, // recordatorios y mensajes automáticos a clientes
   linkiIA: false,            // Linki Secretary, Marketing y Business
   facturacion: false,        // ventas facturadas / boletas

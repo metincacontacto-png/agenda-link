@@ -8,6 +8,7 @@ import type { PublicBusinessDTO } from "@/features/booking/public-business-dto";
 import { dateStringAtTimeZone } from "@/features/schedule/time";
 import BookingFlow from "./components/BookingFlow";
 import PublicLanding from "./components/PublicLanding";
+import { FEATURES } from "@/lib/features";
 
 type Professional = PublicBusinessDTO["professionals"][number];
 type Service = PublicBusinessDTO["services"][number];
@@ -75,7 +76,12 @@ export default function BookingPage({ params }: { params: Promise<{ slug: string
     setShowBookingContact(true);
   };
 
-  const handleBookingSubmit = async (clientName: string, clientWhatsApp: string, clientEmail: string) => {
+  const handleBookingSubmit = async (
+    clientName: string,
+    clientWhatsApp: string,
+    clientEmail: string,
+    paymentChoice: "mercadopago" | "local" = "mercadopago"
+  ) => {
     if (!selectedService || !selectedProfessional) return;
     setSubmitting(true);
     
@@ -90,6 +96,27 @@ export default function BookingPage({ params }: { params: Promise<{ slug: string
         date: selectedDate,
         time: selectedTime,
       };
+
+      if (paymentChoice === "mercadopago" && FEATURES.pagosOnline) {
+        // Redirigir al Checkout Pro oficial de Mercado Pago
+        const res = await fetch("/api/payments/mercadopago/preference", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+
+        const result = await res.json();
+        if (res.ok && result.success && (result.initPoint || result.sandboxInitPoint)) {
+          setShowBookingContact(false);
+          const redirectUrl = result.initPoint || result.sandboxInitPoint;
+          window.location.href = redirectUrl;
+          return;
+        } else {
+          alert(result.error || "No se pudo conectar con Mercado Pago. Intenta nuevamente o elige pagar en el local.");
+          setSubmitting(false);
+          return;
+        }
+      }
 
       const res = await fetch("/api/appointments", {
         method: "POST",

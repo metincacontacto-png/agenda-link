@@ -2,17 +2,19 @@
 
 import React, { useState, useEffect, useRef, type FormEvent } from "react";
 import styles from "./BookingContactModal.module.css";
+import { FEATURES } from "@/lib/features";
 
 interface BookingContactModalProps {
   submitting: boolean;
   onClose: () => void;
-  onSubmit: (name: string, phone: string, email: string) => void;
+  onSubmit: (name: string, phone: string, email: string, paymentChoice: "mercadopago" | "local") => void;
 }
 
 export default function BookingContactModal({ submitting, onClose, onSubmit }: BookingContactModalProps) {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState<"mercadopago" | "local">("mercadopago");
   const firstInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -28,7 +30,7 @@ export default function BookingContactModal({ submitting, onClose, onSubmit }: B
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    onSubmit(name.trim(), phone.trim(), email.trim());
+    onSubmit(name.trim(), phone.trim(), email.trim(), paymentMethod);
   }
 
   return (
@@ -99,6 +101,60 @@ export default function BookingContactModal({ submitting, onClose, onSubmit }: B
               Te enviaremos los detalles de tu solicitud de reserva aquí.
             </small>
           </div>
+          {FEATURES.pagosOnline && (
+            <div className={styles.formGroup} style={{ marginTop: 14 }}>
+              <label className={styles.label}>Opciones de Pago</label>
+              <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginTop: "6px" }}>
+                <label
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "10px",
+                    padding: "10px 14px",
+                    borderRadius: "10px",
+                    border: paymentMethod === "mercadopago" ? "2px solid #0066FF" : "1px solid #e2e8f0",
+                    background: paymentMethod === "mercadopago" ? "rgba(0,102,255,0.04)" : "#fff",
+                    cursor: "pointer",
+                    fontSize: "13px",
+                    fontWeight: "600",
+                  }}
+                >
+                  <input
+                    type="radio"
+                    name="bookingPaymentMethod"
+                    value="mercadopago"
+                    checked={paymentMethod === "mercadopago"}
+                    onChange={() => setPaymentMethod("mercadopago")}
+                  />
+                  <span>Pagar online con Mercado Pago (Redcompra / Tarjetas)</span>
+                </label>
+                <label
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "10px",
+                    padding: "10px 14px",
+                    borderRadius: "10px",
+                    border: paymentMethod === "local" ? "2px solid #0066FF" : "1px solid #e2e8f0",
+                    background: paymentMethod === "local" ? "rgba(0,102,255,0.04)" : "#fff",
+                    cursor: "pointer",
+                    fontSize: "13px",
+                    fontWeight: "600",
+                  }}
+                >
+                  <input
+                    type="radio"
+                    name="bookingPaymentMethod"
+                    value="local"
+                    checked={paymentMethod === "local"}
+                    onChange={() => setPaymentMethod("local")}
+                  />
+                  <span>Pagar en el local el día de la atención</span>
+                </label>
+              </div>
+            </div>
+          )}
+
           <div className={styles.buttonRow}>
             <button
               type="button"
@@ -110,7 +166,11 @@ export default function BookingContactModal({ submitting, onClose, onSubmit }: B
               Volver
             </button>
             <button type="submit" disabled={submitting} className={`${styles.btn} ${styles.btnPrimary}`}>
-              {submitting ? "Enviando…" : "Enviar Solicitud"}
+              {submitting
+                ? "Procesando…"
+                : paymentMethod === "mercadopago" && FEATURES.pagosOnline
+                ? "Pagar con Mercado Pago →"
+                : "Enviar Solicitud"}
             </button>
           </div>
         </form>
