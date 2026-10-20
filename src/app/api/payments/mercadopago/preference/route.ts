@@ -1,11 +1,22 @@
 import { NextResponse } from "next/server";
+import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { createBooking } from "@/features/booking/create-booking";
 import { parseCreateBookingInput } from "@/features/booking/validation";
 import { prismaBookingRepository } from "@/lib/prisma-booking-repository";
 
+function getMercadoPagoAccessToken(): string | undefined {
+  try {
+    const { env } = getCloudflareContext();
+    const workerSecret = (env as { MERCADOPAGO_ACCESS_TOKEN?: string }).MERCADOPAGO_ACCESS_TOKEN;
+    return workerSecret || process.env.MERCADOPAGO_ACCESS_TOKEN;
+  } catch {
+    return process.env.MERCADOPAGO_ACCESS_TOKEN;
+  }
+}
+
 export async function POST(request: Request) {
   try {
-    const accessToken = process.env.MERCADOPAGO_ACCESS_TOKEN;
+    const accessToken = getMercadoPagoAccessToken();
     if (!accessToken) {
       return NextResponse.json(
         { error: "Mercado Pago no está configurado (falta MERCADOPAGO_ACCESS_TOKEN)" },

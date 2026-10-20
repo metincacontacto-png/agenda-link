@@ -11,12 +11,24 @@ export interface GeminiResponse {
   error?: string;
 }
 
+import { getCloudflareContext } from "@opennextjs/cloudflare";
+
+export function getGeminiApiKey(): string | undefined {
+  try {
+    const { env } = getCloudflareContext();
+    const workerSecret = (env as { GEMINI_API_KEY?: string }).GEMINI_API_KEY;
+    return workerSecret || process.env.GEMINI_API_KEY;
+  } catch {
+    return process.env.GEMINI_API_KEY;
+  }
+}
+
 /**
  * Invoca la API REST de Google Gemini de forma compatible con Edge Runtime y Cloudflare Workers.
  * No requiere paquetes externos de npm, utiliza el fetch nativo del entorno.
  */
 export async function callGemini(options: GeminiGenerateOptions): Promise<GeminiResponse> {
-  const apiKey = process.env.GEMINI_API_KEY;
+  const apiKey = getGeminiApiKey();
 
   if (!apiKey || apiKey.trim() === "") {
     return {

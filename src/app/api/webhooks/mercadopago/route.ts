@@ -1,9 +1,20 @@
 import { NextResponse } from "next/server";
+import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { prisma } from "@/lib/db";
+
+function getMercadoPagoAccessToken(): string | undefined {
+  try {
+    const { env } = getCloudflareContext();
+    const workerSecret = (env as { MERCADOPAGO_ACCESS_TOKEN?: string }).MERCADOPAGO_ACCESS_TOKEN;
+    return workerSecret || process.env.MERCADOPAGO_ACCESS_TOKEN;
+  } catch {
+    return process.env.MERCADOPAGO_ACCESS_TOKEN;
+  }
+}
 
 export async function POST(request: Request) {
   try {
-    const accessToken = process.env.MERCADOPAGO_ACCESS_TOKEN;
+    const accessToken = getMercadoPagoAccessToken();
     if (!accessToken) {
       console.warn("Webhook Mercado Pago recibido pero MERCADOPAGO_ACCESS_TOKEN no está definido.");
       return NextResponse.json({ received: true }, { status: 200 });
