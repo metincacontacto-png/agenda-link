@@ -27,6 +27,7 @@ export interface BookingAvailabilityQuery {
   date: string;
   timeZone: string;
   serviceDurationMinutes: number;
+  minDateTime?: Date;
 }
 
 export interface AtomicBookingInput {

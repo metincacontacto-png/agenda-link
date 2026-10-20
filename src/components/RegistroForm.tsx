@@ -184,7 +184,7 @@ export default function RegistroForm({
               Crea tu AgendaLink
             </h2>
             <p className={styles.subtitle}>
-              Empieza gratis. Tu link quedará listo en segundos.
+              14 días gratis, sin tarjeta. Luego eliges plan.
             </p>
           </div>
 
@@ -357,6 +357,9 @@ export default function RegistroForm({
                   <option value="2-5 personas">Plan Básico (2 profesionales - $29.000/mes + IVA)</option>
                   <option value="6+ personas">Plan Premium (5 profesionales - $49.000/mes + IVA)</option>
                 </select>
+                <p style={{ fontSize: "11px", color: "#64748b", marginTop: "4px", marginBottom: 0 }}>
+                  14 días de prueba gratis en todos los planes. Sin cobros automáticos.
+                </p>
               </div>
             </div>
 

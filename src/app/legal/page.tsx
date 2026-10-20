@@ -89,7 +89,7 @@ export default function LegalPage() {
                 3. Disponibilidad del Servicio y Terceros Proveedores
               </h2>
               <p>
-                La plataforma depende de servicios de infraestructura provistos por terceros (Meta/WhatsApp Cloud API, proveedores de nube, pasarelas de pago y operadores de telecomunicaciones). AgendaLink no es responsable por caídas temporales de red, fallas de entrega de mensajes de WhatsApp por políticas de Meta, o interrupciones ajenas a su control directo.
+                La plataforma utiliza tecnologías web estándar y enlaces directos a WhatsApp, dependiendo además de servicios de infraestructura provistos por terceros (proveedores de nube, pasarelas de pago y operadores de telecomunicaciones). AgendaLink no es responsable por caídas temporales de red, indisponibilidad de proveedores externos o interrupciones ajenas a su control directo.
               </p>
             </section>
 

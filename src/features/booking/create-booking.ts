@@ -66,6 +66,7 @@ export async function createBooking(
     date: input.date,
     timeZone: business.timezone,
     serviceDurationMinutes: service.duration,
+    minDateTime: clock.now(),
   });
   if (!availableSlots.includes(input.time)) {
     return rejected(409, "El horario ya no está disponible");

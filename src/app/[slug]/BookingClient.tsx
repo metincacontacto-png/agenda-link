@@ -41,12 +41,14 @@ export default function BookingClient({
     async function loadData() {
       try {
         const query = new URLSearchParams({ slug, date: selectedDate });
-        if (selectedService?.id) query.set("serviceId", selectedService.id);
-        if (selectedProfessional?.id) query.set("professionalId", selectedProfessional.id);
+        if (selectedService?.id) {
+          query.set("serviceId", selectedService.id);
+          if (selectedProfessional?.id) query.set("professionalId", selectedProfessional.id);
+        }
         const res = await fetch(`/api/availability?${query.toString()}`);
         if (!res.ok) {
-          setBusiness(null);
-          setLoading(false);
+          if (res.status === 404) setBusiness(null);
+          else setSlots([]);
           return;
         }
         const data = await res.json();
@@ -65,7 +67,7 @@ export default function BookingClient({
         }
       } catch (err) {
         console.error(err);
-        setBusiness(null);
+        setSlots([]);
       } finally {
         setLoading(false);
       }

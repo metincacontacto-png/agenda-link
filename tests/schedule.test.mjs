@@ -54,6 +54,30 @@ test("generates service-duration slots after intersecting schedules and removing
   assert.deepEqual(slots, ["10:30", "11:00", "13:00", "15:00", "15:30", "16:00", "16:30", "17:00"]);
 });
 
+test("filters out past slots when minDateTime is provided", () => {
+  // 14:00 in Santiago (UTC-3) is 17:00:00.000Z
+  const minDateTime = new Date("2026-01-05T17:00:00.000Z");
+  const slots = generateAvailableSlots({
+    date: "2026-01-05",
+    timeZone: "America/Santiago",
+    serviceDurationMinutes: 60,
+    businessWindows: [{ startMinute: 540, endMinute: 1080 }],
+    professionalWindows: [{ startMinute: 540, endMinute: 1080 }],
+    breaks: [],
+    blocks: [],
+    appointments: [],
+    minDateTime,
+  });
+
+  // All slots 14:00 and earlier are filtered out; only 14:30, 15:00, etc. remain
+  assert.ok(!slots.includes("09:00"));
+  assert.ok(!slots.includes("10:00"));
+  assert.ok(!slots.includes("13:30"));
+  assert.ok(!slots.includes("14:00"));
+  assert.ok(slots.includes("14:30"));
+  assert.ok(slots.includes("15:00"));
+});
+
 test("parses strict local dates, times, and weekdays", () => {
   assert.equal(parseLocalTime("09:30"), 570);
   assert.equal(parseLocalTime("24:00"), null);

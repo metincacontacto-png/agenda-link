@@ -214,6 +214,7 @@ export function generateAvailableSlots(input: {
   breaks: MinuteInterval[];
   blocks: TimedInterval[];
   appointments: ExistingAppointment[];
+  minDateTime?: Date;
 }): string[] {
   const {
     date,
@@ -224,6 +225,7 @@ export function generateAvailableSlots(input: {
     breaks,
     blocks,
     appointments,
+    minDateTime,
   } = input;
   if (
     !parseDate(date) ||
@@ -243,6 +245,8 @@ export function generateAvailableSlots(input: {
       const startsAt = localMinuteToUtc(date, startMinute, timeZone);
       const endsAt = localMinuteToUtc(date, endMinute, timeZone);
       if (!startsAt || !endsAt || endsAt <= startsAt) continue;
+
+      if (minDateTime && startsAt.getTime() <= minDateTime.getTime()) continue;
 
       const hasScheduleBlock = blocks.some((block) =>
         startsAt < block.endsAt && endsAt > block.startsAt,

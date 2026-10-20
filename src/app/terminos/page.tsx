@@ -118,6 +118,9 @@ export default function TerminosPage() {
                 <div>
                   <strong>h) Modificación de Términos y Precios:</strong> Cualquier ajuste sustancial a estos Términos o a los precios será comunicado por escrito o mediante aviso visible en la Plataforma con al menos <strong>15 días corridos de anticipación</strong>. Si el Negocio no está de acuerdo con los cambios informados, podrá cancelar su suscripción sin cargo alguno antes de la entrada en vigencia de las nuevas tarifas o condiciones.
                 </div>
+                <div>
+                  <strong>i) Derecho de Retracto (Art. 3º bis Ley Nº 19.496):</strong> Atendido que el servicio corresponde a una plataforma digital SaaS de acceso y ejecución inmediata, y que todo Negocio cuenta con un período de prueba gratuito de 14 días (sin ingreso de tarjeta bancaria) para verificar de forma previa y completa su funcionalidad, las partes acuerdan expresamente la exclusión del derecho de retracto unilateral respecto de mensualidades ya devengadas o en curso, manteniéndose plenamente vigente el derecho a cancelación con 1 clic para evitar renovaciones futuras y la garantía de reembolso proporcional de 10 días para contrataciones anuales estipulada en la letra d).
+                </div>
               </div>
             </section>
 

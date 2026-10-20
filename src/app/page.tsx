@@ -431,8 +431,8 @@ export default function HomePage() {
           <span>tu agenda abierta, aunque estés atendiendo o durmiendo</span>
         </div>
         <div className={`${styles.stat} ${styles.rv}`}>
-          <b>3</b>
-          <span>asistentes con IA trabajando para tu negocio</span>
+          <b>Hasta 3</b>
+          <span>asistentes con IA según tu plan</span>
         </div>
         <div className={`${styles.stat} ${styles.rv}`}>
           <b>0</b>
@@ -711,7 +711,7 @@ export default function HomePage() {
             Un equipo con inteligencia artificial,
             <br />
             <span className={styles.gradText}>
-              {FEATURES.linkiIA ? "incluido en tu plan." : "Muy pronto en tu plan."}
+              {FEATURES.linkiIA ? "según tu plan." : "Muy pronto en tu plan."}
             </span>
           </h2>
           <p className={styles.lead}>
@@ -731,8 +731,10 @@ export default function HomePage() {
                 </svg>
               </div>
               <div>
-                <h3>Linki Secretary</h3>
-                <p>Atiende consultas online, entrega precios y horarios, y guía a tus clientes a reservar 24/7.</p>
+                <h3>
+                  Linki Secretary <span style={{ fontSize: "0.75rem", fontWeight: "normal", opacity: 0.8 }}>(Próximamente)</span>
+                </h3>
+                <p>Atiende consultas online, entrega precios y horarios, y guía a tus clientes a reservar 24/7 (Próximamente).</p>
               </div>
             </button>
 
@@ -889,7 +891,7 @@ export default function HomePage() {
                     <div>
                       <h4>Valentina Studio</h4>
                       <p>
-                        Panel de Administración · Plan Equipo: 2–5 personas <span className={styles.ok}>Activo</span>
+                        Panel de Administración · Plan Premium · hasta 5 profesionales <span className={styles.ok}>Activo</span>
                       </p>
                     </div>
                     <div className={styles.dhR}>
@@ -1164,7 +1166,7 @@ export default function HomePage() {
               <li>Link y landing personalizada</li>
               <li>Solicitudes de reserva ilimitadas</li>
               <li>Recordatorios por WhatsApp en 1 clic</li>
-              <li>Asistentes Linki IA incluidos</li>
+              <li>Linki Secretary incluido</li>
               <li>Pagos online con Mercado Pago o en el local</li>
               <li>QR y material listo para imprimir</li>
             </ul>
@@ -1200,7 +1202,7 @@ export default function HomePage() {
               <li>Ventas y caja en tiempo real</li>
               <li>Base de clientes e historial</li>
               <li>Recordatorios por WhatsApp en 1 clic</li>
-              <li>Asistentes Linki IA (Secretary y Marketing)</li>
+              <li>Linki Secretary y Marketing incluidos</li>
             </ul>
           </div>
 
@@ -1210,7 +1212,7 @@ export default function HomePage() {
               <h3 style={{ margin: 0 }}>Premium</h3>
               <span className={styles.badgePopular}>Recomendado</span>
             </div>
-            <p className={styles.who}>Para empresas que buscan tener el control y llevar un seguimiento de pacientes/clientes personalizable.</p>
+            <p className={styles.who}>Para empresas que buscan tener el control y llevar un seguimiento de clientes personalizable.</p>
             <div className={styles.price}>
               {billingPeriod === "monthly" ? "$49.000" : "$40.833"}
               <small> CLP/mes + IVA</small>
@@ -1233,10 +1235,10 @@ export default function HomePage() {
             <ul style={{ marginTop: 24 }}>
               <li>Hasta 5 profesionales</li>
               <li>Todo lo del plan Básico</li>
-              <li>Seguimiento de pacientes y clientes</li>
+              <li>Seguimiento de clientes</li>
               <li>Reportes avanzados de ventas y métricas</li>
               <li>Múltiples turnos y bloqueos simultáneos</li>
-              <li>Suite completa Linki IA (incluye Linki Business)</li>
+              <li>Suite completa: Secretary, Marketing y Business IA incluidos</li>
               <li>Soporte prioritario dedicado</li>
             </ul>
           </div>

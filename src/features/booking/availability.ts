@@ -12,8 +12,9 @@ export async function getAvailableSlotsForProfessional(input: {
   timeZone: string;
   serviceDurationMinutes: number;
   excludeAppointmentId?: string;
+  minDateTime?: Date;
 }): Promise<string[]> {
-  const { businessId, professionalId, date, timeZone, serviceDurationMinutes, excludeAppointmentId } = input;
+  const { businessId, professionalId, date, timeZone, serviceDurationMinutes, excludeAppointmentId, minDateTime = new Date() } = input;
   const dayOfWeek = weekdayForDate(date);
   const dayRange = localDayUtcRange(date, timeZone);
   if (dayOfWeek === null || !dayRange) return [];
@@ -57,5 +58,6 @@ export async function getAvailableSlotsForProfessional(input: {
       dateTime: appointment.dateTime,
       durationMinutes: appointment.service.duration,
     })),
+    minDateTime,
   });
 }

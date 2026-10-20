@@ -141,9 +141,9 @@ export default function OnboardingForm({
 
       <section className={styles.card} aria-labelledby="onboarding-title">
         <div className={styles.cardIntro}>
-          <span className={styles.eyebrow}>Empieza gratis</span>
+          <span className={styles.eyebrow}>14 días de prueba gratis</span>
           <h1 id="onboarding-title">Crea tu AgendaLink</h1>
-          <p>Configura tu página y empieza a recibir solicitudes de reserva en menos de 10 minutos.</p>
+          <p>14 días gratis, sin tarjeta. Luego eliges plan. Configura tu página y empieza a recibir solicitudes de reserva.</p>
         </div>
 
         {step === 1 ? (
@@ -258,10 +258,13 @@ export default function OnboardingForm({
               <label>
                 Equipo / plan
                 <select name="teamSize" value={formData.teamSize} onChange={handleChange}>
-                  <option value="1 persona">Solo yo (Plan Individual)</option>
-                  <option value="2-5 personas">2 a 5 personas (Plan Equipo)</option>
-                  <option value="6+ personas">6 o más personas (Plan Negocio)</option>
+                  <option value="1 persona">Plan Individual (1 profesional - $10.000/mes + IVA)</option>
+                  <option value="2-5 personas">Plan Básico (2 profesionales - $29.000/mes + IVA)</option>
+                  <option value="6+ personas">Plan Premium (5 profesionales - $49.000/mes + IVA)</option>
                 </select>
+                <span style={{ fontSize: "11px", color: "#64748b", marginTop: "4px", display: "block" }}>
+                  14 días de prueba gratis en todos los planes. Sin cobros automáticos.
+                </span>
               </label>
             </div>
 
