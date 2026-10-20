@@ -69,7 +69,7 @@ export default function PrivacidadPage() {
               </p>
               <ul style={{ paddingLeft: "20px", marginTop: "8px", display: "flex", flexDirection: "column", gap: "8px" }}>
                 <li>Gestionar y registrar solicitudes de citas entre los clientes y los negocios.</li>
-                <li>Enviar notificaciones y avisos automáticos por WhatsApp o Email para reducir inasistencias cuando estén configurados.</li>
+                <li>Enviar recordatorios que el negocio envía desde su panel por WhatsApp o Email.</li>
                 <li>Proveer métricas y analíticas agregadas en el Panel de Administración del negocio.</li>
                 <li>Garantizar la seguridad y prevención de fraudes en la plataforma.</li>
               </ul>

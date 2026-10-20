@@ -60,7 +60,7 @@ export default function TerminosPage() {
                 2. Naturaleza del Servicio y Rol de Intermediación Tecnológica
               </h2>
               <p>
-                AgendaLink es una plataforma de software como servicio (SaaS) que provee herramientas tecnológicas de agendamiento online, gestión de horarios, recordatorios automatizados, pasarelas de pago y módulos de asistencia mediante inteligencia artificial.
+                AgendaLink es una plataforma de software como servicio (SaaS) que provee herramientas tecnológicas de agendamiento online, gestión de horarios, recordatorios que el negocio envía desde su panel, pasarelas de pago y módulos de asistencia mediante inteligencia artificial.
               </p>
               <div style={{ background: "#f1f5f9", padding: "16px 20px", borderRadius: "12px", margin: "14px 0", borderLeft: "4px solid var(--blue)" }}>
                 <strong>Deslinde Fundamental:</strong> AgendaLink y {LEGAL.razonSocial} <u>NO</u> son prestadores de servicios finales (como peluquería, salud, estética, consultoría, etc.) ni son parte de la relación comercial o contractual celebrada entre el Negocio y sus clientes finales. Toda reserva, servicio prestado, cobro o cancelación es de exclusiva responsabilidad entre las partes involucradas.
@@ -99,7 +99,7 @@ export default function TerminosPage() {
                 5. Procesamiento de Pagos y Seguridad Financiera
               </h2>
               <p>
-                Los pagos online se procesan de forma cifrada mediante integraciones con pasarelas de pago de terceros certificadas (como Transbank Webpay Plus, Mercado Pago, Apple Pay, etc.).
+                Los pagos online se procesan de forma cifrada mediante integraciones con pasarelas de pago certificadas. AgendaLink ofrece pagos online con Mercado Pago (Redcompra y tarjetas) o pago en el local.
               </p>
               <p style={{ marginTop: "8px" }}>
                 AgendaLink <strong>nunca almacena números de tarjeta ni claves bancarias</strong>. Cualquier controversia, contracargo o rechazo financiero deberá resolverse directamente con el procesador de pago o la institución bancaria correspondiente.

@@ -39,6 +39,11 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  if (pathname === "/panel") {
+    url.pathname = "/login";
+    return NextResponse.redirect(url);
+  }
+
   if (
     pathname === "/maintenance" ||
     pathname.startsWith("/super-admin") ||

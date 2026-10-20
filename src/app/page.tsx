@@ -53,19 +53,15 @@ const faqs = [
   },
   {
     q: "¿Qué hacen los asistentes Linki IA?",
-    a:
-      (FEATURES.linkiIA ? "" : "Linki IA llega próximamente. ") +
-      "Linki Secretary responde consultas de tus clientes, Linki Marketing te ayuda a reactivar clientes que dejaron de venir y Linki Business analiza tu negocio para darte recomendaciones concretas.",
+    a: "Linki IA llega próximamente. Linki Secretary responderá consultas de tus clientes, Linki Marketing te ayudará a reactivar clientes que dejaron de venir y Linki Business analizará tu negocio con recomendaciones concretas.",
   },
   {
     q: "¿Puedo cobrar al momento de la reserva?",
-    a: FEATURES.pagosOnline
-      ? "Sí. Puedes recibir pagos con tarjeta y Apple Pay directamente desde tu link, para asegurar la hora y reducir cancelaciones."
-      : "Todavía no. Los pagos online están en desarrollo. Por ahora tus clientes envían su solicitud y pagan directamente en tu negocio.",
+    a: "Pagos online con Mercado Pago (Redcompra y tarjetas) o pago en el local.",
   },
   {
     q: "¿Puedo cambiar de plan o cancelar?",
-    a: "Sí. Puedes subir o bajar de plan a medida que tu equipo crece, y cancelar cuando quieras. El plan anual tiene un 20% de descuento.",
+    a: "Sí. Puedes subir o bajar de plan a medida que tu equipo crece, y cancelar cuando quieras sin permanencia. Con el plan anual obtienes 2 meses gratis ($100.000 + IVA al año para el plan Individual).",
   },
 ];
 
@@ -265,7 +261,7 @@ export default function HomePage() {
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                   <path d="M5 12l5 5L20 7" />
                 </svg>
-                Sin contratos
+                Sin permanencia
               </div>
               <div>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
@@ -358,7 +354,7 @@ export default function HomePage() {
                 {FEATURES.pagosOnline ? (
                   <>
                     <b>+$18.000 pagado</b>
-                    <small>Tarjeta · Apple Pay</small>
+                    <small>Mercado Pago (Redcompra y tarjetas)</small>
                   </>
                 ) : (
                   <>
@@ -376,17 +372,8 @@ export default function HomePage() {
                 </svg>
               </div>
               <div>
-                {FEATURES.linkiIA ? (
-                  <>
-                    <b>Linki recordó la cita</b>
-                    <small>Cero inasistencias hoy</small>
-                  </>
-                ) : (
-                  <>
-                    <b>Agenda de hoy</b>
-                    <small>6 horas tomadas</small>
-                  </>
-                )}
+                <b>Recordatorio WhatsApp</b>
+                <small>Enviado desde tu panel en 1 clic</small>
               </div>
             </div>
           </div>
@@ -441,17 +428,10 @@ export default function HomePage() {
           <span>tu agenda abierta, aunque estés atendiendo o durmiendo</span>
         </div>
         <div className={`${styles.stat} ${styles.rv}`}>
-          {FEATURES.linkiIA ? (
-            <>
-              <b>3</b>
-              <span>asistentes con IA trabajando para tu negocio</span>
-            </>
-          ) : (
-            <>
-              <b>1</b>
-              <span>1 link para tu Instagram, WhatsApp y QR</span>
-            </>
-          )}
+          <b>3</b>
+          <span>
+            asistentes con IA para tu negocio <ProximamenteBadge style={{ marginLeft: 6 }} />
+          </span>
         </div>
         <div className={`${styles.stat} ${styles.rv}`}>
           <b>0</b>
@@ -638,9 +618,7 @@ export default function HomePage() {
               Pagos online {!FEATURES.pagosOnline && <ProximamenteBadge style={{ marginLeft: 8 }} />}
             </h3>
             <p>
-              {FEATURES.pagosOnline
-                ? "Cobra con tarjeta o Apple Pay al reservar. Asegura la hora y reduce las cancelaciones."
-                : "Próximamente: cobra con tarjeta al reservar para asegurar la hora y reducir cancelaciones."}
+              Pagos online con Mercado Pago (Redcompra y tarjetas) o pago en el local.
             </p>
           </div>
 
@@ -829,7 +807,7 @@ export default function HomePage() {
                 <i />
                 <i />
                 <i />
-                <span>agendalink.cl/panel</span>
+                <span>agendalink.cl/admin/valentina</span>
               </div>
               <div className={styles.dash}>
                 <aside>
@@ -1316,7 +1294,7 @@ export default function HomePage() {
                 Crear mi link
               </button>
             </form>
-            <small>Listo en 5 pasos · Sin contratos · Cancela cuando quieras</small>
+            <small>Listo en 5 pasos · Sin permanencia · Cancela cuando quieras</small>
           </div>
         </div>
       </div>
