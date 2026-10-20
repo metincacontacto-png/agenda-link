@@ -20,6 +20,8 @@ import ReservationsTab from "./tabs/ReservationsTab";
 import SalesTab from "./tabs/SalesTab";
 import SettingsTab from "./tabs/SettingsTab";
 import TeamTab from "./tabs/TeamTab";
+import BillingModal from "./tabs/BillingModal";
+import { isSubscriptionActive } from "@/features/businesses/subscription-policy";
 import type { AdminSettingsSubTab, AdminTabKey } from "./tabs/types";
 import styles from "./admin.module.css";
 
@@ -56,6 +58,15 @@ export default function AdminDashboard({ params }: { params: Promise<{ slug: str
 
   // Modales de Cabecera
   const [isFirstStepsModalOpen, setIsFirstStepsModalOpen] = useState(false);
+  const [isBillingModalOpen, setIsBillingModalOpen] = useState(false);
+  const [hasPromptedPaywall, setHasPromptedPaywall] = useState(false);
+
+  React.useEffect(() => {
+    if (business && !isSubscriptionActive(business) && !hasPromptedPaywall) {
+      setIsBillingModalOpen(true);
+      setHasPromptedPaywall(true);
+    }
+  }, [business, hasPromptedPaywall]);
 
   // Checklist de Primeros Pasos
   const [firstStepsChecked, setFirstStepsChecked] = useState({
@@ -142,9 +153,28 @@ export default function AdminDashboard({ params }: { params: Promise<{ slug: str
           isProfileDropdownOpen={isProfileDropdownOpen}
           onProfileDropdownChange={setIsProfileDropdownOpen}
           onOpenFirstSteps={() => setIsFirstStepsModalOpen(true)}
+          onOpenBillingModal={() => setIsBillingModalOpen(true)}
         />
 
-        {activeTab === "dashboard" && (
+        {!isSubscriptionActive(business) ? (
+          <div className={styles.glassCard} style={{ textAlign: "center", padding: "48px 24px", margin: "24px 0", borderRadius: 20 }}>
+            <div style={{ fontSize: 44, marginBottom: 16 }}>⏱️</div>
+            <h2 style={{ fontSize: 24, fontWeight: 900, marginBottom: 12 }}>Tu período de prueba gratis ha concluido</h2>
+            <p style={{ fontSize: 15, color: "var(--text-secondary)", maxWidth: 540, margin: "0 auto 24px", lineHeight: 1.6 }}>
+              Para continuar gestionando citas, consultar tu calendario, ver clientes y reactivar tus reservas públicas en línea, activa tu suscripción mensual protegida por Mercado Pago.
+            </p>
+            <button
+              type="button"
+              onClick={() => setIsBillingModalOpen(true)}
+              className={styles.submitButton}
+              style={{ display: "inline-block", width: "auto", padding: "14px 32px", fontSize: 16, fontWeight: 700 }}
+            >
+              Ver Planes y Activar Suscripción →
+            </button>
+          </div>
+        ) : (
+          <>
+            {activeTab === "dashboard" && (
           <DashboardTab
             businessCurrency={business.currency}
             businessTimezone={business.timezone}
@@ -263,6 +293,8 @@ export default function AdminDashboard({ params }: { params: Promise<{ slug: str
             onServicesChanged={loadAdminData}
           />
         )}
+          </>
+        )}
 
         {/* --- MODAL: PRIMEROS PASOS --- */}
         {isFirstStepsModalOpen && (
@@ -327,6 +359,13 @@ export default function AdminDashboard({ params }: { params: Promise<{ slug: str
             </div>
           </div>
         )}
+ 
+        <BillingModal
+          business={business}
+          isOpen={isBillingModalOpen}
+          onClose={() => setIsBillingModalOpen(false)}
+          isEnforcedPaywall={!isSubscriptionActive(business)}
+        />
 
       </div>
     </main>

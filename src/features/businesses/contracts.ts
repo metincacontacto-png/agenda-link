@@ -25,6 +25,10 @@ export interface BusinessAdminDTO {
   timezone: string;
   plan: string;
   billingBypass: boolean;
+  subscriptionStatus?: string;
+  trialEndsAt?: string | null;
+  subscriptionPlan?: string | null;
+  currentPeriodEnd?: string | null;
   customDomain: string | null;
   logoUrl: string | null;
   landingTitle: string | null;

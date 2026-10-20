@@ -56,6 +56,8 @@ export async function createBusinessForOwner(input: OnboardingInput, owner: Busi
   ]).flat();
   const insertBusinessSchedules = `INSERT INTO "BusinessSchedule" ("id","businessId","dayOfWeek","startMinute","endMinute") VALUES ${Array.from({ length: 7 }, () => "(?,?,?,?,?)").join(",")}`;
 
+  const trialEndsAt = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString();
+
   const statements: D1PreparedStatement[] = [];
   if (!("userId" in owner)) {
     statements.push(database.prepare(`
@@ -67,8 +69,9 @@ export async function createBusinessForOwner(input: OnboardingInput, owner: Busi
     database.prepare(`
       INSERT INTO "Business" (
         "id","name","slug","ownerName","email","category","teamSize","country",
-        "currency","timezone","plan","landingTitle","landingSubtitle","createdAt","updatedAt"
-      ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)
+        "currency","timezone","plan","landingTitle","landingSubtitle",
+        "subscriptionStatus","trialEndsAt","subscriptionPlan","createdAt","updatedAt"
+      ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?, 'TRIALING', ?, ?, CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)
     `).bind(
       businessId,
       input.name,
@@ -83,6 +86,8 @@ export async function createBusinessForOwner(input: OnboardingInput, owner: Busi
       plan,
       input.name,
       "Agenda tu cita en segundos.",
+      trialEndsAt,
+      plan,
     ),
     database.prepare(`
       INSERT INTO "Service" ("id","businessId","name","duration","price","createdAt")

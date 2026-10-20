@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import type { BusinessAdminDTO } from "@/features/businesses/contracts";
+import { getTrialDaysRemaining } from "@/features/businesses/subscription-policy";
 import styles from "../admin.module.css";
 import type { AdminSettingsSubTab, AdminTabKey } from "./types";
 
@@ -16,6 +17,7 @@ interface AdminHeaderProps {
   isProfileDropdownOpen: boolean;
   onProfileDropdownChange: (open: boolean) => void;
   onOpenFirstSteps: () => void;
+  onOpenBillingModal: () => void;
 }
 
 export default function AdminHeader({
@@ -29,16 +31,70 @@ export default function AdminHeader({
   isProfileDropdownOpen,
   onProfileDropdownChange,
   onOpenFirstSteps,
+  onOpenBillingModal,
 }: AdminHeaderProps) {
+  const daysRemaining = getTrialDaysRemaining(business.trialEndsAt);
+  const isTrial = business.subscriptionStatus === "TRIALING" && !business.billingBypass;
+  const isActive = business.subscriptionStatus === "ACTIVE" || business.billingBypass;
+
   return (
     <header className={styles.dashboardHeader}>
       <div>
         <h1 className={styles.dashboardTitle}>{business.name}</h1>
-        <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 4 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 4, flexWrap: "wrap" }}>
           <p style={{ fontSize: 13, color: "var(--text-secondary)", margin: 0 }}>
-            Panel de Administración · Plan Automático: {business.teamSize}
+            Panel de Administración · Plan: {business.subscriptionPlan || business.plan}
           </p>
-          <span className={styles.statusBadge}><span className={styles.statusDot} />Activo</span>
+          {business.billingBypass ? (
+            <span className={styles.statusBadge} style={{ background: "rgba(14, 165, 233, 0.15)", color: "#0369a1" }}>
+              Bypass Activo
+            </span>
+          ) : business.subscriptionStatus === "ACTIVE" ? (
+            <span className={styles.statusBadge}>
+              <span className={styles.statusDot} />
+              Suscripción Activa
+            </span>
+          ) : isTrial && daysRemaining > 0 ? (
+            <button
+              type="button"
+              onClick={onOpenBillingModal}
+              style={{
+                background: daysRemaining <= 3 ? "rgba(245, 158, 11, 0.15)" : "rgba(16, 185, 129, 0.15)",
+                color: daysRemaining <= 3 ? "#b45309" : "#047857",
+                border: "none",
+                borderRadius: 999,
+                padding: "2px 10px",
+                fontSize: 12,
+                fontWeight: 600,
+                cursor: "pointer",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 5,
+              }}
+              title="Haz clic para ver o activar planes de suscripción"
+            >
+              <span>⏱️ {daysRemaining} {daysRemaining === 1 ? "día de prueba" : "días de prueba"}</span>
+              <span style={{ fontSize: 10, opacity: 0.8 }}>· Ver planes</span>
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={onOpenBillingModal}
+              style={{
+                background: "rgba(239, 68, 68, 0.15)",
+                color: "#b91c1c",
+                border: "none",
+                borderRadius: 999,
+                padding: "2px 10px",
+                fontSize: 12,
+                fontWeight: 700,
+                cursor: "pointer",
+              }}
+              title="Período de prueba terminado. Haz clic para activar tu plan."
+            >
+              ⚠️ Prueba expirada · Activar plan
+            </button>
+          )}
         </div>
       </div>
 
@@ -65,7 +121,7 @@ export default function AdminHeader({
           <div className={styles.settingsDropdown}>
             <button className={styles.profileDropdownItem} onClick={() => { onTabChange("landing"); onGearDropdownChange(false); }}>Configuraciones</button>
             <button className={styles.profileDropdownItem} onClick={() => { onTabChange("administracion"); onSettingsTabChange("servicios"); onGearDropdownChange(false); }}>Servicios y recursos</button>
-            <button className={styles.profileDropdownItem} disabled title="El cobro de suscripciones no está conectado">Facturación no disponible</button>
+            <button className={styles.profileDropdownItem} onClick={() => { onOpenBillingModal(); onGearDropdownChange(false); }}>Facturación y Planes</button>
           </div>
         )}
 

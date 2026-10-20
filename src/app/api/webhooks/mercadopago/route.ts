@@ -23,70 +23,172 @@ export async function POST(request: Request) {
     const url = new URL(request.url);
     const body = await request.json().catch(() => ({}));
 
-    // El payment ID puede venir en el body (data.id o id) o en la query string
-    const paymentId =
+    // El payment o subscription ID puede venir en el body (data.id o id) o en la query string
+    const resourceId =
       body?.data?.id ||
       body?.id ||
       url.searchParams.get("data.id") ||
       url.searchParams.get("id");
 
-    const topic = body?.type || body?.topic || url.searchParams.get("topic") || url.searchParams.get("type");
+    const topic = (body?.type || body?.topic || url.searchParams.get("topic") || url.searchParams.get("type") || "")
+      .toString()
+      .toLowerCase();
 
-    if (!paymentId || (topic && topic !== "payment")) {
-      // Ignoramos notificaciones que no sean de pagos (ej: merchant_order) respondiendo 200 para que MP no reintente
+    if (!resourceId) {
       return NextResponse.json({ received: true, ignored: true }, { status: 200 });
     }
 
-    // Consultamos el estado real del pago a la API oficial de Mercado Pago
-    const mpRes = await fetch(`https://api.mercadopago.com/v1/payments/${paymentId}`, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    });
+    // 1. Manejo de Suscripciones (Preapproval)
+    if (topic === "preapproval" || topic === "subscription_preapproval") {
+      const mpRes = await fetch(`https://api.mercadopago.com/preapproval/${resourceId}`, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
 
-    if (!mpRes.ok) {
-      console.error(`Error al consultar pago ${paymentId} en Mercado Pago:`, await mpRes.text());
-      return NextResponse.json({ error: "No se pudo verificar el pago" }, { status: 200 });
+      if (!mpRes.ok) {
+        console.error(`Error al consultar preapproval ${resourceId}:`, await mpRes.text());
+        return NextResponse.json({ received: true, error: "fetch_preapproval_failed" }, { status: 200 });
+      }
+
+      const subData = (await mpRes.json()) as {
+        id?: string;
+        status?: string;
+        external_reference?: string;
+        next_payment_date?: string;
+      };
+
+      const businessId = subData.external_reference;
+      if (!businessId) {
+        return NextResponse.json({ received: true, no_reference: true }, { status: 200 });
+      }
+
+      const business = await prisma.business.findUnique({ where: { id: businessId }, select: { id: true } });
+      if (!business) {
+        return NextResponse.json({ received: true, business_not_found: true }, { status: 200 });
+      }
+
+      if (subData.status === "authorized") {
+        const nextPayment = subData.next_payment_date
+          ? new Date(subData.next_payment_date)
+          : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+
+        await prisma.business.update({
+          where: { id: businessId },
+          data: {
+            subscriptionStatus: "ACTIVE",
+            subscriptionId: subData.id || resourceId,
+            currentPeriodEnd: nextPayment,
+          },
+        });
+        console.log(`[Mercado Pago Webhook] Negocio ${businessId} suscripción marcada como ACTIVE.`);
+      } else if (subData.status === "cancelled") {
+        await prisma.business.update({
+          where: { id: businessId },
+          data: {
+            subscriptionStatus: "CANCELLED",
+          },
+        });
+      } else if (subData.status === "paused") {
+        await prisma.business.update({
+          where: { id: businessId },
+          data: {
+            subscriptionStatus: "PAST_DUE",
+          },
+        });
+      }
+
+      return NextResponse.json({ success: true, type: "subscription", status: subData.status }, { status: 200 });
     }
 
-    const paymentData = await mpRes.json();
-    const { status, external_reference, transaction_amount, payment_method_id } = paymentData;
+    // 2. Manejo de Pagos Recurrentes de Suscripción (Subscription Authorized Payment)
+    if (topic === "subscription_authorized_payment") {
+      const mpRes = await fetch(`https://api.mercadopago.com/authorized_payments/${resourceId}`, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
 
-    // external_reference contiene el appointment.id que asignamos al crear la preferencia
-    if (!external_reference) {
-      return NextResponse.json({ received: true, no_reference: true }, { status: 200 });
+      if (!mpRes.ok) {
+        console.error(`Error al consultar authorized_payment ${resourceId}:`, await mpRes.text());
+        return NextResponse.json({ received: true, error: "fetch_authorized_payment_failed" }, { status: 200 });
+      }
+
+      const paymentData = (await mpRes.json()) as {
+        status?: string;
+        external_reference?: string;
+      };
+
+      const businessId = paymentData.external_reference;
+      if (businessId) {
+        if (paymentData.status === "approved") {
+          await prisma.business.update({
+            where: { id: businessId },
+            data: {
+              subscriptionStatus: "ACTIVE",
+              currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+            },
+          });
+        } else if (paymentData.status === "rejected") {
+          await prisma.business.update({
+            where: { id: businessId },
+            data: {
+              subscriptionStatus: "PAST_DUE",
+            },
+          });
+        }
+      }
+
+      return NextResponse.json({ success: true, type: "authorized_payment", status: paymentData.status }, { status: 200 });
     }
 
-    if (status === "approved") {
-      await prisma.appointment.update({
-        where: { id: external_reference },
-        data: {
-          paymentStatus: "PAID",
-          paymentMethod: `Mercado Pago (${payment_method_id || "Online"})`,
-          paymentAmount: transaction_amount,
-          status: "CONFIRMED",
+    // 3. Manejo de Pagos de Citas (One-off Appointment Payments)
+    if (topic === "payment" || !topic) {
+      const mpRes = await fetch(`https://api.mercadopago.com/v1/payments/${resourceId}`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
         },
       });
 
-      console.log(`[Mercado Pago Webhook] Cita ${external_reference} marcada como PAGADA con éxito.`);
-    } else if (status === "rejected" || status === "cancelled") {
-      await prisma.appointment.update({
-        where: { id: external_reference },
-        data: {
-          paymentStatus: "REJECTED",
-        },
-      });
+      if (!mpRes.ok) {
+        console.error(`Error al consultar pago ${resourceId} en Mercado Pago:`, await mpRes.text());
+        return NextResponse.json({ error: "No se pudo verificar el pago" }, { status: 200 });
+      }
+
+      const paymentData = await mpRes.json();
+      const { status, external_reference, transaction_amount, payment_method_id } = paymentData;
+
+      if (!external_reference) {
+        return NextResponse.json({ received: true, no_reference: true }, { status: 200 });
+      }
+
+      if (status === "approved") {
+        await prisma.appointment.update({
+          where: { id: external_reference },
+          data: {
+            paymentStatus: "PAID",
+            paymentMethod: `Mercado Pago (${payment_method_id || "Online"})`,
+            paymentAmount: transaction_amount,
+            status: "CONFIRMED",
+          },
+        });
+
+        console.log(`[Mercado Pago Webhook] Cita ${external_reference} marcada como PAGADA con éxito.`);
+      } else if (status === "rejected" || status === "cancelled") {
+        await prisma.appointment.update({
+          where: { id: external_reference },
+          data: {
+            paymentStatus: "REJECTED",
+          },
+        });
+      }
+
+      return NextResponse.json({ success: true, status }, { status: 200 });
     }
 
-    return NextResponse.json({ success: true, status }, { status: 200 });
+    return NextResponse.json({ received: true, ignored: true }, { status: 200 });
   } catch (error) {
     console.error("Error en webhook de Mercado Pago:", error);
-    // Respondemos 200 para evitar bloqueos de reintentos infinitos
     return NextResponse.json({ received: true, error: "internal_error" }, { status: 200 });
   }
 }
 
-// Mercado Pago también puede enviar validación GET al registrar el webhook
 export async function GET() {
   return NextResponse.json({ status: "ok", service: "AgendaLink Mercado Pago Webhook" });
 }

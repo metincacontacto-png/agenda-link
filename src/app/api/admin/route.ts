@@ -57,6 +57,10 @@ export async function GET(request: Request) {
           timezone: true,
           plan: true,
           billingBypass: true,
+          subscriptionStatus: true,
+          trialEndsAt: true,
+          subscriptionPlan: true,
+          currentPeriodEnd: true,
           customDomain: true,
           logoUrl: true,
           landingTitle: true,
@@ -117,6 +121,10 @@ export async function GET(request: Request) {
     const businessDTO = {
       ...business,
       billingBypass: canViewSensitive ? business.billingBypass : false,
+      subscriptionStatus: business.subscriptionStatus ?? "TRIALING",
+      trialEndsAt: business.trialEndsAt ? business.trialEndsAt.toISOString() : null,
+      subscriptionPlan: business.subscriptionPlan ?? business.plan,
+      currentPeriodEnd: business.currentPeriodEnd ? business.currentPeriodEnd.toISOString() : null,
       appointments,
     } satisfies BusinessAdminDTO;
 
@@ -179,7 +187,14 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       success: true,
-      business: { ...business, billingBypass: canViewSensitive ? business.billingBypass : false },
+      business: {
+        ...business,
+        billingBypass: canViewSensitive ? business.billingBypass : false,
+        subscriptionStatus: business.subscriptionStatus ?? "TRIALING",
+        trialEndsAt: business.trialEndsAt ? business.trialEndsAt.toISOString() : null,
+        subscriptionPlan: business.subscriptionPlan ?? business.plan,
+        currentPeriodEnd: business.currentPeriodEnd ? business.currentPeriodEnd.toISOString() : null,
+      },
     });
   } catch (error) {
     if (error instanceof MediaValidationError) {

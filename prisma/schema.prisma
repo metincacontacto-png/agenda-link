@@ -32,6 +32,11 @@ model Business {
   landingTestimonialsJson  String?
   plan                     String             @default("INDIVIDUAL")
   billingBypass            Boolean            @default(false)
+  subscriptionStatus       String             @default("TRIALING")
+  trialEndsAt              DateTime?
+  subscriptionId           String?
+  subscriptionPlan         String?
+  currentPeriodEnd         DateTime?
   customDomain             String?            @unique
   createdAt                DateTime           @default(now())
   updatedAt                DateTime           @updatedAt
