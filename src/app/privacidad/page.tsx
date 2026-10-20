@@ -101,7 +101,7 @@ export default function PrivacidadPage() {
               <ul style={{ paddingLeft: "20px", marginTop: "8px", display: "flex", flexDirection: "column", gap: "10px" }}>
                 <li><strong>Cloudflare, Inc. (EE.UU. / Infraestructura Global):</strong> Provee la red de distribución de contenido (CDN), servidores Edge Workers, base de datos distribuida y cortafuegos de seguridad web con cifrado TLS 1.3 en tránsito y cifrado en reposo.</li>
                 <li><strong>Mercado Pago Chile / MercadoLibre (Chile / Región):</strong> Pasarela de pago cuando el cliente opta por pagar online su reserva. Recibe nombre, correo y monto exclusivamente para procesar la transacción bancaria.</li>
-                <li><strong>Google Cloud / Google Gemini API (cuando se habilite Linki IA):</strong> Módulos de inteligencia artificial (Linki IA) para redacción y análisis, operados bajo acuerdos de confidencialidad corporativa y sin utilizar datos personales para el reentrenamiento de modelos públicos.</li>
+                <li><strong>Google Cloud / Google Gemini API (EE.UU.):</strong> Módulos de inteligencia artificial (Linki IA) para redacción y análisis, operados bajo acuerdos de confidencialidad corporativa y sin utilizar datos personales para el reentrenamiento de modelos públicos.</li>
                 <li><strong>Resend, Inc. (EE.UU.):</strong> Proveedor de infraestructura para la entrega automatizada de correos electrónicos transaccionales (comprobantes de reserva y avisos del sistema).</li>
               </ul>
             </section>
