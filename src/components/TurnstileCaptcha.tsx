@@ -33,13 +33,13 @@ const DEFAULT_TEST_SITE_KEY = "1x00000000000000000000AA";
 export default function TurnstileCaptcha({ onVerify }: TurnstileCaptchaProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const widgetIdRef = useRef<string | null>(null);
-  const [useFallback, setUseFallback] = useState(false);
+  const [useFallback, setUseFallback] = useState(() => !process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY);
   const [loaded, setLoaded] = useState(false);
 
-  const siteKey =
-    process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || DEFAULT_TEST_SITE_KEY;
+  const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "";
 
   useEffect(() => {
+    if (!siteKey) return;
     let timer: NodeJS.Timeout;
 
     function renderWidget() {

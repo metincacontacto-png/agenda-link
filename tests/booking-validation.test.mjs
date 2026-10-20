@@ -90,6 +90,10 @@ test("validates and normalizes Chilean phone numbers to +569XXXXXXXX format", ()
   assert.equal(short.ok, false);
   if (!short.ok) assert.equal(short.error, "Ingresa un celular chileno válido (9 dígitos)");
 
+  const veryShort = parseCreateBookingInput({ ...base, clientWhatsApp: "12345" });
+  assert.equal(veryShort.ok, false);
+  if (!veryShort.ok) assert.equal(veryShort.error, "Ingresa un celular chileno válido (9 dígitos)");
+
   const invalidPrefix = parseCreateBookingInput({ ...base, clientWhatsApp: "812345678" });
   assert.equal(invalidPrefix.ok, false);
 });

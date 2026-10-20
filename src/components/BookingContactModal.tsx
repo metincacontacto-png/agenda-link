@@ -31,6 +31,38 @@ export default function BookingContactModal({
   const [paymentMethod, setPaymentMethod] = useState<"mercadopago" | "local">(isDemo ? "local" : "mercadopago");
   const firstInputRef = useRef<HTMLInputElement>(null);
 
+  const cleanPhone = phone.replace(/\D/g, "").replace(/^(56)?/, "");
+  const isPhoneValid = /^9\d{8}$/.test(cleanPhone);
+  const hasTypedPhone = phone.trim().length > 0;
+  const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+  const isNameValid = name.trim().length > 0;
+  const isFormValid = isNameValid && isPhoneValid && isEmailValid;
+
+  let livePhoneMessage: { text: string; isError: boolean } | null = null;
+  if (hasTypedPhone) {
+    if (cleanPhone.length > 0 && !cleanPhone.startsWith("9")) {
+      livePhoneMessage = {
+        text: "El número debe comenzar con 9 (ej: 9 1234 5678)",
+        isError: true,
+      };
+    } else if (cleanPhone.length < 9) {
+      livePhoneMessage = {
+        text: `Faltan dígitos (${cleanPhone.length} de 9). Debe tener 9 dígitos.`,
+        isError: true,
+      };
+    } else if (cleanPhone.length > 9) {
+      livePhoneMessage = {
+        text: "Debe tener exactamente 9 dígitos.",
+        isError: true,
+      };
+    } else if (isPhoneValid) {
+      livePhoneMessage = {
+        text: `✓ Celular chileno válido (+56 9 ${cleanPhone.slice(1, 5)} ${cleanPhone.slice(5)})`,
+        isError: false,
+      };
+    }
+  }
+
   useEffect(() => {
     firstInputRef.current?.focus();
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -130,7 +162,20 @@ export default function BookingContactModal({
             <small style={{ color: "#94a3b8", fontSize: "12px", marginTop: "4px", display: "block" }}>
               Celular chileno de 9 dígitos para recordatorios por WhatsApp.
             </small>
-            {phoneError && (
+            {livePhoneMessage && (
+              <span
+                style={{
+                  color: livePhoneMessage.isError ? "#dc2626" : "#16a34a",
+                  fontSize: "12px",
+                  fontWeight: "600",
+                  marginTop: "4px",
+                  display: "block",
+                }}
+              >
+                {livePhoneMessage.text}
+              </span>
+            )}
+            {!livePhoneMessage && phoneError && (
               <span style={{ color: "#dc2626", fontSize: "12px", fontWeight: "600", marginTop: "4px", display: "block" }}>
                 {phoneError}
               </span>
@@ -231,24 +276,22 @@ export default function BookingContactModal({
           </div>
 
           {/* Aviso de Devolución del 100% sobre el botón de pago */}
-          {paymentMethod === "mercadopago" && !isDemo && (
-            <div
-              style={{
-                background: "#f0fdf4",
-                border: "1px solid #bbf7d0",
-                color: "#166534",
-                padding: "10px 14px",
-                borderRadius: "10px",
-                fontSize: "13px",
-                fontWeight: "700",
-                textAlign: "center",
-                marginBottom: "14px",
-                lineHeight: "1.4",
-              }}
-            >
-              Si el negocio no confirma tu solicitud, te devuelve el 100% del pago.
-            </div>
-          )}
+          <div
+            style={{
+              background: "#f0fdf4",
+              border: "1px solid #bbf7d0",
+              color: "#166534",
+              padding: "10px 14px",
+              borderRadius: "10px",
+              fontSize: "13px",
+              fontWeight: "700",
+              textAlign: "center",
+              marginBottom: "14px",
+              lineHeight: "1.4",
+            }}
+          >
+            Si el negocio no confirma tu solicitud, te devuelve el 100% del pago.
+          </div>
 
           <div className={styles.buttonRow}>
             <button
@@ -260,7 +303,11 @@ export default function BookingContactModal({
             >
               Volver
             </button>
-            <button type="submit" disabled={submitting} className={`${styles.btn} ${styles.btnPrimary}`}>
+            <button
+              type="submit"
+              disabled={submitting || !isFormValid}
+              className={`${styles.btn} ${styles.btnPrimary}`}
+            >
               {submitting
                 ? "Procesando…"
                 : isDemo

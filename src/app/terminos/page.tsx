@@ -135,6 +135,7 @@ export default function TerminosPage() {
                 <li><strong>Carácter Referencial:</strong> Las sugerencias y textos emitidos por los agentes de IA son herramientas de asistencia estadística y no constituyen asesoría legal, médica, tributaria ni financiera vinculante.</li>
                 <li><strong>Supervisión Humana Obligatoria:</strong> El Negocio es el único responsable de revisar, aprobar y emitir cualquier mensaje generado antes de enviarlo a sus clientes finales.</li>
                 <li><strong>Responsabilidad Acotada:</strong> La responsabilidad de {LEGAL.razonSocial} frente a eventuales inexactitudes de los módulos de inteligencia artificial queda regida íntegramente por la cláusula de limitación de responsabilidad de la sección 9.</li>
+                <li><strong>Garantía de Acceso Temprano:</strong> Si contratas antes de que Linki esté disponible, lo recibes sin costo adicional en cuanto se habilite.</li>
               </ul>
             </section>
 

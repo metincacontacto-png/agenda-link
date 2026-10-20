@@ -61,7 +61,7 @@ export default function SecurityCaptcha({ onVerify }: SecurityCaptchaProps) {
           }}
         >
           <span>🛡️</span>
-          <span>Control de seguridad humano</span>
+          <span>Control de seguridad (Captcha)</span>
         </label>
         <button
           type="button"

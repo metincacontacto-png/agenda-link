@@ -45,7 +45,7 @@ export function parseCreateBookingInput(input: unknown): BookingInputResult {
   const serviceId = boundedString(record.serviceId, 1, 100);
   const professionalId = boundedString(record.professionalId, 1, 100);
   const clientName = boundedString(record.clientName, 1, 100);
-  const clientWhatsApp = boundedString(record.clientWhatsApp, 7, 32);
+  const clientWhatsApp = boundedString(record.clientWhatsApp, 1, 32);
   const rawEmail = boundedString(record.clientEmail, 3, 254);
   const date = boundedString(record.date, 10, 10);
   const time = boundedString(record.time, 5, 5);
