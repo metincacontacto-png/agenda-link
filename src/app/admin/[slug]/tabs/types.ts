@@ -11,4 +11,4 @@ export type AdminTabKey =
   | "business"
   | "landing";
 
-export type AdminSettingsSubTab = "servicios" | "whatsapp";
+export type AdminSettingsSubTab = "servicios" | "whatsapp" | "pagos";

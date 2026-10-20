@@ -7,6 +7,13 @@ import { updateBusinessProfile } from "@/features/branding/update-business-profi
 import type { BusinessAdminDTO } from "@/features/businesses/contracts";
 import { logServerError } from "@/server/observability";
 
+function maskToken(token: string | null | undefined): string | null {
+  if (!token) return null;
+  const clean = token.trim();
+  if (clean.length <= 12) return "••••••••";
+  return `${clean.slice(0, 8)}••••••••${clean.slice(-4)}`;
+}
+
 export async function GET(request: Request) {
   let businessId: string | undefined;
   try {
@@ -75,6 +82,8 @@ export async function GET(request: Request) {
           landingTestimonialsJson: true,
           cancellationPolicy: true,
           minNoticeHours: true,
+          mercadoPagoAccessToken: true,
+          mercadoPagoPublicKey: true,
           services: {
             orderBy: { createdAt: "asc" },
             select: { id: true, name: true, duration: true, price: true, imageUrl: true },
@@ -120,13 +129,18 @@ export async function GET(request: Request) {
       paymentMethod: canViewSensitive ? appointment.paymentMethod : null,
       paymentAmount: canViewSensitive ? appointment.paymentAmount : null,
     }));
+
+    const { mercadoPagoAccessToken, ...businessFields } = business;
     const businessDTO = {
-      ...business,
+      ...businessFields,
       billingBypass: canViewSensitive ? business.billingBypass : false,
       subscriptionStatus: business.subscriptionStatus ?? "TRIALING",
       trialEndsAt: business.trialEndsAt ? business.trialEndsAt.toISOString() : null,
       subscriptionPlan: business.subscriptionPlan ?? business.plan,
       currentPeriodEnd: business.currentPeriodEnd ? business.currentPeriodEnd.toISOString() : null,
+      mercadoPagoConnected: Boolean(mercadoPagoAccessToken),
+      mercadoPagoPublicKey: canViewSensitive ? business.mercadoPagoPublicKey : null,
+      mercadoPagoTokenMasked: canViewSensitive ? maskToken(mercadoPagoAccessToken) : null,
       appointments,
     } satisfies BusinessAdminDTO;
 
@@ -187,15 +201,19 @@ export async function POST(request: Request) {
     const business = await updateBusinessProfile(businessRef.id, slug, parsed.value);
     if (!business) return NextResponse.json({ error: "Negocio no encontrado" }, { status: 404 });
 
+    const { mercadoPagoAccessToken, ...businessFields } = business;
     return NextResponse.json({
       success: true,
       business: {
-        ...business,
+        ...businessFields,
         billingBypass: canViewSensitive ? business.billingBypass : false,
         subscriptionStatus: business.subscriptionStatus ?? "TRIALING",
         trialEndsAt: business.trialEndsAt ? business.trialEndsAt.toISOString() : null,
         subscriptionPlan: business.subscriptionPlan ?? business.plan,
         currentPeriodEnd: business.currentPeriodEnd ? business.currentPeriodEnd.toISOString() : null,
+        mercadoPagoConnected: Boolean(mercadoPagoAccessToken),
+        mercadoPagoPublicKey: canViewSensitive ? business.mercadoPagoPublicKey : null,
+        mercadoPagoTokenMasked: canViewSensitive ? maskToken(mercadoPagoAccessToken) : null,
       },
     });
   } catch (error) {

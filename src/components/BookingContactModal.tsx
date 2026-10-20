@@ -8,6 +8,7 @@ import { FEATURES } from "@/lib/features";
 interface BookingContactModalProps {
   businessName?: string;
   isDemo?: boolean;
+  acceptsOnlinePayments?: boolean;
   cancellationPolicy?: string | null;
   errorMessage?: string;
   submitting: boolean;
@@ -18,17 +19,20 @@ interface BookingContactModalProps {
 export default function BookingContactModal({
   businessName,
   isDemo = false,
+  acceptsOnlinePayments = false,
   cancellationPolicy,
   errorMessage,
   submitting,
   onClose,
   onSubmit,
 }: BookingContactModalProps) {
+  const canPayOnline = !isDemo && acceptsOnlinePayments && FEATURES.pagosOnline;
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [phoneError, setPhoneError] = useState<string | null>(null);
-  const [paymentMethod, setPaymentMethod] = useState<"mercadopago" | "local">(isDemo ? "local" : "mercadopago");
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<"mercadopago" | "local">("mercadopago");
+  const paymentMethod: "mercadopago" | "local" = canPayOnline && selectedPaymentMethod === "mercadopago" ? "mercadopago" : "local";
   const firstInputRef = useRef<HTMLInputElement>(null);
 
   const cleanPhone = phone.replace(/\D/g, "").replace(/^(56)?/, "");
@@ -210,7 +214,7 @@ export default function BookingContactModal({
             <div className={styles.formGroup} style={{ marginTop: 14 }}>
               <label className={styles.label}>Opciones de Pago</label>
               <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginTop: "6px" }}>
-                {!isDemo ? (
+                {canPayOnline ? (
                   <label
                     style={{
                       display: "flex",
@@ -230,13 +234,17 @@ export default function BookingContactModal({
                       name="bookingPaymentMethod"
                       value="mercadopago"
                       checked={paymentMethod === "mercadopago"}
-                      onChange={() => setPaymentMethod("mercadopago")}
+                      onChange={() => setSelectedPaymentMethod("mercadopago")}
                     />
                     <span>Pagar online con Mercado Pago (Redcompra / Tarjetas)</span>
                   </label>
-                ) : (
+                ) : isDemo ? (
                   <div style={{ padding: "8px 12px", borderRadius: "8px", background: "#f1f5f9", color: "#64748b", fontSize: "12px" }}>
                     💳 Pagos online con Mercado Pago (desactivado en modo demo)
+                  </div>
+                ) : (
+                  <div style={{ padding: "8px 12px", borderRadius: "8px", background: "#f8fafc", border: "1px solid #e2e8f0", color: "#64748b", fontSize: "12px" }}>
+                    💳 Pagos online no activados por el negocio (paga directamente en el local)
                   </div>
                 )}
                 <label
@@ -258,7 +266,7 @@ export default function BookingContactModal({
                     name="bookingPaymentMethod"
                     value="local"
                     checked={paymentMethod === "local"}
-                    onChange={() => setPaymentMethod("local")}
+                    onChange={() => setSelectedPaymentMethod("local")}
                   />
                   <span>Pagar en el local el día de la atención</span>
                 </label>
@@ -275,23 +283,25 @@ export default function BookingContactModal({
             <div>{cancellationPolicy || "Cancelaciones con al menos 24 h de anticipación."}</div>
           </div>
 
-          {/* Aviso de Devolución del 100% sobre el botón de pago */}
-          <div
-            style={{
-              background: "#f0fdf4",
-              border: "1px solid #bbf7d0",
-              color: "#166534",
-              padding: "10px 14px",
-              borderRadius: "10px",
-              fontSize: "13px",
-              fontWeight: "700",
-              textAlign: "center",
-              marginBottom: "14px",
-              lineHeight: "1.4",
-            }}
-          >
-            Si el negocio no confirma tu solicitud, te devuelve el 100% del pago.
-          </div>
+          {/* Aviso de Devolución del 100% sobre el botón de pago (cuando paga con Mercado Pago) */}
+          {paymentMethod === "mercadopago" && (
+            <div
+              style={{
+                background: "#f0fdf4",
+                border: "1px solid #bbf7d0",
+                color: "#166534",
+                padding: "10px 14px",
+                borderRadius: "10px",
+                fontSize: "13px",
+                fontWeight: "700",
+                textAlign: "center",
+                marginBottom: "14px",
+                lineHeight: "1.4",
+              }}
+            >
+              Si el negocio no confirma tu solicitud, te devuelve el 100% del pago.
+            </div>
+          )}
 
           <div className={styles.buttonRow}>
             <button

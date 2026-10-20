@@ -16,6 +16,8 @@ export interface UpdateBusinessProfileInput {
   landingTestimonialsJson?: string | null;
   cancellationPolicy?: string | null;
   minNoticeHours?: number;
+  mercadoPagoAccessToken?: string | null;
+  mercadoPagoPublicKey?: string | null;
   plan?: "INDIVIDUAL" | "EQUIPO" | "NEGOCIO";
 }
 
@@ -94,6 +96,38 @@ export function parseBusinessProfileInput(input: unknown): BusinessProfileInputR
       return { ok: false, error: "La anticipación mínima debe ser un número entero entre 0 y 72 horas" };
     }
     result.minNoticeHours = hours;
+  }
+  if (record.mercadoPagoAccessToken !== undefined) {
+    if (record.mercadoPagoAccessToken === null || record.mercadoPagoAccessToken === "") {
+      result.mercadoPagoAccessToken = null;
+    } else if (typeof record.mercadoPagoAccessToken === "string") {
+      const token = record.mercadoPagoAccessToken.trim();
+      if (token === "") {
+        result.mercadoPagoAccessToken = null;
+      } else if (!/^(APP_USR-|TEST-)[a-zA-Z0-9_-]{15,150}$/.test(token)) {
+        return { ok: false, error: "El Access Token de Mercado Pago debe comenzar con APP_USR- o TEST-" };
+      } else {
+        result.mercadoPagoAccessToken = token;
+      }
+    } else {
+      return { ok: false, error: "Formato de Access Token inválido" };
+    }
+  }
+  if (record.mercadoPagoPublicKey !== undefined) {
+    if (record.mercadoPagoPublicKey === null || record.mercadoPagoPublicKey === "") {
+      result.mercadoPagoPublicKey = null;
+    } else if (typeof record.mercadoPagoPublicKey === "string") {
+      const pubKey = record.mercadoPagoPublicKey.trim();
+      if (pubKey === "") {
+        result.mercadoPagoPublicKey = null;
+      } else if (!/^(APP_USR-|TEST-)[a-zA-Z0-9_-]{10,120}$/.test(pubKey)) {
+        return { ok: false, error: "La Public Key de Mercado Pago debe comenzar con APP_USR- o TEST-" };
+      } else {
+        result.mercadoPagoPublicKey = pubKey;
+      }
+    } else {
+      return { ok: false, error: "Formato de Public Key inválido" };
+    }
   }
   if (Object.keys(result).length === 0) {
     return { ok: false, error: "No hay cambios de negocio para guardar" };

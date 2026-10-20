@@ -35,6 +35,7 @@ export async function GET(request: Request) {
         landingTestimonialsJson: true,
         cancellationPolicy: true,
         minNoticeHours: true,
+        mercadoPagoAccessToken: true,
         professionals: { select: { id: true, name: true, avatar: true } },
         services: { select: { id: true, name: true, duration: true, price: true, imageUrl: true } },
       },
@@ -43,7 +44,11 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: "Negocio no encontrado" }, { status: 404 });
     }
     businessId = business.id;
-    const publicBusiness: PublicBusinessDTO = business;
+    const { mercadoPagoAccessToken, ...businessFields } = business;
+    const publicBusiness: PublicBusinessDTO = {
+      ...businessFields,
+      acceptsOnlinePayments: Boolean(mercadoPagoAccessToken),
+    };
 
     let availableSlots: string[] = [];
     if (serviceId && professionalId) {
@@ -64,7 +69,7 @@ export async function GET(request: Request) {
     }
 
     return NextResponse.json({
-      business,
+      business: publicBusiness,
       availableSlots,
     });
   } catch (error) {

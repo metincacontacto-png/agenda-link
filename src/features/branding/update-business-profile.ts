@@ -48,6 +48,8 @@ export async function updateBusinessProfile(
       landingTestimonialsJson: input.landingTestimonialsJson,
       cancellationPolicy: input.cancellationPolicy,
       minNoticeHours: input.minNoticeHours,
+      mercadoPagoAccessToken: input.mercadoPagoAccessToken,
+      mercadoPagoPublicKey: input.mercadoPagoPublicKey,
       plan: input.plan,
     },
     select: {
@@ -80,6 +82,8 @@ export async function updateBusinessProfile(
       landingTestimonialsJson: true,
       cancellationPolicy: true,
       minNoticeHours: true,
+      mercadoPagoAccessToken: true,
+      mercadoPagoPublicKey: true,
     },
   });
 

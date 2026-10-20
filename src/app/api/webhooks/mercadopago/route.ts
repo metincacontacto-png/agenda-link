@@ -14,11 +14,7 @@ function getMercadoPagoAccessToken(): string | undefined {
 
 export async function POST(request: Request) {
   try {
-    const accessToken = getMercadoPagoAccessToken();
-    if (!accessToken) {
-      console.warn("Webhook Mercado Pago recibido pero MERCADOPAGO_ACCESS_TOKEN no está definido.");
-      return NextResponse.json({ received: true }, { status: 200 });
-    }
+    const platformAccessToken = getMercadoPagoAccessToken();
 
     const url = new URL(request.url);
     const body = await request.json().catch(() => ({}));
@@ -40,8 +36,13 @@ export async function POST(request: Request) {
 
     // 1. Manejo de Suscripciones (Preapproval)
     if (topic === "preapproval" || topic === "subscription_preapproval") {
+      if (!platformAccessToken) {
+        console.warn("Webhook de suscripción recibido pero MERCADOPAGO_ACCESS_TOKEN no está definido.");
+        return NextResponse.json({ received: true }, { status: 200 });
+      }
+
       const mpRes = await fetch(`https://api.mercadopago.com/preapproval/${resourceId}`, {
-        headers: { Authorization: `Bearer ${accessToken}` },
+        headers: { Authorization: `Bearer ${platformAccessToken}` },
       });
 
       if (!mpRes.ok) {
@@ -101,8 +102,13 @@ export async function POST(request: Request) {
 
     // 2. Manejo de Pagos Recurrentes de Suscripción (Subscription Authorized Payment)
     if (topic === "subscription_authorized_payment") {
+      if (!platformAccessToken) {
+        console.warn("Webhook de pago de suscripción recibido pero MERCADOPAGO_ACCESS_TOKEN no está definido.");
+        return NextResponse.json({ received: true }, { status: 200 });
+      }
+
       const mpRes = await fetch(`https://api.mercadopago.com/authorized_payments/${resourceId}`, {
-        headers: { Authorization: `Bearer ${accessToken}` },
+        headers: { Authorization: `Bearer ${platformAccessToken}` },
       });
 
       if (!mpRes.ok) {
@@ -138,11 +144,29 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: true, type: "authorized_payment", status: paymentData.status }, { status: 200 });
     }
 
-    // 3. Manejo de Pagos de Citas (One-off Appointment Payments)
+    // 3. Manejo de Pagos de Citas (One-off Appointment Payments con cobro directo al negocio)
     if (topic === "payment" || !topic) {
+      const bizId = url.searchParams.get("bizId");
+      let paymentAccessToken = platformAccessToken;
+
+      if (bizId) {
+        const business = await prisma.business.findUnique({
+          where: { id: bizId },
+          select: { mercadoPagoAccessToken: true },
+        });
+        if (business?.mercadoPagoAccessToken) {
+          paymentAccessToken = business.mercadoPagoAccessToken;
+        }
+      }
+
+      if (!paymentAccessToken) {
+        console.warn(`Webhook de pago ${resourceId} recibido pero no hay Access Token disponible.`);
+        return NextResponse.json({ received: true, ignored: true }, { status: 200 });
+      }
+
       const mpRes = await fetch(`https://api.mercadopago.com/v1/payments/${resourceId}`, {
         headers: {
-          Authorization: `Bearer ${accessToken}`,
+          Authorization: `Bearer ${paymentAccessToken}`,
         },
       });
 

@@ -121,6 +121,7 @@ export default function AdminHeader({
           <div className={styles.settingsDropdown}>
             <button className={styles.profileDropdownItem} onClick={() => { onTabChange("landing"); onGearDropdownChange(false); }}>Configuraciones</button>
             <button className={styles.profileDropdownItem} onClick={() => { onTabChange("administracion"); onSettingsTabChange("servicios"); onGearDropdownChange(false); }}>Servicios y recursos</button>
+            <button className={styles.profileDropdownItem} onClick={() => { onTabChange("administracion"); onSettingsTabChange("pagos"); onGearDropdownChange(false); }}>Cobros Online (Mercado Pago)</button>
             <button className={styles.profileDropdownItem} onClick={() => { onOpenBillingModal(); onGearDropdownChange(false); }}>Facturación y Planes</button>
           </div>
         )}
@@ -141,7 +142,7 @@ export default function AdminHeader({
             <button className={styles.profileDropdownItem} disabled title="No hay recursos descargables disponibles">Descargas no disponibles</button>
             <button className={styles.profileDropdownItem} disabled title="El programa de referidos no está habilitado">Referidos no disponibles</button>
             <button className={styles.profileDropdownItem} disabled title="No hay tutoriales publicados todavía">Tutoriales no disponibles</button>
-            <button className={styles.profileDropdownItem} disabled title="El cobro de reservas no está conectado">Pagos no disponibles</button>
+            <button className={styles.profileDropdownItem} onClick={() => { onTabChange("administracion"); onSettingsTabChange("pagos"); onProfileDropdownChange(false); }}>Cobros con Mercado Pago</button>
             <div className={styles.profileDropdownDivider} />
             <Link href="/" className={styles.profileDropdownItemLogout}>Cerrar sesión</Link>
           </div>

@@ -1,29 +1,11 @@
 import { NextResponse } from "next/server";
-import { getCloudflareContext } from "@opennextjs/cloudflare";
+import { prisma } from "@/lib/db";
 import { createBooking } from "@/features/booking/create-booking";
 import { parseCreateBookingInput } from "@/features/booking/validation";
 import { prismaBookingRepository } from "@/lib/prisma-booking-repository";
 
-function getMercadoPagoAccessToken(): string | undefined {
-  try {
-    const { env } = getCloudflareContext();
-    const workerSecret = (env as { MERCADOPAGO_ACCESS_TOKEN?: string }).MERCADOPAGO_ACCESS_TOKEN;
-    return workerSecret || process.env.MERCADOPAGO_ACCESS_TOKEN;
-  } catch {
-    return process.env.MERCADOPAGO_ACCESS_TOKEN;
-  }
-}
-
 export async function POST(request: Request) {
   try {
-    const accessToken = getMercadoPagoAccessToken();
-    if (!accessToken) {
-      return NextResponse.json(
-        { error: "Mercado Pago no está configurado (falta MERCADOPAGO_ACCESS_TOKEN)" },
-        { status: 500 }
-      );
-    }
-
     const body: unknown = await request.json().catch(() => ({}));
     const parsed = parseCreateBookingInput(body);
     if (!parsed.ok) {
@@ -33,6 +15,24 @@ export async function POST(request: Request) {
     if (parsed.value.slug === "valentina") {
       return NextResponse.json(
         { error: "Los pagos online están deshabilitados en el negocio de demostración." },
+        { status: 400 }
+      );
+    }
+
+    // Verificar si el negocio tiene configurado su propio token de Mercado Pago
+    const businessAccount = await prisma.business.findUnique({
+      where: { slug: parsed.value.slug },
+      select: { id: true, mercadoPagoAccessToken: true },
+    });
+
+    if (!businessAccount) {
+      return NextResponse.json({ error: "Negocio no encontrado" }, { status: 404 });
+    }
+
+    const accessToken = businessAccount.mercadoPagoAccessToken;
+    if (!accessToken) {
+      return NextResponse.json(
+        { error: "Este negocio no tiene activados los pagos online con Mercado Pago. Por favor elige pagar en el local." },
         { status: 400 }
       );
     }
@@ -60,7 +60,7 @@ export async function POST(request: Request) {
     const successUrl = `${origin}/${slug}/success?appId=${appointment.id}&payment_status=approved`;
     const failureUrl = `${origin}/${slug}?payment_status=failure&appId=${appointment.id}`;
     const pendingUrl = `${origin}/${slug}/success?appId=${appointment.id}&payment_status=pending`;
-    const notificationUrl = `${origin}/api/webhooks/mercadopago`;
+    const notificationUrl = `${origin}/api/webhooks/mercadopago?bizId=${encodeURIComponent(business.id)}`;
 
     // 4. Crear la preferencia en la API de Mercado Pago
     const mpPayload = {

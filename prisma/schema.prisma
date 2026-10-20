@@ -40,6 +40,8 @@ model Business {
   customDomain             String?            @unique
   cancellationPolicy       String?            @default("Cancelaciones con al menos 24 h de anticipación.")
   minNoticeHours           Int                @default(2)
+  mercadoPagoAccessToken   String?
+  mercadoPagoPublicKey     String?
   createdAt                DateTime           @default(now())
   updatedAt                DateTime           @updatedAt
   services                 Service[]

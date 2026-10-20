@@ -276,6 +276,54 @@ test("business profile updates validate branding and restrict plan changes by ro
   assert.equal(invalidImage.status, 400);
 });
 
+test("business can connect Mercado Pago credentials securely and enable direct online checkout", async () => {
+  const availBefore = await fetch(`${baseUrl}/api/availability?slug=booking-test-a&date=2026-11-03`);
+  const availBeforeData = await availBefore.json();
+  assert.equal(availBeforeData.business.acceptsOnlinePayments, false);
+  assert.equal(availBeforeData.business.mercadoPagoAccessToken, undefined);
+
+  const connectRes = await fetch(`${baseUrl}/api/admin`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Cookie: authCookie },
+    body: JSON.stringify({
+      slug: "booking-test-a",
+      mercadoPagoAccessToken: "APP_USR-1234567890123456-102020-abcdef1234567890-99887766",
+      mercadoPagoPublicKey: "APP_USR-abcdef123456",
+    }),
+  });
+  const connectData = await connectRes.json();
+  assert.equal(connectRes.status, 200);
+  assert.equal(connectData.business.mercadoPagoConnected, true);
+  assert.equal(connectData.business.mercadoPagoTokenMasked, "APP_USR-••••••••7766");
+  assert.equal(connectData.business.mercadoPagoAccessToken, undefined);
+
+  const adminGet = await fetch(`${baseUrl}/api/admin?slug=booking-test-a`, {
+    headers: { Cookie: authCookie },
+  });
+  const adminGetData = await adminGet.json();
+  assert.equal(adminGetData.business.mercadoPagoConnected, true);
+  assert.equal(adminGetData.business.mercadoPagoTokenMasked, "APP_USR-••••••••7766");
+  assert.equal(adminGetData.business.mercadoPagoAccessToken, undefined);
+
+  const availAfter = await fetch(`${baseUrl}/api/availability?slug=booking-test-a&date=2026-11-03`);
+  const availAfterData = await availAfter.json();
+  assert.equal(availAfterData.business.acceptsOnlinePayments, true);
+  assert.equal(availAfterData.business.mercadoPagoAccessToken, undefined);
+
+  const disconnectRes = await fetch(`${baseUrl}/api/admin`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Cookie: authCookie },
+    body: JSON.stringify({
+      slug: "booking-test-a",
+      mercadoPagoAccessToken: "",
+    }),
+  });
+  const disconnectData = await disconnectRes.json();
+  assert.equal(disconnectRes.status, 200);
+  assert.equal(disconnectData.business.mercadoPagoConnected, false);
+  assert.equal(disconnectData.business.mercadoPagoTokenMasked, null);
+});
+
 test("booking rejects foreign IDs, malformed/past input, and slots outside schedules", async () => {
   const crossBusiness = await postBooking(bookingPayload({
     serviceId: serviceB,
