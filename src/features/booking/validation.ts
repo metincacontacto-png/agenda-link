@@ -59,9 +59,14 @@ export function parseCreateBookingInput(input: unknown): BookingInputResult {
   if (!clientName || /[\u0000-\u001f\u007f]/.test(clientName)) {
     return { ok: false, error: "Nombre de cliente inválido" };
   }
-  if (!clientWhatsApp || !/^\+?[0-9\s().-]{7,32}$/.test(clientWhatsApp)) {
-    return { ok: false, error: "WhatsApp o teléfono inválido" };
+  if (!clientWhatsApp) {
+    return { ok: false, error: "Ingresa un celular chileno válido (9 dígitos)" };
   }
+  const cleanPhone = clientWhatsApp.replace(/\D/g, "").replace(/^(56)?/, "");
+  if (!/^9\d{8}$/.test(cleanPhone)) {
+    return { ok: false, error: "Ingresa un celular chileno válido (9 dígitos)" };
+  }
+  const normalizedWhatsApp = "+56" + cleanPhone;
   let clientEmail: string | undefined;
   if (rawEmail) {
     const normalized = rawEmail.toLowerCase();
@@ -81,7 +86,7 @@ export function parseCreateBookingInput(input: unknown): BookingInputResult {
       serviceId,
       professionalId,
       clientName,
-      clientWhatsApp,
+      clientWhatsApp: normalizedWhatsApp,
       ...(clientEmail ? { clientEmail } : {}),
       date,
       time,

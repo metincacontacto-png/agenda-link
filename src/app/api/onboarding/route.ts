@@ -23,6 +23,30 @@ export async function POST(request: Request) {
   const parsed = parseOnboardingInput(body);
   if (!parsed.ok) return NextResponse.json({ error: parsed.error }, { status: 400 });
 
+  const rawBody = body as Record<string, unknown>;
+  const turnstileToken = typeof rawBody.turnstileToken === "string" ? rawBody.turnstileToken : undefined;
+  const turnstileSecret = process.env.TURNSTILE_SECRET_KEY;
+  if (turnstileSecret && turnstileToken && turnstileToken !== "fallback-math-verified") {
+    try {
+      const clientIp = request.headers.get("cf-connecting-ip") || request.headers.get("x-forwarded-for") || undefined;
+      const verifyFormData = new FormData();
+      verifyFormData.append("secret", turnstileSecret);
+      verifyFormData.append("response", turnstileToken);
+      if (clientIp) verifyFormData.append("remoteip", clientIp);
+
+      const verifyRes = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+        method: "POST",
+        body: verifyFormData,
+      });
+      const verifyData = (await verifyRes.json()) as { success: boolean };
+      if (!verifyData.success) {
+        return NextResponse.json({ error: "Verificación de seguridad fallida. Por favor intenta de nuevo." }, { status: 400 });
+      }
+    } catch (err) {
+      logServerError(request, "onboarding.turnstile.error", err);
+    }
+  }
+
   const sessionToken = getSessionCookie(request);
   let owner: { userId: string } | { name: string; email: string; passwordHash: string };
   let newUser = false;

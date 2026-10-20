@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import styles from "./RegistroForm.module.css";
 import QrDownloader from "@/components/QrDownloader";
-import SecurityCaptcha from "@/components/SecurityCaptcha";
+import TurnstileCaptcha from "@/components/TurnstileCaptcha";
 import { cleanSlugInput, isValidSlug } from "@/lib/reserved-slugs";
 
 interface RegistroFormProps {
@@ -67,6 +67,7 @@ export default function RegistroForm({
   const [formStartedAt] = useState(() => Date.now());
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [captchaVerified, setCaptchaVerified] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState("");
   const [createdSlug, setCreatedSlug] = useState("");
   const [copied, setCopied] = useState(false);
 
@@ -137,6 +138,7 @@ export default function RegistroForm({
         termsAccepted: true,
         termsAcceptedAt: new Date().toISOString(),
         termsVersion: "2026-10-20",
+        turnstileToken,
       };
       const res = await fetch("/api/onboarding", {
         method: "POST",
@@ -413,9 +415,14 @@ export default function RegistroForm({
               </label>
             </div>
 
-            {/* Verificación de seguridad (Captcha) */}
+            {/* Verificación de seguridad (Cloudflare Turnstile) */}
             <div style={{ marginBottom: "16px" }}>
-              <SecurityCaptcha onVerify={setCaptchaVerified} />
+              <TurnstileCaptcha
+                onVerify={(verified, token) => {
+                  setCaptchaVerified(verified);
+                  if (token) setTurnstileToken(token);
+                }}
+              />
             </div>
 
             {/* Botón de envío */}

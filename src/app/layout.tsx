@@ -9,7 +9,7 @@ export const metadata: Metadata = {
     template: "%s | AgendaLink",
   },
   description:
-    "La forma más simple de recibir reservas y organizar tu negocio en Chile. Tu link personalizado listo en 30 segundos.",
+    "La forma más simple de recibir reservas y organizar tu negocio en Chile. Tu link listo en minutos.",
   alternates: {
     canonical: "/",
   },

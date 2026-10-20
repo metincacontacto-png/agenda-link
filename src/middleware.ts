@@ -30,18 +30,28 @@ async function loadPlatformSettings(domain: string | null) {
   return readPlatformRoutingSettings(database, domain);
 }
 
+function applySecurityHeaders(res: NextResponse): NextResponse {
+  res.headers.set("Strict-Transport-Security", "max-age=63072000; includeSubDomains; preload");
+  res.headers.set("X-Frame-Options", "DENY");
+  res.headers.set("Content-Security-Policy", "frame-ancestors 'none'");
+  res.headers.set("X-Content-Type-Options", "nosniff");
+  res.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
+  res.headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+  return res;
+}
+
 export async function middleware(request: NextRequest) {
   const url = request.nextUrl.clone();
   const { pathname } = url;
   const hostname = new URL(request.url).hostname.toLowerCase();
 
   if (pathname.includes(".") || pathname.startsWith("/_next")) {
-    return NextResponse.next();
+    return applySecurityHeaders(NextResponse.next());
   }
 
   if (pathname === "/panel") {
     url.pathname = "/login";
-    return NextResponse.redirect(url);
+    return applySecurityHeaders(NextResponse.redirect(url));
   }
 
   if (
@@ -50,7 +60,7 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith("/api/super-admin") ||
     pathname.startsWith("/api/maintenance-check")
   ) {
-    return NextResponse.next();
+    return applySecurityHeaders(NextResponse.next());
   }
 
   const systemHost = isSystemHost(hostname);
@@ -59,18 +69,18 @@ export async function middleware(request: NextRequest) {
     const action = resolvePlatformRoutingAction(pathname, hostname, settings);
     if (action.type === "maintenance") {
       url.pathname = "/maintenance";
-      return NextResponse.rewrite(url);
+      return applySecurityHeaders(NextResponse.rewrite(url));
     }
     if (action.type === "rewrite") {
       url.pathname = `/${action.slug}${pathname}`;
-      return NextResponse.rewrite(url);
+      return applySecurityHeaders(NextResponse.rewrite(url));
     }
-    return NextResponse.next();
+    return applySecurityHeaders(NextResponse.next());
   } catch (error) {
     logProxyError(request, "proxy.routing_lookup.failed", error);
   }
 
-  return NextResponse.next();
+  return applySecurityHeaders(NextResponse.next());
 }
 
 export const config = {

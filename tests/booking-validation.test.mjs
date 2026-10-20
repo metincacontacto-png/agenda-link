@@ -21,6 +21,7 @@ test("accepts and normalizes valid public booking fields, ignoring client paymen
   assert.equal(result.ok, true);
   if (!result.ok) return;
   assert.equal(result.value.clientName, "Test Client");
+  assert.equal(result.value.clientWhatsApp, "+56912345678");
   assert.equal("paymentStatus" in result.value, false);
   assert.equal("paymentAmount" in result.value, false);
 });
@@ -65,6 +66,32 @@ test("rejects malformed or out-of-range booking data", () => {
   assert.equal(parseCreateBookingInput({ ...base, clientName: "   " }).ok, false);
   assert.equal(parseCreateBookingInput({ ...base, clientWhatsApp: "abc" }).ok, false);
   assert.equal(parseCreateBookingInput({ ...base, slug: "../other" }).ok, false);
+});
+
+test("validates and normalizes Chilean phone numbers to +569XXXXXXXX format", () => {
+  const base = {
+    slug: "demo-business",
+    serviceId: "service-1",
+    professionalId: "professional-1",
+    clientName: "Test Client",
+    date: "2026-01-05",
+    time: "10:30",
+  };
+
+  const local9 = parseCreateBookingInput({ ...base, clientWhatsApp: "912345678" });
+  assert.equal(local9.ok, true);
+  if (local9.ok) assert.equal(local9.value.clientWhatsApp, "+56912345678");
+
+  const formatted = parseCreateBookingInput({ ...base, clientWhatsApp: "+56 9 8765 4321" });
+  assert.equal(formatted.ok, true);
+  if (formatted.ok) assert.equal(formatted.value.clientWhatsApp, "+56987654321");
+
+  const short = parseCreateBookingInput({ ...base, clientWhatsApp: "12345678" });
+  assert.equal(short.ok, false);
+  if (!short.ok) assert.equal(short.error, "Ingresa un celular chileno válido (9 dígitos)");
+
+  const invalidPrefix = parseCreateBookingInput({ ...base, clientWhatsApp: "812345678" });
+  assert.equal(invalidPrefix.ok, false);
 });
 
 test("validates availability query fields and requires service/professional together", () => {

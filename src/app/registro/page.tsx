@@ -4,7 +4,7 @@ import RegistroForm from "@/components/RegistroForm";
 
 export const metadata: Metadata = {
   title: "Crea tu AgendaLink gratis",
-  description: "Configura tu página y empieza a recibir solicitudes de reserva en menos de 10 minutos.",
+  description: "Configura tu página y empieza a recibir solicitudes de reserva. Tu link listo en minutos.",
   alternates: {
     canonical: "/registro",
   },

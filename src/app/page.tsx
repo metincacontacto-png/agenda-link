@@ -432,7 +432,7 @@ export default function HomePage() {
         </div>
         <div className={`${styles.stat} ${styles.rv}`}>
           <b>Hasta 3</b>
-          <span>asistentes con IA según tu plan</span>
+          <span>asistentes con IA (próximamente) según tu plan</span>
         </div>
         <div className={`${styles.stat} ${styles.rv}`}>
           <b>0</b>
@@ -1239,11 +1239,12 @@ export default function HomePage() {
               <li>Reportes avanzados de ventas y métricas</li>
               <li>Múltiples turnos y bloqueos simultáneos</li>
               <li>Suite completa: Secretary, Marketing y Business IA (próximamente)</li>
+              <li style={{ fontSize: "12px", color: "#6366f1", fontWeight: "600", listStyle: "none" }}>✦ Si contratas antes de que Linki esté disponible, lo recibes sin costo adicional.</li>
               <li>Soporte prioritario dedicado</li>
             </ul>
           </div>
         </div>
-        <p className={styles.plansFoot}>Precios en pesos chilenos más IVA. Cancela o cambia de plan cuando quieras.</p>
+        <p className={styles.plansFoot}>Precios en pesos chilenos más IVA. Cancela o cambia de plan cuando quieras. Si contratas antes de que Linki esté disponible, lo recibes sin costo adicional.</p>
       </section>
 
       {/* ===== FAQ ===== */}

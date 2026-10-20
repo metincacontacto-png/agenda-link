@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import styles from "./OnboardingForm.module.css";
 import QrDownloader from "@/components/QrDownloader";
-import SecurityCaptcha from "@/components/SecurityCaptcha";
+import TurnstileCaptcha from "@/components/TurnstileCaptcha";
 
 interface OnboardingFormProps {
   initialName?: string;
@@ -36,6 +36,7 @@ export default function OnboardingForm({
   const [formStartedAt] = useState(() => Date.now());
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [captchaVerified, setCaptchaVerified] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState("");
   const [createdSlug, setCreatedSlug] = useState("");
   const [copied, setCopied] = useState(false);
 
@@ -70,6 +71,7 @@ export default function OnboardingForm({
         termsAccepted: true,
         termsAcceptedAt: new Date().toISOString(),
         termsVersion: "2026-10-20",
+        turnstileToken,
       };
       const res = await fetch("/api/onboarding", {
         method: "POST",
@@ -308,7 +310,12 @@ export default function OnboardingForm({
             </div>
 
             <div style={{ marginBottom: "16px" }}>
-              <SecurityCaptcha onVerify={setCaptchaVerified} />
+              <TurnstileCaptcha
+                onVerify={(verified, token) => {
+                  setCaptchaVerified(verified);
+                  if (token) setTurnstileToken(token);
+                }}
+              />
             </div>
 
             <button

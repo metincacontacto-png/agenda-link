@@ -27,6 +27,7 @@ export default function BookingContactModal({
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
+  const [phoneError, setPhoneError] = useState<string | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<"mercadopago" | "local">(isDemo ? "local" : "mercadopago");
   const firstInputRef = useRef<HTMLInputElement>(null);
 
@@ -41,9 +42,21 @@ export default function BookingContactModal({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [onClose]);
 
+  function normalizeChileanPhone(raw: string): string | null {
+    const n = raw.replace(/\D/g, "").replace(/^(56)?/, "");
+    if (!/^9\d{8}$/.test(n)) return null;
+    return "+56" + n;
+  }
+
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    onSubmit(name.trim(), phone.trim(), email.trim(), paymentMethod);
+    setPhoneError(null);
+    const normalizedPhone = normalizeChileanPhone(phone);
+    if (!normalizedPhone) {
+      setPhoneError("Ingresa un celular chileno válido (9 dígitos, ej: 912345678)");
+      return;
+    }
+    onSubmit(name.trim(), normalizedPhone, email.trim(), paymentMethod);
   }
 
   return (
@@ -107,10 +120,21 @@ export default function BookingContactModal({
               required
               maxLength={32}
               value={phone}
-              onChange={(event) => setPhone(event.target.value)}
-              placeholder="Ej. +56912345678"
+              onChange={(event) => {
+                setPhone(event.target.value);
+                if (phoneError) setPhoneError(null);
+              }}
+              placeholder="Ej. 9 1234 5678"
               className={styles.input}
             />
+            <small style={{ color: "#94a3b8", fontSize: "12px", marginTop: "4px", display: "block" }}>
+              Celular chileno de 9 dígitos para recordatorios por WhatsApp.
+            </small>
+            {phoneError && (
+              <span style={{ color: "#dc2626", fontSize: "12px", fontWeight: "600", marginTop: "4px", display: "block" }}>
+                {phoneError}
+              </span>
+            )}
           </div>
           <div className={styles.formGroup}>
             <label className={styles.label} htmlFor="booking-client-email">
@@ -204,12 +228,27 @@ export default function BookingContactModal({
               <span>Política de cancelación</span>
             </div>
             <div>{cancellationPolicy || "Cancelaciones con al menos 24 h de anticipación."}</div>
-            {paymentMethod === "mercadopago" && !isDemo && (
-              <div style={{ marginTop: "8px", paddingTop: "8px", borderTop: "1px dashed #cbd5e1", color: "#0369a1", fontSize: "11.5px", lineHeight: "1.45" }}>
-                💡 <strong>Si el negocio no confirma tu solicitud, te devuelve el 100% del pago.</strong> La devolución es responsabilidad del negocio, a través de su cuenta de Mercado Pago.
-              </div>
-            )}
           </div>
+
+          {/* Aviso de Devolución del 100% sobre el botón de pago */}
+          {paymentMethod === "mercadopago" && !isDemo && (
+            <div
+              style={{
+                background: "#f0fdf4",
+                border: "1px solid #bbf7d0",
+                color: "#166534",
+                padding: "10px 14px",
+                borderRadius: "10px",
+                fontSize: "13px",
+                fontWeight: "700",
+                textAlign: "center",
+                marginBottom: "14px",
+                lineHeight: "1.4",
+              }}
+            >
+              Si el negocio no confirma tu solicitud, te devuelve el 100% del pago.
+            </div>
+          )}
 
           <div className={styles.buttonRow}>
             <button
