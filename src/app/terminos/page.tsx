@@ -147,7 +147,8 @@ export default function TerminosPage() {
               </p>
               <ul style={{ paddingLeft: "20px", marginTop: "8px", display: "flex", flexDirection: "column", gap: "8px" }}>
                 <li>AgendaLink no asegura ni garantiza la asistencia presencial efectiva de los clientes a sus citas.</li>
-                <li>Las políticas sobre abonos, reembolsos y plazos de anulación o reprogramación son fijadas libremente por cada Negocio y deben ser informadas a sus clientes finales.</li>
+                <li>Las políticas sobre abonos, reembolsos y plazos de anulación o reprogramación son fijadas libremente por cada Negocio y deben ser informadas a sus clientes finales antes del pago.</li>
+                <li><strong>Devolución del 100% por Solicitud No Confirmada:</strong> Si el cliente realiza un pago online por una solicitud de reserva que el Negocio posteriormente no confirma o rechaza, el Negocio debe devolver el 100% del pago. La devolución es responsabilidad directa del Negocio a través de su cuenta recaudadora de Mercado Pago.</li>
               </ul>
             </section>
 

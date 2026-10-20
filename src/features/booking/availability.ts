@@ -13,8 +13,11 @@ export async function getAvailableSlotsForProfessional(input: {
   serviceDurationMinutes: number;
   excludeAppointmentId?: string;
   minDateTime?: Date;
+  minNoticeHours?: number;
 }): Promise<string[]> {
-  const { businessId, professionalId, date, timeZone, serviceDurationMinutes, excludeAppointmentId, minDateTime = new Date() } = input;
+  const { businessId, professionalId, date, timeZone, serviceDurationMinutes, excludeAppointmentId } = input;
+  const minNoticeHours = input.minNoticeHours ?? 2;
+  const minDateTime = input.minDateTime ?? new Date(Date.now() + minNoticeHours * 60 * 60 * 1000);
   const dayOfWeek = weekdayForDate(date);
   const dayRange = localDayUtcRange(date, timeZone);
   if (dayOfWeek === null || !dayRange) return [];

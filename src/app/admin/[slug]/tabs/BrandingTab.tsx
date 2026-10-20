@@ -93,6 +93,43 @@ export default function BrandingTab({ business, state, isSaving, onSave, onImage
             </div>
 
             <div style={{ borderTop: "1px solid rgba(0,102,255,0.08)", paddingTop: "16px", marginTop: "16px" }}>
+              <h3 style={{ fontSize: "14px", fontWeight: "700", marginBottom: "12px" }}>Políticas de Reserva y Cancelación</h3>
+              <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: "16px" }}>
+                <div className={styles.formGroup}>
+                  <label>Política de Cancelación (visible al cliente antes de reservar)</label>
+                  <input
+                    type="text"
+                    value={state.cancellationPolicy}
+                    onChange={(event) => state.setCancellationPolicy(event.target.value)}
+                    placeholder="Ej. Cancelaciones con al menos 24 h de anticipación."
+                    className={styles.formInput}
+                  />
+                  <small style={{ color: "var(--text-secondary)", fontSize: "11px", marginTop: "4px" }}>
+                    Por defecto: "Cancelaciones con al menos 24 h de anticipación."
+                  </small>
+                </div>
+                <div className={styles.formGroup}>
+                  <label>Anticipación Mínima para Reservar</label>
+                  <select
+                    value={state.minNoticeHours}
+                    onChange={(event) => state.setMinNoticeHours(Number.parseInt(event.target.value, 10))}
+                    className={styles.formInput}
+                  >
+                    <option value="0">Sin anticipación (inmediata)</option>
+                    <option value="1">1 hora antes</option>
+                    <option value="2">2 horas antes (recomendado)</option>
+                    <option value="4">4 horas antes</option>
+                    <option value="12">12 horas antes</option>
+                    <option value="24">24 horas antes</option>
+                  </select>
+                  <small style={{ color: "var(--text-secondary)", fontSize: "11px", marginTop: "4px" }}>
+                    Evita reservas a 4 minutos de la hora.
+                  </small>
+                </div>
+              </div>
+            </div>
+
+            <div style={{ borderTop: "1px solid rgba(0,102,255,0.08)", paddingTop: "16px", marginTop: "16px" }}>
               <h3 style={{ fontSize: "14px", fontWeight: "700", marginBottom: "12px" }}>Ventajas Principales (¿Por qué elegirnos?)</h3>
               <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 2fr", gap: "12px" }}>

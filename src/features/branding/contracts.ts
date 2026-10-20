@@ -41,4 +41,8 @@ export interface BrandingFormState {
   setTest2Text: (value: string) => void;
   test2Stars: number;
   setTest2Stars: (value: number) => void;
+  cancellationPolicy: string;
+  setCancellationPolicy: (value: string) => void;
+  minNoticeHours: number;
+  setMinNoticeHours: (value: number) => void;
 }

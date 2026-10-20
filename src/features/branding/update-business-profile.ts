@@ -46,6 +46,8 @@ export async function updateBusinessProfile(
       landingHours: input.landingHours,
       landingFeaturesJson: input.landingFeaturesJson,
       landingTestimonialsJson: input.landingTestimonialsJson,
+      cancellationPolicy: input.cancellationPolicy,
+      minNoticeHours: input.minNoticeHours,
       plan: input.plan,
     },
     select: {
@@ -76,6 +78,8 @@ export async function updateBusinessProfile(
       landingHours: true,
       landingFeaturesJson: true,
       landingTestimonialsJson: true,
+      cancellationPolicy: true,
+      minNoticeHours: true,
     },
   });
 

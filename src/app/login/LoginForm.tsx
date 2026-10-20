@@ -183,24 +183,11 @@ export default function LoginForm() {
           </button>
         </form>
 
-        <div style={{ marginTop: 24, paddingTop: 20, borderTop: "1px solid #f1f5f9", textAlign: "center", fontSize: 13, color: "#64748b", display: "grid", gap: 10 }}>
-          <div>
-            ¿Olvidaste tu clave?{" "}
-            <a
-              href={recoveryWhatsAppUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{ color: "#0066FF", fontWeight: 700, textDecoration: "none" }}
-            >
-              Recuperar por WhatsApp
-            </a>
-          </div>
-          <div>
-            ¿No tienes cuenta?{" "}
-            <Link href="/registro" style={{ color: "#0066FF", fontWeight: 700, textDecoration: "none" }}>
-              Crea tu link gratis
-            </Link>
-          </div>
+        <div style={{ marginTop: 24, paddingTop: 20, borderTop: "1px solid #f1f5f9", textAlign: "center", fontSize: 13, color: "#64748b" }}>
+          ¿No tienes cuenta?{" "}
+          <Link href="/registro" style={{ color: "#0066FF", fontWeight: 700, textDecoration: "none" }}>
+            Crea tu link gratis
+          </Link>
         </div>
       </section>
 

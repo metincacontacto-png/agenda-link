@@ -14,6 +14,8 @@ export interface UpdateBusinessProfileInput {
   landingHours?: string | null;
   landingFeaturesJson?: string | null;
   landingTestimonialsJson?: string | null;
+  cancellationPolicy?: string | null;
+  minNoticeHours?: number;
   plan?: "INDIVIDUAL" | "EQUIPO" | "NEGOCIO";
 }
 
@@ -33,6 +35,7 @@ const OPTIONAL_TEXT_LIMITS = {
   landingHours: 300,
   landingFeaturesJson: 10_000,
   landingTestimonialsJson: 10_000,
+  cancellationPolicy: 1000,
 } as const;
 
 export function parseBusinessProfileInput(input: unknown): BusinessProfileInputResult {
@@ -84,6 +87,13 @@ export function parseBusinessProfileInput(input: unknown): BusinessProfileInputR
       return { ok: false, error: "Plan inválido" };
     }
     result.plan = record.plan as UpdateBusinessProfileInput["plan"];
+  }
+  if (record.minNoticeHours !== undefined) {
+    const hours = Number(record.minNoticeHours);
+    if (!Number.isInteger(hours) || hours < 0 || hours > 72) {
+      return { ok: false, error: "La anticipación mínima debe ser un número entero entre 0 y 72 horas" };
+    }
+    result.minNoticeHours = hours;
   }
   if (Object.keys(result).length === 0) {
     return { ok: false, error: "No hay cambios de negocio para guardar" };

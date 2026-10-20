@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import styles from "./OnboardingForm.module.css";
 import QrDownloader from "@/components/QrDownloader";
+import SecurityCaptcha from "@/components/SecurityCaptcha";
 
 interface OnboardingFormProps {
   initialName?: string;
@@ -34,6 +35,7 @@ export default function OnboardingForm({
   const [honeypot, setHoneypot] = useState("");
   const [formStartedAt] = useState(() => Date.now());
   const [termsAccepted, setTermsAccepted] = useState(false);
+  const [captchaVerified, setCaptchaVerified] = useState(false);
   const [createdSlug, setCreatedSlug] = useState("");
   const [copied, setCopied] = useState(false);
 
@@ -53,6 +55,10 @@ export default function OnboardingForm({
     }
     if (!termsAccepted) {
       setError("Debes aceptar los Términos del Servicio y la Política de Privacidad.");
+      return;
+    }
+    if (!captchaVerified) {
+      setError("Por favor completa la verificación de seguridad.");
       return;
     }
     setLoading(true);
@@ -301,10 +307,15 @@ export default function OnboardingForm({
               </label>
             </div>
 
+            <div style={{ marginBottom: "16px" }}>
+              <SecurityCaptcha onVerify={setCaptchaVerified} />
+            </div>
+
             <button
               type="submit"
               disabled={
                 loading ||
+                !captchaVerified ||
                 !termsAccepted ||
                 !formData.name ||
                 !formData.ownerName ||

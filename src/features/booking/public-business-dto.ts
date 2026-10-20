@@ -19,6 +19,8 @@ export interface PublicBusinessDTO {
   landingHours: string | null;
   landingFeaturesJson: string | null;
   landingTestimonialsJson: string | null;
+  cancellationPolicy?: string | null;
+  minNoticeHours?: number | null;
   services: Array<{
     id: string;
     name: string;

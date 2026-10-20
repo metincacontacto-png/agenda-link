@@ -157,20 +157,42 @@ export default function BookingClient({
     return `$${price.toFixed(2)} USD`;
   };
 
+  const isDemo = slug === "valentina";
+
   if (loading) {
     return (
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          height: "100vh",
-          color: "var(--text-secondary)",
-          fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
-        }}
-      >
-        Cargando {initialBusinessName || "agenda"}...
-      </div>
+      <main className={styles.container}>
+        {isDemo && (
+          <div
+            style={{
+              background: "#fef3c7",
+              color: "#92400e",
+              border: "1px solid #fde68a",
+              padding: "10px 16px",
+              textAlign: "center",
+              fontWeight: 700,
+              fontSize: "13.5px",
+              borderRadius: "10px",
+              marginBottom: "16px",
+              boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
+            }}
+          >
+            ⚠️ Negocio de demostración — las reservas no son reales
+          </div>
+        )}
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            minHeight: "50vh",
+            color: "var(--text-secondary)",
+            fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
+          }}
+        >
+          Cargando {initialBusinessName || "agenda"}...
+        </div>
+      </main>
     );
   }
 
@@ -190,6 +212,25 @@ export default function BookingClient({
 
   return (
     <main className={styles.container}>
+      {isDemo && (
+        <div
+          style={{
+            background: "#fef3c7",
+            color: "#92400e",
+            border: "1px solid #fde68a",
+            padding: "10px 16px",
+            textAlign: "center",
+            fontWeight: 700,
+            fontSize: "13.5px",
+            borderRadius: "10px",
+            marginBottom: "16px",
+            boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
+          }}
+        >
+          ⚠️ Negocio de demostración — las reservas no son reales
+        </div>
+      )}
+
       {viewMode === "landing" ? (
         <PublicLanding
           business={business}
@@ -226,6 +267,8 @@ export default function BookingClient({
       {showBookingContact && (
         <BookingContactModal
           businessName={business.name}
+          isDemo={isDemo}
+          cancellationPolicy={business.cancellationPolicy}
           submitting={submitting}
           errorMessage={modalError || undefined}
           onClose={() => {

@@ -59,6 +59,11 @@ export async function createBooking(
   const dateTime = localMinuteToUtc(input.date, minuteOfDay, business.timezone);
   if (!dateTime) return rejected(400, "La hora elegida no existe en la zona horaria del negocio");
   if (dateTime.getTime() <= clock.now().getTime()) return rejected(400, "La reserva debe ser futura");
+  const minNoticeHours = business.minNoticeHours ?? 2;
+  const minRequiredTime = clock.now().getTime() + minNoticeHours * 60 * 60 * 1000;
+  if (dateTime.getTime() < minRequiredTime) {
+    return rejected(400, `Las reservas requieren al menos ${minNoticeHours} hora${minNoticeHours === 1 ? "" : "s"} de anticipación`);
+  }
 
   const availableSlots = await repository.getAvailableSlots({
     businessId: business.id,
@@ -66,7 +71,8 @@ export async function createBooking(
     date: input.date,
     timeZone: business.timezone,
     serviceDurationMinutes: service.duration,
-    minDateTime: clock.now(),
+    minDateTime: new Date(minRequiredTime),
+    minNoticeHours,
   });
   if (!availableSlots.includes(input.time)) {
     return rejected(409, "El horario ya no está disponible");

@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import styles from "./RegistroForm.module.css";
 import QrDownloader from "@/components/QrDownloader";
+import SecurityCaptcha from "@/components/SecurityCaptcha";
 import { cleanSlugInput, isValidSlug } from "@/lib/reserved-slugs";
 
 interface RegistroFormProps {
@@ -65,6 +66,7 @@ export default function RegistroForm({
   const [honeypot, setHoneypot] = useState("");
   const [formStartedAt] = useState(() => Date.now());
   const [termsAccepted, setTermsAccepted] = useState(false);
+  const [captchaVerified, setCaptchaVerified] = useState(false);
   const [createdSlug, setCreatedSlug] = useState("");
   const [copied, setCopied] = useState(false);
 
@@ -116,6 +118,11 @@ export default function RegistroForm({
 
     if (!termsAccepted) {
       setFormError("Debes aceptar los Términos del Servicio y la Política de Privacidad para continuar.");
+      return;
+    }
+
+    if (!captchaVerified) {
+      setFormError("Por favor completa la verificación de seguridad.");
       return;
     }
 
@@ -406,12 +413,18 @@ export default function RegistroForm({
               </label>
             </div>
 
+            {/* Verificación de seguridad (Captcha) */}
+            <div style={{ marginBottom: "16px" }}>
+              <SecurityCaptcha onVerify={setCaptchaVerified} />
+            </div>
+
             {/* Botón de envío */}
             <button
               type="submit"
               className={styles.submitBtn}
               disabled={
                 loading ||
+                !captchaVerified ||
                 !termsAccepted ||
                 !formData.name.trim() ||
                 !formData.slug.trim() ||

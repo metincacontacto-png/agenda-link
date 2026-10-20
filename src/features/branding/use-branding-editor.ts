@@ -31,6 +31,8 @@ export function useBrandingEditor(
   const [test2Name, setTest2Name] = useState("");
   const [test2Text, setTest2Text] = useState("");
   const [test2Stars, setTest2Stars] = useState(5);
+  const [cancellationPolicy, setCancellationPolicy] = useState("");
+  const [minNoticeHours, setMinNoticeHours] = useState(2);
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
@@ -44,6 +46,8 @@ export function useBrandingEditor(
     setLandingPhone(business.landingPhone || "");
     setLandingAddress(business.landingAddress || "");
     setLandingHours(business.landingHours || "");
+    setCancellationPolicy(business.cancellationPolicy || "");
+    setMinNoticeHours(business.minNoticeHours ?? 2);
 
     try {
       const features: Array<{ title?: string; desc?: string }> = JSON.parse(business.landingFeaturesJson || "[]");
@@ -105,6 +109,8 @@ export function useBrandingEditor(
           landingPhone: landingPhone || null,
           landingAddress: landingAddress || null,
           landingHours: landingHours || null,
+          cancellationPolicy: cancellationPolicy || null,
+          minNoticeHours,
           landingFeaturesJson: JSON.stringify([
             { title: feat1Title, desc: feat1Desc },
             { title: feat2Title, desc: feat2Desc },
@@ -152,6 +158,8 @@ export function useBrandingEditor(
     test2Name, setTest2Name,
     test2Text, setTest2Text,
     test2Stars, setTest2Stars,
+    cancellationPolicy, setCancellationPolicy,
+    minNoticeHours, setMinNoticeHours,
   };
 
   return { state, isSaving, save, handleImageFileChange };

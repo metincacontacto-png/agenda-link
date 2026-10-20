@@ -7,17 +7,27 @@ import { FEATURES } from "@/lib/features";
 
 interface BookingContactModalProps {
   businessName?: string;
+  isDemo?: boolean;
+  cancellationPolicy?: string | null;
   errorMessage?: string;
   submitting: boolean;
   onClose: () => void;
   onSubmit: (name: string, phone: string, email: string, paymentChoice: "mercadopago" | "local") => void;
 }
 
-export default function BookingContactModal({ businessName, errorMessage, submitting, onClose, onSubmit }: BookingContactModalProps) {
+export default function BookingContactModal({
+  businessName,
+  isDemo = false,
+  cancellationPolicy,
+  errorMessage,
+  submitting,
+  onClose,
+  onSubmit,
+}: BookingContactModalProps) {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
-  const [paymentMethod, setPaymentMethod] = useState<"mercadopago" | "local">("mercadopago");
+  const [paymentMethod, setPaymentMethod] = useState<"mercadopago" | "local">(isDemo ? "local" : "mercadopago");
   const firstInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -121,33 +131,45 @@ export default function BookingContactModal({ businessName, errorMessage, submit
               Te enviaremos los detalles de tu solicitud de reserva aquí.
             </small>
           </div>
+          {isDemo && (
+            <div style={{ background: "#fef3c7", border: "1px solid #fde68a", color: "#92400e", padding: "10px 12px", borderRadius: "8px", fontSize: "12px", fontWeight: "600", marginTop: "12px" }}>
+              ⚠️ Negocio de demostración: Los pagos online están desactivados y las citas no son reales.
+            </div>
+          )}
+
           {FEATURES.pagosOnline && (
             <div className={styles.formGroup} style={{ marginTop: 14 }}>
               <label className={styles.label}>Opciones de Pago</label>
               <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginTop: "6px" }}>
-                <label
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "10px",
-                    padding: "10px 14px",
-                    borderRadius: "10px",
-                    border: paymentMethod === "mercadopago" ? "2px solid #0066FF" : "1px solid #e2e8f0",
-                    background: paymentMethod === "mercadopago" ? "rgba(0,102,255,0.04)" : "#fff",
-                    cursor: "pointer",
-                    fontSize: "13px",
-                    fontWeight: "600",
-                  }}
-                >
-                  <input
-                    type="radio"
-                    name="bookingPaymentMethod"
-                    value="mercadopago"
-                    checked={paymentMethod === "mercadopago"}
-                    onChange={() => setPaymentMethod("mercadopago")}
-                  />
-                  <span>Pagar online con Mercado Pago (Redcompra / Tarjetas)</span>
-                </label>
+                {!isDemo ? (
+                  <label
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "10px",
+                      padding: "10px 14px",
+                      borderRadius: "10px",
+                      border: paymentMethod === "mercadopago" ? "2px solid #0066FF" : "1px solid #e2e8f0",
+                      background: paymentMethod === "mercadopago" ? "rgba(0,102,255,0.04)" : "#fff",
+                      cursor: "pointer",
+                      fontSize: "13px",
+                      fontWeight: "600",
+                    }}
+                  >
+                    <input
+                      type="radio"
+                      name="bookingPaymentMethod"
+                      value="mercadopago"
+                      checked={paymentMethod === "mercadopago"}
+                      onChange={() => setPaymentMethod("mercadopago")}
+                    />
+                    <span>Pagar online con Mercado Pago (Redcompra / Tarjetas)</span>
+                  </label>
+                ) : (
+                  <div style={{ padding: "8px 12px", borderRadius: "8px", background: "#f1f5f9", color: "#64748b", fontSize: "12px" }}>
+                    💳 Pagos online con Mercado Pago (desactivado en modo demo)
+                  </div>
+                )}
                 <label
                   style={{
                     display: "flex",
@@ -175,6 +197,20 @@ export default function BookingContactModal({ businessName, errorMessage, submit
             </div>
           )}
 
+          {/* Política de Cancelación y Devolución */}
+          <div style={{ background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: "10px", padding: "10px 14px", marginTop: "14px", marginBottom: "16px", fontSize: "12px", color: "#475569" }}>
+            <div style={{ fontWeight: 700, color: "#1e293b", marginBottom: "3px", display: "flex", alignItems: "center", gap: "6px" }}>
+              <span>📋</span>
+              <span>Política de cancelación</span>
+            </div>
+            <div>{cancellationPolicy || "Cancelaciones con al menos 24 h de anticipación."}</div>
+            {paymentMethod === "mercadopago" && !isDemo && (
+              <div style={{ marginTop: "8px", paddingTop: "8px", borderTop: "1px dashed #cbd5e1", color: "#0369a1", fontSize: "11.5px", lineHeight: "1.45" }}>
+                💡 <strong>Si el negocio no confirma tu solicitud, te devuelve el 100% del pago.</strong> La devolución es responsabilidad del negocio, a través de su cuenta de Mercado Pago.
+              </div>
+            )}
+          </div>
+
           <div className={styles.buttonRow}>
             <button
               type="button"
@@ -188,6 +224,8 @@ export default function BookingContactModal({ businessName, errorMessage, submit
             <button type="submit" disabled={submitting} className={`${styles.btn} ${styles.btnPrimary}`}>
               {submitting
                 ? "Procesando…"
+                : isDemo
+                ? "Enviar Solicitud (Modo Demo)"
                 : paymentMethod === "mercadopago" && FEATURES.pagosOnline
                 ? "Pagar con Mercado Pago →"
                 : "Enviar Solicitud"}

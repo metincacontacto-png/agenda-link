@@ -33,6 +33,8 @@ export async function GET(request: Request) {
         landingHours: true,
         landingFeaturesJson: true,
         landingTestimonialsJson: true,
+        cancellationPolicy: true,
+        minNoticeHours: true,
         professionals: { select: { id: true, name: true, avatar: true } },
         services: { select: { id: true, name: true, duration: true, price: true, imageUrl: true } },
       },
@@ -57,6 +59,7 @@ export async function GET(request: Request) {
         date,
         timeZone: publicBusiness.timezone,
         serviceDurationMinutes: service.duration,
+        minNoticeHours: business.minNoticeHours ?? 2,
       });
     }
 

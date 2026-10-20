@@ -73,6 +73,8 @@ export async function GET(request: Request) {
           landingHours: true,
           landingFeaturesJson: true,
           landingTestimonialsJson: true,
+          cancellationPolicy: true,
+          minNoticeHours: true,
           services: {
             orderBy: { createdAt: "asc" },
             select: { id: true, name: true, duration: true, price: true, imageUrl: true },

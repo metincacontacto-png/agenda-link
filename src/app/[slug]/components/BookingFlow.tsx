@@ -51,7 +51,6 @@ export default function BookingFlow({
           type="button"
           onClick={onBackToLanding}
           className={styles.btnSecondary}
-          style={{ padding: "8px 16px", fontSize: "13px", fontWeight: "700" }}
         >
           ← Volver a Presentación
         </button>

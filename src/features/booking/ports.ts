@@ -5,6 +5,8 @@ export interface BookingBusiness {
   currency: string;
   timezone: string;
   email?: string;
+  cancellationPolicy?: string | null;
+  minNoticeHours?: number;
 }
 
 export interface BookingService {
@@ -28,6 +30,7 @@ export interface BookingAvailabilityQuery {
   timeZone: string;
   serviceDurationMinutes: number;
   minDateTime?: Date;
+  minNoticeHours?: number;
 }
 
 export interface AtomicBookingInput {

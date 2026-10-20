@@ -30,6 +30,13 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: parsed.error }, { status: 400 });
     }
 
+    if (parsed.value.slug === "valentina") {
+      return NextResponse.json(
+        { error: "Los pagos online están deshabilitados en el negocio de demostración." },
+        { status: 400 }
+      );
+    }
+
     // 1. Usar el servicio oficial de agendamiento (valida disponibilidad atómica y zona horaria)
     const bookingResult = await createBooking(parsed.value, { repository: prismaBookingRepository });
     if (!bookingResult.ok) {

@@ -53,7 +53,7 @@ const faqs = [
   },
   {
     q: "¿Qué hacen los asistentes Linki IA?",
-    a: "Linki Secretary responde consultas de tus clientes y los guía a reservar, Linki Marketing te ayuda a reactivar clientes que dejaron de venir y Linki Business analiza tus ventas y métricas para darte consejos estratégicos concretos.",
+    a: "Linki Secretary (próximamente) responderá consultas de tus clientes y los guiará a reservar, Linki Marketing (próximamente) te ayudará a reactivar clientes que dejaron de venir y Linki Business (próximamente) analizará tus ventas y métricas para darte consejos estratégicos concretos.",
   },
   {
     q: "¿Puedo cobrar al momento de la reserva?",
@@ -1166,7 +1166,7 @@ export default function HomePage() {
               <li>Link y landing personalizada</li>
               <li>Solicitudes de reserva ilimitadas</li>
               <li>Recordatorios por WhatsApp en 1 clic</li>
-              <li>Linki Secretary incluido</li>
+              <li>Linki Secretary (próximamente)</li>
               <li>Pagos online con Mercado Pago o en el local</li>
               <li>QR y material listo para imprimir</li>
             </ul>
@@ -1202,7 +1202,7 @@ export default function HomePage() {
               <li>Ventas y caja en tiempo real</li>
               <li>Base de clientes e historial</li>
               <li>Recordatorios por WhatsApp en 1 clic</li>
-              <li>Linki Secretary y Marketing incluidos</li>
+              <li>Linki Secretary y Marketing (próximamente)</li>
             </ul>
           </div>
 
@@ -1238,7 +1238,7 @@ export default function HomePage() {
               <li>Seguimiento de clientes</li>
               <li>Reportes avanzados de ventas y métricas</li>
               <li>Múltiples turnos y bloqueos simultáneos</li>
-              <li>Suite completa: Secretary, Marketing y Business IA incluidos</li>
+              <li>Suite completa: Secretary, Marketing y Business IA (próximamente)</li>
               <li>Soporte prioritario dedicado</li>
             </ul>
           </div>

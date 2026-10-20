@@ -6,7 +6,7 @@ export const prismaBookingRepository: BookingRepository = {
   findBusinessBySlug(slug) {
     return prisma.business.findUnique({
       where: { slug },
-      select: { id: true, slug: true, name: true, currency: true, timezone: true, email: true },
+      select: { id: true, slug: true, name: true, currency: true, timezone: true, email: true, cancellationPolicy: true, minNoticeHours: true },
     });
   },
 
