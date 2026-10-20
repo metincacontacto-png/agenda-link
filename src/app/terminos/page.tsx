@@ -42,7 +42,7 @@ export default function TerminosPage() {
             Términos y Condiciones del Servicio
           </h1>
           <p style={{ color: "var(--muted)", fontSize: "14px", marginBottom: "32px" }}>
-            Última actualización: <strong>Octubre 2026</strong> · Operado por <strong>{LEGAL.razonSocial}</strong> (RUT {LEGAL.rut}, {LEGAL.domicilio}, Chile)
+            Fecha de vigencia: <strong>{LEGAL.fechaVigencia}</strong> · Operado por <strong>{LEGAL.razonSocial}</strong> (RUT {LEGAL.rut}, {LEGAL.domicilio}, Chile)
           </p>
 
           <div style={{ lineHeight: "1.75", fontSize: "15px", color: "#334155" }}>
@@ -51,7 +51,7 @@ export default function TerminosPage() {
                 1. Aceptación de los Términos
               </h2>
               <p>
-                Al acceder, registrarse o utilizar la plataforma <strong>AgendaLink</strong> (en adelante, &quot;la Plataforma&quot; o &quot;el Servicio&quot;), desarrollada y operada por <strong>{LEGAL.razonSocial}</strong>, usted (en adelante, &quot;el Usuario&quot;, &quot;el Negocio&quot; o &quot;el Cliente&quot;) acepta expresamente y de manera vinculante los presentes Términos y Condiciones, así como nuestra <Link href="/privacidad" style={{ color: "var(--blue)", fontWeight: "600" }}>Política de Privacidad</Link> y el <Link href="/legal" style={{ color: "var(--blue)", fontWeight: "600" }}>Descargo de Responsabilidad por Uso de IA</Link>.
+                Al registrarse o utilizar la plataforma <strong>AgendaLink</strong> (en adelante, &quot;la Plataforma&quot; o &quot;el Servicio&quot;), desarrollada y operada por <strong>{LEGAL.razonSocial}</strong>, usted (en adelante, &quot;el Negocio&quot;, &quot;el Usuario&quot; o &quot;el Cliente&quot;) manifiesta su consentimiento expreso y vinculante con los presentes Términos y Condiciones, así como con nuestra <Link href="/privacidad" style={{ color: "var(--blue)", fontWeight: "600" }}>Política de Privacidad</Link> y el <Link href="/legal" style={{ color: "var(--blue)", fontWeight: "600" }}>Resguardo Legal e IA</Link>. La aceptación se formaliza de manera activa e inequívoca mediante la marcación de la casilla de verificación correspondiente en el formulario de registro, registrándose la fecha, hora y versión de los términos aceptados.
               </p>
             </section>
 
@@ -63,67 +63,135 @@ export default function TerminosPage() {
                 AgendaLink es una plataforma de software como servicio (SaaS) que provee herramientas tecnológicas de agendamiento online, gestión de horarios, recordatorios que el negocio envía desde su panel, pasarelas de pago y módulos de asistencia mediante inteligencia artificial.
               </p>
               <div style={{ background: "#f1f5f9", padding: "16px 20px", borderRadius: "12px", margin: "14px 0", borderLeft: "4px solid var(--blue)" }}>
-                <strong>Deslinde Fundamental:</strong> AgendaLink y {LEGAL.razonSocial} <u>NO</u> son prestadores de servicios finales (como peluquería, salud, estética, consultoría, etc.) ni son parte de la relación comercial o contractual celebrada entre el Negocio y sus clientes finales. Toda reserva, servicio prestado, cobro o cancelación es de exclusiva responsabilidad entre las partes involucradas.
+                <strong>Deslinde Fundamental:</strong> AgendaLink y {LEGAL.razonSocial} <u>NO</u> son prestadores de los servicios finales ofrecidos por los negocios (como peluquería, salud, estética, consultoría, etc.) ni forman parte de la relación sustantiva o comercial celebrada entre el Negocio y sus clientes finales. Toda reserva, prestación de servicios, cobro o cancelación es de exclusiva responsabilidad entre el Negocio y su clientela.
               </div>
             </section>
 
             <section style={{ marginBottom: "28px" }}>
               <h2 style={{ fontSize: "20px", fontWeight: "800", color: "#0f172a", marginBottom: "12px" }}>
-                3. Descargo y Deslinde de Responsabilidad por Inteligencia Artificial (Linki IA)
+                3. Roles en el Tratamiento de Datos Personales (Ley Nº 21.719 y Ley Nº 19.628)
               </h2>
               <p>
-                La Plataforma integra herramientas de Inteligencia Artificial (incluyendo <em>Linki Secretary</em>, <em>Linki Marketing</em> y <em>Linki Business</em>) para asistir en la redacción, análisis y atención automatizada.
+                En cumplimiento de la legislación chilena sobre protección de datos personales:
               </p>
               <ul style={{ paddingLeft: "20px", marginTop: "8px", display: "flex", flexDirection: "column", gap: "8px" }}>
-                <li><strong>Carácter Referencial:</strong> Las sugerencias, mensajes, cálculos y análisis emitidos por las herramientas de IA son meramente referenciales y no constituyen asesoría legal, médica, contable, tributaria ni comercial infalible.</li>
-                <li><strong>Supervisión Humana Requerida:</strong> El Usuario es el único responsable de revisar, aprobar y supervisar cualquier comunicación automatizada enviada a través de sus canales (como WhatsApp).</li>
-                <li><strong>Exención de Indemnizaciones:</strong> AgendaLink y {LEGAL.razonSocial} quedan totalmente exentas de responsabilidad frente a cualquier error, alucinación de IA, respuesta inexacta, pérdida de clientes o perjuicio directo o indirecto derivado del uso de dichas herramientas.</li>
+                <li><strong>El Negocio es el Responsable del Tratamiento (Data Controller):</strong> Determina los fines y medios del tratamiento de los datos de sus clientes y colaboradores, asegurando contar con la debida base de licitud o consentimiento.</li>
+                <li><strong>AgendaLink es el Encargado del Tratamiento (Data Processor):</strong> {LEGAL.razonSocial} trata los datos personales de los clientes del Negocio única y exclusivamente por cuenta e instrucción de este último, con el solo objeto de prestar las funcionalidades de agendamiento y gestión técnica de la plataforma.</li>
               </ul>
             </section>
 
             <section style={{ marginBottom: "28px" }}>
               <h2 style={{ fontSize: "20px", fontWeight: "800", color: "#0f172a", marginBottom: "12px" }}>
-                4. Citas, Reservas, Inasistencias (No-Shows) y Cancelaciones
+                4. Suscripciones, Precios, Facturación, Renovación y Cancelación (Ley Nº 21.398)
               </h2>
               <p>
-                AgendaLink facilita la infraestructura para que los clientes finales puedan solicitar citas online. Sin embargo:
+                El acceso a la Plataforma se estructura bajo las siguientes condiciones comerciales y de servicio:
               </p>
-              <ul style={{ paddingLeft: "20px", marginTop: "8px", display: "flex", flexDirection: "column", gap: "8px" }}>
-                <li>AgendaLink no garantiza la asistencia efectiva de los clientes ni asume responsabilidad por citas no cumplidas o cancelaciones de última hora.</li>
-                <li>Las políticas de cancelación y reembolso son fijadas de forma independiente por cada negocio.</li>
-              </ul>
-            </section>
-
-            <section style={{ marginBottom: "28px" }}>
-              <h2 style={{ fontSize: "20px", fontWeight: "800", color: "#0f172a", marginBottom: "12px" }}>
-                5. Procesamiento de Pagos y Seguridad Financiera
-              </h2>
-              <p>
-                Los pagos online se procesan de forma cifrada mediante integraciones con pasarelas de pago certificadas. AgendaLink ofrece pagos online con Mercado Pago (Redcompra y tarjetas) o pago en el local.
-              </p>
-              <p style={{ marginTop: "8px" }}>
-                AgendaLink <strong>nunca almacena números de tarjeta ni claves bancarias</strong>. Cualquier controversia, contracargo o rechazo financiero deberá resolverse directamente con el procesador de pago o la institución bancaria correspondiente.
-              </p>
-            </section>
-
-            <section style={{ marginBottom: "28px" }}>
-              <h2 style={{ fontSize: "20px", fontWeight: "800", color: "#0f172a", marginBottom: "12px" }}>
-                6. Limitación Global de Responsabilidad
-              </h2>
-              <p>
-                En la máxima medida permitida por las leyes aplicables de la República de Chile y normativas internacionales:
-              </p>
-              <div style={{ background: "#fef2f2", color: "#991b1b", padding: "16px 20px", borderRadius: "12px", margin: "14px 0", borderLeft: "4px solid #ef4444", fontSize: "14px" }}>
-                AgendaLink, {LEGAL.razonSocial}, sus directores, socios, desarrolladores y empleados no serán responsables bajo ninguna circunstancia por daños directos, indirectos, incidentales, lucro cesante, pérdidas comerciales, interrupciones de servicio de proveedores externos (como WhatsApp, Meta, Cloudflare o pasarelas de pago) o reclamaciones de terceros.
+              <div style={{ display: "flex", flexDirection: "column", gap: "12px", marginTop: "12px" }}>
+                <div>
+                  <strong>a) Planes y Precios:</strong> Los valores vigentes son:
+                  <ul style={{ paddingLeft: "20px", marginTop: "4px" }}>
+                    <li><strong>Plan Individual:</strong> $10.000 + IVA al mes (o $100.000 + IVA al año, ahorrando 2 meses).</li>
+                    <li><strong>Plan Básico:</strong> $29.000 + IVA al mes (o $290.000 + IVA al año, ahorrando 2 meses).</li>
+                    <li><strong>Plan Premium:</strong> $49.000 + IVA al mes (o $490.000 + IVA al año, ahorrando 2 meses).</li>
+                  </ul>
+                  Todos los precios se expresan en Pesos Chilenos (CLP) más el 19% de IVA (Impuesto al Valor Agregado), el cual se detallará en la respectiva boleta o factura electrónica.
+                </div>
+                <div>
+                  <strong>b) Prueba Gratuita de 14 Días y Estado al Día 15:</strong> Todo nuevo negocio dispone de 14 días corridos de prueba gratuita sin requerir tarjeta de crédito para registrarse. Al llegar el <strong>día 15</strong>, si el Negocio no ha suscrito un plan de pago, el acceso administrativo y la posibilidad de que los clientes agenden citas quedarán temporalmente en pausa hasta que se seleccione y abone un plan.
+                </div>
+                <div>
+                  <strong>c) Modalidad de Cobro y Renovación Automática:</strong> El servicio se cobra por adelantado de manera recurrente (mensual o anual). La suscripción se renueva automáticamente por períodos iguales a menos que el Negocio cancele el servicio con anterioridad a la fecha de facturación.
+                </div>
+                <div>
+                  <strong>d) Reembolso del Plan Anual:</strong> En caso de contratar un plan anual, el Negocio podrá solicitar la devolución proporcional de los meses no transcurridos si formula su solicitud dentro de los primeros <strong>10 días corridos</strong> contados desde el cobro. Transcurrido dicho plazo, el plan se mantendrá habilitado hasta el fin del período anual sin reembolso de mensualidades ya transcurridas.
+                </div>
+                <div>
+                  <strong>e) Suspensión por Falta de Pago:</strong> En caso de rechazo del cargo recurrente, se otorgará un período de gracia de <strong>5 días corridos</strong> con avisos vía correo electrónico. Si la deuda no es regularizada en dicho lapso, el servicio se suspenderá temporalmente. Tras 30 días corridos de mora continuada, la cuenta podrá ser dada de baja definitivamente.
+                </div>
+                <div>
+                  <strong>f) Cancelación Simple y sin Barreras (Ley Nº 21.398 Pro-Consumidor):</strong> Conforme a las normas de simetría contractual, el Negocio puede poner término a su suscripción en cualquier momento, de forma tan simple como fue su contratación: directamente con <strong>1 clic desde su panel de control</strong> o mediante un correo electrónico a <a href={`mailto:${LEGAL.email}`} style={{ color: "var(--blue)", fontWeight: "600" }}>{LEGAL.email}</a>, sin multas, penalizaciones ni exigencia de permanencia mínima.
+                </div>
+                <div>
+                  <strong>g) Destino y Exportación de Datos al Cancelar:</strong> Tras la cancelación, el Negocio dispone de un plazo de <strong>30 días corridos</strong> para solicitar la exportación de su historial de reservas y cartera de clientes en formatos estándar (CSV/Excel). Expirado este plazo, los datos personales y operativos serán eliminados permanentemente de los servidores activos, resguardándose únicamente aquellos respaldos estrictamente indispensables para cumplir con obligaciones tributarias o legales chilenas.
+                </div>
+                <div>
+                  <strong>h) Modificación de Términos y Precios:</strong> Cualquier ajuste sustancial a estos Términos o a los precios será comunicado por escrito o mediante aviso visible en la Plataforma con al menos <strong>15 días corridos de anticipación</strong>. Si el Negocio no está de acuerdo con los cambios informados, podrá cancelar su suscripción sin cargo alguno antes de la entrada en vigencia de las nuevas tarifas o condiciones.
+                </div>
               </div>
             </section>
 
             <section style={{ marginBottom: "28px" }}>
               <h2 style={{ fontSize: "20px", fontWeight: "800", color: "#0f172a", marginBottom: "12px" }}>
-                7. Propiedad Intelectual y Jurisdicción
+                5. Descargo y Deslinde por Módulos de Inteligencia Artificial (Linki IA)
               </h2>
               <p>
-                Todo el software, marcas, interfaces, logotipos y algoritmos de AgendaLink son propiedad exclusiva de <strong>{LEGAL.razonSocial}</strong>. Estos términos se rigen por las leyes de la <strong>República de Chile</strong>. Cualquier controversia se someterá a la jurisdicción de los tribunales ordinarios de justicia de Santiago de Chile.
+                La Plataforma integra herramientas de apoyo basadas en inteligencia artificial generativa:
+              </p>
+              <ul style={{ paddingLeft: "20px", marginTop: "8px", display: "flex", flexDirection: "column", gap: "8px" }}>
+                <li><strong>Carácter Referencial:</strong> Las sugerencias y textos emitidos por los agentes de IA son herramientas de asistencia estadística y no constituyen asesoría legal, médica, tributaria ni financiera vinculante.</li>
+                <li><strong>Supervisión Humana Obligatoria:</strong> El Negocio es el único responsable de revisar, aprobar y emitir cualquier mensaje generado antes de enviarlo a sus clientes finales.</li>
+                <li><strong>Responsabilidad Acotada:</strong> La responsabilidad de {LEGAL.razonSocial} frente a eventuales inexactitudes de los módulos de inteligencia artificial queda regida íntegramente por la cláusula de limitación de responsabilidad de la sección 9.</li>
+              </ul>
+            </section>
+
+            <section style={{ marginBottom: "28px" }}>
+              <h2 style={{ fontSize: "20px", fontWeight: "800", color: "#0f172a", marginBottom: "12px" }}>
+                6. Citas, Reservas, Inasistencias y Cancelaciones
+              </h2>
+              <p>
+                AgendaLink provee el software para coordinar agendas y el envío de recordatorios que el negocio envía desde su panel. El Negocio reconoce y acepta que:
+              </p>
+              <ul style={{ paddingLeft: "20px", marginTop: "8px", display: "flex", flexDirection: "column", gap: "8px" }}>
+                <li>AgendaLink no asegura ni garantiza la asistencia presencial efectiva de los clientes a sus citas.</li>
+                <li>Las políticas sobre abonos, reembolsos y plazos de anulación o reprogramación son fijadas libremente por cada Negocio y deben ser informadas a sus clientes finales.</li>
+              </ul>
+            </section>
+
+            <section style={{ marginBottom: "28px" }}>
+              <h2 style={{ fontSize: "20px", fontWeight: "800", color: "#0f172a", marginBottom: "12px" }}>
+                7. Procesamiento de Pagos y Flujo de Dinero
+              </h2>
+              <p>
+                AgendaLink ofrece pagos online con Mercado Pago (Redcompra y tarjetas) o pago en el local.
+              </p>
+              <ul style={{ paddingLeft: "20px", marginTop: "8px", display: "flex", flexDirection: "column", gap: "8px" }}>
+                <li><strong>Cobro Directo del Negocio:</strong> Cada Negocio vincula o gestiona su propia cuenta recaudadora en Mercado Pago o percibe directamente los pagos presenciales en su establecimiento. Los pagos efectuados por los clientes finales por servicios reservados se abonan de manera directa al Negocio.</li>
+                <li><strong>No Recaudación de Terceros:</strong> AgendaLink no intermedia los fondos de los servicios prestados por los Negocios, no administra cuentas de depósito de terceros por concepto de reservas ni retiene las recaudaciones comerciales de los clientes finales. AgendaLink únicamente recauda el valor correspondiente a las suscripciones periódicas de su propio servicio SaaS.</li>
+                <li><strong>Seguridad de Datos de Pago:</strong> AgendaLink nunca almacena números de tarjetas de crédito o débito ni claves bancarias, delegando el cifrado en procesadores certificados PCI-DSS.</li>
+              </ul>
+            </section>
+
+            <section style={{ marginBottom: "28px" }}>
+              <h2 style={{ fontSize: "20px", fontWeight: "800", color: "#0f172a", marginBottom: "12px" }}>
+                8. Veracidad de Testimonios y Reseñas de Clientes
+              </h2>
+              <p>
+                Cuando el Negocio incluya opiniones, valoraciones o testimonios de clientes en su página pública de reservas en AgendaLink, declara y garantiza que corresponden a experiencias y citas reales celebradas en su negocio. Queda estrictamente prohibida la incorporación de reseñas ficticias, inventadas o manipuladas. El Negocio asume la plena y exclusiva responsabilidad ante cualquier requerimiento bajo la Ley Nº 19.496 sobre información engañosa al consumidor.
+              </p>
+            </section>
+
+            <section style={{ marginBottom: "28px" }}>
+              <h2 style={{ fontSize: "20px", fontWeight: "800", color: "#0f172a", marginBottom: "12px" }}>
+                9. Limitación de Responsabilidad (Estatuto Pyme Ley Nº 20.416 y Ley Nº 19.496)
+              </h2>
+              <p>
+                En conformidad con los derechos irrenunciables previstos en la Ley Nº 20.416 (Estatuto Pyme) y la legislación chilena aplicable a contratos de adhesión:
+              </p>
+              <div style={{ background: "#f8fafc", color: "#0f172a", padding: "18px 22px", borderRadius: "14px", margin: "14px 0", border: "1px solid #cbd5e1", borderLeft: "5px solid var(--blue)", fontSize: "14.5px", fontWeight: "500" }}>
+                <strong>La responsabilidad total de LINKI GROUP SpA se limita al monto pagado por el Negocio en los últimos 12 meses, salvo dolo o culpa grave.</strong>
+              </div>
+              <p style={{ fontSize: "14px", color: "var(--muted)" }}>
+                En ningún caso {LEGAL.razonSocial} responderá por daños indirectos, imprevistos o lucro cesante fuera de las previsiones legales vigentes en Chile.
+              </p>
+            </section>
+
+            <section style={{ marginBottom: "28px" }}>
+              <h2 style={{ fontSize: "20px", fontWeight: "800", color: "#0f172a", marginBottom: "12px" }}>
+                10. Propiedad Intelectual y Jurisdicción
+              </h2>
+              <p>
+                Todo el software, marcas, algoritmos, logotipos e interfaces de AgendaLink son propiedad exclusiva de <strong>{LEGAL.razonSocial}</strong>. Estos Términos y Condiciones se rigen e interpretan conforme a las leyes de la <strong>República de Chile</strong>. Para todos los efectos legales, las partes fijan su domicilio en la comuna de <strong>Puerto Varas</strong> y se someten a la competencia de sus tribunales ordinarios de justicia, sin perjuicio de los derechos de los consumidores y pymes ante los tribunales competentes de su respectiva jurisdicción.
               </p>
             </section>
 

@@ -30,6 +30,7 @@ export default function OnboardingForm({
     servicePrice: "",
   });
   const [loading, setLoading] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
   const [createdSlug, setCreatedSlug] = useState("");
   const [copied, setCopied] = useState(false);
 
@@ -45,12 +46,22 @@ export default function OnboardingForm({
       alert("La contraseña debe tener al menos 8 caracteres");
       return;
     }
+    if (!termsAccepted) {
+      alert("Debes aceptar los Términos del Servicio y la Política de Privacidad");
+      return;
+    }
     setLoading(true);
     try {
+      const payload = {
+        ...formData,
+        termsAccepted: true,
+        termsAcceptedAt: new Date().toISOString(),
+        termsVersion: "2026-10-20",
+      };
       const res = await fetch("/api/onboarding", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       });
       const data = await res.json();
       if (data.success) {
@@ -221,10 +232,37 @@ export default function OnboardingForm({
               </select>
             </label>
 
+            <div style={{ margin: "16px 0 12px", display: "flex", alignItems: "flex-start", gap: "10px" }}>
+              <input
+                id="onb-terms-accepted"
+                type="checkbox"
+                checked={termsAccepted}
+                onChange={(e) => setTermsAccepted(e.target.checked)}
+                style={{ marginTop: "3px", width: "18px", height: "18px", accentColor: "#0066FF", cursor: "pointer", flexShrink: 0 }}
+                required
+              />
+              <label htmlFor="onb-terms-accepted" style={{ fontSize: "13px", color: "#475569", lineHeight: "1.45", cursor: "pointer" }}>
+                He leído y acepto los{" "}
+                <Link href="/terminos" target="_blank" rel="noopener" style={{ color: "#0066FF", textDecoration: "underline", fontWeight: 600 }}>
+                  Términos del Servicio
+                </Link>
+                , la{" "}
+                <Link href="/privacidad" target="_blank" rel="noopener" style={{ color: "#0066FF", textDecoration: "underline", fontWeight: 600 }}>
+                  Política de Privacidad
+                </Link>{" "}
+                y el{" "}
+                <Link href="/legal" target="_blank" rel="noopener" style={{ color: "#0066FF", textDecoration: "underline", fontWeight: 600 }}>
+                  Resguardo Legal e IA
+                </Link>
+                .
+              </label>
+            </div>
+
             <button
               type="submit"
               disabled={
                 loading ||
+                !termsAccepted ||
                 !formData.name ||
                 !formData.ownerName ||
                 !formData.email ||
@@ -235,10 +273,6 @@ export default function OnboardingForm({
               {loading ? "Creando tu link..." : "Crear mi link"}
               <span aria-hidden="true">→</span>
             </button>
-
-            <p className={styles.legal}>
-              Al registrarte aceptas los términos de uso y la política de privacidad de AgendaLink.
-            </p>
           </form>
         ) : (
           <div className={styles.success}>

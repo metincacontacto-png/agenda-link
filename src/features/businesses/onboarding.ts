@@ -94,6 +94,18 @@ export async function createBusinessForOwner(input: OnboardingInput, owner: Busi
       INSERT INTO "BusinessMember" ("businessId","userId","role","createdAt")
       VALUES (?,?, 'OWNER', CURRENT_TIMESTAMP)
     `).bind(businessId, ownerUserId),
+    database.prepare(`
+      INSERT INTO "SystemSetting" ("key","value")
+      VALUES (?,?)
+    `).bind(
+      `terms_acceptance:${businessId}`,
+      JSON.stringify({
+        businessId,
+        ownerUserId,
+        acceptedAt: input.termsAcceptedAt || new Date().toISOString(),
+        version: input.termsVersion || "2026-10-20",
+      }),
+    ),
   );
 
   // D1 batch runs sequentially in one transaction and rolls all writes back on failure.

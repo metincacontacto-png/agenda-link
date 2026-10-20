@@ -62,6 +62,7 @@ export default function RegistroForm({
   });
   const [loading, setLoading] = useState(false);
   const [formError, setFormError] = useState("");
+  const [termsAccepted, setTermsAccepted] = useState(false);
   const [createdSlug, setCreatedSlug] = useState("");
   const [copied, setCopied] = useState(false);
 
@@ -111,14 +112,25 @@ export default function RegistroForm({
       return;
     }
 
+    if (!termsAccepted) {
+      setFormError("Debes aceptar los Términos del Servicio y la Política de Privacidad para continuar.");
+      return;
+    }
+
     setLoading(true);
     setFormError("");
 
     try {
+      const payload = {
+        ...formData,
+        termsAccepted: true,
+        termsAcceptedAt: new Date().toISOString(),
+        termsVersion: "2026-10-20",
+      };
       const res = await fetch("/api/onboarding", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       });
 
       const data = await res.json();
@@ -347,12 +359,40 @@ export default function RegistroForm({
               </select>
             </div>
 
+            {/* Casilla de aceptación activa de términos */}
+            <div style={{ margin: "20px 0 16px", display: "flex", alignItems: "flex-start", gap: "10px" }}>
+              <input
+                id="reg-terms-accepted"
+                type="checkbox"
+                checked={termsAccepted}
+                onChange={(e) => setTermsAccepted(e.target.checked)}
+                style={{ marginTop: "3px", width: "18px", height: "18px", accentColor: "#0066FF", cursor: "pointer", flexShrink: 0 }}
+                required
+              />
+              <label htmlFor="reg-terms-accepted" style={{ fontSize: "13px", color: "#475569", lineHeight: "1.45", cursor: "pointer" }}>
+                He leído y acepto los{" "}
+                <Link href="/terminos" target="_blank" rel="noopener" style={{ color: "#0066FF", textDecoration: "underline", fontWeight: 600 }}>
+                  Términos del Servicio
+                </Link>
+                , la{" "}
+                <Link href="/privacidad" target="_blank" rel="noopener" style={{ color: "#0066FF", textDecoration: "underline", fontWeight: 600 }}>
+                  Política de Privacidad
+                </Link>{" "}
+                y el{" "}
+                <Link href="/legal" target="_blank" rel="noopener" style={{ color: "#0066FF", textDecoration: "underline", fontWeight: 600 }}>
+                  Resguardo Legal e IA
+                </Link>
+                .
+              </label>
+            </div>
+
             {/* Botón de envío */}
             <button
               type="submit"
               className={styles.submitBtn}
               disabled={
                 loading ||
+                !termsAccepted ||
                 !formData.name.trim() ||
                 !formData.slug.trim() ||
                 Boolean(slugError) ||
@@ -363,23 +403,6 @@ export default function RegistroForm({
             >
               {loading ? "Creando tu link..." : "Crear mi link gratis"}
             </button>
-
-            {/* Aviso legal exacto */}
-            <p className={styles.legalNotice}>
-              Al registrarte aceptas los{" "}
-              <Link href="/terminos" target="_blank" rel="noopener">
-                Términos
-              </Link>
-              , la{" "}
-              <Link href="/privacidad" target="_blank" rel="noopener">
-                Política de Privacidad
-              </Link>{" "}
-              y el{" "}
-              <Link href="/legal" target="_blank" rel="noopener">
-                Resguardo de IA
-              </Link>
-              .
-            </p>
           </form>
         </>
       )}

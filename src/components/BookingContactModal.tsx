@@ -1,16 +1,18 @@
 "use client";
 
 import React, { useState, useEffect, useRef, type FormEvent } from "react";
+import Link from "next/link";
 import styles from "./BookingContactModal.module.css";
 import { FEATURES } from "@/lib/features";
 
 interface BookingContactModalProps {
+  businessName?: string;
   submitting: boolean;
   onClose: () => void;
   onSubmit: (name: string, phone: string, email: string, paymentChoice: "mercadopago" | "local") => void;
 }
 
-export default function BookingContactModal({ submitting, onClose, onSubmit }: BookingContactModalProps) {
+export default function BookingContactModal({ businessName, submitting, onClose, onSubmit }: BookingContactModalProps) {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
@@ -173,6 +175,13 @@ export default function BookingContactModal({ submitting, onClose, onSubmit }: B
                 : "Enviar Solicitud"}
             </button>
           </div>
+          <p style={{ fontSize: "12px", color: "#64748b", textAlign: "center", marginTop: "14px", lineHeight: "1.4" }}>
+            Tus datos los recibe {businessName || "el negocio"} para gestionar tu reserva.{" "}
+            <Link href="/privacidad" target="_blank" rel="noopener noreferrer" style={{ color: "var(--blue, #0066FF)", textDecoration: "underline" }}>
+              Ver Política de Privacidad
+            </Link>
+            .
+          </p>
         </form>
       </div>
     </div>

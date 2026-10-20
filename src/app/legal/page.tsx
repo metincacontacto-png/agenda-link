@@ -42,17 +42,17 @@ export default function LegalPage() {
             Descargo de Responsabilidad y Cláusulas de IA
           </h1>
           <p style={{ color: "var(--muted)", fontSize: "14px", marginBottom: "32px" }}>
-            Documento de protección legal complementario para usuarios, negocios y terceros · <strong>{LEGAL.razonSocial}</strong> (RUT {LEGAL.rut}, {LEGAL.domicilio}, Chile)
+            Fecha de vigencia: <strong>{LEGAL.fechaVigencia}</strong> · Documento de protección legal complementario para usuarios, negocios y terceros · <strong>{LEGAL.razonSocial}</strong> (RUT {LEGAL.rut}, {LEGAL.domicilio}, Chile)
           </p>
 
           <div style={{ lineHeight: "1.75", fontSize: "15px", color: "#334155" }}>
             <section style={{ marginBottom: "28px" }}>
-              <div style={{ background: "#fef2f2", color: "#991b1b", padding: "20px 24px", borderRadius: "16px", border: "1px solid #fecaca", fontSize: "14.5px" }}>
-                <h3 style={{ fontSize: "17px", fontWeight: "800", marginBottom: "8px", color: "#7f1d1d" }}>
-                  ⚖️ Cláusula de Indemnidad y No Responsabilidad
+              <div style={{ background: "#f8fafc", color: "#0f172a", padding: "20px 24px", borderRadius: "16px", border: "1px solid #cbd5e1", borderLeft: "5px solid var(--blue)", fontSize: "14.5px" }}>
+                <h3 style={{ fontSize: "17px", fontWeight: "800", marginBottom: "8px", color: "#0f172a" }}>
+                  ⚖️ Limitación Legal de Responsabilidad (Estatuto Pyme)
                 </h3>
                 <p>
-                  AgendaLink es una herramienta tecnológica provista en modalidad <strong>&quot;tal cual&quot; (as-is)</strong> y <strong>&quot;según disponibilidad&quot; (as-available)</strong>. Bajo ninguna circunstancia AgendaLink ni su empresa titular {LEGAL.razonSocial} responderán por reclamos, demandas civiles, laborales, comerciales, tributarias o penales derivadas del uso directo o indirecto de la plataforma, de los servicios prestados por los negocios registrados, ni de los mensajes generados por sistemas automatizados.
+                  AgendaLink es una plataforma SaaS de software. Conforme al Estatuto Pyme (Ley Nº 20.416) y la legislación chilena aplicable: <strong>La responsabilidad total de LINKI GROUP SpA se limita al monto pagado por el Negocio en los últimos 12 meses, salvo dolo o culpa grave.</strong>
                 </p>
               </div>
             </section>
@@ -67,21 +67,20 @@ export default function LegalPage() {
               <ul style={{ paddingLeft: "20px", marginTop: "10px", display: "flex", flexDirection: "column", gap: "10px" }}>
                 <li><strong>Sin Garantía de Exactitud:</strong> La inteligencia artificial puede cometer errores, generar respuestas inexactas o interpretaciones imprecisas (&quot;alucinaciones&quot;). AgendaLink no garantiza que los textos generados sean 100% correctos ni infalibles.</li>
                 <li><strong>No Constituye Asesoramiento Profesional:</strong> Ninguna respuesta de Linki IA debe considerarse asesoría médica, jurídica, legal, contable ni financiera.</li>
-                <li><strong>Responsabilidad del Negocio Emisor:</strong> El negocio o usuario titular asume plena y exclusiva responsabilidad por el contenido de los mensajes, promociones, respuestas automáticas por WhatsApp y decisiones comerciales que adopte a partir de los datos de la IA.</li>
-                <li><strong>Renuncia a Demandas:</strong> El uso de Linki IA implica la renuncia expresa del usuario a interponer demandas o reclamos de indemnización contra AgendaLink o {LEGAL.razonSocial} por cualquier perjuicio atribuido a las funciones de inteligencia artificial.</li>
+                <li><strong>Supervisión Humana Obligatoria:</strong> El negocio o usuario titular asume plena responsabilidad por el contenido de los mensajes, promociones, respuestas y decisiones comerciales que adopte a partir de los datos de la IA, debiendo siempre verificar su exactitud.</li>
               </ul>
             </section>
 
             <section style={{ marginBottom: "28px" }}>
               <h2 style={{ fontSize: "20px", fontWeight: "800", color: "#0f172a", marginBottom: "12px" }}>
-                2. Exención de Responsabilidad por la Prestación de Servicios
+                2. Exención de Responsabilidad por la Prestación de Servicios y Flujo de Pagos
               </h2>
               <p>
                 AgendaLink no es propietaria, no supervisa, no controla ni garantiza los servicios que ofrecen los negocios o profesionales independientes en la plataforma.
               </p>
               <ul style={{ paddingLeft: "20px", marginTop: "10px", display: "flex", flexDirection: "column", gap: "10px" }}>
                 <li>Cualquier reclamo sobre calidad, retrasos, insatisfacción, daños a la persona o incumplimiento de servicios es de exclusiva competencia entre el cliente y el profesional o negocio contratado.</li>
-                <li>AgendaLink no participa en el flujo de dinero correspondiente a los honorarios de los profesionales, limitándose a proveer la integración técnica con procesadores de pago independientes.</li>
+                <li><strong>Flujo de Pagos Directo:</strong> Los pagos que los clientes finales efectúan por servicios reservados se canalizan de manera directa a la cuenta de Mercado Pago del propio Negocio o se perciben presencialmente en el local. AgendaLink no intermedia la recaudación de fondos de terceros ni retiene pagos por servicios prestados por los Negocios; únicamente percibe los cobros por suscripción al software SaaS.</li>
               </ul>
             </section>
 

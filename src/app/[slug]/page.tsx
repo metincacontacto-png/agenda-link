@@ -207,6 +207,7 @@ export default function BookingPage({ params }: { params: Promise<{ slug: string
 
       {showBookingContact && (
         <BookingContactModal
+          businessName={business.name}
           submitting={submitting}
           onClose={() => setShowBookingContact(false)}
           onSubmit={handleBookingSubmit}

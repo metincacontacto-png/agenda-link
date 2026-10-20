@@ -1,4 +1,4 @@
-import { RESERVED_SLUGS, SLUG_REGEX, cleanSlugInput } from "@/lib/reserved-slugs";
+import { RESERVED_SLUGS, SLUG_REGEX, cleanSlugInput } from "../../lib/reserved-slugs.ts";
 
 export interface OnboardingInput {
   name: string;
@@ -12,6 +12,9 @@ export interface OnboardingInput {
   serviceDuration: number;
   servicePrice: number;
   password: string | null;
+  termsAccepted?: boolean;
+  termsAcceptedAt?: string;
+  termsVersion?: string;
 }
 
 export type OnboardingInputResult =
@@ -97,6 +100,13 @@ export function parseOnboardingInput(body: unknown): OnboardingInputResult {
     customSlug = candidate;
   }
 
+  if (data.termsAccepted === false) {
+    return { ok: false, error: "Debes aceptar los Términos del Servicio y la Política de Privacidad para continuar" };
+  }
+  const termsAccepted = data.termsAccepted === true;
+  const termsAcceptedAt = typeof data.termsAcceptedAt === "string" ? data.termsAcceptedAt : new Date().toISOString();
+  const termsVersion = typeof data.termsVersion === "string" ? data.termsVersion : "2026-10-20";
+
   return {
     ok: true,
     value: {
@@ -111,6 +121,9 @@ export function parseOnboardingInput(body: unknown): OnboardingInputResult {
       serviceDuration,
       servicePrice,
       password,
+      termsAccepted,
+      termsAcceptedAt,
+      termsVersion,
     },
   };
 }

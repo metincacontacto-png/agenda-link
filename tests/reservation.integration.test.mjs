@@ -34,7 +34,10 @@ let memberCookie;
 let onboardingBusinessId;
 
 function runWrangler(args) {
-  execFileSync("npx", ["wrangler", ...args], { stdio: "ignore" });
+  execFileSync("npx", ["wrangler", ...args], {
+    stdio: "ignore",
+    env: { ...process.env, CI: "1", WRANGLER_LOG: "none" },
+  });
 }
 
 function encodeBase64Url(bytes) {
@@ -352,6 +355,9 @@ test("business onboarding creates an account, owner membership, and default sche
       serviceName: "Consulta de prueba",
       serviceDuration: 60,
       servicePrice: 25000,
+      termsAccepted: true,
+      termsAcceptedAt: new Date().toISOString(),
+      termsVersion: "2026-10-20",
     }),
   });
   const result = await response.json();
