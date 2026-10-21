@@ -184,13 +184,13 @@ export default function TerminosPage() {
                 9. Régimen y Limitación de Responsabilidad (Art. 1558 del Código Civil)
               </h2>
               <p>
-                AgendaLink provee una plataforma tecnológica en modalidad SaaS. Salvo en los casos de dolo o culpa grave legalmente calificados, las partes acuerdan el siguiente régimen de responsabilidad:
+                AgendaLink provee una plataforma tecnológica en modalidad SaaS. Salvo en los casos de dolo o culpa grave legalmente calificados, y sin perjuicio de los derechos irrenunciables de la Ley Nº 19.496 y de la Ley Nº 20.416, las partes acuerdan el siguiente régimen de responsabilidad:
               </p>
               <div style={{ background: "#f8fafc", color: "#0f172a", padding: "18px 22px", borderRadius: "14px", margin: "14px 0", border: "1px solid #cbd5e1", borderLeft: "5px solid var(--blue)", fontSize: "14.5px", fontWeight: "500" }}>
                 <strong>La responsabilidad total acumulada de {LEGAL.razonSocial} frente al Negocio por cualquier daño directo derivado del uso o indisponibilidad de la Plataforma se limitará exclusivamente al monto total efectivamente pagado por el Negocio por concepto de suscripción durante los doce (12) meses anteriores al hecho generador del reclamo.</strong>
               </div>
               <p style={{ fontSize: "14px", color: "var(--muted)" }}>
-                En ningún caso {LEGAL.razonSocial} será responsable por lucro cesante, pérdida de ingresos o clientela, daño moral ni perjuicios indirectos o imprevistos derivados de la relación contractual.
+                En ningún caso {LEGAL.razonSocial} será responsable por lucro cesante, pérdida de ingresos o clientela, daño moral ni perjuicios indirectos o imprevistos derivados de la relación contractual, sin perjuicio de los derechos irrenunciables de la Ley Nº 19.496 y de la Ley Nº 20.416.
               </p>
             </section>
 

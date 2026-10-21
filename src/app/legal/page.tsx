@@ -49,10 +49,10 @@ export default function LegalPage() {
             <section style={{ marginBottom: "28px" }}>
               <div style={{ background: "#f8fafc", color: "#0f172a", padding: "20px 24px", borderRadius: "16px", border: "1px solid #cbd5e1", borderLeft: "5px solid var(--blue)", fontSize: "14.5px" }}>
                 <h3 style={{ fontSize: "17px", fontWeight: "800", marginBottom: "8px", color: "#0f172a" }}>
-                  ⚖️ Limitación Legal de Responsabilidad Contractual (Art. 1558 Código Civil)
+                  ⚖️ Régimen y Limitación de Responsabilidad (Art. 1558 Código Civil)
                 </h3>
                 <p>
-                  AgendaLink es una plataforma SaaS de software. Salvo en los supuestos de dolo o culpa grave legalmente calificados: <strong>La responsabilidad acumulada de {LEGAL.razonSocial} frente al Negocio se limita exclusivamente a los perjuicios directos y previsibles efectivamente acreditados, hasta un monto máximo equivalente al total pagado por el Negocio en los últimos 12 meses anteriores al hecho causante.</strong> En ningún caso responderá por lucro cesante, daño moral ni pérdidas indirectas de negocio.
+                  AgendaLink es una plataforma SaaS de software. Salvo en los supuestos de dolo o culpa grave legalmente calificados, y sin perjuicio de los derechos irrenunciables de la Ley Nº 19.496 y de la Ley Nº 20.416: <strong>La responsabilidad acumulada de {LEGAL.razonSocial} frente al Negocio se limita exclusivamente a los perjuicios directos y previsibles efectivamente acreditados, hasta un monto máximo equivalente al total pagado por el Negocio en los últimos 12 meses anteriores al hecho causante.</strong> En ningún caso responderá por lucro cesante, daño moral ni pérdidas indirectas de negocio, sin perjuicio de los derechos irrenunciables de la Ley Nº 19.496 y de la Ley Nº 20.416.
                 </p>
               </div>
             </section>

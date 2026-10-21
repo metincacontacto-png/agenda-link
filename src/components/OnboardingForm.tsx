@@ -271,7 +271,7 @@ export default function OnboardingForm({
                   <option value="6+ personas">Plan Premium (5 profesionales - $49.000/mes + IVA)</option>
                 </select>
                 <span style={{ fontSize: "11px", color: "#64748b", marginTop: "4px", display: "block" }}>
-                  14 días de prueba gratis en todos los planes. Sin cobros automáticos.
+                  14 días de prueba gratis. La prueba no se cobra sola. Al día 15 eliges si sigues.
                 </span>
               </label>
             </div>
