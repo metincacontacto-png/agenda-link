@@ -11,25 +11,47 @@ export async function GET(request: Request) {
     const authorization = await requireSuperAdmin(request);
     if (!authorization.ok) return authorization.response;
 
-    const businesses = await prisma.business.findMany({
+    const rawBusinesses = await prisma.business.findMany({
       orderBy: { createdAt: "desc" },
       select: {
         id: true,
         name: true,
         slug: true,
         ownerName: true,
+        email: true,
+        landingPhone: true,
         category: true,
         country: true,
         teamSize: true,
         plan: true,
         billingBypass: true,
+        subscriptionStatus: true,
+        trialEndsAt: true,
+        subscriptionPlan: true,
+        currentPeriodEnd: true,
         customDomain: true,
+        mercadoPagoAccessToken: true,
         createdAt: true,
-      }
+        _count: {
+          select: {
+            appointments: true,
+            services: true,
+            professionals: true,
+          },
+        },
+      },
+    });
+
+    const businesses = rawBusinesses.map((biz) => {
+      const { mercadoPagoAccessToken, ...rest } = biz;
+      return {
+        ...rest,
+        mercadoPagoConnected: Boolean(mercadoPagoAccessToken),
+      };
     });
 
     const maintenanceSetting = await prisma.systemSetting.findUnique({
-      where: { key: "maintenanceMode" }
+      where: { key: "maintenanceMode" },
     });
     const maintenanceMode = maintenanceSetting ? maintenanceSetting.value === "true" : false;
 
@@ -48,7 +70,7 @@ export async function PUT(request: Request) {
     if (!authorization.ok) return authorization.response;
 
     const body = await request.json();
-    const { isMaintenanceToggle, maintenanceMode, slug, plan, billingBypass, customDomain } = body;
+    const { isMaintenanceToggle, maintenanceMode, slug, plan, billingBypass, customDomain, subscriptionStatus } = body;
 
     // Si es un toggle global de mantenimiento
     if (isMaintenanceToggle !== undefined) {
@@ -85,6 +107,7 @@ export async function PUT(request: Request) {
       data: {
         plan: plan === undefined ? undefined : plan,
         billingBypass: billingBypass === undefined ? undefined : billingBypass,
+        subscriptionStatus: subscriptionStatus === undefined ? undefined : subscriptionStatus,
         customDomain: customDomain === undefined ? undefined : (customDomain ? customDomain.trim().toLowerCase().replace(/^(https?:\/\/)?(www\.)?/, "") : null)
       }
     });

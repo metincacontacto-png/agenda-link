@@ -9,13 +9,89 @@ interface Business {
   name: string;
   slug: string;
   ownerName: string;
+  email: string;
+  landingPhone: string | null;
   category: string;
   country: string;
   teamSize: string;
   plan: string;
   billingBypass: boolean;
+  subscriptionStatus: string;
+  trialEndsAt: string | null;
+  subscriptionPlan: string | null;
+  currentPeriodEnd: string | null;
   customDomain: string | null;
+  mercadoPagoConnected: boolean;
   createdAt: string;
+  _count?: {
+    appointments: number;
+    services: number;
+    professionals: number;
+  };
+}
+
+type FilterCategory = "all" | "active" | "trial" | "expired" | "bypass" | "mp";
+
+function getBusinessStatus(biz: Business): {
+  key: "bypass" | "active" | "trial" | "expired" | "cancelled";
+  label: string;
+  badgeStyle: React.CSSProperties;
+  details: string;
+} {
+  if (biz.billingBypass) {
+    return {
+      key: "bypass",
+      label: "⭐ Bypass Activo",
+      badgeStyle: { background: "rgba(168, 85, 247, 0.12)", color: "#9333ea", border: "1px solid rgba(168, 85, 247, 0.25)" },
+      details: "Acceso libre concedido",
+    };
+  }
+
+  if (biz.subscriptionStatus === "ACTIVE") {
+    const end = biz.currentPeriodEnd ? new Date(biz.currentPeriodEnd).toLocaleDateString("es-CL") : null;
+    return {
+      key: "active",
+      label: "🟢 Activa (Pagando)",
+      badgeStyle: { background: "rgba(34, 197, 94, 0.12)", color: "#16a34a", border: "1px solid rgba(34, 197, 94, 0.25)" },
+      details: end ? `Renueva: ${end}` : "Suscripción activa",
+    };
+  }
+
+  if (biz.subscriptionStatus === "CANCELLED" || biz.subscriptionStatus === "PAST_DUE") {
+    return {
+      key: "cancelled",
+      label: "🔴 Cancelado / Impago",
+      badgeStyle: { background: "rgba(239, 68, 68, 0.12)", color: "#dc2626", border: "1px solid rgba(239, 68, 68, 0.25)" },
+      details: "Suscripción inactiva",
+    };
+  }
+
+  // TRIALING
+  if (biz.trialEndsAt) {
+    const remainingDays = Math.ceil((new Date(biz.trialEndsAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+    if (remainingDays > 0) {
+      return {
+        key: "trial",
+        label: `⏱️ En Prueba (${remainingDays}d)`,
+        badgeStyle: { background: "rgba(59, 130, 246, 0.12)", color: "#2563eb", border: "1px solid rgba(59, 130, 246, 0.25)" },
+        details: `${remainingDays} días restantes`,
+      };
+    } else {
+      return {
+        key: "expired",
+        label: "⚠️ Prueba Expirada",
+        badgeStyle: { background: "rgba(245, 158, 11, 0.15)", color: "#b45309", border: "1px solid rgba(245, 158, 11, 0.3)" },
+        details: "Requiere activar plan",
+      };
+    }
+  }
+
+  return {
+    key: "trial",
+    label: "⏱️ En Prueba",
+    badgeStyle: { background: "rgba(59, 130, 246, 0.12)", color: "#2563eb", border: "1px solid rgba(59, 130, 246, 0.25)" },
+    details: "Período de prueba",
+  };
 }
 
 export default function SuperAdminPage() {
@@ -24,6 +100,7 @@ export default function SuperAdminPage() {
   
   const [businesses, setBusinesses] = useState<Business[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<FilterCategory>("all");
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
@@ -108,7 +185,11 @@ export default function SuperAdminPage() {
     }
   };
 
-  const handleUpdateField = async (slug: string, field: "plan" | "billingBypass" | "customDomain", value: string | boolean | null) => {
+  const handleUpdateField = async (
+    slug: string,
+    field: "plan" | "billingBypass" | "customDomain" | "subscriptionStatus",
+    value: string | boolean | null
+  ) => {
     setActionLoading(`${slug}_${field}`);
     
     try {
@@ -123,7 +204,6 @@ export default function SuperAdminPage() {
 
       const data = await res.json();
       if (data.success) {
-        // Actualizar localmente
         setBusinesses(prev => prev.map(biz => {
           if (biz.slug === slug) {
             return { ...biz, [field]: value };
@@ -145,11 +225,49 @@ export default function SuperAdminPage() {
     }
   };
 
-  const filteredBusinesses = businesses.filter(biz => 
-    biz.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    biz.slug.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    biz.ownerName.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // KPIs
+  const totalCount = businesses.length;
+  const activeCount = businesses.filter(b => b.subscriptionStatus === "ACTIVE").length;
+  const trialCount = businesses.filter(b => {
+    const s = getBusinessStatus(b);
+    return s.key === "trial";
+  }).length;
+  const expiredCount = businesses.filter(b => {
+    const s = getBusinessStatus(b);
+    return s.key === "expired" || s.key === "cancelled";
+  }).length;
+  const bypassCount = businesses.filter(b => b.billingBypass).length;
+  const mpCount = businesses.filter(b => b.mercadoPagoConnected).length;
+
+  const filteredBusinesses = businesses.filter(biz => {
+    // 1. Filtro de búsqueda
+    const q = searchQuery.toLowerCase().trim();
+    const matchesSearch = !q || (
+      biz.name.toLowerCase().includes(q) ||
+      biz.slug.toLowerCase().includes(q) ||
+      biz.ownerName.toLowerCase().includes(q) ||
+      (biz.email && biz.email.toLowerCase().includes(q)) ||
+      (biz.landingPhone && biz.landingPhone.includes(q))
+    );
+
+    if (!matchesSearch) return false;
+
+    // 2. Filtro de categoría
+    if (statusFilter === "all") return true;
+    if (statusFilter === "active") return biz.subscriptionStatus === "ACTIVE";
+    if (statusFilter === "trial") {
+      const s = getBusinessStatus(biz);
+      return s.key === "trial";
+    }
+    if (statusFilter === "expired") {
+      const s = getBusinessStatus(biz);
+      return s.key === "expired" || s.key === "cancelled";
+    }
+    if (statusFilter === "bypass") return biz.billingBypass;
+    if (statusFilter === "mp") return biz.mercadoPagoConnected;
+
+    return true;
+  });
 
   if (loading) {
     return (
@@ -187,7 +305,7 @@ export default function SuperAdminPage() {
       <header className={styles.header}>
         <div>
           <h1 className={styles.title}>Panel de Super Admin</h1>
-          <p className={styles.subtitle}>Gestión estratégica de negocios, planes y dominios.</p>
+          <p className={styles.subtitle}>Supervisión en tiempo real de cuentas activas, planes, contactos y suscripciones.</p>
         </div>
         <button onClick={handleLogout} className={styles.logoutBtn}>
           Cerrar Sesión ➔
@@ -206,10 +324,10 @@ export default function SuperAdminPage() {
       )}
 
       {/* Tarjeta de Mantenimiento Global */}
-      <section className={styles.glassCard} style={{ padding: "20px", marginBottom: "24px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "16px" }}>
+      <section className={styles.glassCard} style={{ padding: "18px 24px", marginBottom: "24px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "16px" }}>
         <div>
-          <h2 style={{ fontSize: "16px", fontWeight: "700", marginBottom: "4px", color: "var(--foreground)" }}>🔧 Modo Mantenimiento Global</h2>
-          <p style={{ fontSize: "13px", color: "var(--text-secondary)", margin: 0 }}>Activa este modo para mostrar una pantalla de mantenimiento a todos los visitantes del sistema.</p>
+          <h2 style={{ fontSize: "15px", fontWeight: "700", marginBottom: "4px", color: "var(--foreground)" }}>🔧 Modo Mantenimiento Global</h2>
+          <p style={{ fontSize: "12.5px", color: "var(--text-secondary)", margin: 0 }}>Pausa el acceso general a todas las landings y agendas de la plataforma ante actualizaciones mayores.</p>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
           <button
@@ -218,6 +336,7 @@ export default function SuperAdminPage() {
             onClick={handleToggleMaintenance}
             className={`${styles.iosToggle} ${maintenanceMode ? styles.iosToggleActive : ""}`}
             style={maintenanceMode ? { backgroundColor: "#ff3b30" } : {}}
+            aria-label="Toggle modo mantenimiento"
           >
             <span className={styles.iosToggleDot} />
           </button>
@@ -227,43 +346,181 @@ export default function SuperAdminPage() {
         </div>
       </section>
 
-      {/* Buscador e Información rápida */}
-      <div className={styles.topControlRow}>
-        <div className={styles.searchWrapper}>
-          <span className={styles.searchIcon}>🔍</span>
-          <input
-            type="text"
-            placeholder="Buscar por negocio, slug o dueño..."
-            value={searchQuery}
-            onChange={e => setSearchQuery(e.target.value)}
-            className={styles.searchInput}
-          />
+      {/* Tarjetas KPI de Resumen de Cuentas */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))", gap: "14px", marginBottom: "24px" }}>
+        <div style={{ background: "#ffffff", border: "1px solid var(--card-border)", borderRadius: "16px", padding: "16px", display: "flex", flexDirection: "column" }}>
+          <span style={{ fontSize: "11px", fontWeight: "700", color: "var(--text-secondary)", textTransform: "uppercase", letterSpacing: "0.5px" }}>Total Cuentas</span>
+          <strong style={{ fontSize: "28px", fontWeight: "900", color: "#0f172a", marginTop: "4px" }}>{totalCount}</strong>
+          <span style={{ fontSize: "11px", color: "var(--text-secondary)", marginTop: "2px" }}>Registradas en el sistema</span>
         </div>
-        <div className={styles.kpiCard}>
-          <strong>{businesses.length}</strong>
-          <span>Negocios Registrados</span>
+        <div style={{ background: "rgba(34, 197, 94, 0.05)", border: "1px solid rgba(34, 197, 94, 0.2)", borderRadius: "16px", padding: "16px", display: "flex", flexDirection: "column" }}>
+          <span style={{ fontSize: "11px", fontWeight: "700", color: "#16a34a", textTransform: "uppercase", letterSpacing: "0.5px" }}>🟢 Pagando Activo</span>
+          <strong style={{ fontSize: "28px", fontWeight: "900", color: "#16a34a", marginTop: "4px" }}>{activeCount}</strong>
+          <span style={{ fontSize: "11px", color: "var(--text-secondary)", marginTop: "2px" }}>Suscripciones MP al día</span>
+        </div>
+        <div style={{ background: "rgba(59, 130, 246, 0.05)", border: "1px solid rgba(59, 130, 246, 0.2)", borderRadius: "16px", padding: "16px", display: "flex", flexDirection: "column" }}>
+          <span style={{ fontSize: "11px", fontWeight: "700", color: "#2563eb", textTransform: "uppercase", letterSpacing: "0.5px" }}>⏱️ En Período de Prueba</span>
+          <strong style={{ fontSize: "28px", fontWeight: "900", color: "#2563eb", marginTop: "4px" }}>{trialCount}</strong>
+          <span style={{ fontSize: "11px", color: "var(--text-secondary)", marginTop: "2px" }}>Pruebas vigentes (14 días)</span>
+        </div>
+        <div style={{ background: "rgba(245, 158, 11, 0.05)", border: "1px solid rgba(245, 158, 11, 0.25)", borderRadius: "16px", padding: "16px", display: "flex", flexDirection: "column" }}>
+          <span style={{ fontSize: "11px", fontWeight: "700", color: "#b45309", textTransform: "uppercase", letterSpacing: "0.5px" }}>⚠️ Prueba Vencida</span>
+          <strong style={{ fontSize: "28px", fontWeight: "900", color: "#b45309", marginTop: "4px" }}>{expiredCount}</strong>
+          <span style={{ fontSize: "11px", color: "var(--text-secondary)", marginTop: "2px" }}>Sin suscripción activa</span>
+        </div>
+        <div style={{ background: "rgba(168, 85, 247, 0.05)", border: "1px solid rgba(168, 85, 247, 0.2)", borderRadius: "16px", padding: "16px", display: "flex", flexDirection: "column" }}>
+          <span style={{ fontSize: "11px", fontWeight: "700", color: "#9333ea", textTransform: "uppercase", letterSpacing: "0.5px" }}>⭐ Con Bypass</span>
+          <strong style={{ fontSize: "28px", fontWeight: "900", color: "#9333ea", marginTop: "4px" }}>{bypassCount}</strong>
+          <span style={{ fontSize: "11px", color: "var(--text-secondary)", marginTop: "2px" }}>Acceso gratis habilitado</span>
+        </div>
+        <div style={{ background: "rgba(0, 102, 255, 0.05)", border: "1px solid rgba(0, 102, 255, 0.2)", borderRadius: "16px", padding: "16px", display: "flex", flexDirection: "column" }}>
+          <span style={{ fontSize: "11px", fontWeight: "700", color: "#0066FF", textTransform: "uppercase", letterSpacing: "0.5px" }}>💳 Mercado Pago</span>
+          <strong style={{ fontSize: "28px", fontWeight: "900", color: "#0066FF", marginTop: "4px" }}>{mpCount}</strong>
+          <span style={{ fontSize: "11px", color: "var(--text-secondary)", marginTop: "2px" }}>Cobros directos activos</span>
         </div>
       </div>
 
-      {/* Tabla de Negocios */}
+      {/* Barra de Filtros y Búsqueda */}
+      <div style={{ display: "flex", flexDirection: "column", gap: "12px", marginBottom: "20px" }}>
+        {/* Pills de Filtrado Rápido */}
+        <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", alignItems: "center" }}>
+          <button
+            type="button"
+            onClick={() => setStatusFilter("all")}
+            style={{
+              padding: "6px 14px",
+              borderRadius: "99px",
+              border: statusFilter === "all" ? "1px solid #0066FF" : "1px solid #e2e8f0",
+              background: statusFilter === "all" ? "#0066FF" : "#ffffff",
+              color: statusFilter === "all" ? "#ffffff" : "#475569",
+              fontSize: "12.5px",
+              fontWeight: "600",
+              cursor: "pointer",
+            }}
+          >
+            Todos ({totalCount})
+          </button>
+          <button
+            type="button"
+            onClick={() => setStatusFilter("active")}
+            style={{
+              padding: "6px 14px",
+              borderRadius: "99px",
+              border: statusFilter === "active" ? "1px solid #16a34a" : "1px solid #e2e8f0",
+              background: statusFilter === "active" ? "#16a34a" : "#ffffff",
+              color: statusFilter === "active" ? "#ffffff" : "#475569",
+              fontSize: "12.5px",
+              fontWeight: "600",
+              cursor: "pointer",
+            }}
+          >
+            🟢 Activos / Pagando ({activeCount})
+          </button>
+          <button
+            type="button"
+            onClick={() => setStatusFilter("trial")}
+            style={{
+              padding: "6px 14px",
+              borderRadius: "99px",
+              border: statusFilter === "trial" ? "1px solid #2563eb" : "1px solid #e2e8f0",
+              background: statusFilter === "trial" ? "#2563eb" : "#ffffff",
+              color: statusFilter === "trial" ? "#ffffff" : "#475569",
+              fontSize: "12.5px",
+              fontWeight: "600",
+              cursor: "pointer",
+            }}
+          >
+            ⏱️ En Prueba ({trialCount})
+          </button>
+          <button
+            type="button"
+            onClick={() => setStatusFilter("expired")}
+            style={{
+              padding: "6px 14px",
+              borderRadius: "99px",
+              border: statusFilter === "expired" ? "1px solid #b45309" : "1px solid #e2e8f0",
+              background: statusFilter === "expired" ? "#b45309" : "#ffffff",
+              color: statusFilter === "expired" ? "#ffffff" : "#475569",
+              fontSize: "12.5px",
+              fontWeight: "600",
+              cursor: "pointer",
+            }}
+          >
+            ⚠️ Vencidos ({expiredCount})
+          </button>
+          <button
+            type="button"
+            onClick={() => setStatusFilter("bypass")}
+            style={{
+              padding: "6px 14px",
+              borderRadius: "99px",
+              border: statusFilter === "bypass" ? "1px solid #9333ea" : "1px solid #e2e8f0",
+              background: statusFilter === "bypass" ? "#9333ea" : "#ffffff",
+              color: statusFilter === "bypass" ? "#ffffff" : "#475569",
+              fontSize: "12.5px",
+              fontWeight: "600",
+              cursor: "pointer",
+            }}
+          >
+            ⭐ Con Bypass ({bypassCount})
+          </button>
+          <button
+            type="button"
+            onClick={() => setStatusFilter("mp")}
+            style={{
+              padding: "6px 14px",
+              borderRadius: "99px",
+              border: statusFilter === "mp" ? "1px solid #0066FF" : "1px solid #e2e8f0",
+              background: statusFilter === "mp" ? "#eff6ff" : "#ffffff",
+              color: statusFilter === "mp" ? "#0066FF" : "#475569",
+              fontSize: "12.5px",
+              fontWeight: "600",
+              cursor: "pointer",
+            }}
+          >
+            💳 Cobros MP Activos ({mpCount})
+          </button>
+        </div>
+
+        {/* Input Buscador */}
+        <div className={styles.topControlRow}>
+          <div className={styles.searchWrapper}>
+            <span className={styles.searchIcon}>🔍</span>
+            <input
+              type="text"
+              placeholder="Buscar por negocio, slug, dueño, email o teléfono..."
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              className={styles.searchInput}
+            />
+          </div>
+          <div style={{ fontSize: "13px", color: "var(--text-secondary)", fontWeight: "600" }}>
+            Mostrando {filteredBusinesses.length} de {businesses.length}
+          </div>
+        </div>
+      </div>
+
+      {/* Tabla Enriquecida de Negocios */}
       <section className={styles.glassCard}>
         <div className={styles.tableWrapper}>
           <table className={styles.adminTable}>
             <thead>
               <tr>
-                <th>Negocio / Slug</th>
-                <th>Dueño</th>
-                <th>Rubro / País</th>
-                <th>Plan de Pago</th>
-                <th>Bypass de Pago (Acceso Libre)</th>
-                <th>Dominio Personalizado</th>
+                <th>Negocio & Enlaces</th>
+                <th>Dueño & Contacto</th>
+                <th>Estado de Suscripción</th>
+                <th>Plan SaaS</th>
+                <th>Cobros Directos MP</th>
+                <th>Actividad</th>
+                <th>Bypass (Acceso Libre)</th>
+                <th>Dominio Propio</th>
               </tr>
             </thead>
             <tbody>
               {filteredBusinesses.length === 0 ? (
                 <tr>
-                  <td colSpan={6} style={{ textAlign: "center", padding: "40px", color: "var(--text-secondary)" }}>
-                    No se encontraron negocios.
+                  <td colSpan={8} style={{ textAlign: "center", padding: "40px", color: "var(--text-secondary)" }}>
+                    No se encontraron negocios con los filtros aplicados.
                   </td>
                 </tr>
               ) : (
@@ -271,34 +528,116 @@ export default function SuperAdminPage() {
                   const isPlanLoading = actionLoading === `${biz.slug}_plan`;
                   const isBypassLoading = actionLoading === `${biz.slug}_billingBypass`;
                   const isDomainLoading = actionLoading === `${biz.slug}_customDomain`;
+                  const isStatusLoading = actionLoading === `${biz.slug}_subscriptionStatus`;
+                  const statusInfo = getBusinessStatus(biz);
+                  const cleanPhone = (biz.landingPhone || "").replace(/\D/g, "");
                   
                   return (
                     <tr key={biz.id}>
-                      {/* Negocio y Link */}
+                      {/* 1. Negocio y Enlaces */}
                       <td>
-                        <div style={{ fontWeight: "700", color: "var(--foreground)" }}>{biz.name}</div>
-                        <a 
-                          href={`/${biz.slug}`} 
-                          target="_blank" 
-                          rel="noreferrer"
-                          className={styles.businessLink}
-                        >
-                          /{biz.slug}
-                        </a>
+                        <div style={{ fontWeight: "700", color: "var(--foreground)", fontSize: "14px" }}>
+                          {biz.name}
+                        </div>
+                        <div style={{ display: "flex", gap: "8px", alignItems: "center", marginTop: "4px" }}>
+                          <a 
+                            href={`/${biz.slug}`} 
+                            target="_blank" 
+                            rel="noreferrer"
+                            className={styles.businessLink}
+                            title="Ver página pública de reservas"
+                          >
+                            /{biz.slug} ↗
+                          </a>
+                          <span style={{ color: "#cbd5e1" }}>•</span>
+                          <a
+                            href={`/admin/${biz.slug}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            style={{ fontSize: "11px", color: "#0066FF", textDecoration: "none", fontWeight: "600" }}
+                            title="Entrar a su panel de administración"
+                          >
+                            Panel ⚙️
+                          </a>
+                        </div>
+                        <div style={{ fontSize: "11px", color: "var(--text-secondary)", marginTop: "4px" }}>
+                          Reg: {new Date(biz.createdAt).toLocaleDateString("es-CL")}
+                        </div>
                       </td>
 
-                      {/* Dueño */}
+                      {/* 2. Dueño & Contacto */}
                       <td>
-                        <div style={{ fontWeight: "500" }}>{biz.ownerName}</div>
+                        <div style={{ fontWeight: "600", color: "#1e293b" }}>{biz.ownerName}</div>
+                        {biz.email ? (
+                          <div style={{ marginTop: "2px" }}>
+                            <a
+                              href={`mailto:${biz.email}`}
+                              style={{ fontSize: "12px", color: "#0066FF", textDecoration: "none" }}
+                              title="Enviar correo"
+                            >
+                              ✉️ {biz.email}
+                            </a>
+                          </div>
+                        ) : (
+                          <span style={{ fontSize: "11px", color: "#94a3b8" }}>Sin email</span>
+                        )}
+                        {biz.landingPhone && (
+                          <div style={{ marginTop: "2px" }}>
+                            <a
+                              href={`https://wa.me/${cleanPhone}`}
+                              target="_blank"
+                              rel="noreferrer"
+                              style={{ fontSize: "11.5px", color: "#16a34a", textDecoration: "none", fontWeight: "600" }}
+                              title="Contactar por WhatsApp"
+                            >
+                              💬 {biz.landingPhone}
+                            </a>
+                          </div>
+                        )}
+                        <div style={{ fontSize: "11px", color: "var(--text-secondary)", marginTop: "2px" }}>
+                          {biz.category} • {biz.country}
+                        </div>
                       </td>
 
-                      {/* Rubro y País */}
+                      {/* 3. Estado de Suscripción */}
                       <td>
-                        <div style={{ fontSize: "12px", color: "var(--text-secondary)" }}>{biz.category}</div>
-                        <div style={{ fontSize: "11px", fontWeight: "600", color: "var(--primary)" }}>{biz.country} ({biz.teamSize})</div>
+                        <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                          <span
+                            style={{
+                              ...statusInfo.badgeStyle,
+                              padding: "4px 8px",
+                              borderRadius: "6px",
+                              fontSize: "11.5px",
+                              fontWeight: "700",
+                              display: "inline-block",
+                              width: "fit-content",
+                            }}
+                          >
+                            {statusInfo.label}
+                          </span>
+                          <span style={{ fontSize: "11px", color: "var(--text-secondary)" }}>
+                            {statusInfo.details}
+                          </span>
+                          
+                          {/* Cambiar estado manual */}
+                          <div style={{ display: "flex", alignItems: "center", gap: "4px", marginTop: "4px" }}>
+                            <select
+                              value={biz.subscriptionStatus}
+                              disabled={isStatusLoading}
+                              onChange={e => handleUpdateField(biz.slug, "subscriptionStatus", e.target.value)}
+                              style={{ fontSize: "11px", padding: "2px 6px", borderRadius: "4px", border: "1px solid #cbd5e1", background: "#f8fafc" }}
+                            >
+                              <option value="TRIALING">TRIALING (Prueba)</option>
+                              <option value="ACTIVE">ACTIVE (Pagada)</option>
+                              <option value="PAST_DUE">PAST_DUE (Vencida)</option>
+                              <option value="CANCELLED">CANCELLED (Cancelada)</option>
+                            </select>
+                            {isStatusLoading && <span className={styles.actionSpinner} />}
+                          </div>
+                        </div>
                       </td>
 
-                      {/* Plan Dropdown */}
+                      {/* 4. Plan SaaS */}
                       <td>
                         <select
                           value={biz.plan}
@@ -314,7 +653,52 @@ export default function SuperAdminPage() {
                         {isPlanLoading && <span className={styles.actionSpinner} />}
                       </td>
 
-                      {/* Bypass Toggle */}
+                      {/* 5. Cobros Directos Mercado Pago */}
+                      <td>
+                        {biz.mercadoPagoConnected ? (
+                          <span
+                            style={{
+                              background: "rgba(34, 197, 94, 0.1)",
+                              color: "#16a34a",
+                              border: "1px solid rgba(34, 197, 94, 0.25)",
+                              padding: "4px 8px",
+                              borderRadius: "6px",
+                              fontSize: "11.5px",
+                              fontWeight: "700",
+                              display: "inline-flex",
+                              alignItems: "center",
+                              gap: "4px",
+                            }}
+                          >
+                            ✓ Conectado
+                          </span>
+                        ) : (
+                          <span
+                            style={{
+                              background: "#f1f5f9",
+                              color: "#64748b",
+                              padding: "4px 8px",
+                              borderRadius: "6px",
+                              fontSize: "11.5px",
+                              fontWeight: "600",
+                            }}
+                          >
+                            – Solo en local
+                          </span>
+                        )}
+                      </td>
+
+                      {/* 6. Actividad */}
+                      <td>
+                        <div style={{ fontSize: "12px", color: "#1e293b", fontWeight: "600" }}>
+                          📅 {biz._count?.appointments || 0} reservas
+                        </div>
+                        <div style={{ fontSize: "11.5px", color: "var(--text-secondary)", marginTop: "2px" }}>
+                          ✂️ {biz._count?.services || 0} servicios • 👤 {biz._count?.professionals || 0} prof.
+                        </div>
+                      </td>
+
+                      {/* 7. Bypass de Pago */}
                       <td>
                         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                           <button
@@ -322,16 +706,17 @@ export default function SuperAdminPage() {
                             disabled={isBypassLoading}
                             onClick={() => handleUpdateField(biz.slug, "billingBypass", !biz.billingBypass)}
                             className={`${styles.iosToggle} ${biz.billingBypass ? styles.iosToggleActive : ""}`}
+                            aria-label={`Toggle bypass para ${biz.name}`}
                           >
                             <span className={styles.iosToggleDot} />
                           </button>
-                          <span style={{ fontSize: "12px", fontWeight: "600", color: biz.billingBypass ? "var(--success)" : "var(--text-secondary)" }}>
-                            {biz.billingBypass ? "Bypass Activo" : "Requiere Pago"}
+                          <span style={{ fontSize: "11.5px", fontWeight: "600", color: biz.billingBypass ? "var(--success)" : "var(--text-secondary)" }}>
+                            {biz.billingBypass ? "Activo" : "No"}
                           </span>
                         </div>
                       </td>
 
-                      {/* Dominio Personalizado */}
+                      {/* 8. Dominio Personalizado */}
                       <td>
                         {editingSlug === biz.slug ? (
                           <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
@@ -346,12 +731,14 @@ export default function SuperAdminPage() {
                               onClick={() => handleUpdateField(biz.slug, "customDomain", tempDomain)}
                               disabled={isDomainLoading}
                               className={styles.saveBtn}
+                              title="Guardar dominio"
                             >
                               ✓
                             </button>
                             <button
                               onClick={() => setEditingSlug(null)}
                               className={styles.cancelBtn}
+                              title="Cancelar"
                             >
                               ✕
                             </button>
@@ -373,6 +760,7 @@ export default function SuperAdminPage() {
                                 setTempDomain(biz.customDomain || "");
                               }}
                               className={styles.editBtn}
+                              title="Editar dominio"
                             >
                               ✏️
                             </button>
