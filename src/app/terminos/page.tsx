@@ -91,9 +91,9 @@ export default function TerminosPage() {
                 <div>
                   <strong>a) Planes y Precios:</strong> Los valores vigentes son:
                   <ul style={{ paddingLeft: "20px", marginTop: "4px" }}>
-                    <li><strong>Plan Individual:</strong> $10.000 + IVA al mes (o $100.000 + IVA al año, ahorrando 2 meses). Incluye Linki Secretary (próximamente).</li>
-                    <li><strong>Plan Básico:</strong> $29.000 + IVA al mes (o $290.000 + IVA al año, ahorrando 2 meses). Incluye Linki Secretary y Marketing (próximamente).</li>
-                    <li><strong>Plan Premium:</strong> $49.000 + IVA al mes (o $490.000 + IVA al año, ahorrando 2 meses). Incluye suite completa de Linki IA (próximamente). Si contratas antes de que Linki esté disponible, lo recibes sin costo adicional.</li>
+                    <li><strong>Plan Individual:</strong> $10.000 + IVA al mes (o $100.000 + IVA al año, ahorrando 2 meses). Incluye Linki Secretary.</li>
+                    <li><strong>Plan Básico:</strong> $29.000 + IVA al mes (o $290.000 + IVA al año, ahorrando 2 meses). Incluye Linki Secretary y Marketing.</li>
+                    <li><strong>Plan Premium:</strong> $49.000 + IVA al mes (o $490.000 + IVA al año, ahorrando 2 meses). Incluye suite completa de Linki IA.</li>
                   </ul>
                   Todos los precios se expresan en Pesos Chilenos (CLP) más el 19% de IVA (Impuesto al Valor Agregado), el cual se detallará en la respectiva boleta o factura electrónica.
                 </div>
@@ -122,7 +122,7 @@ export default function TerminosPage() {
                   <strong>i) Derecho de Retracto (Art. 3º bis Ley Nº 19.496):</strong> Atendido que el servicio corresponde a una plataforma digital SaaS de acceso y ejecución inmediata, y que todo Negocio cuenta con un período de prueba gratuito de 14 días (sin ingreso de tarjeta bancaria) para verificar de forma previa y completa su funcionalidad, las partes acuerdan expresamente la exclusión del derecho de retracto unilateral respecto de mensualidades ya devengadas o en curso, manteniéndose plenamente vigente el derecho a cancelación con 1 clic para evitar renovaciones futuras y la garantía de reembolso proporcional de 10 días para contrataciones anuales estipulada en la letra d).
                 </div>
                 <div>
-                  <strong>j) Asistentes Linki IA sin Costo Adicional:</strong> Si contratas antes de que Linki esté disponible, lo recibes sin costo adicional. Los módulos de inteligencia artificial (Linki Secretary, Marketing y Business IA) se integrarán en tu plan respectivo al momento de su habilitación general sin costos extra ni recargos en tu tarifa contratada.
+                  <strong>j) Asistentes Linki IA incluidos:</strong> Los módulos de inteligencia artificial (Linki Secretary, Marketing y Business IA) vienen incluidos en tu suscripción según el plan contratado, sin costos ocultos ni recargos adicionales.
                 </div>
               </div>
             </section>
@@ -138,7 +138,7 @@ export default function TerminosPage() {
                 <li><strong>Carácter Referencial:</strong> Las sugerencias y textos emitidos por los agentes de IA son herramientas de asistencia estadística y no constituyen asesoría legal, médica, tributaria ni financiera vinculante.</li>
                 <li><strong>Supervisión Humana Obligatoria:</strong> El Negocio es el único responsable de revisar, aprobar y emitir cualquier mensaje generado antes de enviarlo a sus clientes finales.</li>
                 <li><strong>Responsabilidad Acotada:</strong> La responsabilidad de {LEGAL.razonSocial} frente a eventuales inexactitudes de los módulos de inteligencia artificial queda regida íntegramente por la cláusula de limitación de responsabilidad de la sección 9.</li>
-                <li><strong>Garantía de Acceso Temprano:</strong> Si contratas antes de que Linki esté disponible, lo recibes sin costo adicional en cuanto se habilite.</li>
+                <li><strong>Disponibilidad Nativa:</strong> Los módulos Linki IA están integrados de forma nativa en la plataforma y disponibles según el nivel de plan contratado.</li>
               </ul>
             </section>
 

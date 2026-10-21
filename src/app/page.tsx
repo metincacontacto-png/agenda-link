@@ -53,7 +53,7 @@ const faqs = [
   },
   {
     q: "¿Qué hacen los asistentes Linki IA?",
-    a: "Linki Secretary (próximamente) responderá consultas de tus clientes y los guiará a reservar, Linki Marketing (próximamente) te ayudará a reactivar clientes que dejaron de venir y Linki Business (próximamente) analizará tus ventas y métricas para darte consejos estratégicos concretos.",
+    a: "Linki Secretary atiende dudas de tus clientes y los guía a reservar, Linki Marketing te ayuda a reactivar clientes que dejaron de venir y Linki Business analiza tus ventas y métricas para darte consejos estratégicos concretos.",
   },
   {
     q: "¿Puedo cobrar al momento de la reserva?",
@@ -432,7 +432,7 @@ export default function HomePage() {
         </div>
         <div className={`${styles.stat} ${styles.rv}`}>
           <b>Hasta 3</b>
-          <span>asistentes con IA (próximamente)</span>
+          <span>asistentes con IA incluidos según tu plan</span>
         </div>
         <div className={`${styles.stat} ${styles.rv}`}>
           <b>0</b>
@@ -731,10 +731,8 @@ export default function HomePage() {
                 </svg>
               </div>
               <div>
-                <h3>
-                  Linki Secretary <span style={{ fontSize: "0.75rem", fontWeight: "normal", opacity: 0.8 }}>(Próximamente)</span>
-                </h3>
-                <p>Atiende consultas online, entrega precios y horarios, y guía a tus clientes a reservar 24/7 (Próximamente).</p>
+                <h3>Linki Secretary</h3>
+                <p>Atiende consultas online, entrega precios y horarios, y guía a tus clientes a reservar 24/7.</p>
               </div>
             </button>
 
@@ -1166,7 +1164,7 @@ export default function HomePage() {
               <li>Link y landing personalizada</li>
               <li>Solicitudes de reserva ilimitadas</li>
               <li>Recordatorios por WhatsApp en 1 clic</li>
-              <li>Linki Secretary (próximamente)</li>
+              <li>Linki Secretary (asistente IA)</li>
               <li>Pagos online con Mercado Pago o en el local</li>
               <li>QR y material listo para imprimir</li>
             </ul>
@@ -1202,7 +1200,7 @@ export default function HomePage() {
               <li>Ventas y caja en tiempo real</li>
               <li>Base de clientes e historial</li>
               <li>Recordatorios por WhatsApp en 1 clic</li>
-              <li>Linki Secretary y Marketing (próximamente)</li>
+              <li>Linki Secretary y Marketing (asistentes IA)</li>
             </ul>
           </div>
 
@@ -1238,13 +1236,12 @@ export default function HomePage() {
               <li>Seguimiento de clientes</li>
               <li>Reportes avanzados de ventas y métricas</li>
               <li>Múltiples turnos y bloqueos simultáneos</li>
-              <li>Suite completa: Secretary, Marketing y Business IA (próximamente)</li>
-              <li style={{ fontSize: "12px", color: "#6366f1", fontWeight: "600", listStyle: "none" }}>✦ Si contratas antes de que Linki esté disponible, lo recibes sin costo adicional.</li>
+              <li>Suite completa: Secretary, Marketing y Business IA</li>
               <li>Soporte prioritario dedicado</li>
             </ul>
           </div>
         </div>
-        <p className={styles.plansFoot}>Precios en pesos chilenos más IVA. Cancela o cambia de plan cuando quieras. Si contratas antes de que Linki esté disponible, lo recibes sin costo adicional.</p>
+        <p className={styles.plansFoot}>Precios en pesos chilenos más IVA. Cancela o cambia de plan cuando quieras.</p>
       </section>
 
       {/* ===== FAQ ===== */}
