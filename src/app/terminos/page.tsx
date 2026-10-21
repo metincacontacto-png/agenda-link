@@ -60,7 +60,7 @@ export default function TerminosPage() {
                 2. Naturaleza del Servicio y Rol de Intermediación Tecnológica
               </h2>
               <p>
-                AgendaLink es una plataforma de software como servicio (SaaS) que provee herramientas tecnológicas de agendamiento online, gestión de horarios, recordatorios que el negocio envía desde su panel, pasarelas de pago y módulos de asistencia mediante inteligencia artificial.
+                AgendaLink es una plataforma de software como servicio (SaaS) que provee herramientas tecnológicas de agendamiento online, gestión de horarios, recordatorios por WhatsApp en 1 clic que el negocio envía desde su panel mediante enlaces directos (wa.me), pasarela de cobro directo con Mercado Pago y módulos de asistencia inteligente.
               </p>
               <div style={{ background: "#f1f5f9", padding: "16px 20px", borderRadius: "12px", margin: "14px 0", borderLeft: "4px solid var(--blue)" }}>
                 <strong>Deslinde Fundamental:</strong> AgendaLink y {LEGAL.razonSocial} <u>NO</u> son prestadores de los servicios finales ofrecidos por los negocios (como peluquería, salud, estética, consultoría, etc.) ni forman parte de la relación sustantiva o comercial celebrada entre el Negocio y sus clientes finales. Toda reserva, prestación de servicios, cobro o cancelación es de exclusiva responsabilidad entre el Negocio y su clientela.
@@ -147,12 +147,12 @@ export default function TerminosPage() {
                 6. Citas, Reservas, Inasistencias y Cancelaciones
               </h2>
               <p>
-                AgendaLink provee el software para coordinar agendas y el envío de recordatorios que el negocio envía desde su panel. El Negocio reconoce y acepta que:
+                AgendaLink provee la infraestructura de software para la coordinación de horarios y la generación de enlaces de recordatorios que el negocio envía directamente desde su panel a sus clientes. El Negocio reconoce y acepta que:
               </p>
               <ul style={{ paddingLeft: "20px", marginTop: "8px", display: "flex", flexDirection: "column", gap: "8px" }}>
                 <li>AgendaLink no asegura ni garantiza la asistencia presencial efectiva de los clientes a sus citas.</li>
                 <li>Las políticas sobre abonos, reembolsos y plazos de anulación o reprogramación son fijadas libremente por cada Negocio y deben ser informadas a sus clientes finales antes del pago.</li>
-                <li><strong>Devolución del 100% por Solicitud No Confirmada:</strong> Si el cliente realiza un pago online por una solicitud de reserva que el Negocio posteriormente no confirma o rechaza, el Negocio debe devolver el 100% del pago. La devolución es responsabilidad directa del Negocio a través de su cuenta recaudadora de Mercado Pago.</li>
+                <li><strong>Reembolsos y Devoluciones de Clientes Finales:</strong> Toda solicitud de devolución, cancelación o compensación económica debe ser resuelta y ejecutada directamente por el Negocio a través de su propia cuenta de Mercado Pago o presencialmente. AgendaLink no intermedia los fondos de los servicios prestados por los Negocios ni retiene recaudaciones de clientes finales, por lo que no efectúa reembolsos directos a clientes finales.</li>
               </ul>
             </section>
 
@@ -161,11 +161,11 @@ export default function TerminosPage() {
                 7. Procesamiento de Pagos y Flujo de Dinero
               </h2>
               <p>
-                AgendaLink ofrece pagos online con Mercado Pago (Redcompra y tarjetas) o pago en el local.
+                AgendaLink ofrece integración con Mercado Pago (Redcompra, tarjetas de débito y crédito) o pago directo en el local.
               </p>
               <ul style={{ paddingLeft: "20px", marginTop: "8px", display: "flex", flexDirection: "column", gap: "8px" }}>
-                <li><strong>Cobro Directo del Negocio:</strong> Cada Negocio vincula o gestiona su propia cuenta recaudadora en Mercado Pago o percibe directamente los pagos presenciales en su establecimiento. Los pagos efectuados por los clientes finales por servicios reservados se abonan de manera directa al Negocio.</li>
-                <li><strong>No Recaudación de Terceros:</strong> AgendaLink no intermedia los fondos de los servicios prestados por los Negocios, no administra cuentas de depósito de terceros por concepto de reservas ni retiene las recaudaciones comerciales de los clientes finales. AgendaLink únicamente recauda el valor correspondiente a las suscripciones periódicas de su propio servicio SaaS.</li>
+                <li><strong>Cobro Directo del Negocio:</strong> Cada Negocio conecta su propia cuenta de Mercado Pago o percibe directamente los pagos presenciales en su establecimiento. Los pagos efectuados por los clientes finales por servicios reservados se acreditan de manera directa e íntegra en la cuenta del Negocio.</li>
+                <li><strong>No Recaudación de Terceros:</strong> AgendaLink no intermedia los fondos de los servicios prestados por los Negocios, no administra cuentas de depósito de terceros por concepto de reservas ni retiene las recaudaciones comerciales de los clientes finales. AgendaLink únicamente percibe los cobros por suscripción al software SaaS.</li>
                 <li><strong>Seguridad de Datos de Pago:</strong> AgendaLink nunca almacena números de tarjetas de crédito o débito ni claves bancarias, delegando el cifrado en procesadores certificados PCI-DSS.</li>
               </ul>
             </section>
@@ -181,16 +181,16 @@ export default function TerminosPage() {
 
             <section style={{ marginBottom: "28px" }}>
               <h2 style={{ fontSize: "20px", fontWeight: "800", color: "#0f172a", marginBottom: "12px" }}>
-                9. Limitación de Responsabilidad (Estatuto Pyme Ley Nº 20.416 y Ley Nº 19.496)
+                9. Régimen y Limitación de Responsabilidad (Art. 1558 del Código Civil)
               </h2>
               <p>
-                En conformidad con los derechos irrenunciables previstos en la Ley Nº 20.416 (Estatuto Pyme) y la legislación chilena aplicable a contratos de adhesión:
+                AgendaLink provee una plataforma tecnológica en modalidad SaaS. Salvo en los casos de dolo o culpa grave legalmente calificados, las partes acuerdan el siguiente régimen de responsabilidad:
               </p>
               <div style={{ background: "#f8fafc", color: "#0f172a", padding: "18px 22px", borderRadius: "14px", margin: "14px 0", border: "1px solid #cbd5e1", borderLeft: "5px solid var(--blue)", fontSize: "14.5px", fontWeight: "500" }}>
-                <strong>La responsabilidad total de LINKI GROUP SpA se limita al monto pagado por el Negocio en los últimos 12 meses, salvo dolo o culpa grave.</strong>
+                <strong>La responsabilidad total acumulada de {LEGAL.razonSocial} frente al Negocio por cualquier daño directo derivado del uso o indisponibilidad de la Plataforma se limitará exclusivamente al monto total efectivamente pagado por el Negocio por concepto de suscripción durante los doce (12) meses anteriores al hecho generador del reclamo.</strong>
               </div>
               <p style={{ fontSize: "14px", color: "var(--muted)" }}>
-                En ningún caso {LEGAL.razonSocial} responderá por daños indirectos, imprevistos o lucro cesante fuera de las previsiones legales vigentes en Chile.
+                En ningún caso {LEGAL.razonSocial} será responsable por lucro cesante, pérdida de ingresos o clientela, daño moral ni perjuicios indirectos o imprevistos derivados de la relación contractual.
               </p>
             </section>
 
@@ -199,7 +199,7 @@ export default function TerminosPage() {
                 10. Propiedad Intelectual y Jurisdicción
               </h2>
               <p>
-                Todo el software, marcas, algoritmos, logotipos e interfaces de AgendaLink son propiedad exclusiva de <strong>{LEGAL.razonSocial}</strong>. Estos Términos y Condiciones se rigen e interpretan conforme a las leyes de la <strong>República de Chile</strong>. Para todos los efectos legales, las partes fijan su domicilio en la comuna de <strong>Puerto Varas</strong> y se someten a la competencia de sus tribunales ordinarios de justicia, sin perjuicio de los derechos de los consumidores y pymes ante los tribunales competentes de su respectiva jurisdicción.
+                Todo el software, marcas, algoritmos, logotipos e interfaces de AgendaLink son propiedad exclusiva de <strong>{LEGAL.razonSocial}</strong>. Estos Términos y Condiciones se rigen e interpretan conforme a las leyes de la <strong>República de Chile</strong>. Para todos los efectos legales, las partes fijan su domicilio en la comuna de <strong>{LEGAL.tribunales}</strong> y se someten a la competencia de sus tribunales ordinarios de justicia, sin perjuicio de los derechos irrenunciables que asistan a los consumidores ante los juzgados de policía local correspondientes a su domicilio conforme a la Ley Nº 19.496.
               </p>
             </section>
 

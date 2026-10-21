@@ -7,6 +7,10 @@ export interface DashboardMetrics {
   professionalsCount: number;
   currentWeekAppointments: number;
   visibleAppointments: BusinessAppointmentDTO[];
+  mercadoPagoSales: number;
+  localSales: number;
+  mercadoPagoPercent: number;
+  localPercent: number;
   applePaySales: number;
   visaSales: number;
   applePayPercent: number;
@@ -31,12 +35,23 @@ export function calculateDashboardMetrics(input: {
         return date >= weekStart && date <= weekEnd;
       }).length
     : 0;
-  const applePaySales = appointments
-    .filter((appointment) => appointment.paymentStatus === "PAID" && appointment.paymentMethod === "Apple Pay")
+  const mercadoPagoSales = appointments
+    .filter((appointment) => appointment.paymentStatus === "PAID" && Boolean(
+      appointment.paymentMethod?.toLowerCase().includes("mercado") ||
+      appointment.paymentMethod?.toLowerCase().includes("online") ||
+      appointment.paymentMethod?.toLowerCase() === "apple pay"
+    ))
     .reduce((total, appointment) => total + (appointment.paymentAmount || appointment.service.price || 0), 0);
-  const visaSales = appointments
-    .filter((appointment) => appointment.paymentStatus === "PAID" && appointment.paymentMethod !== "Apple Pay")
+  const localSales = appointments
+    .filter((appointment) => appointment.paymentStatus === "PAID" && !Boolean(
+      appointment.paymentMethod?.toLowerCase().includes("mercado") ||
+      appointment.paymentMethod?.toLowerCase().includes("online") ||
+      appointment.paymentMethod?.toLowerCase() === "apple pay"
+    ))
     .reduce((total, appointment) => total + (appointment.paymentAmount || appointment.service.price || 0), 0);
+
+  const mercadoPagoPercent = totalSales > 0 ? Math.round((mercadoPagoSales / totalSales) * 100) : 0;
+  const localPercent = totalSales > 0 ? Math.round((localSales / totalSales) * 100) : 0;
 
   return {
     totalReservations: totalAppointments,
@@ -45,9 +60,13 @@ export function calculateDashboardMetrics(input: {
     professionalsCount,
     currentWeekAppointments,
     visibleAppointments: appointments,
-    applePaySales,
-    visaSales,
-    applePayPercent: totalSales > 0 ? Math.round((applePaySales / totalSales) * 100) : 0,
-    visaPercent: totalSales > 0 ? Math.round((visaSales / totalSales) * 100) : 0,
+    mercadoPagoSales,
+    localSales,
+    mercadoPagoPercent,
+    localPercent,
+    applePaySales: mercadoPagoSales,
+    visaSales: localSales,
+    applePayPercent: mercadoPagoPercent,
+    visaPercent: localPercent,
   };
 }

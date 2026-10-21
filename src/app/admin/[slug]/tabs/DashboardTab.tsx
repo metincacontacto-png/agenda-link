@@ -96,17 +96,17 @@ export default function DashboardTab({
           <div style={{ display: "flex", flexDirection: "column", gap: "16px", marginTop: "24px" }}>
             <div className={styles.statProgressBarRow}>
               <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12.5px", fontWeight: "600", marginBottom: "4px" }}>
-                <span>Apple Pay registrado</span>
-                <span>{metrics.applePayPercent}% ({formatPrice(metrics.applePaySales, businessCurrency)})</span>
+                <span>Pagos Online (Mercado Pago)</span>
+                <span>{metrics.mercadoPagoPercent}% ({formatPrice(metrics.mercadoPagoSales, businessCurrency)})</span>
               </div>
-              <div className={styles.progressBarBg}><div className={styles.progressBarFill} style={{ width: `${metrics.applePayPercent}%`, background: "var(--foreground)" }} /></div>
+              <div className={styles.progressBarBg}><div className={styles.progressBarFill} style={{ width: `${metrics.mercadoPagoPercent}%`, background: "var(--blue)" }} /></div>
             </div>
             <div className={styles.statProgressBarRow}>
               <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12.5px", fontWeight: "600", marginBottom: "4px" }}>
-                <span>Otros métodos registrados</span>
-                <span>{metrics.visaPercent}% ({formatPrice(metrics.visaSales, businessCurrency)})</span>
+                <span>Pagos en el local / Otros</span>
+                <span>{metrics.localPercent}% ({formatPrice(metrics.localSales, businessCurrency)})</span>
               </div>
-              <div className={styles.progressBarBg}><div className={styles.progressBarFill} style={{ width: `${metrics.visaPercent}%`, background: "var(--primary)" }} /></div>
+              <div className={styles.progressBarBg}><div className={styles.progressBarFill} style={{ width: `${metrics.localPercent}%`, background: "var(--primary)" }} /></div>
             </div>
           </div>
         </div>

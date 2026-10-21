@@ -42,17 +42,17 @@ export default function LegalPage() {
             Descargo de Responsabilidad y Cláusulas de IA
           </h1>
           <p style={{ color: "var(--muted)", fontSize: "14px", marginBottom: "32px" }}>
-            Fecha de vigencia: <strong>{LEGAL.fechaVigencia}</strong> · Documento de protección legal complementario para usuarios, negocios y terceros · <strong>{LEGAL.razonSocial}</strong> (RUT {LEGAL.rut}, {LEGAL.domicilio}, Chile)
+            Fecha de vigencia: <strong>{LEGAL.fechaVigencia}</strong> · Documento de protección legal complementario para usuarios, negocios y terceros · <strong>{LEGAL.razonSocial}</strong> (RUT {LEGAL.rut}, {LEGAL.domicilio}, {LEGAL.ciudad}, {LEGAL.pais})
           </p>
 
           <div style={{ lineHeight: "1.75", fontSize: "15px", color: "#334155" }}>
             <section style={{ marginBottom: "28px" }}>
               <div style={{ background: "#f8fafc", color: "#0f172a", padding: "20px 24px", borderRadius: "16px", border: "1px solid #cbd5e1", borderLeft: "5px solid var(--blue)", fontSize: "14.5px" }}>
                 <h3 style={{ fontSize: "17px", fontWeight: "800", marginBottom: "8px", color: "#0f172a" }}>
-                  ⚖️ Limitación Legal de Responsabilidad (Estatuto Pyme)
+                  ⚖️ Limitación Legal de Responsabilidad Contractual (Art. 1558 Código Civil)
                 </h3>
                 <p>
-                  AgendaLink es una plataforma SaaS de software. Conforme al Estatuto Pyme (Ley Nº 20.416) y la legislación chilena aplicable: <strong>La responsabilidad total de LINKI GROUP SpA se limita al monto pagado por el Negocio en los últimos 12 meses, salvo dolo o culpa grave.</strong>
+                  AgendaLink es una plataforma SaaS de software. Salvo en los supuestos de dolo o culpa grave legalmente calificados: <strong>La responsabilidad acumulada de {LEGAL.razonSocial} frente al Negocio se limita exclusivamente a los perjuicios directos y previsibles efectivamente acreditados, hasta un monto máximo equivalente al total pagado por el Negocio en los últimos 12 meses anteriores al hecho causante.</strong> En ningún caso responderá por lucro cesante, daño moral ni pérdidas indirectas de negocio.
                 </p>
               </div>
             </section>
@@ -112,7 +112,7 @@ export default function LegalPage() {
 
             <section style={{ marginTop: "36px", paddingTop: "24px", borderTop: "1px solid #e2e8f0" }}>
               <p style={{ fontSize: "14px", color: "var(--muted)" }}>
-                Para comunicaciones legales o notificaciones formales: <strong>{LEGAL.razonSocial}</strong> · <a href={`mailto:${LEGAL.email}`} style={{ color: "var(--blue)", fontWeight: "600" }}>{LEGAL.email}</a> · {LEGAL.domicilio}, Chile.
+                Para comunicaciones legales o notificaciones formales: <strong>{LEGAL.razonSocial}</strong> · <a href={`mailto:${LEGAL.email}`} style={{ color: "var(--blue)", fontWeight: "600" }}>{LEGAL.email}</a> · {LEGAL.domicilio}, {LEGAL.ciudad}, {LEGAL.pais}.
               </p>
             </section>
           </div>

@@ -524,10 +524,7 @@ export default function HomePage() {
             <div className={styles.num}>2</div>
             <h3>Carga tus servicios</h3>
             <p>
-              Agrega servicios, precios y duración.{" "}
-              {FEATURES.whatsappAutomatico
-                ? "Conecta tu WhatsApp para recibir cada reserva al instante."
-                : "Comparte tu WhatsApp de contacto para que tus clientes te ubiquen."}
+              Agrega servicios, precios y duración. Conecta tu WhatsApp para atender consultas y enviar recordatorios en 1 clic.
             </p>
           </div>
           <div className={`${styles.step} ${styles.rv}`}>
@@ -934,7 +931,7 @@ export default function HomePage() {
                         <small>PASO 3</small>
                         <span className={styles.ck} />
                         <b>Vincular WhatsApp</b>
-                        <em>Recibe avisos de solicitudes al instante.</em>
+                        <em>Atención directa y recordatorios en 1 clic.</em>
                       </div>
                       <div className={styles.os}>
                         <small>PASO 4</small>

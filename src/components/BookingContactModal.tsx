@@ -293,13 +293,13 @@ export default function BookingContactModal({
                 padding: "10px 14px",
                 borderRadius: "10px",
                 fontSize: "13px",
-                fontWeight: "700",
+                fontWeight: "600",
                 textAlign: "center",
                 marginBottom: "14px",
                 lineHeight: "1.4",
               }}
             >
-              Si el negocio no confirma tu solicitud, te devuelve el 100% del pago.
+              Pago procesado de forma directa al negocio mediante Mercado Pago.
             </div>
           )}
 

@@ -134,9 +134,6 @@ export default function BookingFlow({
       )}
 
       <div className={styles.footerBar}>
-        <div style={{ fontSize: "12px", color: "#166534", background: "#f0fdf4", border: "1px solid #bbf7d0", padding: "6px 12px", borderRadius: "8px", textAlign: "center", marginBottom: "8px", fontWeight: "600" }}>
-          Si el negocio no confirma tu solicitud, te devuelve el 100% del pago.
-        </div>
         <button
           type="button"
           disabled={!selectedService || !selectedTime || submitting}
