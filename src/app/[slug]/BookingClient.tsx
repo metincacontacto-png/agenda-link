@@ -28,6 +28,7 @@ export default function BookingClient({
   const [selectedTime, setSelectedTime] = useState("");
   const [slots, setSlots] = useState<string[]>([]);
   const initializedBusinessTimeZone = useRef(false);
+  const userInteractedWithDate = useRef(false);
 
   const [loading, setLoading] = useState(true);
   const [showBookingContact, setShowBookingContact] = useState(false);
@@ -64,6 +65,12 @@ export default function BookingClient({
 
         if (bizProfs.length > 0 && !selectedProfessional) {
           setSelectedProfessional(bizProfs[0]);
+        }
+        if (data.business?.services?.length > 0 && !selectedService) {
+          setSelectedService(data.business.services[0]);
+        }
+        if (!userInteractedWithDate.current && data.availableSlots?.length === 0 && data.nextAvailableDate) {
+          setSelectedDate(data.nextAvailableDate);
         }
       } catch (err) {
         console.error(err);
@@ -235,7 +242,10 @@ export default function BookingClient({
         <PublicLanding
           business={business}
           formatPrice={formatPrice}
-          onStartBooking={() => setViewMode("booking")}
+          onStartBooking={(service) => {
+            if (service) setSelectedService(service);
+            setViewMode("booking");
+          }}
         />
       ) : (
         <BookingFlow
@@ -258,7 +268,10 @@ export default function BookingClient({
             setSelectedProfessional(professional);
             setSelectedTime("");
           }}
-          onSelectDate={setSelectedDate}
+          onSelectDate={(date) => {
+            userInteractedWithDate.current = true;
+            setSelectedDate(date);
+          }}
           onSelectTime={setSelectedTime}
           onBook={handleBookClick}
         />

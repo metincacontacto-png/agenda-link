@@ -193,7 +193,7 @@ export default function RegistroForm({
               Crea tu AgendaLink
             </h2>
             <p className={styles.subtitle}>
-              14 días gratis, sin tarjeta. Luego eliges plan.
+              14 días gratis, sin tarjeta.
             </p>
           </div>
 

@@ -12,8 +12,8 @@ const convos = [
   {
     n: "Linki Secretary",
     m: [
-      { type: "in", text: "Me escribieron preguntando si tengo hora para corte mañana en la tarde. ¿Qué le respondo?" },
-      { type: "out", text: 'Mañana martes tienes libre 15:30 y 18:30 con Pía. Te sugiero: "¡Hola! Sí, tengo 15:30 o 18:30. El corte + brushing cuesta $18.000. Reserva aquí en 20 segundos: agendalink.cl/valentina"' },
+      { type: "in", text: "Me escribieron preguntando si tengo hora para manicura mañana en la tarde. ¿Qué le respondo?" },
+      { type: "out", text: 'Mañana martes tienes libre 15:30 y 18:30 con Valentina. Te sugiero: "¡Hola! Sí, tengo 15:30 o 18:30. La manicura rusa cuesta $18.000. Reserva aquí en 20 segundos: agendalink.cl/valentina"' },
       { type: "in", text: "Perfecto, cópialo." },
     ],
   },
@@ -176,6 +176,28 @@ export default function HomePage() {
 
   return (
     <div className={styles.landingPage} ref={containerRef}>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "SoftwareApplication",
+            name: "AgendaLink",
+            applicationCategory: "BusinessApplication",
+            operatingSystem: "All",
+            offers: {
+              "@type": "AggregateOffer",
+              priceCurrency: "CLP",
+              lowPrice: "14990",
+              highPrice: "44990",
+              offerCount: "3",
+            },
+            description:
+              "Plataforma de reservas, gestión de citas y asistentes IA para negocios y profesionales independientes en Chile.",
+            url: "https://agendalink.cl",
+          }),
+        }}
+      />
       {/* ===== NAV ===== */}
       <nav className={`${styles.nav} ${scrolled ? styles.navScrolled : ""}`}>
         <div className={styles.wrap}>
@@ -715,9 +737,13 @@ export default function HomePage() {
           </p>
         </div>
         <div className={`${styles.wrap} ${styles.aiGrid}`}>
-          <div className={`${styles.agents} ${styles.rv}`}>
+          <div className={`${styles.agents} ${styles.rv}`} role="tablist" aria-label="Asistentes Linki IA">
             <button
+              id="linki-tab-0"
               type="button"
+              role="tab"
+              aria-selected={activeAgent === 0}
+              aria-controls="linki-chat-panel"
               className={`${styles.agent} ${activeAgent === 0 ? styles.agentOn : ""}`}
               onClick={() => setActiveAgent(0)}
             >
@@ -733,7 +759,11 @@ export default function HomePage() {
             </button>
 
             <button
+              id="linki-tab-1"
               type="button"
+              role="tab"
+              aria-selected={activeAgent === 1}
+              aria-controls="linki-chat-panel"
               className={`${styles.agent} ${activeAgent === 1 ? styles.agentOn : ""}`}
               onClick={() => setActiveAgent(1)}
             >
@@ -749,7 +779,11 @@ export default function HomePage() {
             </button>
 
             <button
+              id="linki-tab-2"
               type="button"
+              role="tab"
+              aria-selected={activeAgent === 2}
+              aria-controls="linki-chat-panel"
               className={`${styles.agent} ${activeAgent === 2 ? styles.agentOn : ""}`}
               onClick={() => setActiveAgent(2)}
             >
@@ -765,7 +799,7 @@ export default function HomePage() {
             </button>
           </div>
 
-          <div className={`${styles.chat} ${styles.rv}`}>
+          <div id="linki-chat-panel" role="tabpanel" aria-labelledby={`linki-tab-${activeAgent}`} className={`${styles.chat} ${styles.rv}`}>
             <div className={styles.chatTop}>
               <div className={styles.av}>L</div>
               <div>
@@ -1250,12 +1284,14 @@ export default function HomePage() {
             <div key={idx} className={`${styles.q} ${openFaq === idx ? styles.qOpen : ""} ${styles.rv}`}>
               <button
                 type="button"
+                aria-expanded={openFaq === idx}
+                aria-controls={`faq-answer-${idx}`}
                 onClick={() => setOpenFaq((prev) => (prev === idx ? null : idx))}
               >
                 {item.q}
                 <span>+</span>
               </button>
-              <div className={styles.a}>
+              <div id={`faq-answer-${idx}`} className={styles.a}>
                 <p>{item.a}</p>
               </div>
             </div>

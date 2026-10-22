@@ -7,7 +7,7 @@ import styles from "../page.module.css";
 interface PublicLandingProps {
   business: PublicBusinessDTO;
   formatPrice: (price: number, currency: string) => string;
-  onStartBooking: () => void;
+  onStartBooking: (service?: PublicBusinessDTO["services"][number]) => void;
 }
 
 export default function PublicLanding({ business, formatPrice, onStartBooking }: PublicLandingProps) {
@@ -130,7 +130,20 @@ export default function PublicLanding({ business, formatPrice, onStartBooking }:
             <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
               {business.services.length > 0 ? (
                 business.services.slice(0, 3).map((service) => (
-                  <div key={service.id} className={styles.landingServiceCardGlass}>
+                  <div
+                    key={service.id}
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => onStartBooking(service)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        onStartBooking(service);
+                      }
+                    }}
+                    className={styles.landingServiceCardGlass}
+                    style={{ cursor: "pointer" }}
+                  >
                     <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
                       {service.imageUrl ? (
                         <img src={service.imageUrl} alt={service.name} style={{ width: "48px", height: "48px", borderRadius: "8px", objectFit: "cover", flexShrink: 0 }} />
@@ -175,7 +188,7 @@ export default function PublicLanding({ business, formatPrice, onStartBooking }:
       </div>
 
       <div className={styles.floatingCTA}>
-        <button type="button" className={styles.ctaBtn} onClick={onStartBooking}>
+        <button type="button" className={styles.ctaBtn} onClick={() => onStartBooking()}>
           ⚡ Reservar Cita Online
         </button>
       </div>

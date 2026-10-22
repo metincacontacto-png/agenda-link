@@ -51,6 +51,7 @@ export async function GET(request: Request) {
     };
 
     let availableSlots: string[] = [];
+    let nextAvailableDate: string | null = null;
     if (serviceId && professionalId) {
       const service = publicBusiness.services.find((item) => item.id === serviceId);
       const professional = publicBusiness.professionals.find((item) => item.id === professionalId);
@@ -66,11 +67,34 @@ export async function GET(request: Request) {
         serviceDurationMinutes: service.duration,
         minNoticeHours: business.minNoticeHours ?? 2,
       });
+
+      if (availableSlots.length === 0) {
+        const [year, month, day] = date.split("-").map(Number);
+        const currentDate = new Date(Date.UTC(year, month - 1, day));
+        for (let i = 1; i <= 14; i++) {
+          const nextDateObj = new Date(currentDate);
+          nextDateObj.setUTCDate(nextDateObj.getUTCDate() + i);
+          const nextDateStr = nextDateObj.toISOString().slice(0, 10);
+          const checkSlots = await getAvailableSlotsForProfessional({
+            businessId: publicBusiness.id,
+            professionalId,
+            date: nextDateStr,
+            timeZone: publicBusiness.timezone,
+            serviceDurationMinutes: service.duration,
+            minNoticeHours: business.minNoticeHours ?? 2,
+          });
+          if (checkSlots.length > 0) {
+            nextAvailableDate = nextDateStr;
+            break;
+          }
+        }
+      }
     }
 
     return NextResponse.json({
       business: publicBusiness,
       availableSlots,
+      nextAvailableDate,
     });
   } catch (error) {
     logServerError(request, "availability.read.failed", error, { businessId });

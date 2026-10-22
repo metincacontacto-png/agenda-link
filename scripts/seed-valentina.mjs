@@ -25,15 +25,16 @@ export function generateValentinaSQL() {
     // 3. Crear negocio Valentina Studio
     `INSERT INTO "Business" (
        "id", "name", "slug", "ownerName", "email", "category", "teamSize", "country",
-       "currency", "timezone", "plan", "landingTitle", "landingSubtitle", "landingAbout",
+       "currency", "timezone", "plan", "logoUrl", "landingCoverUrl", "landingTitle", "landingSubtitle", "landingAbout",
        "landingPhone", "landingAddress", "landingHours", "billingBypass", "createdAt", "updatedAt"
      ) VALUES (
        '${businessId}', 'Valentina Studio', 'valentina', 'Valentina Morales', 'contacto@valentina.cl',
        'Belleza y Estética', '1 persona', 'CL', 'CLP', 'America/Santiago', 'INDIVIDUAL',
+       '/demo/valentina-logo.jpg', '/demo/valentina-banner.jpg',
        'Valentina Studio — Manicura y Estética',
        'Especialistas en manicura rusa, nail art y lifting de pestañas en Providencia.',
        'En Valentina Studio nos dedicamos al cuidado estético personalizado con productos de la más alta calidad y un ambiente diseñado para tu comodidad y desconexión.',
-       '+56985967325', 'Av. Providencia 2133, Providencia, Santiago', 'Lunes a Sábado de 10:00 a 19:30 hrs',
+       '+56 9 8765 4321', 'Providencia, Santiago', 'Lunes a Sábado de 10:00 a 19:30 hrs',
        1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
      );`,
 
@@ -42,14 +43,14 @@ export function generateValentinaSQL() {
      VALUES ('${businessId}', '${userId}', 'OWNER', CURRENT_TIMESTAMP);`,
 
     // 5. Crear servicios
-    `INSERT INTO "Service" ("id", "businessId", "name", "duration", "price", "createdAt")
-     VALUES ('${service1Id}', '${businessId}', 'Manicura Rusa Combinada', 60, 18000, CURRENT_TIMESTAMP);`,
-    `INSERT INTO "Service" ("id", "businessId", "name", "duration", "price", "createdAt")
-     VALUES ('${service2Id}', '${businessId}', 'Esmaltado Permanente + Nivelación', 75, 24000, CURRENT_TIMESTAMP);`,
-    `INSERT INTO "Service" ("id", "businessId", "name", "duration", "price", "createdAt")
-     VALUES ('${service3Id}', '${businessId}', 'Lifting de Pestañas + Tinte', 60, 22000, CURRENT_TIMESTAMP);`,
-    `INSERT INTO "Service" ("id", "businessId", "name", "duration", "price", "createdAt")
-     VALUES ('${service4Id}', '${businessId}', 'Perfilado de Cejas con Henna', 45, 15000, CURRENT_TIMESTAMP);`,
+    `INSERT INTO "Service" ("id", "businessId", "name", "duration", "price", "imageUrl", "createdAt")
+     VALUES ('${service1Id}', '${businessId}', 'Manicura Rusa Combinada', 60, 18000, '/demo/service-manicura.jpg', CURRENT_TIMESTAMP);`,
+    `INSERT INTO "Service" ("id", "businessId", "name", "duration", "price", "imageUrl", "createdAt")
+     VALUES ('${service2Id}', '${businessId}', 'Esmaltado Permanente + Nivelación', 75, 24000, '/demo/service-esmaltado.jpg', CURRENT_TIMESTAMP);`,
+    `INSERT INTO "Service" ("id", "businessId", "name", "duration", "price", "imageUrl", "createdAt")
+     VALUES ('${service3Id}', '${businessId}', 'Lifting de Pestañas + Tinte', 60, 22000, '/demo/service-lifting.jpg', CURRENT_TIMESTAMP);`,
+    `INSERT INTO "Service" ("id", "businessId", "name", "duration", "price", "imageUrl", "createdAt")
+     VALUES ('${service4Id}', '${businessId}', 'Perfilado de Cejas con Henna', 45, 15000, '/demo/service-manicura.jpg', CURRENT_TIMESTAMP);`,
 
     // 6. Crear profesional
     `INSERT INTO "Professional" ("id", "businessId", "name", "avatar", "createdAt")

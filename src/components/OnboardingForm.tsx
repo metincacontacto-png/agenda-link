@@ -151,7 +151,7 @@ export default function OnboardingForm({
         <div className={styles.cardIntro}>
           <span className={styles.eyebrow}>14 días de prueba gratis</span>
           <h1 id="onboarding-title">Crea tu AgendaLink</h1>
-          <p>14 días gratis, sin tarjeta. Luego eliges plan. Configura tu página y empieza a recibir solicitudes de reserva.</p>
+          <p>14 días gratis, sin tarjeta. Configura tu página y empieza a recibir solicitudes de reserva.</p>
         </div>
 
         {step === 1 ? (
