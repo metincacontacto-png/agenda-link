@@ -439,6 +439,54 @@ test("business onboarding creates an account, owner membership, and default sche
     headers: { Cookie: cookie },
   });
   assert.equal(adminData.status, 200);
+
+  // Attempt to onboard again with the same email but incorrect password
+  const wrongPasswordRes = await fetch(`${baseUrl}/api/onboarding`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      name: `Second Biz ${randomUUID().slice(0, 8)}`,
+      ownerName: "Same Owner",
+      email: onboardingTestEmail,
+      password: "WrongPassword123!",
+      category: "Salud",
+      teamSize: "1 persona",
+      country: "Chile",
+      serviceName: "Consulta de prueba",
+      serviceDuration: 60,
+      servicePrice: 25000,
+      termsAccepted: true,
+      termsAcceptedAt: new Date().toISOString(),
+      termsVersion: "2026-10-20",
+    }),
+  });
+  assert.equal(wrongPasswordRes.status, 400);
+  const wrongPasswordData = await wrongPasswordRes.json();
+  assert.ok(wrongPasswordData.error.includes("Este correo ya está registrado"));
+
+  // Attempt to onboard again with the same email and correct password
+  const secondBizRes = await fetch(`${baseUrl}/api/onboarding`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      name: `Second Biz ${randomUUID().slice(0, 8)}`,
+      ownerName: "Same Owner",
+      email: onboardingTestEmail,
+      password: "OnboardingTestPassword123!",
+      category: "Salud",
+      teamSize: "1 persona",
+      country: "Chile",
+      serviceName: "Consulta de prueba",
+      serviceDuration: 60,
+      servicePrice: 25000,
+      termsAccepted: true,
+      termsAcceptedAt: new Date().toISOString(),
+      termsVersion: "2026-10-20",
+    }),
+  });
+  assert.equal(secondBizRes.status, 201);
+  const secondBizData = await secondBizRes.json();
+  assert.ok(secondBizData.success);
 });
 
 test("client payment claims are ignored and concurrent requests cannot double-book a professional", async () => {
