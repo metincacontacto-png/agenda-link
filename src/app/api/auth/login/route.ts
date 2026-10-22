@@ -41,14 +41,24 @@ export async function POST(request: Request) {
   try {
     const user = await prisma.user.findUnique({
       where: { email: normalizeEmail(input.email) },
-      select: { id: true, passwordHash: true },
+      select: {
+        id: true,
+        passwordHash: true,
+        memberships: {
+          select: {
+            business: { select: { slug: true } },
+          },
+          take: 1,
+        },
+      },
     });
     const validPassword = await verifyPassword(input.password, user?.passwordHash ?? null);
     if (!user || !validPassword) return genericAuthError();
 
     const token = await createSessionToken(user.id);
+    const slug = user.memberships[0]?.business?.slug || null;
     return NextResponse.json(
-      { success: true },
+      { success: true, slug },
       { headers: { "Set-Cookie": sessionCookie(token) } },
     );
   } catch (error) {

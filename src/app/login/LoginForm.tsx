@@ -33,13 +33,16 @@ export default function LoginForm() {
         return;
       }
 
+      const data = await response.json().catch(() => null);
       const requestedPath = new URLSearchParams(window.location.search).get("next");
       const destination =
         requestedPath?.startsWith("/") &&
         !requestedPath.startsWith("//") &&
         !requestedPath.includes("\\")
           ? requestedPath
-          : "/";
+          : data?.slug
+            ? `/admin/${data.slug}`
+            : "/";
       window.location.assign(destination);
     } catch {
       setError("No se pudo iniciar sesión. Comprueba tu conexión e inténtalo otra vez.");
