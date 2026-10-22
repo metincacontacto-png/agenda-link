@@ -23,8 +23,8 @@ const convos = [
     m: [
       { type: "out", text: "📊 Detecté 23 clientes que no vienen hace más de 60 días." },
       { type: "out", text: 'Te propongo enviarles: "¡Te echamos de menos! 15% en tu próxima visita esta semana" 💙' },
-      { type: "in", text: "Dale, envíalo" },
-      { type: "out", text: "Enviado por WhatsApp. Te aviso cuando lleguen las solicitudes. 🚀" },
+      { type: "in", text: "Dale, genera los enlaces" },
+      { type: "out", text: "Campañas listas en tu panel con enlaces a WhatsApp para enviar en 1 clic. 🚀" },
     ],
   },
   {
@@ -52,8 +52,8 @@ const faqs = [
     a: "Desde tu panel de administración, envías un recordatorio personalizado a cada cliente por WhatsApp con un solo clic. Es 100% gratuito, sin límites ni costos adicionales por mensaje.",
   },
   {
-    q: "¿Qué hacen los asistentes Linki IA?",
-    a: "Linki Secretary atiende dudas de tus clientes y los guía a reservar, Linki Marketing te ayuda a reactivar clientes que dejaron de venir y Linki Business analiza tus ventas y métricas para darte consejos estratégicos concretos.",
+    q: "¿Qué hacen los asistentes Linki IA y dónde atienden?",
+    a: "Operan directamente dentro de tu panel de administración: Linki Secretary responde consultas sobre tus precios y servicios para ayudarte a atender y guiar a tus clientes a reservar, Linki Marketing analiza clientes inactivos para generar mensajes y enlaces de reactivación por WhatsApp en 1 clic, y Linki Business analiza tus ventas y métricas para darte consejos comerciales estratégicos.",
   },
   {
     q: "¿Puedo cobrar al momento de la reserva?",
@@ -712,7 +712,7 @@ export default function HomePage() {
             </span>
           </h2>
           <p className={styles.lead}>
-            Tres asistentes que trabajan por ti: atienden, venden y te ayudan a tomar mejores decisiones.
+            Tres asistentes inteligentes integrados en tu panel de administración: te ayudan a responder consultas, reactivar clientes y tomar mejores decisiones.
           </p>
         </div>
         <div className={`${styles.wrap} ${styles.aiGrid}`}>
@@ -729,7 +729,7 @@ export default function HomePage() {
               </div>
               <div>
                 <h3>Linki Secretary</h3>
-                <p>Atiende consultas online, entrega precios y horarios, y guía a tus clientes a reservar 24/7.</p>
+                <p>En tu panel: responde dudas sobre tus servicios, precios y horarios reales, y te asiste para guiar a tus clientes a reservar.</p>
               </div>
             </button>
 
@@ -745,7 +745,7 @@ export default function HomePage() {
               </div>
               <div>
                 <h3>Linki Marketing</h3>
-                <p>Detecta clientes que dejaron de venir y te propone campañas para traerlos de vuelta.</p>
+                <p>En tu panel: detecta clientes que dejaron de venir y propone campañas con enlaces a WhatsApp para reactivarlos en 1 clic.</p>
               </div>
             </button>
 
@@ -761,7 +761,7 @@ export default function HomePage() {
               </div>
               <div>
                 <h3>Linki Business</h3>
-                <p>Tu consultor: analiza tus ventas y servicios y te dice dónde está la oportunidad.</p>
+                <p>En tu panel: analiza tus ventas, métricas y horarios valle para entregarte recomendaciones estratégicas.</p>
               </div>
             </button>
           </div>
@@ -771,7 +771,7 @@ export default function HomePage() {
               <div className={styles.av}>L</div>
               <div>
                 <b>{convos[activeAgent].n}</b>
-                <small>● en línea</small>
+                <small>● asistente en tu panel</small>
               </div>
             </div>
             <div className={styles.msgs}>
@@ -1161,7 +1161,7 @@ export default function HomePage() {
               <li>Link y landing personalizada</li>
               <li>Solicitudes de reserva ilimitadas</li>
               <li>Recordatorios por WhatsApp en 1 clic</li>
-              <li>Linki Secretary (asistente IA)</li>
+              <li>Linki Secretary (asistente en tu panel)</li>
               <li>Pagos online con Mercado Pago o en el local</li>
               <li>QR y material listo para imprimir</li>
             </ul>
@@ -1197,7 +1197,7 @@ export default function HomePage() {
               <li>Ventas y caja en tiempo real</li>
               <li>Base de clientes e historial</li>
               <li>Recordatorios por WhatsApp en 1 clic</li>
-              <li>Linki Secretary y Marketing (asistentes IA)</li>
+              <li>Linki Secretary y Marketing (asistentes en tu panel)</li>
             </ul>
           </div>
 
@@ -1233,7 +1233,7 @@ export default function HomePage() {
               <li>Seguimiento de clientes</li>
               <li>Reportes avanzados de ventas y métricas</li>
               <li>Múltiples turnos y bloqueos simultáneos</li>
-              <li>Suite completa: Secretary, Marketing y Business IA</li>
+              <li>Suite completa: Secretary, Marketing y Business IA (en tu panel)</li>
               <li>Soporte prioritario dedicado</li>
             </ul>
           </div>

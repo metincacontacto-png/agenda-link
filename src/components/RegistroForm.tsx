@@ -367,7 +367,7 @@ export default function RegistroForm({
                   <option value="6+ personas">Plan Premium (5 profesionales - $49.000/mes + IVA)</option>
                 </select>
                 <p style={{ fontSize: "11px", color: "#64748b", marginTop: "4px", marginBottom: 0 }}>
-                  14 días de prueba gratis. La prueba no se cobra sola. Al día 15 eliges si sigues.
+                  14 días gratis, sin tarjeta. Si te gusta, activas tu plan y se renueva automáticamente cada mes.
                 </p>
               </div>
             </div>
