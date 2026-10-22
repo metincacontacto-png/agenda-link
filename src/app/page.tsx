@@ -60,7 +60,7 @@ const faqs = [
   },
   {
     q: "¿Puedo cambiar de plan o cancelar?",
-    a: "Sí. Puedes subir o bajar de plan a medida que tu equipo crece, y cancelar cuando quieras sin permanencia. Con el plan anual obtienes 2 meses gratis ($100.000 + IVA al año para el plan Individual).",
+    a: "Sí. Puedes subir o bajar de plan a medida que tu equipo crece, y cancelar cuando quieras sin permanencia. Con el plan anual obtienes 2 meses gratis ($99.900 + IVA al año para el plan Individual).",
   },
 ];
 
@@ -188,8 +188,8 @@ export default function HomePage() {
             offers: {
               "@type": "AggregateOffer",
               priceCurrency: "CLP",
-              lowPrice: "14990",
-              highPrice: "44990",
+              lowPrice: "9990",
+              highPrice: "48990",
               offerCount: "3",
             },
             description:
@@ -1171,11 +1171,11 @@ export default function HomePage() {
             <h3>Individual</h3>
             <p className={styles.who}>Para independientes que necesitan de un aliado para controlar y hacer crecer su negocio.</p>
             <div className={styles.price}>
-              {billingPeriod === "monthly" ? "$10.000" : "$8.333"}
+              {billingPeriod === "monthly" ? "$9.990" : "$8.325"}
               <small> CLP/mes + IVA</small>
             </div>
             <p className={styles.priceNote}>
-              {billingPeriod === "yearly" ? "$100.000 al año + IVA (ahorras 2 meses)" : "Plan mensual sin permanencia"}
+              {billingPeriod === "yearly" ? "$99.900 al año + IVA (ahorras 2 meses)" : "Plan mensual sin permanencia"}
             </p>
             <div className={styles.planPill}>
               👤 1 profesional
@@ -1205,11 +1205,11 @@ export default function HomePage() {
             <h3>Básico</h3>
             <p className={styles.who}>Para negocios que buscan organizarse, controlar su administración y hacer crecer sus ventas.</p>
             <div className={styles.price}>
-              {billingPeriod === "monthly" ? "$29.000" : "$24.167"}
+              {billingPeriod === "monthly" ? "$28.990" : "$24.158"}
               <small> CLP/mes + IVA</small>
             </div>
             <p className={styles.priceNote}>
-              {billingPeriod === "yearly" ? "$290.000 al año + IVA (ahorras 2 meses)" : "Plan mensual sin permanencia"}
+              {billingPeriod === "yearly" ? "$289.900 al año + IVA (ahorras 2 meses)" : "Plan mensual sin permanencia"}
             </p>
             <div className={styles.planPill}>
               👥 2 profesionales
@@ -1241,11 +1241,11 @@ export default function HomePage() {
             </div>
             <p className={styles.who}>Para negocios con equipo que buscan control total y seguimiento personalizado de clientes.</p>
             <div className={styles.price}>
-              {billingPeriod === "monthly" ? "$49.000" : "$40.833"}
+              {billingPeriod === "monthly" ? "$48.990" : "$40.825"}
               <small> CLP/mes + IVA</small>
             </div>
             <p className={styles.priceNote}>
-              {billingPeriod === "yearly" ? "$490.000 al año + IVA (ahorras 2 meses)" : "Plan mensual sin permanencia"}
+              {billingPeriod === "yearly" ? "$489.900 al año + IVA (ahorras 2 meses)" : "Plan mensual sin permanencia"}
             </p>
             <div className={styles.planPill}>
               🏢 5 profesionales

@@ -14,8 +14,8 @@ export const SUBSCRIPTION_PLANS: Record<"INDIVIDUAL" | "EQUIPO" | "NEGOCIO", Pla
   INDIVIDUAL: {
     id: "INDIVIDUAL",
     name: "Individual",
-    price: 10000,
-    priceFormatted: "$10.000 CLP/mes",
+    price: 9990,
+    priceFormatted: "$9.990 CLP/mes",
     description: "Para profesionales independientes.",
     maxProfessionals: 1,
     envPlanKey: "MERCADOPAGO_PLAN_ID_INDIVIDUAL",
@@ -23,8 +23,8 @@ export const SUBSCRIPTION_PLANS: Record<"INDIVIDUAL" | "EQUIPO" | "NEGOCIO", Pla
   EQUIPO: {
     id: "EQUIPO",
     name: "Básico",
-    price: 29000,
-    priceFormatted: "$29.000 CLP/mes",
+    price: 28990,
+    priceFormatted: "$28.990 CLP/mes",
     description: "Para salones o centros de 2 a 5 profesionales.",
     maxProfessionals: 5,
     envPlanKey: "MERCADOPAGO_PLAN_ID_EQUIPO",
@@ -32,8 +32,8 @@ export const SUBSCRIPTION_PLANS: Record<"INDIVIDUAL" | "EQUIPO" | "NEGOCIO", Pla
   NEGOCIO: {
     id: "NEGOCIO",
     name: "Premium",
-    price: 49000,
-    priceFormatted: "$49.000 CLP/mes",
+    price: 48990,
+    priceFormatted: "$48.990 CLP/mes",
     description: "Para centros grandes con profesionales ilimitados.",
     maxProfessionals: 999,
     envPlanKey: "MERCADOPAGO_PLAN_ID_NEGOCIO",

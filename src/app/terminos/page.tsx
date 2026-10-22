@@ -91,9 +91,9 @@ export default function TerminosPage() {
                 <div>
                   <strong>a) Planes y Precios:</strong> Los valores vigentes son:
                   <ul style={{ paddingLeft: "20px", marginTop: "4px" }}>
-                    <li><strong>Plan Individual:</strong> $10.000 + IVA al mes (o $100.000 + IVA al año, ahorrando 2 meses). Incluye Linki Secretary.</li>
-                    <li><strong>Plan Básico:</strong> $29.000 + IVA al mes (o $290.000 + IVA al año, ahorrando 2 meses). Incluye Linki Secretary y Marketing.</li>
-                    <li><strong>Plan Premium:</strong> $49.000 + IVA al mes (o $490.000 + IVA al año, ahorrando 2 meses). Incluye suite completa de Linki IA.</li>
+                    <li><strong>Plan Individual:</strong> $9.990 + IVA al mes (o $99.900 + IVA al año, ahorrando 2 meses). Incluye Linki Secretary.</li>
+                    <li><strong>Plan Básico:</strong> $28.990 + IVA al mes (o $289.900 + IVA al año, ahorrando 2 meses). Incluye Linki Secretary y Marketing.</li>
+                    <li><strong>Plan Premium:</strong> $48.990 + IVA al mes (o $489.900 + IVA al año, ahorrando 2 meses). Incluye suite completa de Linki IA.</li>
                   </ul>
                   Todos los precios se expresan en Pesos Chilenos (CLP) más el 19% de IVA (Impuesto al Valor Agregado), el cual se detallará en la respectiva boleta o factura electrónica.
                 </div>

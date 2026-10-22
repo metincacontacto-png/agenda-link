@@ -7,15 +7,15 @@ import {
 } from "../src/features/businesses/subscription-policy.ts";
 
 test("subscription policy: plan configurations match business requirements", () => {
-  assert.equal(SUBSCRIPTION_PLANS.INDIVIDUAL.price, 10000);
+  assert.equal(SUBSCRIPTION_PLANS.INDIVIDUAL.price, 9990);
   assert.equal(SUBSCRIPTION_PLANS.INDIVIDUAL.envPlanKey, "MERCADOPAGO_PLAN_ID_INDIVIDUAL");
   assert.equal(SUBSCRIPTION_PLANS.INDIVIDUAL.maxProfessionals, 1);
 
-  assert.equal(SUBSCRIPTION_PLANS.EQUIPO.price, 29000);
+  assert.equal(SUBSCRIPTION_PLANS.EQUIPO.price, 28990);
   assert.equal(SUBSCRIPTION_PLANS.EQUIPO.envPlanKey, "MERCADOPAGO_PLAN_ID_EQUIPO");
   assert.equal(SUBSCRIPTION_PLANS.EQUIPO.maxProfessionals, 5);
 
-  assert.equal(SUBSCRIPTION_PLANS.NEGOCIO.price, 49000);
+  assert.equal(SUBSCRIPTION_PLANS.NEGOCIO.price, 48990);
   assert.equal(SUBSCRIPTION_PLANS.NEGOCIO.envPlanKey, "MERCADOPAGO_PLAN_ID_NEGOCIO");
   assert.ok(SUBSCRIPTION_PLANS.NEGOCIO.maxProfessionals > 5);
 });

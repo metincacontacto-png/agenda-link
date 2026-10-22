@@ -45,9 +45,9 @@ if (!accessToken.startsWith("APP_USR-") && !accessToken.startsWith("TEST-")) {
 }
 
 const plans = [
-  { code: "INDIVIDUAL", name: "AgendaLink Individual", amount: 10000 },
-  { code: "EQUIPO", name: "AgendaLink Básico", amount: 29000 },
-  { code: "NEGOCIO", name: "AgendaLink Premium", amount: 49000 },
+  { code: "INDIVIDUAL", name: "AgendaLink Individual", amount: 9990 },
+  { code: "EQUIPO", name: "AgendaLink Básico", amount: 28990 },
+  { code: "NEGOCIO", name: "AgendaLink Premium", amount: 48990 },
 ];
 
 for (const plan of plans) {

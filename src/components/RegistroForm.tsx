@@ -362,9 +362,9 @@ export default function RegistroForm({
                   onChange={(e) => setFormData({ ...formData, teamSize: e.target.value })}
                   className={styles.select}
                 >
-                  <option value="1 persona">Plan Individual (1 profesional - $10.000/mes + IVA)</option>
-                  <option value="2-5 personas">Plan Básico (2 profesionales - $29.000/mes + IVA)</option>
-                  <option value="6+ personas">Plan Premium (5 profesionales - $49.000/mes + IVA)</option>
+                  <option value="1 persona">Plan Individual (1 profesional - $9.990/mes + IVA)</option>
+                  <option value="2-5 personas">Plan Básico (2 profesionales - $28.990/mes + IVA)</option>
+                  <option value="6+ personas">Plan Premium (5 profesionales - $48.990/mes + IVA)</option>
                 </select>
                 <p style={{ fontSize: "11px", color: "#64748b", marginTop: "4px", marginBottom: 0 }}>
                   14 días gratis, sin tarjeta. Si te gusta, activas tu plan y se renueva automáticamente cada mes.

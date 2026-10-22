@@ -189,7 +189,7 @@ export default function BillingModal({
                   Individual
                 </div>
                 <div style={{ fontSize: 24, fontWeight: 900, margin: "6px 0 4px" }}>
-                  $10.000 <span style={{ fontSize: 12, fontWeight: 500, color: "var(--text-secondary)" }}>/mes</span>
+                  $9.990 <span style={{ fontSize: 12, fontWeight: 500, color: "var(--text-secondary)" }}>/mes</span>
                 </div>
                 <p style={{ fontSize: 12, color: "var(--text-secondary)", marginBottom: 14 }}>
                   Para 1 profesional independiente
@@ -257,7 +257,7 @@ export default function BillingModal({
                   Básico
                 </div>
                 <div style={{ fontSize: 24, fontWeight: 900, margin: "6px 0 4px" }}>
-                  $29.000 <span style={{ fontSize: 12, fontWeight: 500, color: "var(--text-secondary)" }}>/mes</span>
+                  $28.990 <span style={{ fontSize: 12, fontWeight: 500, color: "var(--text-secondary)" }}>/mes</span>
                 </div>
                 <p style={{ fontSize: 12, color: "var(--text-secondary)", marginBottom: 14 }}>
                   Para equipos de 2 a 5 profesionales
@@ -308,7 +308,7 @@ export default function BillingModal({
                   Premium
                 </div>
                 <div style={{ fontSize: 24, fontWeight: 900, margin: "6px 0 4px" }}>
-                  $49.000 <span style={{ fontSize: 12, fontWeight: 500, color: "var(--text-secondary)" }}>/mes</span>
+                  $48.990 <span style={{ fontSize: 12, fontWeight: 500, color: "var(--text-secondary)" }}>/mes</span>
                 </div>
                 <p style={{ fontSize: 12, color: "var(--text-secondary)", marginBottom: 14 }}>
                   Para negocios de más de 5 personas

@@ -84,39 +84,45 @@ export async function POST(request: Request) {
 
     const payerEmail = session.user.email || business.email;
 
-    const mpPayload = {
-      preapproval_plan_id: preapprovalPlanId,
-      payer_email: payerEmail,
-      external_reference: business.id,
-      reason: `Agenda Link - Plan ${planConfig.name}`,
-      back_url: `${origin}/admin/${business.slug}?subscription=success`,
-      status: "pending",
-    };
+    const fallbackHostedUrl = `https://www.mercadopago.cl/subscriptions/checkout?preapproval_plan_id=${preapprovalPlanId}`;
+    let initPoint = fallbackHostedUrl;
+    let subscriptionId: string | undefined;
 
-    const mpRes = await fetch("https://api.mercadopago.com/preapproval", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${secrets.accessToken}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(mpPayload),
-    });
+    try {
+      const mpPayload = {
+        payer_email: payerEmail,
+        back_url: `${origin}/admin/${business.slug}?subscription=success`,
+        reason: `Agenda Link - Plan ${planConfig.name}`,
+        external_reference: business.id,
+        auto_recurring: {
+          frequency: 1,
+          frequency_type: "months",
+          transaction_amount: planConfig.price,
+          currency_id: "CLP",
+        },
+      };
 
-    if (!mpRes.ok) {
-      const errText = await mpRes.text();
-      console.error("[MercadoPago Subscription Checkout] Error:", errText);
-      return NextResponse.json(
-        { error: "No se pudo iniciar el proceso de suscripción con Mercado Pago", details: errText },
-        { status: 502 }
-      );
-    }
+      const mpRes = await fetch("https://api.mercadopago.com/preapproval", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${secrets.accessToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(mpPayload),
+      });
 
-    const mpData = (await mpRes.json()) as { id?: string; init_point?: string };
-    if (!mpData.init_point) {
-      return NextResponse.json(
-        { error: "Mercado Pago no devolvió la URL de suscripción" },
-        { status: 502 }
-      );
+      if (mpRes.ok) {
+        const mpData = (await mpRes.json()) as { id?: string; init_point?: string };
+        if (mpData.init_point) {
+          initPoint = mpData.init_point;
+          subscriptionId = mpData.id;
+        }
+      } else {
+        const errText = await mpRes.text();
+        console.warn("[MercadoPago Subscription Checkout] Dynamic preapproval failed, falling back to hosted plan URL:", errText);
+      }
+    } catch (err) {
+      console.warn("[MercadoPago Subscription Checkout] Error calling preapproval API, falling back to hosted plan URL:", err);
     }
 
     // Save selected target plan on business
@@ -129,8 +135,8 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       success: true,
-      initPoint: mpData.init_point,
-      subscriptionId: mpData.id,
+      initPoint,
+      subscriptionId,
     });
   } catch (error) {
     console.error("[Subscription Checkout Error]", error);
