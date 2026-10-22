@@ -12,10 +12,9 @@ const convos = [
   {
     n: "Linki Secretary",
     m: [
-      { type: "in", text: "Hola! ¿tienen hora para corte mañana en la tarde?" },
-      { type: "out", text: "¡Hola! 👋 Sí, mañana martes tengo 15:30 y 18:30 con Pía. El corte + brushing cuesta $18.000." },
-      { type: "in", text: "Las 18:30 porfa" },
-      { type: "out", text: "Listo ✅ Envía tu solicitud aquí en 20 segundos: agendalink.cl/valentina. Te avisaremos apenas se confirme." },
+      { type: "in", text: "Me escribieron preguntando si tengo hora para corte mañana en la tarde. ¿Qué le respondo?" },
+      { type: "out", text: 'Mañana martes tienes libre 15:30 y 18:30 con Pía. Te sugiero: "¡Hola! Sí, tengo 15:30 o 18:30. El corte + brushing cuesta $18.000. Reserva aquí en 20 segundos: agendalink.cl/valentina"' },
+      { type: "in", text: "Perfecto, cópialo." },
     ],
   },
   {
@@ -1196,7 +1195,6 @@ export default function HomePage() {
               <li>Calendario compartido por profesional</li>
               <li>Ventas y caja en tiempo real</li>
               <li>Base de clientes e historial</li>
-              <li>Recordatorios por WhatsApp en 1 clic</li>
               <li>Linki Secretary y Marketing (asistentes en tu panel)</li>
             </ul>
           </div>
@@ -1207,7 +1205,7 @@ export default function HomePage() {
               <h3 style={{ margin: 0 }}>Premium</h3>
               <span className={styles.badgePopular}>Recomendado</span>
             </div>
-            <p className={styles.who}>Para empresas que buscan tener el control y llevar un seguimiento de clientes personalizable.</p>
+            <p className={styles.who}>Para negocios con equipo que buscan control total y seguimiento personalizado de clientes.</p>
             <div className={styles.price}>
               {billingPeriod === "monthly" ? "$49.000" : "$40.833"}
               <small> CLP/mes + IVA</small>

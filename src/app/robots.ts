@@ -6,7 +6,7 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: "*",
         allow: "/",
-        disallow: ["/panel", "/api/", "/login"],
+        disallow: ["/admin", "/admin/", "/panel", "/api/", "/login"],
       },
     ],
     sitemap: "https://agendalink.cl/sitemap.xml",

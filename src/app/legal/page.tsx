@@ -42,7 +42,7 @@ export default function LegalPage() {
             Descargo de Responsabilidad y Cláusulas de IA
           </h1>
           <p style={{ color: "var(--muted)", fontSize: "14px", marginBottom: "32px" }}>
-            Fecha de vigencia: <strong>{LEGAL.fechaVigencia}</strong> · Documento de protección legal complementario para usuarios, negocios y terceros · <strong>{LEGAL.razonSocial}</strong> (RUT {LEGAL.rut}, {LEGAL.domicilio}, {LEGAL.ciudad}, {LEGAL.pais})
+            Fecha de vigencia: <strong>{LEGAL.fechaVigencia}</strong> · Documento de protección legal complementario para usuarios, negocios y terceros · <strong>{LEGAL.razonSocial}</strong> (RUT {LEGAL.rut}, {LEGAL.domicilio}, {LEGAL.pais})
           </p>
 
           <div style={{ lineHeight: "1.75", fontSize: "15px", color: "#334155" }}>
@@ -112,7 +112,7 @@ export default function LegalPage() {
 
             <section style={{ marginTop: "36px", paddingTop: "24px", borderTop: "1px solid #e2e8f0" }}>
               <p style={{ fontSize: "14px", color: "var(--muted)" }}>
-                Para comunicaciones legales o notificaciones formales: <strong>{LEGAL.razonSocial}</strong> · <a href={`mailto:${LEGAL.email}`} style={{ color: "var(--blue)", fontWeight: "600" }}>{LEGAL.email}</a> · {LEGAL.domicilio}, {LEGAL.ciudad}, {LEGAL.pais}.
+                Para comunicaciones legales o notificaciones formales: <strong>{LEGAL.razonSocial}</strong> · <a href={`mailto:${LEGAL.email}`} style={{ color: "var(--blue)", fontWeight: "600" }}>{LEGAL.email}</a> · {LEGAL.domicilio}, {LEGAL.pais}.
               </p>
             </section>
           </div>

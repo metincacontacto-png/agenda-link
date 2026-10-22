@@ -37,6 +37,10 @@ export async function generateMetadata({
     description:
       business.landingSubtitle ||
       `Reserva tu hora de atención online en ${business.name} a través de AgendaLink.`,
+    alternates: {
+      canonical: `https://agendalink.cl/${slug}`,
+    },
+    ...(slug === "valentina" ? { robots: { index: false, follow: false } } : {}),
   };
 }
 

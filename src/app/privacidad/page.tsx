@@ -42,7 +42,7 @@ export default function PrivacidadPage() {
             Política de Privacidad
           </h1>
           <p style={{ color: "var(--muted)", fontSize: "14px", marginBottom: "32px" }}>
-            En conformidad con la <strong>Ley Nº 19.628</strong> y los estándares de la <strong>Ley Nº 21.719 sobre Protección de Datos Personales</strong> (Chile) · Fecha de vigencia: <strong>{LEGAL.fechaVigencia}</strong> · Operado por <strong>{LEGAL.razonSocial}</strong> (RUT {LEGAL.rut}, {LEGAL.domicilio}, {LEGAL.ciudad}, {LEGAL.pais})
+            En conformidad con la <strong>Ley Nº 19.628</strong> y los estándares de la <strong>Ley Nº 21.719 sobre Protección de Datos Personales</strong> (Chile) · Fecha de vigencia: <strong>{LEGAL.fechaVigencia}</strong> · Operado por <strong>{LEGAL.razonSocial}</strong> (RUT {LEGAL.rut}, {LEGAL.domicilio}, {LEGAL.pais})
           </p>
 
           <div style={{ lineHeight: "1.75", fontSize: "15px", color: "#334155" }}>
@@ -145,6 +145,9 @@ export default function PrivacidadPage() {
               </p>
               <p style={{ marginTop: "8px" }}>
                 Para ejercer cualquiera de estos derechos, el titular debe remitir una comunicación escrita a <a href={`mailto:${LEGAL.email}`} style={{ color: "var(--blue)", fontWeight: "600" }}>{LEGAL.email}</a> acreditando debidamente su identidad. {LEGAL.razonSocial} responderá a toda solicitud formal dentro del plazo legal máximo de <strong>15 días hábiles</strong>.
+              </p>
+              <p style={{ marginTop: "8px" }}>
+                Cuando la solicitud provenga de un cliente final de un Negocio, {LEGAL.razonSocial} la remitirá al Negocio responsable y le prestará la asistencia necesaria para responderla.
               </p>
             </section>
 

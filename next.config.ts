@@ -8,6 +8,7 @@ if (process.env.NODE_ENV === "development") {
 // Configuración del adaptador Cloudflare para Next.js
 const nextConfig: NextConfig = {
   output: "standalone",
+  poweredByHeader: false,
   serverExternalPackages: ["@prisma/client", ".prisma/client"],
   experimental: {
     serverMinification: false,

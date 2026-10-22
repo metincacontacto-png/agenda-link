@@ -31,12 +31,7 @@ async function loadPlatformSettings(domain: string | null) {
 }
 
 function applySecurityHeaders(res: NextResponse): NextResponse {
-  res.headers.set("Strict-Transport-Security", "max-age=63072000; includeSubDomains; preload");
-  res.headers.set("X-Frame-Options", "DENY");
-  res.headers.set("Content-Security-Policy", "frame-ancestors 'none'");
-  res.headers.set("X-Content-Type-Options", "nosniff");
-  res.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
-  res.headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+  // Security headers are globally managed in next.config.ts and public/_headers to avoid duplicates
   return res;
 }
 
