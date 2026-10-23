@@ -192,13 +192,14 @@ export default function MarketingAiTab({ slug, businessName }: MarketingAiTabPro
                 width: "100%",
                 padding: "14px",
                 borderRadius: "10px",
-                border: "1px solid var(--card-border)",
-                background: "rgba(0, 0, 0, 0.2)",
-                color: "var(--foreground)",
-                fontSize: "13px",
-                lineHeight: "1.5",
+                border: "1.5px solid #cbd5e1",
+                background: "#ffffff",
+                color: "#0f172a",
+                fontSize: "13.5px",
+                lineHeight: "1.55",
                 resize: "vertical",
                 fontFamily: "inherit",
+                boxShadow: "0 1px 3px rgba(0, 0, 0, 0.03)",
               }}
             />
           </div>

@@ -170,20 +170,21 @@ export default function BusinessAiTab({
       )}
 
       {!loading && report && (
-        <div style={{ background: "rgba(255, 255, 255, 0.03)", border: "1px solid var(--card-border)", borderRadius: "14px", padding: "24px", position: "relative" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "18px", borderBottom: "1px solid var(--card-border)", paddingBottom: "12px" }}>
-            <span style={{ fontSize: "12px", color: "var(--text-secondary)" }}>
+        <div style={{ background: "#ffffff", border: "1px solid #e2e8f0", borderRadius: "14px", padding: "24px", position: "relative", boxShadow: "0 4px 18px rgba(0,0,0,0.03)" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "18px", borderBottom: "1px solid #e2e8f0", paddingBottom: "12px" }}>
+            <span style={{ fontSize: "12.5px", color: "var(--text-secondary)", fontWeight: "600" }}>
               📅 Diagnóstico emitido {generatedAt ? `hoy a las ${generatedAt} hrs` : "recientemente"}
             </span>
             <button
               onClick={copyToClipboard}
               style={{
-                background: "transparent",
-                border: "1px solid var(--card-border)",
-                color: copied ? "#4ade80" : "var(--text-secondary)",
+                background: "#f8fafc",
+                border: "1px solid #cbd5e1",
+                color: copied ? "#16a34a" : "#334155",
                 fontSize: "12px",
-                borderRadius: "6px",
-                padding: "4px 10px",
+                fontWeight: "600",
+                borderRadius: "8px",
+                padding: "6px 12px",
                 cursor: "pointer",
               }}
             >
