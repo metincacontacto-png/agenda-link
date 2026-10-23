@@ -176,22 +176,25 @@ export default function BookingContactModal({
             <label className={styles.label} htmlFor="booking-client-phone">
               Número de WhatsApp
             </label>
-            <input
-              id="booking-client-phone"
-              type="tel"
-              autoComplete="tel"
-              required
-              maxLength={32}
-              value={phone}
-              onChange={(event) => {
-                setPhone(event.target.value);
-                if (phoneError) setPhoneError(null);
-              }}
-              placeholder="Ej. 9 1234 5678"
-              className={styles.input}
-            />
+            <div className={styles.phoneInputWrapper}>
+              <span className={styles.phonePrefix}>🇨🇱 +56</span>
+              <input
+                id="booking-client-phone"
+                type="tel"
+                autoComplete="tel"
+                required
+                maxLength={20}
+                value={phone}
+                onChange={(event) => {
+                  setPhone(event.target.value);
+                  if (phoneError) setPhoneError(null);
+                }}
+                placeholder="9 1234 5678"
+                className={styles.inputWithPrefix}
+              />
+            </div>
             <small style={{ color: "#94a3b8", fontSize: "12px", marginTop: "4px", display: "block" }}>
-              Celular chileno de 9 dígitos para recordatorios por WhatsApp.
+              Ingresa los 9 dígitos de tu celular (el código +56 ya está incluido).
             </small>
             {livePhoneMessage && (
               <span

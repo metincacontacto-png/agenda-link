@@ -1,11 +1,13 @@
 import { prisma } from "@/lib/db";
 import {
   generateAvailableSlots,
+  generateSlots,
   localDayUtcRange,
   weekdayForDate,
+  type GenerateSlotsResult,
 } from "@/features/schedule/time";
 
-export async function getAvailableSlotsForProfessional(input: {
+export interface ProfessionalSlotsInput {
   businessId: string;
   professionalId: string;
   date: string;
@@ -14,13 +16,17 @@ export async function getAvailableSlotsForProfessional(input: {
   excludeAppointmentId?: string;
   minDateTime?: Date;
   minNoticeHours?: number;
-}): Promise<string[]> {
+}
+
+export async function getSlotsForProfessional(
+  input: ProfessionalSlotsInput,
+): Promise<GenerateSlotsResult> {
   const { businessId, professionalId, date, timeZone, serviceDurationMinutes, excludeAppointmentId } = input;
   const minNoticeHours = input.minNoticeHours ?? 2;
   const minDateTime = input.minDateTime ?? new Date(Date.now() + minNoticeHours * 60 * 60 * 1000);
   const dayOfWeek = weekdayForDate(date);
   const dayRange = localDayUtcRange(date, timeZone);
-  if (dayOfWeek === null || !dayRange) return [];
+  if (dayOfWeek === null || !dayRange) return { availableSlots: [], bookedSlots: [] };
 
   const [businessSchedules, professionalSchedules, breaks, blocks, appointments] = await Promise.all([
     prisma.businessSchedule.findMany({ where: { businessId, dayOfWeek } }),
@@ -49,7 +55,7 @@ export async function getAvailableSlotsForProfessional(input: {
     }),
   ]);
 
-  return generateAvailableSlots({
+  return generateSlots({
     date,
     timeZone,
     serviceDurationMinutes,
@@ -63,4 +69,11 @@ export async function getAvailableSlotsForProfessional(input: {
     })),
     minDateTime,
   });
+}
+
+export async function getAvailableSlotsForProfessional(
+  input: ProfessionalSlotsInput,
+): Promise<string[]> {
+  const result = await getSlotsForProfessional(input);
+  return result.availableSlots;
 }

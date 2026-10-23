@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   generateAvailableSlots,
+  generateSlots,
   localDayUtcRange,
   localMinuteToUtc,
   parseLocalTime,
@@ -53,6 +54,24 @@ test("generates service-duration slots after intersecting schedules and removing
 
   assert.deepEqual(slots, ["10:30", "11:00", "13:00", "15:00", "15:30", "16:00", "16:30", "17:00"]);
 });
+
+test("generateSlots returns both availableSlots and bookedSlots for booked appointments", () => {
+  const result = generateSlots({
+    date: "2026-01-05",
+    timeZone: "America/Santiago",
+    serviceDurationMinutes: 60,
+    businessWindows: [{ startMinute: 540, endMinute: 1080 }],
+    professionalWindows: [{ startMinute: 540, endMinute: 1080 }],
+    breaks: [],
+    blocks: [],
+    appointments: [{ dateTime: new Date("2026-01-05T14:30:00.000Z"), durationMinutes: 60 }],
+  });
+
+  // 14:30 UTC is 11:30 Santiago time (UTC-3)
+  assert.ok(result.bookedSlots.includes("11:30"));
+  assert.ok(!result.availableSlots.includes("11:30"));
+});
+
 
 test("filters out past slots when minDateTime is provided", () => {
   // 14:00 in Santiago (UTC-3) is 17:00:00.000Z

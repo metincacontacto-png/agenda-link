@@ -27,6 +27,7 @@ export default function BookingClient({
   const [selectedDate, setSelectedDate] = useState(() => dateStringAtTimeZone(new Date(), "America/Santiago"));
   const [selectedTime, setSelectedTime] = useState("");
   const [slots, setSlots] = useState<string[]>([]);
+  const [bookedSlots, setBookedSlots] = useState<string[]>([]);
   const initializedBusinessTimeZone = useRef(false);
   const userInteractedWithDate = useRef(false);
 
@@ -49,13 +50,17 @@ export default function BookingClient({
         const res = await fetch(`/api/availability?${query.toString()}`);
         if (!res.ok) {
           if (res.status === 404) setBusiness(null);
-          else setSlots([]);
+          else {
+            setSlots([]);
+            setBookedSlots([]);
+          }
           return;
         }
         const data = await res.json();
 
         setBusiness(data.business);
         setSlots(data.availableSlots || []);
+        setBookedSlots(data.bookedSlots || []);
         if (!initializedBusinessTimeZone.current) {
           setSelectedDate(dateStringAtTimeZone(new Date(), data.business?.timezone || "America/Santiago"));
           initializedBusinessTimeZone.current = true;
@@ -75,6 +80,7 @@ export default function BookingClient({
       } catch (err) {
         console.error(err);
         setSlots([]);
+        setBookedSlots([]);
       } finally {
         setLoading(false);
       }
@@ -257,6 +263,7 @@ export default function BookingClient({
           selectedDate={selectedDate}
           selectedTime={selectedTime}
           slots={slots}
+          bookedSlots={bookedSlots}
           submitting={submitting}
           formatPrice={formatPrice}
           onBackToLanding={() => setViewMode("landing")}

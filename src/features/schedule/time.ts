@@ -205,7 +205,12 @@ function formatMinute(minuteOfDay: number): string {
   return `${hours}:${minutes}`;
 }
 
-export function generateAvailableSlots(input: {
+export interface GenerateSlotsResult {
+  availableSlots: string[];
+  bookedSlots: string[];
+}
+
+export function generateSlots(input: {
   date: string;
   timeZone: string;
   serviceDurationMinutes: number;
@@ -215,7 +220,7 @@ export function generateAvailableSlots(input: {
   blocks: TimedInterval[];
   appointments: ExistingAppointment[];
   minDateTime?: Date;
-}): string[] {
+}): GenerateSlotsResult {
   const {
     date,
     timeZone,
@@ -232,10 +237,12 @@ export function generateAvailableSlots(input: {
     !Number.isInteger(serviceDurationMinutes) ||
     serviceDurationMinutes < 1
   ) {
-    return [];
+    return { availableSlots: [], bookedSlots: [] };
   }
 
   const available = new Set<string>();
+  const booked = new Set<string>();
+
   for (const window of intersectWindows(businessWindows, professionalWindows)) {
     const firstStart = Math.ceil(window.startMinute / SLOT_STEP_MINUTES) * SLOT_STEP_MINUTES;
     for (let startMinute = firstStart; startMinute + serviceDurationMinutes <= window.endMinute; startMinute += SLOT_STEP_MINUTES) {
@@ -245,8 +252,6 @@ export function generateAvailableSlots(input: {
       const startsAt = localMinuteToUtc(date, startMinute, timeZone);
       const endsAt = localMinuteToUtc(date, endMinute, timeZone);
       if (!startsAt || !endsAt || endsAt <= startsAt) continue;
-
-      if (minDateTime && startsAt.getTime() <= minDateTime.getTime()) continue;
 
       const hasScheduleBlock = blocks.some((block) =>
         startsAt < block.endsAt && endsAt > block.startsAt,
@@ -259,9 +264,34 @@ export function generateAvailableSlots(input: {
         );
         return startsAt < appointmentEnd && endsAt > appointment.dateTime;
       });
-      if (!overlapsAppointment) available.add(formatMinute(startMinute));
+
+      const slotStr = formatMinute(startMinute);
+      if (overlapsAppointment) {
+        booked.add(slotStr);
+      } else {
+        if (minDateTime && startsAt.getTime() <= minDateTime.getTime()) continue;
+        available.add(slotStr);
+      }
     }
   }
 
-  return [...available].sort();
+  return {
+    availableSlots: [...available].sort(),
+    bookedSlots: [...booked].sort(),
+  };
 }
+
+export function generateAvailableSlots(input: {
+  date: string;
+  timeZone: string;
+  serviceDurationMinutes: number;
+  businessWindows: MinuteInterval[];
+  professionalWindows: MinuteInterval[];
+  breaks: MinuteInterval[];
+  blocks: TimedInterval[];
+  appointments: ExistingAppointment[];
+  minDateTime?: Date;
+}): string[] {
+  return generateSlots(input).availableSlots;
+}
+

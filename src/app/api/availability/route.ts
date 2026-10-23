@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { getAvailableSlotsForProfessional } from "@/features/booking/availability";
+import { getSlotsForProfessional } from "@/features/booking/availability";
 import type { PublicBusinessDTO } from "@/features/booking/public-business-dto";
 import { parseAvailabilityQuery } from "@/features/booking/validation";
 import { logServerError } from "@/server/observability";
@@ -52,6 +52,7 @@ export async function GET(request: Request) {
     };
 
     let availableSlots: string[] = [];
+    let bookedSlots: string[] = [];
     let nextAvailableDate: string | null = null;
     if (serviceId && professionalId) {
       const service = publicBusiness.services.find((item) => item.id === serviceId);
@@ -60,7 +61,7 @@ export async function GET(request: Request) {
         return NextResponse.json({ error: "Servicio o profesional no encontrado" }, { status: 404 });
       }
 
-      availableSlots = await getAvailableSlotsForProfessional({
+      const slotData = await getSlotsForProfessional({
         businessId: publicBusiness.id,
         professionalId,
         date,
@@ -68,6 +69,8 @@ export async function GET(request: Request) {
         serviceDurationMinutes: service.duration,
         minNoticeHours: business.minNoticeHours ?? 2,
       });
+      availableSlots = slotData.availableSlots;
+      bookedSlots = slotData.bookedSlots;
 
       if (availableSlots.length === 0) {
         const [year, month, day] = date.split("-").map(Number);
@@ -76,7 +79,7 @@ export async function GET(request: Request) {
           const nextDateObj = new Date(currentDate);
           nextDateObj.setUTCDate(nextDateObj.getUTCDate() + i);
           const nextDateStr = nextDateObj.toISOString().slice(0, 10);
-          const checkSlots = await getAvailableSlotsForProfessional({
+          const checkSlots = await getSlotsForProfessional({
             businessId: publicBusiness.id,
             professionalId,
             date: nextDateStr,
@@ -84,7 +87,7 @@ export async function GET(request: Request) {
             serviceDurationMinutes: service.duration,
             minNoticeHours: business.minNoticeHours ?? 2,
           });
-          if (checkSlots.length > 0) {
+          if (checkSlots.availableSlots.length > 0) {
             nextAvailableDate = nextDateStr;
             break;
           }
@@ -95,6 +98,7 @@ export async function GET(request: Request) {
     return NextResponse.json({
       business: publicBusiness,
       availableSlots,
+      bookedSlots,
       nextAvailableDate,
     });
   } catch (error) {

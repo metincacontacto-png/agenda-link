@@ -51,6 +51,10 @@ export default function Calendar({
     }
   }, [selectedDate, onSelectDate, days]);
 
+  const allSlots = React.useMemo(() => {
+    return Array.from(new Set([...slots, ...bookedSlots])).sort();
+  }, [slots, bookedSlots]);
+
   return (
     <div className={styles.container}>
       <div className={styles.daysRow}>
@@ -92,13 +96,13 @@ export default function Calendar({
           <p style={{ fontSize: "13px", color: "#ef4444", marginTop: "12px", textAlign: "center", fontWeight: "600" }}>
             El negocio se encuentra cerrado en este día.
           </p>
-        ) : slots.length === 0 ? (
+        ) : allSlots.length === 0 ? (
           <p style={{ fontSize: "13px", color: "var(--text-secondary)", marginTop: "12px", textAlign: "center" }}>
             No hay horarios disponibles para este día.
           </p>
         ) : (
           <div className={styles.slotsGrid}>
-            {slots.map((slot) => {
+            {allSlots.map((slot) => {
               const isBooked = bookedSlots.includes(slot);
               return (
                 <button

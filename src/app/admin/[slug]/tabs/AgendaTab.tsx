@@ -69,8 +69,21 @@ export default function AgendaTab({
                     <td key={columnIndex} className={styles.calendarCell}>
                       {appointments.map((appointment) => {
                         const isPaid = appointment.paymentStatus === "PAID";
+                        const appDate = new Date(appointment.dateTime);
+                        const timeStr = appDate.toLocaleTimeString("es-CL", {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                          hour12: false,
+                        });
                         return (
                           <div key={appointment.id} className={`${styles.appointmentBlock} ${isPaid ? styles.appointmentBlockPaid : ""}`}>
+                            <div className={styles.appointmentTimeBadge}>
+                              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+                                <circle cx="12" cy="12" r="10" />
+                                <polyline points="12 6 12 12 16 14" />
+                              </svg>
+                              {timeStr} hrs
+                            </div>
                             <div className={styles.appointmentClientName}>{appointment.clientName}</div>
                             <div className={styles.appointmentServiceName}>{appointment.service?.name}</div>
                             <div className={`${styles.appointmentPriceBadge} ${isPaid ? styles.appointmentPriceBadgePaid : ""}`} style={{ display: "flex", alignItems: "center", gap: "3px" }}>

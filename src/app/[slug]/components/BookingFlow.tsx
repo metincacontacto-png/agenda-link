@@ -16,6 +16,7 @@ interface BookingFlowProps {
   selectedDate: string;
   selectedTime: string;
   slots: string[];
+  bookedSlots?: string[];
   submitting: boolean;
   formatPrice: (price: number, currency: string) => string;
   onBackToLanding: () => void;
@@ -35,6 +36,7 @@ export default function BookingFlow({
   selectedDate,
   selectedTime,
   slots,
+  bookedSlots = [],
   submitting,
   formatPrice,
   onBackToLanding,
@@ -129,6 +131,7 @@ export default function BookingFlow({
             selectedTime={selectedTime}
             onSelectTime={onSelectTime}
             slots={slots}
+            bookedSlots={bookedSlots}
           />
         </div>
       )}
