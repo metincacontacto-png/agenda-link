@@ -6,7 +6,8 @@
   background-size: 24px 24px;
   color: var(--foreground);
   position: relative;
-  overflow: hidden;
+  overflow-x: clip;
+  width: 100%;
 }
 
 /* Background Glowing Orbs */
@@ -46,7 +47,13 @@
   flex-direction: column;
   gap: 24px;
   z-index: 10;
-  position: relative;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100dvh;
+  align-self: flex-start;
+  overflow-y: auto;
+  flex-shrink: 0;
 }
 
 .brandLogo {
@@ -120,12 +127,30 @@
 /* Área de Contenido Principal */
 .contentArea {
   flex: 1;
+  min-width: 0;
   padding: 40px;
-  overflow-y: auto;
+  overflow: visible;
   max-width: 1240px;
   margin: 0 auto;
   z-index: 5;
   width: 100%;
+}
+
+@media (max-width: 900px) {
+  .adminContainer {
+    flex-direction: column;
+  }
+  .sidebar {
+    width: 100%;
+    height: auto;
+    position: static;
+    border-right: none;
+    border-bottom: 1px solid rgba(0, 102, 255, 0.08);
+    padding: 20px 16px;
+  }
+  .contentArea {
+    padding: 24px 16px;
+  }
 }
 
 .dashboardHeader {

@@ -224,7 +224,7 @@ export default function AdminDashboard({ params }: { params: Promise<{ slug: str
             setIsFirstStepsCollapsed(false);
             const el = document.getElementById("guia-paso-a-paso");
             if (el) {
-              el.scrollIntoView({ behavior: "smooth" });
+              window.scrollTo({ top: 0, behavior: "smooth" });
             } else {
               setIsFirstStepsModalOpen(true);
             }
