@@ -174,6 +174,7 @@ export default function AdminHeader({
           <div className={styles.settingsDropdown}>
             <button className={styles.profileDropdownItem} onClick={() => { onTabChange("landing"); onGearDropdownChange(false); }}>Configuraciones</button>
             <button className={styles.profileDropdownItem} onClick={() => { onTabChange("administracion"); onSettingsTabChange("servicios"); onGearDropdownChange(false); }}>Servicios y recursos</button>
+            <button className={styles.profileDropdownItem} onClick={() => { onTabChange("administracion"); onSettingsTabChange("horarios"); onGearDropdownChange(false); }}>Horarios y Bloqueos</button>
             <button className={styles.profileDropdownItem} onClick={() => { onTabChange("administracion"); onSettingsTabChange("pagos"); onGearDropdownChange(false); }}>Cobros Online (Mercado Pago)</button>
             <button className={styles.profileDropdownItem} onClick={() => { onOpenBillingModal(); onGearDropdownChange(false); }}>Facturación y Planes</button>
           </div>

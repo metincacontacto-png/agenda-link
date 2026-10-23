@@ -253,10 +253,15 @@ export function generateSlots(input: {
       const endsAt = localMinuteToUtc(date, endMinute, timeZone);
       if (!startsAt || !endsAt || endsAt <= startsAt) continue;
 
+      const slotStr = formatMinute(startMinute);
+
       const hasScheduleBlock = blocks.some((block) =>
         startsAt < block.endsAt && endsAt > block.startsAt,
       );
-      if (hasScheduleBlock) continue;
+      if (hasScheduleBlock) {
+        booked.add(slotStr);
+        continue;
+      }
 
       const overlapsAppointment = appointments.some((appointment) => {
         const appointmentEnd = new Date(
@@ -265,7 +270,6 @@ export function generateSlots(input: {
         return startsAt < appointmentEnd && endsAt > appointment.dateTime;
       });
 
-      const slotStr = formatMinute(startMinute);
       if (overlapsAppointment) {
         booked.add(slotStr);
       } else {

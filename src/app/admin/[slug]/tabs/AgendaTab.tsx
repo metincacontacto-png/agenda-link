@@ -12,6 +12,7 @@ interface AgendaTabProps {
   formatPrice: (price: number, currency: string) => string;
   onPreviousWeek: () => void;
   onNextWeek: () => void;
+  onOpenScheduleBlocks?: () => void;
 }
 
 export default function AgendaTab({
@@ -23,11 +24,36 @@ export default function AgendaTab({
   formatPrice,
   onPreviousWeek,
   onNextWeek,
+  onOpenScheduleBlocks,
 }: AgendaTabProps) {
   return (
     <section className={styles.glassCard} style={{ padding: "20px" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
-        <h2 style={{ fontSize: "16px", fontWeight: "700" }}>Agenda de Turnos</h2>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px", flexWrap: "wrap", gap: "12px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
+          <h2 style={{ fontSize: "16px", fontWeight: "700", margin: 0 }}>Agenda de Turnos</h2>
+          {onOpenScheduleBlocks && (
+            <button
+              type="button"
+              onClick={onOpenScheduleBlocks}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "6px",
+                background: "#ffffff",
+                border: "1px solid #cbd5e1",
+                borderRadius: "8px",
+                padding: "6px 12px",
+                fontSize: "12px",
+                fontWeight: "600",
+                color: "#0f172a",
+                cursor: "pointer",
+                boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
+              }}
+            >
+              <span>⛔</span> Bloquear Día u Horario
+            </button>
+          )}
+        </div>
         <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
           <button onClick={onPreviousWeek} className={styles.navItemActive} style={{ width: "32px", height: "32px", padding: 0, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: "8px", fontWeight: "bold", border: "none", cursor: "pointer" }}>
             &lt;

@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import type { BusinessAdminDTO } from "@/features/businesses/contracts";
 import type { AdminSettingsSubTab } from "./types";
 import ServicesTab from "./ServicesTab";
+import ScheduleTab from "./ScheduleTab";
 import styles from "../admin.module.css";
 
 interface SettingsTabProps {
@@ -114,6 +115,12 @@ export default function SettingsTab({
           Servicios y Recursos
         </button>
         <button
+          className={`${styles.segmentedButton} ${subTab === "horarios" ? styles.segmentedButtonActive : ""}`}
+          onClick={() => onSubTabChange("horarios")}
+        >
+          ⏰ Horarios y Bloqueos
+        </button>
+        <button
           className={`${styles.segmentedButton} ${subTab === "pagos" ? styles.segmentedButtonActive : ""}`}
           onClick={() => onSubTabChange("pagos")}
         >
@@ -135,6 +142,10 @@ export default function SettingsTab({
           formatPrice={formatPrice}
           onServicesChanged={onServicesChanged}
         />
+      )}
+
+      {subTab === "horarios" && (
+        <ScheduleTab slug={slug} timezone={business.timezone} />
       )}
 
       {subTab === "pagos" && (

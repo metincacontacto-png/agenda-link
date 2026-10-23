@@ -810,6 +810,10 @@ export default function AdminDashboard({ params }: { params: Promise<{ slug: str
             formatPrice={formatPrice}
             onPreviousWeek={calendar.onPreviousWeek}
             onNextWeek={calendar.onNextWeek}
+            onOpenScheduleBlocks={() => {
+              setActiveTab("administracion");
+              setAdminSubTab("horarios");
+            }}
           />
         )}
 

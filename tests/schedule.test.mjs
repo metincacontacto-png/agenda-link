@@ -72,6 +72,28 @@ test("generateSlots returns both availableSlots and bookedSlots for booked appoi
   assert.ok(!result.availableSlots.includes("11:30"));
 });
 
+test("generateSlots marks schedule blocks as bookedSlots (red/occupied) rather than omitting them", () => {
+  const result = generateSlots({
+    date: "2026-01-05",
+    timeZone: "America/Santiago",
+    serviceDurationMinutes: 60,
+    businessWindows: [{ startMinute: 540, endMinute: 1080 }],
+    professionalWindows: [{ startMinute: 540, endMinute: 1080 }],
+    breaks: [],
+    blocks: [{
+      startsAt: new Date("2026-01-05T13:00:00.000Z"), // 10:00 Santiago
+      endsAt: new Date("2026-01-05T15:00:00.000Z"),   // 12:00 Santiago
+    }],
+    appointments: [],
+  });
+
+  assert.ok(result.bookedSlots.includes("10:00"));
+  assert.ok(result.bookedSlots.includes("10:30"));
+  assert.ok(!result.availableSlots.includes("10:00"));
+  assert.ok(!result.availableSlots.includes("10:30"));
+});
+
+
 
 test("filters out past slots when minDateTime is provided", () => {
   // 14:00 in Santiago (UTC-3) is 17:00:00.000Z
