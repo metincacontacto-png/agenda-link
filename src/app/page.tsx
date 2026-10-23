@@ -282,12 +282,6 @@ export default function HomePage() {
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                   <path d="M5 12l5 5L20 7" />
                 </svg>
-                Sin permanencia
-              </div>
-              <div>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                  <path d="M5 12l5 5L20 7" />
-                </svg>
                 Todo Chile
               </div>
             </div>
@@ -348,7 +342,7 @@ export default function HomePage() {
                       <span>18:30</span>
                     </div>
                   </div>
-                  <div className={styles.bookBtn}>Enviar solicitud →</div>
+                  <div className={styles.bookBtn}>⚡ Agenda tu Cita Online →</div>
                 </div>
               </div>
             </div>
@@ -398,9 +392,6 @@ export default function HomePage() {
               </div>
             </div>
           </div>
-          <p style={{ fontSize: "11px", color: "rgba(255, 255, 255, 0.45)", textAlign: "center", marginTop: "14px", letterSpacing: "0.02em" }}>
-            * Imagen referencial
-          </p>
         </div>
       </header>
 
@@ -1128,9 +1119,6 @@ export default function HomePage() {
                 </main>
               </div>
             </div>
-            <p style={{ fontSize: "11px", color: "var(--text-muted, #64748b)", textAlign: "center", marginTop: "14px", letterSpacing: "0.02em" }}>
-              * Imagen referencial
-            </p>
           </div>
         </div>
       </section>
@@ -1328,7 +1316,7 @@ export default function HomePage() {
                 Crear mi link
               </button>
             </form>
-            <small>Listo en 5 pasos · Sin permanencia · Cancela cuando quieras</small>
+            <small>Listo en 5 pasos · Cancela cuando quieras</small>
           </div>
         </div>
       </div>
