@@ -27,7 +27,30 @@ export async function deleteCatalogService(serviceId: string): Promise<boolean> 
   });
   if (!service) return false;
 
-  if (service.imageUrl) await deleteFromR2(service.imageUrl);
+  if (service.imageUrl) {
+    try {
+      await deleteFromR2(service.imageUrl);
+    } catch (err) {
+      console.warn("Failed to delete service image from R2:", err);
+    }
+  }
+
+  // Delete all appointments associated with this service to satisfy foreign key constraints
+  const appointments = await prisma.appointment.findMany({
+    where: { serviceId: service.id },
+    select: { id: true },
+  });
+
+  if (appointments.length > 0) {
+    const appointmentIds = appointments.map((a) => a.id);
+    await prisma.appointmentAudit.deleteMany({
+      where: { appointmentId: { in: appointmentIds } },
+    });
+    await prisma.appointment.deleteMany({
+      where: { id: { in: appointmentIds } },
+    });
+  }
+
   await prisma.service.delete({ where: { id: service.id } });
   return true;
 }

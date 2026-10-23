@@ -68,10 +68,12 @@ export default function ServicesTab({ slug, services, currency, formatPrice, onS
       if (response.ok) {
         await onServicesChanged();
       } else {
-        alert("Error al eliminar servicio");
+        const data = await response.json().catch(() => null);
+        alert(data?.error || "Error al eliminar servicio");
       }
     } catch (error) {
       console.error("Error deleting service:", error);
+      alert("Error de conexión al eliminar servicio");
     }
   };
 
