@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import type { DashboardMetrics } from "@/features/businesses/dashboard-metrics";
 import styles from "../admin.module.css";
 
@@ -10,6 +10,92 @@ interface BusinessAiTabProps {
   serviceCount: number;
   professionalCount: number;
   currency: string;
+}
+
+function renderBoldText(text: string) {
+  const parts = text.split(/(\*\*.*?\*\*)/g);
+  return parts.map((part, i) => {
+    if (part.startsWith("**") && part.endsWith("**")) {
+      return (
+        <strong key={i} style={{ color: "#0f172a", fontWeight: "700" }}>
+          {part.slice(2, -2)}
+        </strong>
+      );
+    }
+    return part;
+  });
+}
+
+function FormattedReport({ text }: { text: string }) {
+  const lines = text.split("\n");
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: "12px", color: "#334155", fontSize: "14px", lineHeight: "1.7" }}>
+      {lines.map((line, idx) => {
+        const trimmed = line.trim();
+        if (!trimmed) {
+          return <div key={idx} style={{ height: "4px" }} />;
+        }
+
+        if (trimmed === "---") {
+          return <hr key={idx} style={{ border: "none", borderTop: "1px solid #e2e8f0", margin: "14px 0" }} />;
+        }
+
+        // Encabezados H3 o H2 (ej: ### 1. 📊 Diagnóstico...)
+        if (trimmed.startsWith("### ") || trimmed.startsWith("## ")) {
+          const title = trimmed.replace(/^#{2,3}\s+/, "");
+          return (
+            <div
+              key={idx}
+              style={{
+                marginTop: "16px",
+                marginBottom: "4px",
+                padding: "10px 14px",
+                background: "#f0f9ff",
+                borderLeft: "4px solid #0284c7",
+                borderRadius: "0 8px 8px 0",
+                fontSize: "15px",
+                fontWeight: "700",
+                color: "#0369a1",
+              }}
+            >
+              {renderBoldText(title)}
+            </div>
+          );
+        }
+
+        // Listas con viñeta (* o - o •)
+        if (trimmed.startsWith("* ") || trimmed.startsWith("- ") || trimmed.startsWith("• ")) {
+          const content = trimmed.replace(/^[*•-]\s+/, "");
+          return (
+            <div key={idx} style={{ display: "flex", gap: "8px", paddingLeft: "12px" }}>
+              <span style={{ color: "#0284c7", fontWeight: "700", lineHeight: "1.7" }}>•</span>
+              <div style={{ flex: 1 }}>{renderBoldText(content)}</div>
+            </div>
+          );
+        }
+
+        // Listas numeradas (1. , 2. )
+        if (/^\d+\.\s+/.test(trimmed)) {
+          const numMatch = trimmed.match(/^(\d+\.)\s+(.*)$/);
+          if (numMatch) {
+            return (
+              <div key={idx} style={{ display: "flex", gap: "8px", paddingLeft: "8px", marginTop: "4px" }}>
+                <span style={{ fontWeight: "700", color: "#0284c7", minWidth: "22px" }}>{numMatch[1]}</span>
+                <div style={{ flex: 1 }}>{renderBoldText(numMatch[2])}</div>
+              </div>
+            );
+          }
+        }
+
+        return (
+          <p key={idx} style={{ margin: 0 }}>
+            {renderBoldText(trimmed)}
+          </p>
+        );
+      })}
+    </div>
+  );
 }
 
 export default function BusinessAiTab({
@@ -25,21 +111,7 @@ export default function BusinessAiTab({
   const [generatedAt, setGeneratedAt] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
-  // Cargar reporte previo de localStorage si existe
-  useEffect(() => {
-    try {
-      const cached = localStorage.getItem(`linki_business_report_${slug}`);
-      if (cached) {
-        const parsed = JSON.parse(cached);
-        setReport(parsed.report || "");
-        setGeneratedAt(parsed.generatedAt || null);
-      }
-    } catch {
-      // Ignorar error de parsing
-    }
-  }, [slug]);
-
-  const handleGenerateReport = async () => {
+  const handleGenerateReport = useCallback(async () => {
     setLoading(true);
     setError(null);
 
@@ -72,7 +144,29 @@ export default function BusinessAiTab({
     } finally {
       setLoading(false);
     }
-  };
+  }, [slug]);
+
+  // Cargar reporte previo de localStorage si existe y está completo
+  useEffect(() => {
+    try {
+      const cached = localStorage.getItem(`linki_business_report_${slug}`);
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        // Validar que el reporte almacenado no sea un fragmento truncado
+        if (parsed.report && parsed.report.length > 400 && parsed.report.includes("###")) {
+          setReport(parsed.report);
+          setGeneratedAt(parsed.generatedAt || null);
+          return;
+        }
+        // Si el reporte previo estaba cortado, limpiar el almacenamiento
+        localStorage.removeItem(`linki_business_report_${slug}`);
+      }
+      // Si no hay reporte válido o estaba cortado, generar automáticamente
+      void handleGenerateReport();
+    } catch {
+      void handleGenerateReport();
+    }
+  }, [slug, handleGenerateReport]);
 
   const copyToClipboard = () => {
     if (!report) return;
@@ -192,17 +286,7 @@ export default function BusinessAiTab({
             </button>
           </div>
 
-          <div
-            style={{
-              fontSize: "14px",
-              lineHeight: "1.7",
-              color: "var(--foreground)",
-              whiteSpace: "pre-wrap",
-              wordBreak: "break-word",
-            }}
-          >
-            {report}
-          </div>
+          <FormattedReport text={report} />
         </div>
       )}
 

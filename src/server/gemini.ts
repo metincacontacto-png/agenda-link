@@ -3,6 +3,7 @@ export interface GeminiGenerateOptions {
   systemInstruction?: string;
   temperature?: number;
   maxOutputTokens?: number;
+  thinkingBudget?: number;
 }
 
 export interface GeminiResponse {
@@ -58,7 +59,10 @@ export async function callGemini(options: GeminiGenerateOptions): Promise<Gemini
     contents,
     generationConfig: {
       temperature: options.temperature ?? 0.7,
-      maxOutputTokens: options.maxOutputTokens ?? 1200,
+      maxOutputTokens: options.maxOutputTokens ?? 4000,
+      thinkingConfig: {
+        thinkingBudget: options.thinkingBudget ?? 0,
+      },
     },
   };
 
@@ -94,13 +98,18 @@ export async function callGemini(options: GeminiGenerateOptions): Promise<Gemini
     const data = (await response.json()) as {
       candidates?: Array<{
         content?: {
-          parts?: Array<{ text?: string }>;
+          parts?: Array<{ text?: string; thought?: boolean }>;
         };
       }>;
     };
 
-    const generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-    if (!generatedText) {
+    const parts = data.candidates?.[0]?.content?.parts || [];
+    const generatedText = parts
+      .filter((p) => !p.thought && typeof p.text === "string")
+      .map((p) => p.text)
+      .join("");
+
+    if (!generatedText || !generatedText.trim()) {
       return {
         ok: false,
         error: "NO_CONTENT",
