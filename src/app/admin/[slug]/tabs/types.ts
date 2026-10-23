@@ -1,4 +1,5 @@
 export type AdminTabKey =
+  | "paso-a-paso"
   | "dashboard"
   | "ventas"
   | "clientes"
