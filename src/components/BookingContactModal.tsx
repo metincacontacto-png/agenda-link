@@ -71,14 +71,23 @@ export default function BookingContactModal({
   }
 
   useEffect(() => {
-    firstInputRef.current?.focus();
+    if (typeof window !== "undefined" && window.innerWidth > 768) {
+      firstInputRef.current?.focus();
+    }
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         onClose();
       }
     };
     window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = prevOverflow;
+    };
   }, [onClose]);
 
   function normalizeChileanPhone(raw: string): string | null {
@@ -90,9 +99,16 @@ export default function BookingContactModal({
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setPhoneError(null);
+    if (!name.trim()) {
+      firstInputRef.current?.focus();
+      return;
+    }
     const normalizedPhone = normalizeChileanPhone(phone);
     if (!normalizedPhone) {
       setPhoneError("Ingresa un celular chileno válido (9 dígitos, ej: 912345678)");
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
       return;
     }
     onSubmit(name.trim(), normalizedPhone, email.trim(), paymentMethod);
@@ -107,6 +123,14 @@ export default function BookingContactModal({
       aria-labelledby="booking-contact-modal-title"
     >
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+        <button
+          type="button"
+          onClick={onClose}
+          className={styles.closeBtn}
+          aria-label="Cerrar modal"
+        >
+          ✕
+        </button>
         <h2 id="booking-contact-modal-title" className={styles.title}>
           Confirma tus datos
         </h2>
@@ -340,7 +364,7 @@ export default function BookingContactModal({
             </button>
             <button
               type="submit"
-              disabled={submitting || !isFormValid}
+              disabled={submitting}
               className={`${styles.btn} ${styles.btnPrimary}`}
             >
               {submitting
