@@ -44,10 +44,10 @@ export default function PublicLanding({ business, formatPrice, onStartBooking }:
         />
 
         {/* Header Info Card below the banner */}
-        <div className={styles.landingSectionGlass} style={{ padding: "24px" }}>
+        <div className={styles.landingSectionGlass} style={{ padding: "28px 24px" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "20px", flexWrap: "wrap" }}>
-            {/* Left Side: Titles, Badge & Primary CTA Button */}
-            <div style={{ display: "flex", flexDirection: "column", gap: "12px", textAlign: "left", flex: 1, minWidth: "260px" }}>
+            {/* Left Side: Titles & Badge */}
+            <div style={{ display: "flex", flexDirection: "column", gap: "8px", textAlign: "left", flex: 1, minWidth: "260px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
                 <h1 style={{ fontSize: "24px", fontWeight: "850", color: "#0f172a", margin: 0, letterSpacing: "-0.02em" }}>
                   {heroTitle}
@@ -57,25 +57,14 @@ export default function PublicLanding({ business, formatPrice, onStartBooking }:
                 </span>
               </div>
               
-              <p style={{ fontSize: "14px", color: "#475569", margin: 0, lineHeight: "1.5" }}>
+              <p style={{ fontSize: "14.5px", color: "#475569", margin: 0, lineHeight: "1.5" }}>
                 {heroSubtitle}
               </p>
-
-              <div style={{ marginTop: "6px" }}>
-                <button 
-                  type="button" 
-                  className={styles.heroPrimaryBtn} 
-                  onClick={() => onStartBooking()}
-                  style={{ padding: "14px 28px", fontSize: "15.5px" }}
-                >
-                  ⚡ Reservar Cita Online
-                </button>
-              </div>
             </div>
 
             {/* Right Side: Profile / Logo Photo */}
             <div style={{ flexShrink: 0 }}>
-              <div style={{ width: "96px", height: "96px", borderRadius: "50%", padding: "4px", background: "white", boxShadow: "0 8px 24px rgba(0, 102, 255, 0.12)", border: "1px solid rgba(0, 102, 255, 0.1)" }}>
+              <div style={{ width: "92px", height: "92px", borderRadius: "50%", padding: "4px", background: "white", boxShadow: "0 8px 24px rgba(0, 102, 255, 0.12)", border: "1px solid rgba(0, 102, 255, 0.1)" }}>
                 {business.logoUrl ? (
                   <img src={business.logoUrl} alt={business.name} style={{ width: "100%", height: "100%", borderRadius: "50%", objectFit: "cover" }} />
                 ) : (
@@ -85,7 +74,29 @@ export default function PublicLanding({ business, formatPrice, onStartBooking }:
                 )}
               </div>
             </div>
+          </div>
 
+          {/* Módulo Principal: Botón Destacado de Reserva (Centrado y Principal) */}
+          <div className={styles.heroCtaCenterWrapper}>
+            <button 
+              type="button" 
+              className={styles.heroPrimaryBtnLarge} 
+              onClick={() => onStartBooking()}
+            >
+              <span className={styles.heroBtnSparkle}>⚡</span>
+              <span>Reservar Cita Online</span>
+              <span className={styles.heroBtnArrow}>→</span>
+            </button>
+            <div className={styles.heroTrustBadges}>
+              <span style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                Confirmación inmediata
+              </span>
+              <span style={{ opacity: 0.4 }}>•</span>
+              <span>Sin llamadas ni esperas</span>
+              <span style={{ opacity: 0.4 }}>•</span>
+              <span>Elige servicio y profesional</span>
+            </div>
           </div>
         </div>
       </div>
