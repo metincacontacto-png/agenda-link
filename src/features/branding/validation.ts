@@ -9,6 +9,7 @@ export interface UpdateBusinessProfileInput {
   landingAbout?: string | null;
   landingCoverUrl?: string | null;
   landingSecondaryCoverUrl?: string | null;
+  landingMobileCoverUrl?: string | null;
   landingPhone?: string | null;
   landingAddress?: string | null;
   landingHours?: string | null;
@@ -32,6 +33,7 @@ const OPTIONAL_TEXT_LIMITS = {
   landingAbout: 5000,
   landingCoverUrl: 8 * 1024 * 1024,
   landingSecondaryCoverUrl: 8 * 1024 * 1024,
+  landingMobileCoverUrl: 8 * 1024 * 1024,
   landingPhone: 50,
   landingAddress: 300,
   landingHours: 300,

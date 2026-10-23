@@ -9,6 +9,7 @@ interface BookingContactModalProps {
   businessName?: string;
   isDemo?: boolean;
   acceptsOnlinePayments?: boolean;
+  servicePrice?: number;
   cancellationPolicy?: string | null;
   errorMessage?: string;
   submitting: boolean;
@@ -20,19 +21,21 @@ export default function BookingContactModal({
   businessName,
   isDemo = false,
   acceptsOnlinePayments = false,
+  servicePrice,
   cancellationPolicy,
   errorMessage,
   submitting,
   onClose,
   onSubmit,
 }: BookingContactModalProps) {
-  const canPayOnline = !isDemo && acceptsOnlinePayments && FEATURES.pagosOnline;
+  const isFreeService = typeof servicePrice === "number" && servicePrice <= 0;
+  const canPayOnline = !isFreeService && !isDemo && acceptsOnlinePayments && FEATURES.pagosOnline;
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [phoneError, setPhoneError] = useState<string | null>(null);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<"mercadopago" | "local">("mercadopago");
-  const paymentMethod: "mercadopago" | "local" = canPayOnline && selectedPaymentMethod === "mercadopago" ? "mercadopago" : "local";
+  const paymentMethod: "mercadopago" | "local" = isFreeService ? "local" : (canPayOnline && selectedPaymentMethod === "mercadopago" ? "mercadopago" : "local");
   const firstInputRef = useRef<HTMLInputElement>(null);
 
   const cleanPhone = phone.replace(/\D/g, "").replace(/^(56)?/, "");
@@ -210,7 +213,29 @@ export default function BookingContactModal({
             </div>
           )}
 
-          {FEATURES.pagosOnline && (
+          {isFreeService ? (
+            <div
+              style={{
+                background: "#f0fdf4",
+                border: "1px solid #bbf7d0",
+                borderRadius: "10px",
+                padding: "12px 14px",
+                marginTop: 14,
+                display: "flex",
+                alignItems: "center",
+                gap: "10px",
+                color: "#166534",
+                fontSize: "13px",
+                fontWeight: "600",
+              }}
+            >
+              <span style={{ fontSize: "20px" }}>🎉</span>
+              <div>
+                <div style={{ fontWeight: "700" }}>Servicio sin costo ($0)</div>
+                <div style={{ fontSize: "12px", opacity: 0.9 }}>No requiere pago ni tarjeta para confirmar tu cita.</div>
+              </div>
+            </div>
+          ) : FEATURES.pagosOnline ? (
             <div className={styles.formGroup} style={{ marginTop: 14 }}>
               <label className={styles.label}>Opciones de Pago</label>
               <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginTop: "6px" }}>
@@ -272,7 +297,7 @@ export default function BookingContactModal({
                 </label>
               </div>
             </div>
-          )}
+          ) : null}
 
           {/* Política de Cancelación y Devolución */}
           <div style={{ background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: "10px", padding: "10px 14px", marginTop: "14px", marginBottom: "16px", fontSize: "12px", color: "#475569" }}>
@@ -284,7 +309,7 @@ export default function BookingContactModal({
           </div>
 
           {/* Aviso de Devolución del 100% sobre el botón de pago (cuando paga con Mercado Pago) */}
-          {paymentMethod === "mercadopago" && (
+          {!isFreeService && paymentMethod === "mercadopago" && (
             <div
               style={{
                 background: "#f0fdf4",
@@ -320,6 +345,8 @@ export default function BookingContactModal({
             >
               {submitting
                 ? "Procesando…"
+                : isFreeService
+                ? "Confirmar Cita Gratis →"
                 : isDemo
                 ? "Enviar Solicitud (Modo Demo)"
                 : paymentMethod === "mercadopago" && FEATURES.pagosOnline

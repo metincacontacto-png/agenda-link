@@ -9,6 +9,8 @@ export interface BrandingFormState {
   setLandingCoverUrl: (value: string) => void;
   landingSecondaryCoverUrl: string;
   setLandingSecondaryCoverUrl: (value: string) => void;
+  landingMobileCoverUrl: string;
+  setLandingMobileCoverUrl: (value: string) => void;
   logoUrl: string;
   setLogoUrl: (value: string) => void;
   landingPhone: string;

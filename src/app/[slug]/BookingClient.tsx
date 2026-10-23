@@ -282,6 +282,7 @@ export default function BookingClient({
           businessName={business.name}
           isDemo={isDemo}
           acceptsOnlinePayments={Boolean(business.acceptsOnlinePayments)}
+          servicePrice={selectedService?.price ?? 0}
           cancellationPolicy={business.cancellationPolicy}
           submitting={submitting}
           errorMessage={modalError || undefined}

@@ -39,11 +39,11 @@ export default function BrandingTab({ business, state, isSaving, onSave, onImage
               <textarea value={state.landingAbout} onChange={(event) => state.setLandingAbout(event.target.value)} placeholder="Describe tu negocio, experiencia y propuesta de valor..." className={styles.formInput} style={{ minHeight: "80px", resize: "vertical" }} />
             </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "16px" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))", gap: "16px" }}>
               <div className={styles.formGroup}>
-                <label>Logotipo del Negocio</label>
+                <label>Logotipo</label>
                 <input type="file" id="logo-upload" accept="image/*" style={{ display: "none" }} onChange={(event) => onImageFileChange(event, state.setLogoUrl)} />
-                <label htmlFor="logo-upload" className={styles.uploadBtnLabel}>{state.logoUrl ? "Cambiar Logotipo" : "Subir Logotipo"}</label>
+                <label htmlFor="logo-upload" className={styles.uploadBtnLabel}>{state.logoUrl ? "Cambiar Logo" : "Subir Logo"}</label>
                 {state.logoUrl && (
                   <div style={{ marginTop: "8px", display: "flex", alignItems: "center", gap: "8px" }}>
                     <img src={state.logoUrl} alt="Vista previa del logotipo" style={{ width: "32px", height: "32px", borderRadius: "50%", objectFit: "cover" }} />
@@ -53,13 +53,25 @@ export default function BrandingTab({ business, state, isSaving, onSave, onImage
               </div>
 
               <div className={styles.formGroup}>
-                <label>Banner Principal (Hero)</label>
+                <label>Banner PC / Desktop</label>
                 <input type="file" id="cover-upload" accept="image/*" style={{ display: "none" }} onChange={(event) => onImageFileChange(event, state.setLandingCoverUrl)} />
-                <label htmlFor="cover-upload" className={styles.uploadBtnLabel}>{state.landingCoverUrl ? "Cambiar Banner" : "Subir Banner"}</label>
+                <label htmlFor="cover-upload" className={styles.uploadBtnLabel}>{state.landingCoverUrl ? "Cambiar PC" : "Subir PC"}</label>
                 {state.landingCoverUrl && (
                   <div style={{ marginTop: "8px", display: "flex", alignItems: "center", gap: "8px" }}>
                     <div style={{ width: "60px", height: "32px", borderRadius: "4px", backgroundImage: `url(${state.landingCoverUrl})`, backgroundSize: "cover" }} />
                     <button type="button" onClick={() => state.setLandingCoverUrl("")} style={{ border: "none", background: "none", color: "var(--danger)", fontSize: "11px", fontWeight: "bold", cursor: "pointer" }}>Eliminar</button>
+                  </div>
+                )}
+              </div>
+
+              <div className={styles.formGroup}>
+                <label>Banner Teléfono (Móvil)</label>
+                <input type="file" id="mobile-cover-upload" accept="image/*" style={{ display: "none" }} onChange={(event) => onImageFileChange(event, state.setLandingMobileCoverUrl)} />
+                <label htmlFor="mobile-cover-upload" className={styles.uploadBtnLabel} style={{ borderColor: state.landingMobileCoverUrl ? undefined : "var(--primary)" }}>{state.landingMobileCoverUrl ? "Cambiar Móvil" : "Subir Móvil"}</label>
+                {state.landingMobileCoverUrl && (
+                  <div style={{ marginTop: "8px", display: "flex", alignItems: "center", gap: "8px" }}>
+                    <div style={{ width: "32px", height: "48px", borderRadius: "4px", backgroundImage: `url(${state.landingMobileCoverUrl})`, backgroundSize: "cover" }} />
+                    <button type="button" onClick={() => state.setLandingMobileCoverUrl("")} style={{ border: "none", background: "none", color: "var(--danger)", fontSize: "11px", fontWeight: "bold", cursor: "pointer" }}>Eliminar</button>
                   </div>
                 )}
               </div>
@@ -230,7 +242,7 @@ export default function BrandingTab({ business, state, isSaving, onSave, onImage
               <h4 style={{ fontSize: "13px", fontWeight: "800", margin: 0 }}>{business.name}</h4>
               <span className={styles.statusBadge} style={{ transform: "scale(0.8)", margin: "4px 0" }}><span className={styles.statusDot} />Disponible</span>
             </div>
-            <div className={styles.previewHero} style={{ backgroundImage: state.landingCoverUrl ? `url(${state.landingCoverUrl})` : "linear-gradient(135deg, #00c6ff, #0072ff)" }}>
+            <div className={styles.previewHero} style={{ backgroundImage: (state.landingMobileCoverUrl || state.landingCoverUrl) ? `url(${state.landingMobileCoverUrl || state.landingCoverUrl})` : "linear-gradient(135deg, #00c6ff, #0072ff)" }}>
               <div className={styles.previewHeroOverlay}>
                 <h2 style={{ color: "white", fontSize: "14px", fontWeight: "800", margin: 0 }}>{state.landingTitle || "Título principal"}</h2>
                 <p style={{ color: "rgba(255,255,255,0.8)", fontSize: "10px", margin: "2px 0 0 0" }}>{state.landingSubtitle || "Subtítulo de presentación"}</p>

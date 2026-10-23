@@ -25,6 +25,7 @@ model Business {
   landingAbout             String?
   landingCoverUrl          String?
   landingSecondaryCoverUrl String?
+  landingMobileCoverUrl    String?
   landingPhone             String?
   landingAddress           String?
   landingHours             String?

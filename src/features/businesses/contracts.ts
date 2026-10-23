@@ -36,6 +36,7 @@ export interface BusinessAdminDTO {
   landingAbout: string | null;
   landingCoverUrl: string | null;
   landingSecondaryCoverUrl: string | null;
+  landingMobileCoverUrl: string | null;
   landingPhone: string | null;
   landingAddress: string | null;
   landingHours: string | null;

@@ -75,6 +75,7 @@ export async function GET(request: Request) {
           landingAbout: true,
           landingCoverUrl: true,
           landingSecondaryCoverUrl: true,
+          landingMobileCoverUrl: true,
           landingPhone: true,
           landingAddress: true,
           landingHours: true,

@@ -16,6 +16,7 @@ export default function PublicLanding({ business, formatPrice, onStartBooking }:
   const heroSubtitle = business.landingSubtitle || "Selecciona tu servicio y profesional favorito para agendar de forma inmediata.";
   const aboutText = business.landingAbout || "";
   const coverUrl = business.landingCoverUrl || "";
+  const mobileCoverUrl = business.landingMobileCoverUrl || "";
   const phone = business.landingPhone || "";
   const address = business.landingAddress || "";
   const hours = business.landingHours || "";
@@ -29,19 +30,24 @@ export default function PublicLanding({ business, formatPrice, onStartBooking }:
     <div className={styles.landingContainer}>
       {/* Módulo 1: HERO HEADER (Banner + Info Card debajo) */}
       <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-        {/* Banner Image Box */}
-        <div 
-          className={styles.landingHero} 
-          style={coverUrl ? { 
-            backgroundImage: `url(${coverUrl})`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            height: "240px"
-          } : {
-            background: "linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0284c7 100%)",
-            height: "180px"
-          }}
-        />
+        {/* Banner Image Box (Responsive Móvil y Desktop) */}
+        <div className={styles.landingHero}>
+          {coverUrl || mobileCoverUrl ? (
+            <picture className={styles.landingHeroPicture}>
+              {mobileCoverUrl && (
+                <source media="(max-width: 768px)" srcSet={mobileCoverUrl} />
+              )}
+              <img
+                src={coverUrl || mobileCoverUrl}
+                alt={business.name}
+                className={styles.landingHeroImg}
+                loading="eager"
+              />
+            </picture>
+          ) : (
+            <div className={styles.landingHeroDefault} />
+          )}
+        </div>
 
         {/* Header Info Card below the banner */}
         <div className={styles.landingSectionGlass} style={{ padding: "28px 24px" }}>
@@ -84,7 +90,7 @@ export default function PublicLanding({ business, formatPrice, onStartBooking }:
               onClick={() => onStartBooking()}
             >
               <span className={styles.heroBtnSparkle}>⚡</span>
-              <span>Reservar Cita Online</span>
+              <span>Agenda tu Cita Online</span>
               <span className={styles.heroBtnArrow}>→</span>
             </button>
             <div className={styles.heroTrustBadges}>
@@ -276,7 +282,7 @@ export default function PublicLanding({ business, formatPrice, onStartBooking }:
             onClick={() => onStartBooking()}
             style={{ padding: "12px 28px", borderRadius: "99px", background: "white", color: "var(--primary)", border: "none", fontSize: "15px", fontWeight: "850", cursor: "pointer", boxShadow: "0 4px 15px rgba(0,0,0,0.15)", marginTop: "4px" }}
           >
-            ⚡ Reservar Cita Online Ahora
+            ⚡ Agenda tu Cita Online Ahora
           </button>
         </div>
       )}
@@ -288,7 +294,7 @@ export default function PublicLanding({ business, formatPrice, onStartBooking }:
           className={styles.ctaBtn} 
           onClick={() => onStartBooking()}
         >
-          ⚡ Reservar Cita Online
+          ⚡ Agenda tu Cita Online
         </button>
       </div>
     </div>

@@ -2,7 +2,7 @@ import { prisma } from "@/lib/db";
 import { uploadBase64ToR2, deleteFromR2 } from "@/features/media/storage";
 import type { UpdateBusinessProfileInput } from "@/features/branding/validation";
 
-const IMAGE_FIELDS = ["logoUrl", "landingCoverUrl", "landingSecondaryCoverUrl"] as const;
+const IMAGE_FIELDS = ["logoUrl", "landingCoverUrl", "landingSecondaryCoverUrl", "landingMobileCoverUrl"] as const;
 type ImageField = (typeof IMAGE_FIELDS)[number];
 
 export async function updateBusinessProfile(
@@ -12,7 +12,7 @@ export async function updateBusinessProfile(
 ) {
   const existing = await prisma.business.findUnique({
     where: { id: businessId },
-    select: { logoUrl: true, landingCoverUrl: true, landingSecondaryCoverUrl: true },
+    select: { logoUrl: true, landingCoverUrl: true, landingSecondaryCoverUrl: true, landingMobileCoverUrl: true },
   });
   if (!existing) return null;
 
@@ -23,7 +23,14 @@ export async function updateBusinessProfile(
     if (value === null || value === "") {
       nextImageValues[field] = null;
     } else {
-      const prefix = field === "logoUrl" ? `logo_${slug}` : field === "landingCoverUrl" ? `cover_${slug}` : `seccover_${slug}`;
+      const prefix =
+        field === "logoUrl"
+          ? `logo_${slug}`
+          : field === "landingCoverUrl"
+            ? `cover_${slug}`
+            : field === "landingSecondaryCoverUrl"
+              ? `seccover_${slug}`
+              : `mobcover_${slug}`;
       nextImageValues[field] = await uploadBase64ToR2(value, prefix) ?? null;
     }
   }
@@ -41,6 +48,7 @@ export async function updateBusinessProfile(
       landingAbout: input.landingAbout,
       landingCoverUrl: nextImageValues.landingCoverUrl,
       landingSecondaryCoverUrl: nextImageValues.landingSecondaryCoverUrl,
+      landingMobileCoverUrl: nextImageValues.landingMobileCoverUrl,
       landingPhone: input.landingPhone,
       landingAddress: input.landingAddress,
       landingHours: input.landingHours,
@@ -75,6 +83,7 @@ export async function updateBusinessProfile(
       landingAbout: true,
       landingCoverUrl: true,
       landingSecondaryCoverUrl: true,
+      landingMobileCoverUrl: true,
       landingPhone: true,
       landingAddress: true,
       landingHours: true,

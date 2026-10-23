@@ -210,15 +210,38 @@
 }
 
 .landingHero {
-  height: 250px;
-  border-radius: 24px;
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  min-height: 180px;
+  max-height: 280px;
+  border-radius: 20px;
   position: relative;
   overflow: hidden;
   border: 1px solid rgba(0,0,0,0.06);
   box-shadow: 0 12px 30px rgba(0,0,0,0.08);
+  background-color: #0f172a;
+  display: flex;
+}
+
+.landingHeroPicture {
+  width: 100%;
+  height: 100%;
+  display: flex;
+}
+
+.landingHeroImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+
+.landingHeroDefault {
+  width: 100%;
+  height: 100%;
+  min-height: 180px;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0284c7 100%);
 }
 
 .landingHeroOverlay {
@@ -587,7 +610,9 @@
   }
 
   .landingHero {
-    height: 320px;
+    aspect-ratio: 21 / 9;
+    max-height: 320px;
+    height: auto;
     border-radius: 28px;
   }
 

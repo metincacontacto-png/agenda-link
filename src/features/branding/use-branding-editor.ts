@@ -15,6 +15,7 @@ export function useBrandingEditor(
   const [landingAbout, setLandingAbout] = useState("");
   const [landingCoverUrl, setLandingCoverUrl] = useState("");
   const [landingSecondaryCoverUrl, setLandingSecondaryCoverUrl] = useState("");
+  const [landingMobileCoverUrl, setLandingMobileCoverUrl] = useState("");
   const [logoUrl, setLogoUrl] = useState("");
   const [landingPhone, setLandingPhone] = useState("");
   const [landingAddress, setLandingAddress] = useState("");
@@ -42,6 +43,7 @@ export function useBrandingEditor(
     setLandingAbout(business.landingAbout || "");
     setLandingCoverUrl(business.landingCoverUrl || "");
     setLandingSecondaryCoverUrl(business.landingSecondaryCoverUrl || "");
+    setLandingMobileCoverUrl(business.landingMobileCoverUrl || "");
     setLogoUrl(business.logoUrl || "");
     setLandingPhone(business.landingPhone || "");
     setLandingAddress(business.landingAddress || "");
@@ -106,6 +108,7 @@ export function useBrandingEditor(
           landingAbout: landingAbout || null,
           landingCoverUrl: landingCoverUrl || null,
           landingSecondaryCoverUrl: landingSecondaryCoverUrl || null,
+          landingMobileCoverUrl: landingMobileCoverUrl || null,
           landingPhone: landingPhone || null,
           landingAddress: landingAddress || null,
           landingHours: landingHours || null,
@@ -142,6 +145,7 @@ export function useBrandingEditor(
     landingAbout, setLandingAbout,
     landingCoverUrl, setLandingCoverUrl,
     landingSecondaryCoverUrl, setLandingSecondaryCoverUrl,
+    landingMobileCoverUrl, setLandingMobileCoverUrl,
     logoUrl, setLogoUrl,
     landingPhone, setLandingPhone,
     landingAddress, setLandingAddress,
