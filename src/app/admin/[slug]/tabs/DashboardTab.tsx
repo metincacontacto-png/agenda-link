@@ -24,9 +24,15 @@ export default function DashboardTab({
 }: DashboardTabProps) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "28px" }}>
-      <p style={{ margin: 0, fontSize: "12px", color: "var(--text-secondary)" }}>
-        Resumen calculado a partir de las citas recibidas.
-      </p>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10 }}>
+        <p style={{ margin: 0, fontSize: "12px", color: "var(--text-secondary)" }}>
+          Resumen calculado a partir de las citas recibidas.
+        </p>
+        <span style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: "11.5px", fontWeight: 600, color: "#16a34a", background: "rgba(34, 197, 94, 0.08)", padding: "3px 10px", borderRadius: 999, border: "1px solid rgba(34, 197, 94, 0.2)" }}>
+          <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#22c55e", display: "inline-block", boxShadow: "0 0 6px #22c55e" }} />
+          En tiempo real (auto-actualizable)
+        </span>
+      </div>
 
       <div className={styles.kpiGrid}>
         <div className={styles.kpiCardDark}>

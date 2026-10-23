@@ -133,118 +133,118 @@ export function renderClientBookingHtml(data: BookingEmailData): string {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Confirmación de Reserva</title>
 </head>
-<body style="margin:0;padding:24px 12px;background-color:#0f172a;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#f8fafc;-webkit-font-smoothing:antialiased;">
-  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:580px;margin:0 auto;background-color:#1e293b;border-radius:18px;border:1px solid #334155;overflow:hidden;box-shadow:0 12px 32px rgba(0,0,0,0.45);">
-    <!-- Brand Header with Official Logo -->
+<body style="margin:0;padding:28px 12px;background-color:#f4f6f9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#0f172a;-webkit-font-smoothing:antialiased;">
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:580px;margin:0 auto;background-color:#ffffff;border-radius:16px;border:1px solid #e2e8f0;overflow:hidden;box-shadow:0 8px 30px rgba(0,0,0,0.06);">
+    <!-- Brand Header with Official Logo for Light Background -->
     <tr>
-      <td style="background-color:#0a0f1d;padding:24px 24px 18px 24px;text-align:center;border-bottom:1px solid #1e293b;">
+      <td style="background-color:#ffffff;padding:26px 24px 20px 24px;text-align:center;border-bottom:1px solid #f1f5f9;">
         <a href="https://agendalink.cl" target="_blank" style="text-decoration:none;display:inline-block;">
-          <img src="https://agendalink.cl/logo-horizontal-blanco.png" alt="AgendaLink" width="165" height="auto" style="display:block;max-width:180px;height:auto;margin:0 auto;border:0;outline:none;" />
+          <img src="https://agendalink.cl/logo-horizontal.png" alt="AgendaLink" width="160" height="auto" style="display:block;max-width:170px;height:auto;margin:0 auto;border:0;outline:none;" />
         </a>
       </td>
     </tr>
     <!-- Hero Confirmation Banner -->
     <tr>
-      <td style="background:linear-gradient(135deg, #0066FF 0%, #004ecc 100%);padding:34px 28px;text-align:center;color:#ffffff;">
-        <div style="display:inline-block;background:rgba(255,255,255,0.2);width:44px;height:44px;line-height:44px;border-radius:50%;margin-bottom:12px;font-size:22px;font-weight:bold;">
+      <td style="background-color:#f8fafc;padding:32px 28px 26px 28px;text-align:center;border-bottom:1px solid #e2e8f0;">
+        <div style="display:inline-block;background-color:#0066FF;color:#ffffff;width:44px;height:44px;line-height:44px;border-radius:50%;margin-bottom:12px;font-size:22px;font-weight:bold;text-align:center;">
           ✓
         </div>
-        <h1 style="margin:0 0 8px 0;font-size:23px;font-weight:800;letter-spacing:-0.02em;color:#ffffff;">
+        <h1 style="margin:0 0 6px 0;font-size:22px;font-weight:800;letter-spacing:-0.02em;color:#0f172a;">
           ¡Tu reserva está confirmada!
         </h1>
-        <p style="margin:0;font-size:15px;color:rgba(255,255,255,0.92);line-height:1.4;">
-          Te esperamos en <strong>${data.business.name}</strong>
+        <p style="margin:0;font-size:14.5px;color:#475569;line-height:1.4;">
+          Te esperamos en <strong style="color:#0f172a;">${data.business.name}</strong>
         </p>
       </td>
     </tr>
     <!-- Main Content -->
     <tr>
-      <td style="padding:30px 28px 24px 28px;">
-        <p style="margin:0 0 20px 0;font-size:15px;color:#cbd5e1;line-height:1.5;">
-          Hola <strong style="color:#ffffff;">${data.clientName}</strong>, tu cita ha sido reservada exitosamente. Aquí tienes tu comprobante oficial:
+      <td style="padding:28px 28px 24px 28px;">
+        <p style="margin:0 0 20px 0;font-size:14.5px;color:#334155;line-height:1.5;">
+          Hola <strong style="color:#0f172a;">${data.clientName}</strong>, tu cita ha sido reservada con éxito. Aquí tienes el comprobante con todos los detalles:
         </p>
 
-        <!-- Bulletproof Table for Email Clients -->
-        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#0f172a;border-radius:14px;border:1px solid #334155;overflow:hidden;margin-bottom:24px;">
+        <!-- High-Contrast Flat Details Table -->
+        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#ffffff;border-radius:12px;border:1px solid #e2e8f0;overflow:hidden;margin-bottom:24px;">
           <tr>
-            <td style="padding:14px 18px;border-bottom:1px solid #1e293b;color:#94a3b8;font-size:13.5px;font-weight:500;width:38%;">
-              📅 Fecha
+            <td style="padding:13px 18px;border-bottom:1px solid #f1f5f9;color:#64748b;font-size:12.5px;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;width:38%;">
+              Fecha
             </td>
-            <td align="right" style="padding:14px 18px;border-bottom:1px solid #1e293b;color:#ffffff;font-size:14px;font-weight:700;">
+            <td align="right" style="padding:13px 18px;border-bottom:1px solid #f1f5f9;color:#0f172a;font-size:14px;font-weight:700;">
               ${formattedDate}
-              <span style="font-size:11px;color:#64748b;display:block;margin-top:2px;font-weight:normal;">(${data.date})</span>
+              <span style="font-size:11px;color:#94a3b8;display:block;margin-top:2px;font-weight:normal;">(${data.date})</span>
             </td>
           </tr>
           <tr>
-            <td style="padding:14px 18px;border-bottom:1px solid #1e293b;color:#94a3b8;font-size:13.5px;font-weight:500;">
-              ⏰ Hora
+            <td style="padding:13px 18px;border-bottom:1px solid #f1f5f9;color:#64748b;font-size:12.5px;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;">
+              Hora
             </td>
-            <td align="right" style="padding:14px 18px;border-bottom:1px solid #1e293b;color:#38bdf8;font-size:16px;font-weight:800;">
-              <span style="background:rgba(56,189,248,0.12);border:1px solid rgba(56,189,248,0.3);padding:3px 10px;border-radius:6px;display:inline-block;">
+            <td align="right" style="padding:13px 18px;border-bottom:1px solid #f1f5f9;color:#0066FF;font-size:15px;font-weight:800;">
+              <span style="background-color:#eff6ff;border:1px solid #bfdbfe;padding:3px 10px;border-radius:6px;display:inline-block;">
                 ${data.time} hrs
               </span>
             </td>
           </tr>
           <tr>
-            <td style="padding:14px 18px;border-bottom:1px solid #1e293b;color:#94a3b8;font-size:13.5px;font-weight:500;">
-              ✂️ Servicio
+            <td style="padding:13px 18px;border-bottom:1px solid #f1f5f9;color:#64748b;font-size:12.5px;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;">
+              Servicio
             </td>
-            <td align="right" style="padding:14px 18px;border-bottom:1px solid #1e293b;color:#ffffff;font-size:14px;font-weight:600;">
-              ${data.service.name} <span style="color:#94a3b8;font-weight:normal;">(${data.service.duration} min)</span>
+            <td align="right" style="padding:13px 18px;border-bottom:1px solid #f1f5f9;color:#0f172a;font-size:14px;font-weight:700;">
+              ${data.service.name} <span style="color:#64748b;font-weight:normal;font-size:13px;">(${data.service.duration} min)</span>
             </td>
           </tr>
           <tr>
-            <td style="padding:14px 18px;border-bottom:1px solid #1e293b;color:#94a3b8;font-size:13.5px;font-weight:500;">
-              👤 Profesional
+            <td style="padding:13px 18px;border-bottom:1px solid #f1f5f9;color:#64748b;font-size:12.5px;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;">
+              Profesional
             </td>
-            <td align="right" style="padding:14px 18px;border-bottom:1px solid #1e293b;color:#ffffff;font-size:14px;font-weight:600;">
+            <td align="right" style="padding:13px 18px;border-bottom:1px solid #f1f5f9;color:#0f172a;font-size:14px;font-weight:700;">
               ${data.professional.name}
             </td>
           </tr>
           <tr>
-            <td style="padding:14px 18px;border-bottom:1px solid #1e293b;color:#94a3b8;font-size:13.5px;font-weight:500;">
-              🏢 Establecimiento
+            <td style="padding:13px 18px;border-bottom:1px solid #f1f5f9;color:#64748b;font-size:12.5px;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;">
+              Establecimiento
             </td>
-            <td align="right" style="padding:14px 18px;border-bottom:1px solid #1e293b;color:#ffffff;font-size:14px;font-weight:600;">
+            <td align="right" style="padding:13px 18px;border-bottom:1px solid #f1f5f9;color:#0f172a;font-size:14px;font-weight:700;">
               ${data.business.name}
             </td>
           </tr>
           <tr>
-            <td style="padding:14px 18px;color:#94a3b8;font-size:13.5px;font-weight:500;">
-              💳 Total a Pagar
+            <td style="padding:13px 18px;color:#64748b;font-size:12.5px;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;">
+              Total a Pagar
             </td>
-            <td align="right" style="padding:14px 18px;color:#22c55e;font-size:16px;font-weight:800;">
+            <td align="right" style="padding:13px 18px;color:#16a34a;font-size:16px;font-weight:800;">
               ${formattedPrice}
             </td>
           </tr>
         </table>
 
         <!-- Direct Link Button -->
-        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:22px;">
+        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:20px;">
           <tr>
             <td align="center">
-              <a href="https://agendalink.cl/${data.business.slug}" target="_blank" style="display:inline-block;background-color:#0066FF;color:#ffffff;text-decoration:none;padding:12px 26px;border-radius:10px;font-weight:700;font-size:14px;box-shadow:0 4px 12px rgba(0,102,255,0.35);">
+              <a href="https://agendalink.cl/${data.business.slug}" target="_blank" style="display:inline-block;background-color:#0066FF;color:#ffffff;text-decoration:none;padding:12px 28px;border-radius:10px;font-weight:700;font-size:14px;box-shadow:0 3px 10px rgba(0,102,255,0.25);">
                 Ver Información del Negocio
               </a>
             </td>
           </tr>
         </table>
 
-        <div style="background-color:rgba(148,163,184,0.06);border-left:3px solid #38bdf8;padding:12px 16px;border-radius:0 8px 8px 0;margin-top:10px;">
-          <p style="margin:0;font-size:12.5px;color:#94a3b8;line-height:1.5;">
-            💡 <strong>Aviso:</strong> Si necesitas reprogramar o cancelar tu hora, comunícate directamente con ${data.business.name}.
+        <div style="background-color:#f8fafc;border:1px solid #e2e8f0;border-left:3px solid #0066FF;padding:12px 16px;border-radius:0 8px 8px 0;margin-top:10px;">
+          <p style="margin:0;font-size:12.5px;color:#475569;line-height:1.5;">
+            <strong>Aviso:</strong> Si necesitas reprogramar o cancelar tu cita, comunícate directamente con ${data.business.name}.
           </p>
         </div>
       </td>
     </tr>
-    <!-- Footer -->
+    <!-- Clean Light Footer -->
     <tr>
-      <td style="background-color:#0a0f1d;padding:22px 28px;text-align:center;border-top:1px solid #334155;color:#64748b;font-size:12px;line-height:1.6;">
-        <p style="margin:0 0 6px 0;color:#94a3b8;font-weight:600;">
-          Reserva gestionada por <strong>AgendaLink</strong>
+      <td style="background-color:#f8fafc;padding:20px 28px;text-align:center;border-top:1px solid #e2e8f0;color:#64748b;font-size:12px;line-height:1.6;">
+        <p style="margin:0 0 4px 0;color:#334155;font-weight:600;">
+          Reserva gestionada a través de <strong>AgendaLink</strong>
         </p>
         <p style="margin:0;">
-          <a href="https://agendalink.cl" style="color:#38bdf8;text-decoration:none;">agendalink.cl</a> · La plataforma de agendamiento para Chile
+          <a href="https://agendalink.cl" style="color:#0066FF;text-decoration:none;font-weight:500;">agendalink.cl</a> · La plataforma de agendamiento para Chile
         </p>
       </td>
     </tr>
@@ -266,105 +266,105 @@ export function renderBusinessNotificationHtml(data: BookingEmailData): string {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Nueva Reserva Recibida</title>
 </head>
-<body style="margin:0;padding:24px 12px;background-color:#0f172a;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#f8fafc;-webkit-font-smoothing:antialiased;">
-  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:580px;margin:0 auto;background-color:#1e293b;border-radius:18px;border:1px solid #334155;overflow:hidden;box-shadow:0 12px 32px rgba(0,0,0,0.45);">
-    <!-- Brand Header with Official Logo -->
+<body style="margin:0;padding:28px 12px;background-color:#f4f6f9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#0f172a;-webkit-font-smoothing:antialiased;">
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:580px;margin:0 auto;background-color:#ffffff;border-radius:16px;border:1px solid #e2e8f0;overflow:hidden;box-shadow:0 8px 30px rgba(0,0,0,0.06);">
+    <!-- Brand Header with Official Logo for Light Background -->
     <tr>
-      <td style="background-color:#0a0f1d;padding:24px 24px 18px 24px;text-align:center;border-bottom:1px solid #1e293b;">
+      <td style="background-color:#ffffff;padding:26px 24px 20px 24px;text-align:center;border-bottom:1px solid #f1f5f9;">
         <a href="https://agendalink.cl" target="_blank" style="text-decoration:none;display:inline-block;">
-          <img src="https://agendalink.cl/logo-horizontal-blanco.png" alt="AgendaLink" width="165" height="auto" style="display:block;max-width:180px;height:auto;margin:0 auto;border:0;outline:none;" />
+          <img src="https://agendalink.cl/logo-horizontal.png" alt="AgendaLink" width="160" height="auto" style="display:block;max-width:170px;height:auto;margin:0 auto;border:0;outline:none;" />
         </a>
       </td>
     </tr>
     <!-- Hero Notification Banner -->
     <tr>
-      <td style="background:linear-gradient(135deg, #059669 0%, #047857 100%);padding:34px 28px;text-align:center;color:#ffffff;">
-        <div style="display:inline-block;background:rgba(255,255,255,0.2);width:44px;height:44px;line-height:44px;border-radius:50%;margin-bottom:12px;font-size:22px;font-weight:bold;">
-          🔔
+      <td style="background-color:#f8fafc;padding:32px 28px 26px 28px;text-align:center;border-bottom:1px solid #e2e8f0;">
+        <div style="display:inline-block;background-color:#16a34a;color:#ffffff;width:44px;height:44px;line-height:44px;border-radius:50%;margin-bottom:12px;font-size:20px;font-weight:bold;text-align:center;">
+          ✓
         </div>
-        <h1 style="margin:0 0 8px 0;font-size:23px;font-weight:800;letter-spacing:-0.02em;color:#ffffff;">
+        <h1 style="margin:0 0 6px 0;font-size:22px;font-weight:800;letter-spacing:-0.02em;color:#0f172a;">
           ¡Nueva Cita Registrada!
         </h1>
-        <p style="margin:0;font-size:15px;color:rgba(255,255,255,0.92);line-height:1.4;">
+        <p style="margin:0;font-size:14.5px;color:#475569;line-height:1.4;">
           ${data.business.name}
         </p>
       </td>
     </tr>
     <!-- Main Content -->
     <tr>
-      <td style="padding:30px 28px 24px 28px;">
-        <p style="margin:0 0 20px 0;font-size:15px;color:#cbd5e1;line-height:1.5;">
-          Un cliente acaba de reservar una nueva cita a través de tu enlace:
+      <td style="padding:28px 28px 24px 28px;">
+        <p style="margin:0 0 20px 0;font-size:14.5px;color:#334155;line-height:1.5;">
+          Un cliente acaba de reservar una nueva cita en tu negocio:
         </p>
 
-        <!-- Bulletproof Table for Email Clients -->
-        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#0f172a;border-radius:14px;border:1px solid #334155;overflow:hidden;margin-bottom:24px;">
+        <!-- High-Contrast Flat Details Table -->
+        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#ffffff;border-radius:12px;border:1px solid #e2e8f0;overflow:hidden;margin-bottom:24px;">
           <tr>
-            <td style="padding:14px 18px;border-bottom:1px solid #1e293b;color:#94a3b8;font-size:13.5px;font-weight:500;width:38%;">
-              👤 Cliente
+            <td style="padding:13px 18px;border-bottom:1px solid #f1f5f9;color:#64748b;font-size:12.5px;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;width:38%;">
+              Cliente
             </td>
-            <td align="right" style="padding:14px 18px;border-bottom:1px solid #1e293b;color:#ffffff;font-size:14px;font-weight:700;">
+            <td align="right" style="padding:13px 18px;border-bottom:1px solid #f1f5f9;color:#0f172a;font-size:14px;font-weight:700;">
               ${data.clientName}
             </td>
           </tr>
           <tr>
-            <td style="padding:14px 18px;border-bottom:1px solid #1e293b;color:#94a3b8;font-size:13.5px;font-weight:500;">
-              📱 WhatsApp
+            <td style="padding:13px 18px;border-bottom:1px solid #f1f5f9;color:#64748b;font-size:12.5px;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;">
+              WhatsApp
             </td>
-            <td align="right" style="padding:14px 18px;border-bottom:1px solid #1e293b;font-size:14px;font-weight:700;">
-              <a href="${waUrl}" target="_blank" style="color:#22c55e;text-decoration:none;">
+            <td align="right" style="padding:13px 18px;border-bottom:1px solid #f1f5f9;font-size:14px;font-weight:700;">
+              <a href="${waUrl}" target="_blank" style="color:#16a34a;text-decoration:none;font-weight:700;">
                 ${data.clientWhatsApp}
               </a>
             </td>
           </tr>
           <tr>
-            <td style="padding:14px 18px;border-bottom:1px solid #1e293b;color:#94a3b8;font-size:13.5px;font-weight:500;">
-              ✉️ Email
+            <td style="padding:13px 18px;border-bottom:1px solid #f1f5f9;color:#64748b;font-size:12.5px;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;">
+              Email
             </td>
-            <td align="right" style="padding:14px 18px;border-bottom:1px solid #1e293b;color:#ffffff;font-size:14px;font-weight:600;">
+            <td align="right" style="padding:13px 18px;border-bottom:1px solid #f1f5f9;color:#0f172a;font-size:14px;font-weight:600;">
               ${data.clientEmail || "No especificado"}
             </td>
           </tr>
           <tr>
-            <td style="padding:14px 18px;border-bottom:1px solid #1e293b;color:#94a3b8;font-size:13.5px;font-weight:500;">
-              📅 Fecha
+            <td style="padding:13px 18px;border-bottom:1px solid #f1f5f9;color:#64748b;font-size:12.5px;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;">
+              Fecha
             </td>
-            <td align="right" style="padding:14px 18px;border-bottom:1px solid #1e293b;color:#ffffff;font-size:14px;font-weight:700;">
+            <td align="right" style="padding:13px 18px;border-bottom:1px solid #f1f5f9;color:#0f172a;font-size:14px;font-weight:700;">
               ${formattedDate}
-              <span style="font-size:11px;color:#64748b;display:block;margin-top:2px;font-weight:normal;">(${data.date})</span>
+              <span style="font-size:11px;color:#94a3b8;display:block;margin-top:2px;font-weight:normal;">(${data.date})</span>
             </td>
           </tr>
           <tr>
-            <td style="padding:14px 18px;border-bottom:1px solid #1e293b;color:#94a3b8;font-size:13.5px;font-weight:500;">
-              ⏰ Hora
+            <td style="padding:13px 18px;border-bottom:1px solid #f1f5f9;color:#64748b;font-size:12.5px;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;">
+              Hora
             </td>
-            <td align="right" style="padding:14px 18px;border-bottom:1px solid #1e293b;color:#34d399;font-size:16px;font-weight:800;">
-              <span style="background:rgba(52,211,153,0.12);border:1px solid rgba(52,211,153,0.3);padding:3px 10px;border-radius:6px;display:inline-block;">
+            <td align="right" style="padding:13px 18px;border-bottom:1px solid #f1f5f9;color:#0066FF;font-size:15px;font-weight:800;">
+              <span style="background-color:#eff6ff;border:1px solid #bfdbfe;padding:3px 10px;border-radius:6px;display:inline-block;">
                 ${data.time} hrs
               </span>
             </td>
           </tr>
           <tr>
-            <td style="padding:14px 18px;border-bottom:1px solid #1e293b;color:#94a3b8;font-size:13.5px;font-weight:500;">
-              ✂️ Servicio
+            <td style="padding:13px 18px;border-bottom:1px solid #f1f5f9;color:#64748b;font-size:12.5px;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;">
+              Servicio
             </td>
-            <td align="right" style="padding:14px 18px;border-bottom:1px solid #1e293b;color:#ffffff;font-size:14px;font-weight:600;">
-              ${data.service.name} <span style="color:#94a3b8;font-weight:normal;">(${data.service.duration} min)</span>
+            <td align="right" style="padding:13px 18px;border-bottom:1px solid #f1f5f9;color:#0f172a;font-size:14px;font-weight:700;">
+              ${data.service.name} <span style="color:#64748b;font-weight:normal;font-size:13px;">(${data.service.duration} min)</span>
             </td>
           </tr>
           <tr>
-            <td style="padding:14px 18px;border-bottom:1px solid #1e293b;color:#94a3b8;font-size:13.5px;font-weight:500;">
-              💼 Profesional
+            <td style="padding:13px 18px;border-bottom:1px solid #f1f5f9;color:#64748b;font-size:12.5px;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;">
+              Profesional
             </td>
-            <td align="right" style="padding:14px 18px;border-bottom:1px solid #1e293b;color:#ffffff;font-size:14px;font-weight:600;">
+            <td align="right" style="padding:13px 18px;border-bottom:1px solid #f1f5f9;color:#0f172a;font-size:14px;font-weight:700;">
               ${data.professional.name}
             </td>
           </tr>
           <tr>
-            <td style="padding:14px 18px;color:#94a3b8;font-size:13.5px;font-weight:500;">
-              💵 Valor
+            <td style="padding:13px 18px;color:#64748b;font-size:12.5px;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;">
+              Valor
             </td>
-            <td align="right" style="padding:14px 18px;color:#22c55e;font-size:16px;font-weight:800;">
+            <td align="right" style="padding:13px 18px;color:#16a34a;font-size:16px;font-weight:800;">
               ${formattedPrice}
             </td>
           </tr>
@@ -374,10 +374,10 @@ export function renderBusinessNotificationHtml(data: BookingEmailData): string {
         <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:20px;">
           <tr>
             <td align="center" style="padding-bottom:12px;">
-              <a href="${waUrl}" target="_blank" style="display:inline-block;background-color:#22c55e;color:#ffffff;text-decoration:none;padding:12px 24px;border-radius:10px;font-weight:700;font-size:14px;margin-right:8px;">
-                💬 Contactar por WhatsApp
+              <a href="${waUrl}" target="_blank" style="display:inline-block;background-color:#16a34a;color:#ffffff;text-decoration:none;padding:12px 22px;border-radius:10px;font-weight:700;font-size:14px;margin-right:8px;box-shadow:0 3px 10px rgba(22,163,74,0.25);">
+                💬 Contactar WhatsApp
               </a>
-              <a href="https://agendalink.cl/admin/${data.business.slug}" target="_blank" style="display:inline-block;background-color:#0066FF;color:#ffffff;text-decoration:none;padding:12px 24px;border-radius:10px;font-weight:700;font-size:14px;">
+              <a href="https://agendalink.cl/admin/${data.business.slug}" target="_blank" style="display:inline-block;background-color:#0066FF;color:#ffffff;text-decoration:none;padding:12px 22px;border-radius:10px;font-weight:700;font-size:14px;box-shadow:0 3px 10px rgba(0,102,255,0.25);">
                 Ver en Panel Admin
               </a>
             </td>
@@ -385,14 +385,14 @@ export function renderBusinessNotificationHtml(data: BookingEmailData): string {
         </table>
       </td>
     </tr>
-    <!-- Footer -->
+    <!-- Clean Light Footer -->
     <tr>
-      <td style="background-color:#0a0f1d;padding:22px 28px;text-align:center;border-top:1px solid #334155;color:#64748b;font-size:12px;line-height:1.6;">
-        <p style="margin:0 0 6px 0;color:#94a3b8;font-weight:600;">
+      <td style="background-color:#f8fafc;padding:20px 28px;text-align:center;border-top:1px solid #e2e8f0;color:#64748b;font-size:12px;line-height:1.6;">
+        <p style="margin:0 0 4px 0;color:#334155;font-weight:600;">
           Notificación automática de <strong>AgendaLink</strong>
         </p>
         <p style="margin:0;">
-          <a href="https://agendalink.cl" style="color:#38bdf8;text-decoration:none;">agendalink.cl</a> · Portal del Negocio: <a href="https://agendalink.cl/${data.business.slug}" style="color:#38bdf8;text-decoration:none;">agendalink.cl/${data.business.slug}</a>
+          <a href="https://agendalink.cl" style="color:#0066FF;text-decoration:none;font-weight:500;">agendalink.cl</a> · Portal del Negocio: <a href="https://agendalink.cl/${data.business.slug}" style="color:#0066FF;text-decoration:none;font-weight:500;">agendalink.cl/${data.business.slug}</a>
         </p>
       </td>
     </tr>

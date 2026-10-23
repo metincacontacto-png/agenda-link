@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import type { BusinessAdminDTO } from "@/features/businesses/contracts";
 import { getTrialDaysRemaining } from "@/features/businesses/subscription-policy";
@@ -33,6 +34,21 @@ export default function AdminHeader({
   onOpenFirstSteps,
   onOpenBillingModal,
 }: AdminHeaderProps) {
+  const [copiedLink, setCopiedLink] = useState(false);
+
+  const handleCopyLink = async () => {
+    try {
+      const url = typeof window !== "undefined"
+        ? `${window.location.origin}/${business.slug}`
+        : `https://agendalink.cl/${business.slug}`;
+      await navigator.clipboard.writeText(url);
+      setCopiedLink(true);
+      setTimeout(() => setCopiedLink(false), 2500);
+    } catch {
+      // fallback
+    }
+  };
+
   const daysRemaining = getTrialDaysRemaining(business.trialEndsAt);
   const isTrial = business.subscriptionStatus === "TRIALING" && !business.billingBypass;
   const isActive = business.subscriptionStatus === "ACTIVE" || business.billingBypass;
@@ -98,7 +114,44 @@ export default function AdminHeader({
         </div>
       </div>
 
-      <div style={{ display: "flex", alignItems: "center", gap: 16, position: "relative" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 10, position: "relative" }}>
+        <button
+          type="button"
+          onClick={handleCopyLink}
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 6,
+            background: copiedLink ? "rgba(34, 197, 94, 0.12)" : "rgba(0, 102, 255, 0.08)",
+            color: copiedLink ? "#16a34a" : "var(--primary)",
+            border: `1.5px solid ${copiedLink ? "rgba(34, 197, 94, 0.4)" : "rgba(0, 102, 255, 0.25)"}`,
+            padding: "8px 14px",
+            borderRadius: 999,
+            fontSize: 13,
+            fontWeight: 700,
+            cursor: "pointer",
+            transition: "all 0.2s cubic-bezier(0.16, 1, 0.3, 1)",
+            whiteSpace: "nowrap",
+          }}
+          title="Copiar link público para compartir con clientes"
+        >
+          {copiedLink ? (
+            <>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+              ¡Link Copiado!
+            </>
+          ) : (
+            <>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+              </svg>
+              Copiar Link
+            </>
+          )}
+        </button>
         <Link href={`/${business.slug}`} target="_blank" className={styles.publicLinkBtn}>Ver link público ↗</Link>
         <button
           type="button"

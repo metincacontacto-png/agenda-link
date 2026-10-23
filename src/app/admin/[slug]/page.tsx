@@ -34,6 +34,8 @@ export default function AdminDashboard({ params }: { params: Promise<{ slug: str
     appointmentPagination,
     loadingMoreAppointments,
     loading,
+    newBookingAlert,
+    dismissNewBookingAlert,
     loadAdminData,
     loadMoreAppointments,
   } = useAdminBusiness(slug);
@@ -210,6 +212,52 @@ export default function AdminDashboard({ params }: { params: Promise<{ slug: str
       />
 
       <div className={styles.contentArea}>
+        {newBookingAlert && (
+          <div
+            role="alert"
+            style={{
+              position: "sticky",
+              top: 16,
+              zIndex: 1000,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: 12,
+              background: "linear-gradient(135deg, #0066FF 0%, #004ecc 100%)",
+              color: "#ffffff",
+              padding: "12px 20px",
+              borderRadius: "14px",
+              boxShadow: "0 8px 24px rgba(0, 102, 255, 0.35)",
+              marginBottom: 16,
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: 10, fontSize: "14px", fontWeight: 700 }}>
+              <span style={{ fontSize: "18px" }}>🔔</span>
+              <span>{newBookingAlert}</span>
+            </div>
+            <button
+              type="button"
+              onClick={dismissNewBookingAlert}
+              style={{
+                background: "rgba(255, 255, 255, 0.2)",
+                border: "none",
+                color: "#ffffff",
+                width: 26,
+                height: 26,
+                borderRadius: "50%",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontWeight: "bold",
+                fontSize: 14,
+              }}
+              aria-label="Cerrar notificación"
+            >
+              ✕
+            </button>
+          </div>
+        )}
         <AdminHeader
           business={business}
           ownerName={ownerName}
