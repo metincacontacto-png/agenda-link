@@ -157,35 +157,37 @@ export async function PUT(request: Request) {
       })),
     );
 
-    await prisma.$transaction(async (tx) => {
-      await tx.businessSchedule.deleteMany({
-        where: { businessId: business.id },
-      });
-
-      if (businessScheduleData.length > 0) {
-        await tx.businessSchedule.createMany({
-          data: businessScheduleData,
-        });
-      }
-
-      if (professionals.length > 0) {
-        await tx.professionalSchedule.deleteMany({
-          where: {
-            professionalId: { in: professionals.map((p) => p.id) },
-          },
-        });
-
-        if (professionalScheduleData.length > 0) {
-          await tx.professionalSchedule.createMany({
-            data: professionalScheduleData,
-          });
-        }
-      }
+    // 1. Limpiar horarios de negocio previos
+    await prisma.businessSchedule.deleteMany({
+      where: { businessId: business.id },
     });
+
+    // 2. Insertar nuevos horarios de negocio
+    for (const item of businessScheduleData) {
+      await prisma.businessSchedule.create({
+        data: item,
+      });
+    }
+
+    // 3. Sincronizar horarios de los profesionales del negocio
+    if (professionals.length > 0) {
+      for (const prof of professionals) {
+        await prisma.professionalSchedule.deleteMany({
+          where: { professionalId: prof.id },
+        });
+      }
+
+      for (const profItem of professionalScheduleData) {
+        await prisma.professionalSchedule.create({
+          data: profItem,
+        });
+      }
+    }
 
     return NextResponse.json({ success: true });
   } catch (error) {
     logServerError(request, "businessSchedule.update.failed", error, { businessId });
-    return NextResponse.json({ error: "Error interno del servidor" }, { status: 500 });
+    const msg = error instanceof Error ? error.message : "Error interno al guardar horario";
+    return NextResponse.json({ error: msg }, { status: 500 });
   }
 }
