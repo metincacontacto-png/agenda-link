@@ -13,6 +13,9 @@ interface AgendaTabProps {
   onPreviousWeek: () => void;
   onNextWeek: () => void;
   onOpenScheduleBlocks?: () => void;
+  scheduleBlocks: Array<{ id: string; startsAt: string; endsAt: string; reason: string | null }>;
+  onBlockSlot: (date: Date, hour: string) => Promise<void> | void;
+  onUnblockSlot: (blockId: string) => Promise<void> | void;
 }
 
 export default function AgendaTab({
@@ -25,7 +28,22 @@ export default function AgendaTab({
   onPreviousWeek,
   onNextWeek,
   onOpenScheduleBlocks,
+  scheduleBlocks = [],
+  onBlockSlot,
+  onUnblockSlot,
 }: AgendaTabProps) {
+  const getBlockForSlot = (date: Date, hour: string) => {
+    const [slotHour, slotMinute = 0] = hour.split(":").map((val) => Number.parseInt(val, 10));
+    const slotStart = new Date(date.getFullYear(), date.getMonth(), date.getDate(), slotHour, slotMinute, 0, 0).getTime();
+    const slotEnd = slotStart + 60 * 60 * 1000;
+
+    return scheduleBlocks.find((block) => {
+      const blockStart = new Date(block.startsAt).getTime();
+      const blockEnd = new Date(block.endsAt).getTime();
+      if (Number.isNaN(blockStart) || Number.isNaN(blockEnd)) return false;
+      return slotStart < blockEnd && slotEnd > blockStart;
+    });
+  };
   return (
     <section className={styles.glassCard} style={{ padding: "20px" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px", flexWrap: "wrap", gap: "12px" }}>
@@ -91,38 +109,74 @@ export default function AgendaTab({
                 <td className={styles.calendarTimeCell}>{hour}</td>
                 {weekDates.map((date, columnIndex) => {
                   const appointments = getAppointmentsForSlot(date, hour);
+                  const block = getBlockForSlot(date, hour);
+
                   return (
                     <td key={columnIndex} className={styles.calendarCell}>
-                      {appointments.map((appointment) => {
-                        const isPaid = appointment.paymentStatus === "PAID";
-                        const appDate = new Date(appointment.dateTime);
-                        const timeStr = appDate.toLocaleTimeString("es-CL", {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                          hour12: false,
-                        });
-                        return (
-                          <div key={appointment.id} className={`${styles.appointmentBlock} ${isPaid ? styles.appointmentBlockPaid : ""}`}>
-                            <div className={styles.appointmentTimeBadge}>
-                              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
-                                <circle cx="12" cy="12" r="10" />
-                                <polyline points="12 6 12 12 16 14" />
-                              </svg>
-                              {timeStr} hrs
-                            </div>
-                            <div className={styles.appointmentClientName}>{appointment.clientName}</div>
-                            <div className={styles.appointmentServiceName}>{appointment.service?.name}</div>
-                            <div className={`${styles.appointmentPriceBadge} ${isPaid ? styles.appointmentPriceBadgePaid : ""}`} style={{ display: "flex", alignItems: "center", gap: "3px" }}>
-                              {isPaid && (
-                                <svg className={styles.badgeIcon} style={{ width: "10px", height: "10px", marginRight: 0 }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                                  <polyline points="20 6 9 17 4 12" />
+                      {appointments.length > 0 ? (
+                        appointments.map((appointment) => {
+                          const isPaid = appointment.paymentStatus === "PAID";
+                          const appDate = new Date(appointment.dateTime);
+                          const timeStr = appDate.toLocaleTimeString("es-CL", {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            hour12: false,
+                          });
+                          return (
+                            <div key={appointment.id} className={`${styles.appointmentBlock} ${isPaid ? styles.appointmentBlockPaid : ""}`}>
+                              <div className={styles.appointmentTimeBadge}>
+                                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+                                  <circle cx="12" cy="12" r="10" />
+                                  <polyline points="12 6 12 12 16 14" />
                                 </svg>
-                              )}
-                              {formatPrice(appointment.paymentAmount || appointment.service?.price || 0, businessCurrency)}
+                                {timeStr} hrs
+                              </div>
+                              <div className={styles.appointmentClientName}>{appointment.clientName}</div>
+                              <div className={styles.appointmentServiceName}>{appointment.service?.name}</div>
+                              <div className={`${styles.appointmentPriceBadge} ${isPaid ? styles.appointmentPriceBadgePaid : ""}`} style={{ display: "flex", alignItems: "center", gap: "3px" }}>
+                                {isPaid && (
+                                  <svg className={styles.badgeIcon} style={{ width: "10px", height: "10px", marginRight: 0 }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                                    <polyline points="20 6 9 17 4 12" />
+                                  </svg>
+                                )}
+                                {formatPrice(appointment.paymentAmount || appointment.service?.price || 0, businessCurrency)}
+                              </div>
                             </div>
+                          );
+                        })
+                      ) : block ? (
+                        <div className={styles.calendarBlockCard}>
+                          <div>
+                            <div className={styles.calendarBlockTitle}>
+                              <span>🔴</span>
+                              <span>Ocupado (Bloqueado)</span>
+                            </div>
+                            {block.reason && (
+                              <div className={styles.calendarBlockReason} title={block.reason}>
+                                {block.reason}
+                              </div>
+                            )}
                           </div>
-                        );
-                      })}
+                          <button
+                            type="button"
+                            className={styles.calendarUnblockBtn}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              void onUnblockSlot(block.id);
+                            }}
+                          >
+                            🔓 Desbloquear
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          type="button"
+                          className={styles.calendarAddBlockBtn}
+                          onClick={() => void onBlockSlot(date, hour)}
+                        >
+                          + Bloquear
+                        </button>
+                      )}
                     </td>
                   );
                 })}

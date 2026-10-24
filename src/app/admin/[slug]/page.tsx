@@ -7,6 +7,7 @@ import { useAdminBusiness } from "@/features/businesses/use-admin-business";
 import { useBrandingEditor } from "@/features/branding/use-branding-editor";
 import { useAdminAppointmentActions } from "@/features/booking/use-admin-appointment-actions";
 import { useAdminCalendar } from "@/features/schedule/use-admin-calendar";
+import { dateStringAtTimeZone } from "@/features/schedule/time";
 import AgendaTab from "./tabs/AgendaTab";
 import AdminHeader from "./tabs/AdminHeader";
 import AdminSidebar from "./tabs/AdminSidebar";
@@ -58,6 +59,96 @@ export default function AdminDashboard({ params }: { params: Promise<{ slug: str
   const [todayReservationsCollapsed, setTodayReservationsCollapsed] = useState(false);
   const [isGearDropdownOpen, setIsGearDropdownOpen] = useState(false);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
+
+  // Bloqueos de Horario interactivos en la Agenda
+  const [scheduleBlocks, setScheduleBlocks] = useState<
+    Array<{ id: string; startsAt: string; endsAt: string; reason: string | null }>
+  >([]);
+
+  const fetchScheduleBlocks = React.useCallback(async () => {
+    try {
+      const res = await fetch(`/api/schedule-blocks?slug=${encodeURIComponent(slug)}`);
+      const data = await res.json();
+      if (res.ok && data.success && Array.isArray(data.blocks)) {
+        setScheduleBlocks(data.blocks);
+      }
+    } catch (err) {
+      console.error("Error loading schedule blocks:", err);
+    }
+  }, [slug]);
+
+  React.useEffect(() => {
+    void fetchScheduleBlocks();
+  }, [fetchScheduleBlocks, calendar.weekDates, business, activeTab]);
+
+  const handleBlockSlot = async (date: Date, hour: string) => {
+    const tz = business?.timezone || "America/Santiago";
+    let dateString: string;
+    try {
+      dateString = dateStringAtTimeZone(
+        new Date(date.getFullYear(), date.getMonth(), date.getDate(), 12, 0, 0),
+        tz
+      );
+    } catch {
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, "0");
+      const d = String(date.getDate()).padStart(2, "0");
+      dateString = `${y}-${m}-${d}`;
+    }
+
+    const [slotHour, slotMinute = 0] = hour.split(":").map((v) => Number.parseInt(v, 10));
+    const slotStart = new Date(date.getFullYear(), date.getMonth(), date.getDate(), slotHour, slotMinute, 0, 0);
+    const slotEnd = new Date(slotStart.getTime() + 60 * 60 * 1000);
+
+    const tempId = `temp-${Date.now()}`;
+    const tempBlock = {
+      id: tempId,
+      startsAt: slotStart.toISOString(),
+      endsAt: slotEnd.toISOString(),
+      reason: "Bloqueo rápido agenda",
+    };
+
+    setScheduleBlocks((prev) => [...prev, tempBlock]);
+
+    try {
+      const res = await fetch("/api/schedule-blocks", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          slug,
+          mode: "slot",
+          date: dateString,
+          slotTime: hour,
+          durationMinutes: 60,
+          reason: "Bloqueo rápido agenda",
+        }),
+      });
+      if (!res.ok) {
+        console.error("Error al bloquear horario:", await res.text());
+      }
+    } catch (error) {
+      console.error("Error al bloquear horario:", error);
+    } finally {
+      await fetchScheduleBlocks();
+    }
+  };
+
+  const handleUnblockSlot = async (blockId: string) => {
+    setScheduleBlocks((prev) => prev.filter((b) => b.id !== blockId));
+
+    try {
+      const res = await fetch(`/api/schedule-blocks?slug=${encodeURIComponent(slug)}&id=${encodeURIComponent(blockId)}`, {
+        method: "DELETE",
+      });
+      if (!res.ok) {
+        console.error("Error al desbloquear horario:", await res.text());
+      }
+    } catch (error) {
+      console.error("Error al desbloquear horario:", error);
+    } finally {
+      await fetchScheduleBlocks();
+    }
+  };
 
   // Modales de Cabecera
   const [isFirstStepsModalOpen, setIsFirstStepsModalOpen] = useState(false);
@@ -810,6 +901,9 @@ export default function AdminDashboard({ params }: { params: Promise<{ slug: str
             formatPrice={formatPrice}
             onPreviousWeek={calendar.onPreviousWeek}
             onNextWeek={calendar.onNextWeek}
+            scheduleBlocks={scheduleBlocks}
+            onBlockSlot={handleBlockSlot}
+            onUnblockSlot={handleUnblockSlot}
             onOpenScheduleBlocks={() => {
               setActiveTab("administracion");
               setAdminSubTab("horarios");
