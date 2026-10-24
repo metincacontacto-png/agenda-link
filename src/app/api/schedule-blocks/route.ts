@@ -14,6 +14,9 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Falta el parámetro slug" }, { status: 400 });
   }
 
+  const startDate = searchParams.get("startDate");
+  const endDate = searchParams.get("endDate");
+
   try {
     const business = await prisma.business.findUnique({
       where: { slug },
@@ -26,12 +29,39 @@ export async function GET(request: Request) {
     const auth = await requireBusinessMembership(session.user, business.id);
     if (!auth.ok) return auth.response;
 
+    let dateFilter: { startsAt: { lt: Date }; endsAt: { gt: Date } } | null = null;
+
+    if (startDate || endDate) {
+      const start = startDate || endDate!;
+      const end = endDate || startDate!;
+      if (!isValidDateOnly(start) || !isValidDateOnly(end) || start > end) {
+        return NextResponse.json({ error: "Rango de fechas inválido (debe ser formato YYYY-MM-DD)" }, { status: 400 });
+      }
+
+      const startRange = localDayUtcRange(start, business.timezone);
+      const endRange = localDayUtcRange(end, business.timezone);
+      if (!startRange || !endRange) {
+        return NextResponse.json({ error: "No se pudo calcular el rango de fechas" }, { status: 400 });
+      }
+
+      dateFilter = {
+        startsAt: { lt: endRange.endsAt },
+        endsAt: { gt: startRange.startsAt },
+      };
+    }
+
     const blocks = await prisma.scheduleBlock.findMany({
       where: {
         businessId: business.id,
+        ...(dateFilter
+          ? {
+              startsAt: dateFilter.startsAt,
+              endsAt: dateFilter.endsAt,
+            }
+          : {}),
       },
-      orderBy: { startsAt: "desc" },
-      take: 50,
+      orderBy: { startsAt: dateFilter ? "asc" : "desc" },
+      ...(dateFilter ? {} : { take: 100 }),
       select: {
         id: true,
         startsAt: true,
@@ -63,18 +93,33 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Falta el slug del negocio" }, { status: 400 });
   }
 
-  const { slug, date, isFullDay, startTime, endTime, reason } = body as {
+  const {
+    slug,
+    mode,
+    startDate,
+    endDate,
+    date,
+    slotTime,
+    durationMinutes,
+    isFullDay,
+    startTime,
+    endTime,
+    reason,
+    professionalId,
+  } = body as {
     slug: string;
-    date: string;
+    mode?: string;
+    startDate?: string;
+    endDate?: string;
+    date?: string;
+    slotTime?: string;
+    durationMinutes?: number;
     isFullDay?: boolean;
     startTime?: string;
     endTime?: string;
     reason?: string;
+    professionalId?: string | null;
   };
-
-  if (!date || !isValidDateOnly(date)) {
-    return NextResponse.json({ error: "Fecha inválida (debe ser formato YYYY-MM-DD)" }, { status: 400 });
-  }
 
   try {
     const business = await prisma.business.findUnique({
@@ -91,14 +136,58 @@ export async function POST(request: Request) {
     let startsAt: Date | null = null;
     let endsAt: Date | null = null;
 
-    if (isFullDay) {
+    if (mode === "range") {
+      if (!startDate || !isValidDateOnly(startDate)) {
+        return NextResponse.json({ error: "Fecha de inicio inválida (debe ser formato YYYY-MM-DD)" }, { status: 400 });
+      }
+      if (!endDate || !isValidDateOnly(endDate)) {
+        return NextResponse.json({ error: "Fecha de fin inválida (debe ser formato YYYY-MM-DD)" }, { status: 400 });
+      }
+      if (startDate > endDate) {
+        return NextResponse.json({ error: "La fecha de inicio no puede ser posterior a la fecha de fin" }, { status: 400 });
+      }
+      const startRange = localDayUtcRange(startDate, business.timezone);
+      const endRange = localDayUtcRange(endDate, business.timezone);
+      if (!startRange || !endRange) {
+        return NextResponse.json({ error: "No se pudo calcular el rango de fechas" }, { status: 400 });
+      }
+      startsAt = startRange.startsAt;
+      endsAt = endRange.endsAt;
+    } else if (mode === "slot") {
+      if (!date || !isValidDateOnly(date)) {
+        return NextResponse.json({ error: "Fecha inválida (debe ser formato YYYY-MM-DD)" }, { status: 400 });
+      }
+      if (!slotTime || typeof slotTime !== "string") {
+        return NextResponse.json({ error: "Debes especificar la hora del horario/slot" }, { status: 400 });
+      }
+      const startMin = parseLocalTime(slotTime);
+      if (startMin === null) {
+        return NextResponse.json({ error: "Hora de slot inválida (debe ser formato HH:mm)" }, { status: 400 });
+      }
+      const duration =
+        typeof durationMinutes === "number" && Number.isInteger(durationMinutes) && durationMinutes > 0
+          ? durationMinutes
+          : 60;
+      const endMin = startMin + duration;
+      startsAt = localMinuteToUtc(date, startMin, business.timezone);
+      endsAt = localMinuteToUtc(date, endMin, business.timezone);
+      if (!startsAt || !endsAt || startsAt >= endsAt) {
+        return NextResponse.json({ error: "Horarios no válidos en la zona horaria del negocio" }, { status: 400 });
+      }
+    } else if (mode === "day") {
+      if (!date || !isValidDateOnly(date)) {
+        return NextResponse.json({ error: "Fecha inválida (debe ser formato YYYY-MM-DD)" }, { status: 400 });
+      }
       const dayRange = localDayUtcRange(date, business.timezone);
       if (!dayRange) {
         return NextResponse.json({ error: "No se pudo calcular el rango del día" }, { status: 400 });
       }
       startsAt = dayRange.startsAt;
       endsAt = dayRange.endsAt;
-    } else {
+    } else if (mode === "custom_hours") {
+      if (!date || !isValidDateOnly(date)) {
+        return NextResponse.json({ error: "Fecha inválida (debe ser formato YYYY-MM-DD)" }, { status: 400 });
+      }
       if (!startTime || !endTime) {
         return NextResponse.json({ error: "Debes especificar hora de inicio y fin" }, { status: 400 });
       }
@@ -112,11 +201,45 @@ export async function POST(request: Request) {
       if (!startsAt || !endsAt || startsAt >= endsAt) {
         return NextResponse.json({ error: "Horarios no válidos en la zona horaria del negocio" }, { status: 400 });
       }
+    } else if (!mode) {
+      // Backward compatibility for { date, isFullDay, startTime, endTime }
+      if (!date || !isValidDateOnly(date)) {
+        return NextResponse.json({ error: "Fecha inválida (debe ser formato YYYY-MM-DD)" }, { status: 400 });
+      }
+      if (isFullDay) {
+        const dayRange = localDayUtcRange(date, business.timezone);
+        if (!dayRange) {
+          return NextResponse.json({ error: "No se pudo calcular el rango del día" }, { status: 400 });
+        }
+        startsAt = dayRange.startsAt;
+        endsAt = dayRange.endsAt;
+      } else {
+        if (!startTime || !endTime) {
+          return NextResponse.json({ error: "Debes especificar hora de inicio y fin" }, { status: 400 });
+        }
+        const startMin = parseLocalTime(startTime);
+        const endMin = parseLocalTime(endTime);
+        if (startMin === null || endMin === null || startMin >= endMin) {
+          return NextResponse.json({ error: "Rango de horas inválido" }, { status: 400 });
+        }
+        startsAt = localMinuteToUtc(date, startMin, business.timezone);
+        endsAt = localMinuteToUtc(date, endMin, business.timezone);
+        if (!startsAt || !endsAt || startsAt >= endsAt) {
+          return NextResponse.json({ error: "Horarios no válidos en la zona horaria del negocio" }, { status: 400 });
+        }
+      }
+    } else {
+      return NextResponse.json({ error: "Modo de bloqueo no válido" }, { status: 400 });
+    }
+
+    if (!startsAt || !endsAt) {
+      return NextResponse.json({ error: "No se pudo determinar el horario a bloquear" }, { status: 400 });
     }
 
     const block = await prisma.scheduleBlock.create({
       data: {
         businessId: business.id,
+        professionalId: professionalId ? professionalId : null,
         startsAt,
         endsAt,
         reason: reason?.trim() || "Día/Horario no disponible",

@@ -125,3 +125,93 @@ test("parses strict local dates, times, and weekdays", () => {
   assert.equal(weekdayForDate("2026-01-05"), 1);
   assert.equal(weekdayForDate("2026-02-30"), null);
 });
+
+test("supports multi-day date range blocking spanning from startRange.startsAt to endRange.endsAt", () => {
+  const timeZone = "America/Santiago";
+  const startDate = "2026-01-05";
+  const endDate = "2026-01-07";
+
+  const startRange = localDayUtcRange(startDate, timeZone);
+  const endRange = localDayUtcRange(endDate, timeZone);
+  assert.ok(startRange);
+  assert.ok(endRange);
+
+  const multiDayBlock = {
+    startsAt: startRange.startsAt,
+    endsAt: endRange.endsAt,
+  };
+
+  // Verify that for all dates in the range (start, middle, end), all slots are marked as booked
+  for (const date of ["2026-01-05", "2026-01-06", "2026-01-07"]) {
+    const result = generateSlots({
+      date,
+      timeZone,
+      serviceDurationMinutes: 60,
+      businessWindows: [{ startMinute: 540, endMinute: 1080 }],
+      professionalWindows: [{ startMinute: 540, endMinute: 1080 }],
+      breaks: [],
+      blocks: [multiDayBlock],
+      appointments: [],
+    });
+
+    assert.equal(result.availableSlots.length, 0, `Expected no available slots on blocked day ${date}`);
+    assert.ok(result.bookedSlots.length > 0, `Expected booked slots on blocked day ${date}`);
+    assert.ok(result.bookedSlots.includes("09:00"));
+    assert.ok(result.bookedSlots.includes("17:00"));
+  }
+
+  // Verify that dates outside the range are NOT blocked by this multi-day block
+  const resultAfter = generateSlots({
+    date: "2026-01-08",
+    timeZone,
+    serviceDurationMinutes: 60,
+    businessWindows: [{ startMinute: 540, endMinute: 1080 }],
+    professionalWindows: [{ startMinute: 540, endMinute: 1080 }],
+    breaks: [],
+    blocks: [multiDayBlock],
+    appointments: [],
+  });
+
+  assert.ok(resultAfter.availableSlots.length > 0, "Expected available slots on day after block");
+  assert.equal(resultAfter.bookedSlots.length, 0, "Expected no booked slots on day after block");
+  assert.ok(resultAfter.availableSlots.includes("09:00"));
+});
+
+test("supports specific slot blocking using localMinuteToUtc", () => {
+  const timeZone = "America/Santiago";
+  const date = "2026-01-05";
+  const slotMinute = 14 * 60; // 14:00
+  const durationMinutes = 60;
+
+  const slotStart = localMinuteToUtc(date, slotMinute, timeZone);
+  const slotEnd = localMinuteToUtc(date, slotMinute + durationMinutes, timeZone);
+  assert.ok(slotStart);
+  assert.ok(slotEnd);
+
+  const slotBlock = {
+    startsAt: slotStart,
+    endsAt: slotEnd,
+  };
+
+  const result = generateSlots({
+    date,
+    timeZone,
+    serviceDurationMinutes: 60,
+    businessWindows: [{ startMinute: 540, endMinute: 1080 }],
+    professionalWindows: [{ startMinute: 540, endMinute: 1080 }],
+    breaks: [],
+    blocks: [slotBlock],
+    appointments: [],
+  });
+
+  // 14:00 slot is blocked
+  assert.ok(result.bookedSlots.includes("14:00"));
+  assert.ok(!result.availableSlots.includes("14:00"));
+  // 13:30 slot overlaps 14:00-15:00 for a 60-min service, so it is also blocked
+  assert.ok(result.bookedSlots.includes("13:30"));
+  assert.ok(!result.availableSlots.includes("13:30"));
+  // Earlier and later slots remain available
+  assert.ok(result.availableSlots.includes("09:00"));
+  assert.ok(result.availableSlots.includes("15:00"));
+});
+
