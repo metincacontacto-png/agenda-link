@@ -178,47 +178,52 @@ export default function PublicLanding({ business, formatPrice, onStartBooking }:
                   className={styles.appleServiceCard}
                   onClick={() => onStartBooking(service)}
                 >
-                  <div className={styles.appleServiceCardTop}>
-                    <div className={styles.appleServiceCardIcon}>
-                      {service.imageUrl ? (
-                        <img
-                          src={service.imageUrl}
-                          alt={service.name}
-                          className={styles.appleServiceCardImg}
-                        />
-                      ) : (
-                        <span>⚡</span>
-                      )}
-                    </div>
+                  {/* Large Photo on Top */}
+                  <div className={styles.appleServiceImageWrapper}>
+                    {service.imageUrl ? (
+                      <img
+                        src={service.imageUrl}
+                        alt={service.name}
+                        className={styles.appleServiceLargeImg}
+                        loading="lazy"
+                      />
+                    ) : (
+                      <div className={styles.appleServiceFallbackBanner}>
+                        <span style={{ fontSize: "36px" }}>⚡</span>
+                      </div>
+                    )}
 
-                    <div className={styles.appleServiceCardDuration}>
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <div className={styles.appleServiceDurationBadge}>
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                         <circle cx="12" cy="12" r="10" />
                         <polyline points="12 6 12 12 16 14" />
                       </svg>
                       <span>{service.duration} min</span>
                     </div>
-
-                    <h3 className={styles.appleServiceCardTitle}>{service.name}</h3>
                   </div>
 
-                  <div className={styles.appleServiceCardBottom}>
-                    <div>
-                      <span style={{ fontSize: "11px", color: "#86868b", fontWeight: 600, display: "block" }}>
-                        Inversión
-                      </span>
-                      <span className={styles.appleServiceCardPrice}>
-                        {formatPrice(service.price, business.currency)}
-                      </span>
-                    </div>
+                  {/* Card Body */}
+                  <div className={styles.appleServiceBody}>
+                    <h3 className={styles.appleServiceCardTitle}>{service.name}</h3>
 
-                    <button
-                      type="button"
-                      className={styles.appleServiceCardBtn}
-                    >
-                      <span>Reservar</span>
-                      <span>→</span>
-                    </button>
+                    <div className={styles.appleServiceCardBottom}>
+                      <div>
+                        <span style={{ fontSize: "11px", color: "#86868b", fontWeight: 600, display: "block" }}>
+                          Inversión
+                        </span>
+                        <span className={styles.appleServiceCardPrice}>
+                          {formatPrice(service.price, business.currency)}
+                        </span>
+                      </div>
+
+                      <button
+                        type="button"
+                        className={styles.appleServiceCardBtn}
+                      >
+                        <span>Reservar</span>
+                        <span>→</span>
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))
