@@ -2,6 +2,7 @@
 
 import React from "react";
 import type { PublicBusinessDTO } from "@/features/booking/public-business-dto";
+import { parseLandingFeatures } from "@/features/branding/content";
 import { buildDirectWhatsAppUrl } from "@/lib/whatsapp";
 import styles from "../page.module.css";
 
@@ -16,10 +17,12 @@ export default function PublicLanding({ business, formatPrice, onStartBooking }:
   const heroSubtitle =
     business.landingSubtitle ||
     "Reserva tu hora en segundos, sin llamadas ni fricción. Elige tu servicio y asegura tu atención de inmediato.";
+  const aboutText = business.landingAbout || "";
   const coverUrl = business.landingCoverUrl || business.landingMobileCoverUrl || "";
   const phone = business.landingPhone || "";
   const address = business.landingAddress || "";
   const hours = business.landingHours || "";
+  const features = parseLandingFeatures(business.landingFeaturesJson);
 
   const whatsAppInquiryUrl = phone
     ? buildDirectWhatsAppUrl(
@@ -88,6 +91,16 @@ export default function PublicLanding({ business, formatPrice, onStartBooking }:
           {/* Subtitle */}
           <p className={styles.appleHeroSubtitle}>{heroSubtitle}</p>
 
+          {/* Location & Rating Meta Row */}
+          {(address || business.category) && (
+            <div className={styles.appleHeroMetaRow}>
+              {address && <span>📍 {address}</span>}
+              {address && <span>•</span>}
+              <span style={{ color: "#eab308", fontWeight: 700 }}>★ 5.0</span>
+              <span style={{ color: "#86868b" }}>Servicio Verificado</span>
+            </div>
+          )}
+
           {/* Apple Action CTAs */}
           <div className={styles.appleHeroCtas}>
             <button
@@ -116,37 +129,22 @@ export default function PublicLanding({ business, formatPrice, onStartBooking }:
             <span>Aviso a WhatsApp</span>
           </div>
 
-          {/* CINEMATIC SHOWCASE BANNER (Hardware/Keynote Style) */}
-          <div className={styles.appleShowcaseBanner}>
-            {coverUrl ? (
+          {/* CLEAN SHOWCASE BANNER (100% limpio, sin gradientes negras ni letras encima) */}
+          {coverUrl && (
+            <div className={styles.appleShowcaseBanner}>
               <img
                 src={coverUrl}
                 alt={business.name}
                 className={styles.appleShowcaseImg}
                 loading="eager"
               />
-            ) : (
-              <div style={{ width: "100%", height: "100%", background: "linear-gradient(135deg, #0071e3 0%, #1e1e24 100%)" }} />
-            )}
-
-            <div className={styles.appleShowcaseOverlay}>
-              <div className={styles.appleShowcaseBadge}>
-                {address && <span>📍 {address}</span>}
-                {address && <span>•</span>}
-                <span style={{ color: "#fcd34d", fontWeight: 700 }}>★ 5.0</span>
-                <span>Servicio Verificado</span>
-              </div>
-              <h2 className={styles.appleShowcaseTitle}>{business.name}</h2>
-              <p className={styles.appleShowcaseSub}>
-                Atención personalizada y exclusiva. Elige tu fecha y hora con disponibilidad en tiempo real.
-              </p>
             </div>
-          </div>
+          )}
         </div>
       </section>
 
       {/* =========================================================
-          3. FULLSCREEN APPLE SERVICES SECTION (Product Cards Grid)
+          3. FULLSCREEN APPLE SERVICES SECTION (Product Cards Grid con Fotos en Grande)
           ========================================================= */}
       <section id="servicios" className={styles.appleServicesSection}>
         <div className={styles.appleServicesContainer}>
@@ -237,44 +235,136 @@ export default function PublicLanding({ business, formatPrice, onStartBooking }:
       </section>
 
       {/* =========================================================
-          4. MINIMALIST APPLE FOOTER / WHATSAPP SECTION
+          4. CONÓCENOS (Sobre el negocio)
           ========================================================= */}
-      <section className={styles.appleFooterSection}>
-        <div className={styles.appleFooterCard}>
-          <div style={{ textAlign: "inherit" }}>
-            <span style={{ fontSize: "11.5px", fontWeight: 700, textTransform: "uppercase", color: "#0071e3", letterSpacing: "0.8px", display: "block", marginBottom: "4px" }}>
-              Atención Inmediata
-            </span>
-            <h3 style={{ fontSize: "22px", fontWeight: 800, color: "#1d1d1f", margin: "0 0 4px 0", letterSpacing: "-0.01em" }}>
-              ¿Tienes alguna duda o requerimiento especial?
-            </h3>
-            <p style={{ fontSize: "14px", color: "#86868b", margin: 0 }}>
-              Escríbenos directamente a WhatsApp y te atenderemos con gusto.
-            </p>
-            {(address || hours) && (
-              <div style={{ display: "flex", gap: "16px", flexWrap: "wrap", marginTop: "12px", fontSize: "12.5px", color: "#86868b" }}>
-                {address && <span>📍 {address}</span>}
-                {address && hours && <span>•</span>}
-                {hours && <span>🕒 {hours}</span>}
-              </div>
-            )}
-          </div>
+      {aboutText && (
+        <section className={styles.appleInfoSection}>
+          <div className={styles.appleInfoContainer}>
+            <div className={styles.appleCardWhite}>
+              <span className={styles.appleSectionTag} style={{ color: "#0071e3" }}>CONÓCENOS</span>
+              <h2 className={styles.appleSectionTitle} style={{ fontSize: "28px", marginBottom: "16px" }}>
+                Sobre {business.name}
+              </h2>
+              <p style={{ fontSize: "15px", color: "#475569", lineHeight: "1.7", margin: "0 0 24px 0" }}>
+                {aboutText}
+              </p>
 
-          {phone && whatsAppInquiryUrl && (
-            <a
-              href={whatsAppInquiryUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={styles.appleWhatsAppBtn}
-            >
-              <span>💬</span>
-              <span>Escribir al WhatsApp</span>
-            </a>
-          )}
+              <div className={styles.appleContactPillsGrid}>
+                {phone && (
+                  <div className={styles.appleContactPill}>
+                    <span style={{ fontSize: "22px" }}>📞</span>
+                    <div>
+                      <span className={styles.applePillLabel}>WhatsApp / Teléfono</span>
+                      <span className={styles.applePillValue}>{phone}</span>
+                    </div>
+                  </div>
+                )}
+                {hours && (
+                  <div className={styles.appleContactPill}>
+                    <span style={{ fontSize: "22px" }}>🕒</span>
+                    <div>
+                      <span className={styles.applePillLabel}>Horario de Atención</span>
+                      <span className={styles.applePillValue}>{hours}</span>
+                    </div>
+                  </div>
+                )}
+                {address && (
+                  <div className={styles.appleContactPill}>
+                    <span style={{ fontSize: "22px" }}>📍</span>
+                    <div>
+                      <span className={styles.applePillLabel}>Dirección</span>
+                      <span className={styles.applePillValue}>{address}</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* =========================================================
+          5. GARANTÍA Y COMPROMISO (¿Por qué elegirnos?)
+          ========================================================= */}
+      {features && features.length > 0 && (
+        <section className={styles.appleInfoSection}>
+          <div className={styles.appleInfoContainer}>
+            <div className={styles.appleCardWhite}>
+              <span className={styles.appleSectionTag} style={{ color: "#0071e3" }}>GARANTÍA Y COMPROMISO</span>
+              <h2 className={styles.appleSectionTitle} style={{ fontSize: "28px", marginBottom: "20px" }}>
+                ¿Por qué elegirnos?
+              </h2>
+
+              <div className={styles.appleFeaturesGrid}>
+                {features.map((feat, index) => (
+                  <div key={index} className={styles.appleFeatureCard}>
+                    <div className={styles.appleFeatureIcon}>
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0071e3" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                        <polyline points="9 11 13 15 9" />
+                      </svg>
+                    </div>
+                    <h3 className={styles.appleFeatureTitle}>{feat.title}</h3>
+                    <p className={styles.appleFeatureDesc}>{feat.desc}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* =========================================================
+          6. BANNER EJECUTIVO INFERIOR (ATENCIÓN PERSONALIZADA)
+          ========================================================= */}
+      <section className={styles.appleInfoSection} style={{ paddingBottom: "60px" }}>
+        <div className={styles.appleInfoContainer}>
+          <div className={styles.appleDarkBanner}>
+            <div style={{ display: "flex", flexDirection: "column", gap: "8px", maxWidth: "580px" }}>
+              <span style={{ fontSize: "11px", fontWeight: 800, textTransform: "uppercase", color: "#38bdf8", letterSpacing: "0.8px" }}>
+                ATENCIÓN PERSONALIZADA
+              </span>
+              <h3 style={{ fontSize: "clamp(22px, 3vw, 28px)", fontWeight: 850, margin: 0, color: "white", letterSpacing: "-0.02em" }}>
+                ¿Tienes alguna duda antes de agendar?
+              </h3>
+              <p style={{ fontSize: "14px", color: "#94a3b8", margin: 0, lineHeight: 1.5 }}>
+                Estamos aquí para orientarte sobre servicios, presupuestos o requerimientos especiales.
+              </p>
+              {(address || hours) && (
+                <div style={{ display: "flex", gap: "16px", flexWrap: "wrap", marginTop: "8px", fontSize: "12.5px", color: "#cbd5e1" }}>
+                  {address && <span>📍 {address}</span>}
+                  {address && hours && <span>•</span>}
+                  {hours && <span>🕒 {hours}</span>}
+                </div>
+              )}
+            </div>
+
+            <div className={styles.appleDarkBannerBtns}>
+              {phone && whatsAppInquiryUrl && (
+                <a
+                  href={whatsAppInquiryUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={styles.appleGreenBtn}
+                >
+                  <span>💬</span>
+                  <span>Escribir al WhatsApp</span>
+                </a>
+              )}
+              <button
+                type="button"
+                onClick={() => onStartBooking()}
+                className={styles.appleBluePillBtn}
+              >
+                <span>⚡</span>
+                <span>Agendar Cita Online</span>
+              </button>
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* Floating CTA for Mobile */}
+      {/* Floating CTA for Mobile Only (hidden on desktop) */}
       <div className={styles.floatingCTA}>
         <button
           type="button"
