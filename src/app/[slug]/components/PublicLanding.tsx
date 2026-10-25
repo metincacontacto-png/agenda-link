@@ -15,7 +15,7 @@ export default function PublicLanding({ business, formatPrice, onStartBooking }:
   const heroTitle = business.landingTitle || business.name;
   const heroSubtitle =
     business.landingSubtitle ||
-    "Reserva tu hora en segundos sin llamadas ni demoras. Selecciona tu servicio y asegura tu atención de inmediato.";
+    "Reserva tu hora en segundos, sin llamadas ni fricción. Elige tu servicio y asegura tu atención de inmediato.";
   const coverUrl = business.landingCoverUrl || business.landingMobileCoverUrl || "";
   const phone = business.landingPhone || "";
   const address = business.landingAddress || "";
@@ -24,194 +24,252 @@ export default function PublicLanding({ business, formatPrice, onStartBooking }:
   const whatsAppInquiryUrl = phone
     ? buildDirectWhatsAppUrl(
         phone,
-        `¡Hola ${business.name}! 👋 Tengo una consulta sobre los servicios y disponibilidad de horas.`
+        `¡Hola ${business.name}! 👋 Tengo una consulta sobre sus servicios y disponibilidad de horas.`
       )
     : "";
 
   return (
-    <div className={styles.landingContainer}>
-      <div className={styles.classicCardContainer}>
-        {/* 1. PORTADA HERO LIMPIA */}
-        <div className={styles.classicCoverBanner}>
-          {coverUrl ? (
-            <img
-              src={coverUrl}
-              alt={business.name}
-              className={styles.classicCoverImg}
-              loading="eager"
-            />
-          ) : (
-            <div style={{ width: "100%", height: "100%", background: "linear-gradient(135deg, #0066FF 0%, #3b82f6 50%, #0284c7 100%)" }} />
-          )}
-
-          <div className={styles.classicCoverBadge}>
-            <span className={styles.pulseDot} style={{ background: "#16a34a" }}></span>
-            <span>Atención Hoy</span>
-          </div>
-        </div>
-
-        {/* 2. CABECERA DEL NEGOCIO & BOTÓN PRINCIPAL DE AGENDAR */}
-        <div className={styles.classicHeaderSection}>
-          <div className={styles.classicAvatarWrapper}>
-            <div className={styles.classicAvatar}>
-              {business.logoUrl ? (
-                <img
-                  src={business.logoUrl}
-                  alt={business.name}
-                  className={styles.classicAvatarImg}
-                />
-              ) : (
-                <div className={styles.classicAvatarFallback}>
-                  {business.name.substring(0, 2).toUpperCase()}
-                </div>
+    <div className={styles.landingContainer} style={{ width: "100%", maxWidth: "100%", padding: 0 }}>
+      {/* =========================================================
+          1. APPLE BLUR FLOATING NAVIGATION BAR
+          ========================================================= */}
+      <header className={styles.appleNav}>
+        <div className={styles.appleNavInner}>
+          <div className={styles.appleNavBrand}>
+            {business.logoUrl ? (
+              <img
+                src={business.logoUrl}
+                alt={business.name}
+                className={styles.appleNavLogo}
+              />
+            ) : (
+              <div className={styles.appleNavLogoFallback}>
+                {business.name.substring(0, 2).toUpperCase()}
+              </div>
+            )}
+            <div style={{ display: "flex", flexDirection: "column", textAlign: "left" }}>
+              <span className={styles.appleNavTitle}>{business.name}</span>
+              {business.category && (
+                <span className={styles.appleNavCategory}>{business.category}</span>
               )}
             </div>
-
-            <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "12px", fontWeight: 600, color: "#64748b" }}>
-              {address && <span>📍 {address.split(",")[0]}</span>}
-              <span style={{ color: "#eab308", fontWeight: 800 }}>★ 5.0</span>
-            </div>
           </div>
 
-          {business.category && (
-            <span className={styles.classicMetaBadge}>{business.category}</span>
-          )}
-
-          <h1 className={styles.classicBusinessName}>{heroTitle}</h1>
-          <p className={styles.classicSubtitle}>{heroSubtitle}</p>
-
-          {/* BOTÓN GIGANTE DE ALTA CONVERSIÓN (El centro de atención) */}
-          <div className={styles.classicHeroCtaBox}>
+          <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+            <span style={{ display: "inline-flex", alignItems: "center", gap: "6px", fontSize: "12px", color: "#86868b", fontWeight: 500 }}>
+              <span className={styles.pulseDot} style={{ background: "#34c759" }}></span>
+              <span>Disponible hoy</span>
+            </span>
             <button
               type="button"
-              className={styles.classicPrimaryBtn}
+              className={styles.appleNavBtn}
               onClick={() => onStartBooking()}
             >
-              <span>⚡</span>
-              <span>Agendar Cita Online Ahora</span>
+              Agendar Cita
+            </button>
+          </div>
+        </div>
+      </header>
+
+      {/* =========================================================
+          2. FULLSCREEN APPLE HERO SECTION
+          ========================================================= */}
+      <section className={styles.appleHeroSection}>
+        <div className={styles.appleHeroContainer}>
+          {/* Pill Badge */}
+          <div className={styles.appleHeroBadge}>
+            <span>✨</span>
+            <span>Agendamiento Online 24/7</span>
+          </div>
+
+          {/* Big Confident Headline */}
+          <h1 className={styles.appleHeroTitle}>{heroTitle}</h1>
+
+          {/* Subtitle */}
+          <p className={styles.appleHeroSubtitle}>{heroSubtitle}</p>
+
+          {/* Apple Action CTAs */}
+          <div className={styles.appleHeroCtas}>
+            <button
+              type="button"
+              className={styles.applePrimaryBtn}
+              onClick={() => onStartBooking()}
+            >
+              <span>⚡ Agendar Cita Online</span>
               <span style={{ fontSize: "18px" }}>→</span>
             </button>
+            <a href="#servicios" className={styles.appleSecondaryBtn}>
+              <span>Ver Servicios</span>
+              <span style={{ fontSize: "14px" }}>↓</span>
+            </a>
+          </div>
 
-            <div className={styles.classicHeroTrust}>
-              <span style={{ display: "inline-flex", alignItems: "center", gap: "4px", color: "#16a34a", fontWeight: 700 }}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                Confirmación Inmediata
-              </span>
-              <span>•</span>
-              <span>Sin esperas</span>
-              <span>•</span>
-              <span>Aviso a WhatsApp</span>
+          {/* Micro Trust Row */}
+          <div className={styles.appleMicroTrust}>
+            <span style={{ display: "inline-flex", alignItems: "center", gap: "6px", color: "#16a34a", fontWeight: 600 }}>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              Confirmación Inmediata
+            </span>
+            <span>•</span>
+            <span>Sin esperas ni llamadas</span>
+            <span>•</span>
+            <span>Aviso a WhatsApp</span>
+          </div>
+
+          {/* CINEMATIC SHOWCASE BANNER (Hardware/Keynote Style) */}
+          <div className={styles.appleShowcaseBanner}>
+            {coverUrl ? (
+              <img
+                src={coverUrl}
+                alt={business.name}
+                className={styles.appleShowcaseImg}
+                loading="eager"
+              />
+            ) : (
+              <div style={{ width: "100%", height: "100%", background: "linear-gradient(135deg, #0071e3 0%, #1e1e24 100%)" }} />
+            )}
+
+            <div className={styles.appleShowcaseOverlay}>
+              <div className={styles.appleShowcaseBadge}>
+                {address && <span>📍 {address}</span>}
+                {address && <span>•</span>}
+                <span style={{ color: "#fcd34d", fontWeight: 700 }}>★ 5.0</span>
+                <span>Servicio Verificado</span>
+              </div>
+              <h2 className={styles.appleShowcaseTitle}>{business.name}</h2>
+              <p className={styles.appleShowcaseSub}>
+                Atención personalizada y exclusiva. Elige tu fecha y hora con disponibilidad en tiempo real.
+              </p>
             </div>
           </div>
         </div>
+      </section>
 
-        {/* 3. CATÁLOGO DE SERVICIOS DIRECTO */}
-        <div className={styles.classicServicesSection}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "4px" }}>
-            <h2 className={styles.classicSectionTitle}>Servicios Disponibles</h2>
-            {business.services && business.services.length > 0 && (
-              <span style={{ fontSize: "11.5px", fontWeight: 700, color: "#0066FF", background: "#eff6ff", padding: "2px 8px", borderRadius: "999px" }}>
-                {business.services.length} {business.services.length === 1 ? "servicio" : "servicios"}
-              </span>
-            )}
+      {/* =========================================================
+          3. FULLSCREEN APPLE SERVICES SECTION (Product Cards Grid)
+          ========================================================= */}
+      <section id="servicios" className={styles.appleServicesSection}>
+        <div className={styles.appleServicesContainer}>
+          <div className={styles.appleSectionHeader}>
+            <div>
+              <span className={styles.appleSectionTag}>Catálogo Oficial</span>
+              <h2 className={styles.appleSectionTitle}>Servicios Disponibles</h2>
+              <p className={styles.appleSectionSubtitle}>
+                Precios transparentes y duración exacta. Selecciona tu servicio para reservar:
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => onStartBooking()}
+              className={styles.applePrimaryBtn}
+              style={{ padding: "10px 24px", fontSize: "14px" }}
+            >
+              ⚡ Agendar Ahora
+            </button>
           </div>
-          <p className={styles.classicSectionSub}>Selecciona el servicio que deseas agendar:</p>
 
-          <div className={styles.classicServicesList}>
+          {/* Responsive Grid of Apple Cards */}
+          <div className={styles.appleServicesGrid}>
             {business.services && business.services.length > 0 ? (
               business.services.map((service) => (
                 <div
                   key={service.id}
-                  className={styles.classicServiceCard}
+                  className={styles.appleServiceCard}
                   onClick={() => onStartBooking(service)}
                 >
-                  <div style={{ display: "flex", alignItems: "center", gap: "12px", minWidth: 0, flex: 1 }}>
-                    <div className={styles.classicServiceIcon}>
+                  <div className={styles.appleServiceCardTop}>
+                    <div className={styles.appleServiceCardIcon}>
                       {service.imageUrl ? (
-                        <img src={service.imageUrl} alt={service.name} className={styles.classicServiceImg} />
+                        <img
+                          src={service.imageUrl}
+                          alt={service.name}
+                          className={styles.appleServiceCardImg}
+                        />
                       ) : (
                         <span>⚡</span>
                       )}
                     </div>
-                    <div style={{ minWidth: 0, textAlign: "left" }}>
-                      <h3 className={styles.classicServiceTitle}>{service.name}</h3>
-                      <span className={styles.classicServiceDuration}>
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <circle cx="12" cy="12" r="10" />
-                          <polyline points="12 6 12 12 16 14" />
-                        </svg>
-                        {service.duration} min
-                      </span>
+
+                    <div className={styles.appleServiceCardDuration}>
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="12" cy="12" r="10" />
+                        <polyline points="12 6 12 12 16 14" />
+                      </svg>
+                      <span>{service.duration} min</span>
                     </div>
+
+                    <h3 className={styles.appleServiceCardTitle}>{service.name}</h3>
                   </div>
 
-                  <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "6px", flexShrink: 0 }}>
-                    <span className={styles.classicServicePrice}>
-                      {formatPrice(service.price, business.currency)}
-                    </span>
-                    <span className={styles.classicReservePill}>
-                      Reservar →
-                    </span>
+                  <div className={styles.appleServiceCardBottom}>
+                    <div>
+                      <span style={{ fontSize: "11px", color: "#86868b", fontWeight: 600, display: "block" }}>
+                        Inversión
+                      </span>
+                      <span className={styles.appleServiceCardPrice}>
+                        {formatPrice(service.price, business.currency)}
+                      </span>
+                    </div>
+
+                    <button
+                      type="button"
+                      className={styles.appleServiceCardBtn}
+                    >
+                      <span>Reservar</span>
+                      <span>→</span>
+                    </button>
                   </div>
                 </div>
               ))
             ) : (
-              <p style={{ fontSize: "13.5px", color: "var(--text-secondary)", margin: "16px 0" }}>
-                No hay servicios configurados por el momento.
+              <p style={{ fontSize: "14px", color: "#86868b", margin: "24px 0" }}>
+                No hay servicios configurados actualmente.
               </p>
             )}
           </div>
         </div>
+      </section>
 
-        {/* 4. INFORMACIÓN DEL LOCAL & HORARIOS (Si existen) */}
-        {(address || hours) && (
-          <div className={styles.classicInfoStrip}>
-            {address && (
-              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                <span style={{ fontSize: "16px" }}>📍</span>
-                <div>
-                  <span style={{ fontWeight: 700, color: "#0f172a", display: "block" }}>Dirección</span>
-                  <span>{address}</span>
-                </div>
-              </div>
-            )}
-            {hours && (
-              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                <span style={{ fontSize: "16px" }}>🕒</span>
-                <div>
-                  <span style={{ fontWeight: 700, color: "#0f172a", display: "block" }}>Horario de Atención</span>
-                  <span>{hours}</span>
-                </div>
+      {/* =========================================================
+          4. MINIMALIST APPLE FOOTER / WHATSAPP SECTION
+          ========================================================= */}
+      <section className={styles.appleFooterSection}>
+        <div className={styles.appleFooterCard}>
+          <div style={{ textAlign: "inherit" }}>
+            <span style={{ fontSize: "11.5px", fontWeight: 700, textTransform: "uppercase", color: "#0071e3", letterSpacing: "0.8px", display: "block", marginBottom: "4px" }}>
+              Atención Inmediata
+            </span>
+            <h3 style={{ fontSize: "22px", fontWeight: 800, color: "#1d1d1f", margin: "0 0 4px 0", letterSpacing: "-0.01em" }}>
+              ¿Tienes alguna duda o requerimiento especial?
+            </h3>
+            <p style={{ fontSize: "14px", color: "#86868b", margin: 0 }}>
+              Escríbenos directamente a WhatsApp y te atenderemos con gusto.
+            </p>
+            {(address || hours) && (
+              <div style={{ display: "flex", gap: "16px", flexWrap: "wrap", marginTop: "12px", fontSize: "12.5px", color: "#86868b" }}>
+                {address && <span>📍 {address}</span>}
+                {address && hours && <span>•</span>}
+                {hours && <span>🕒 {hours}</span>}
               </div>
             )}
           </div>
-        )}
 
-        {/* 5. DUDAS Y CONSULTAS AL WHATSAPP */}
-        {phone && whatsAppInquiryUrl && (
-          <div className={styles.classicWhatsAppCard}>
-            <div style={{ textAlign: "inherit" }}>
-              <div style={{ fontSize: "13.5px", fontWeight: 750, color: "#0f172a" }}>
-                ¿Tienes alguna duda antes de agendar?
-              </div>
-              <div style={{ fontSize: "12px", color: "#475569", marginTop: "2px" }}>
-                Escríbenos directamente y te responderemos a la brevedad.
-              </div>
-            </div>
+          {phone && whatsAppInquiryUrl && (
             <a
               href={whatsAppInquiryUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className={styles.classicWhatsAppBtn}
+              className={styles.appleWhatsAppBtn}
             >
               <span>💬</span>
               <span>Escribir al WhatsApp</span>
             </a>
-          </div>
-        )}
-      </div>
+          )}
+        </div>
+      </section>
 
-      {/* Floating Action Bar para Móviles */}
+      {/* Floating CTA for Mobile */}
       <div className={styles.floatingCTA}>
         <button
           type="button"
