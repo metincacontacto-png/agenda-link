@@ -32,7 +32,7 @@ export default function PublicLanding({ business, formatPrice, onStartBooking }:
     : "";
 
   return (
-    <div className={styles.landingContainer} style={{ width: "100%", maxWidth: "100%", padding: 0 }}>
+    <div className={styles.appleLandingWrapper}>
       {/* =========================================================
           1. APPLE BLUR FLOATING NAVIGATION BAR
           ========================================================= */}
@@ -132,12 +132,24 @@ export default function PublicLanding({ business, formatPrice, onStartBooking }:
           {/* CLEAN SHOWCASE BANNER (100% limpio, sin gradientes negras ni letras encima) */}
           {coverUrl && (
             <div className={styles.appleShowcaseBanner}>
-              <img
-                src={coverUrl}
-                alt={business.name}
-                className={styles.appleShowcaseImg}
-                loading="eager"
-              />
+              {business.landingMobileCoverUrl && business.landingCoverUrl ? (
+                <picture>
+                  <source media="(max-width: 640px)" srcSet={business.landingMobileCoverUrl} />
+                  <img
+                    src={business.landingCoverUrl}
+                    alt={business.name}
+                    className={styles.appleShowcaseImg}
+                    loading="eager"
+                  />
+                </picture>
+              ) : (
+                <img
+                  src={coverUrl}
+                  alt={business.name}
+                  className={styles.appleShowcaseImg}
+                  loading="eager"
+                />
+              )}
             </div>
           )}
         </div>
@@ -252,7 +264,11 @@ export default function PublicLanding({ business, formatPrice, onStartBooking }:
               <div className={styles.appleContactPillsGrid}>
                 {phone && (
                   <div className={styles.appleContactPill}>
-                    <span style={{ fontSize: "22px" }}>📞</span>
+                    <div className={styles.applePillIconWrapper}>
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#475569" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                      </svg>
+                    </div>
                     <div>
                       <span className={styles.applePillLabel}>WhatsApp / Teléfono</span>
                       <span className={styles.applePillValue}>{phone}</span>
@@ -261,7 +277,12 @@ export default function PublicLanding({ business, formatPrice, onStartBooking }:
                 )}
                 {hours && (
                   <div className={styles.appleContactPill}>
-                    <span style={{ fontSize: "22px" }}>🕒</span>
+                    <div className={styles.applePillIconWrapper}>
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#475569" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="12" cy="12" r="10" />
+                        <polyline points="12 6 12 12 16 14" />
+                      </svg>
+                    </div>
                     <div>
                       <span className={styles.applePillLabel}>Horario de Atención</span>
                       <span className={styles.applePillValue}>{hours}</span>
@@ -270,7 +291,12 @@ export default function PublicLanding({ business, formatPrice, onStartBooking }:
                 )}
                 {address && (
                   <div className={styles.appleContactPill}>
-                    <span style={{ fontSize: "22px" }}>📍</span>
+                    <div className={styles.applePillIconWrapper}>
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e11d48" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                        <circle cx="12" cy="10" r="3" />
+                      </svg>
+                    </div>
                     <div>
                       <span className={styles.applePillLabel}>Dirección</span>
                       <span className={styles.applePillValue}>{address}</span>
@@ -299,9 +325,9 @@ export default function PublicLanding({ business, formatPrice, onStartBooking }:
                 {features.map((feat, index) => (
                   <div key={index} className={styles.appleFeatureCard}>
                     <div className={styles.appleFeatureIcon}>
-                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0071e3" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0071e3" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                        <polyline points="9 11 13 15 9" />
+                        <polyline points="9 12 11 14 15 10" />
                       </svg>
                     </div>
                     <h3 className={styles.appleFeatureTitle}>{feat.title}</h3>
@@ -332,9 +358,19 @@ export default function PublicLanding({ business, formatPrice, onStartBooking }:
               </p>
               {(address || hours) && (
                 <div style={{ display: "flex", gap: "16px", flexWrap: "wrap", marginTop: "8px", fontSize: "12.5px", color: "#cbd5e1" }}>
-                  {address && <span>📍 {address}</span>}
+                  {address && (
+                    <span style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                      {address}
+                    </span>
+                  )}
                   {address && hours && <span>•</span>}
-                  {hours && <span>🕒 {hours}</span>}
+                  {hours && (
+                    <span style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                      {hours}
+                    </span>
+                  )}
                 </div>
               )}
             </div>
@@ -347,7 +383,7 @@ export default function PublicLanding({ business, formatPrice, onStartBooking }:
                   rel="noopener noreferrer"
                   className={styles.appleGreenBtn}
                 >
-                  <span>💬</span>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
                   <span>Escribir al WhatsApp</span>
                 </a>
               )}
@@ -356,7 +392,7 @@ export default function PublicLanding({ business, formatPrice, onStartBooking }:
                 onClick={() => onStartBooking()}
                 className={styles.appleBluePillBtn}
               >
-                <span>⚡</span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
                 <span>Agendar Cita Online</span>
               </button>
             </div>
