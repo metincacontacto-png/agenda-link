@@ -167,7 +167,7 @@ export default function AdminDashboard({ params }: { params: Promise<{ slug: str
   }, [business, hasPromptedPaywall]);
 
   // Estados de la Guía Paso a Paso
-  const [isFirstStepsCollapsed, setIsFirstStepsCollapsed] = useState(false);
+  const [isFirstStepsCollapsed, setIsFirstStepsCollapsed] = useState(true);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [copiedShareLink, setCopiedShareLink] = useState(false);
 
@@ -383,13 +383,9 @@ export default function AdminDashboard({ params }: { params: Promise<{ slug: str
           isProfileDropdownOpen={isProfileDropdownOpen}
           onProfileDropdownChange={setIsProfileDropdownOpen}
           onOpenFirstSteps={() => {
+            setActiveTab("paso-a-paso");
             setIsFirstStepsCollapsed(false);
-            const el = document.getElementById("guia-paso-a-paso");
-            if (el) {
-              window.scrollTo({ top: 0, behavior: "smooth" });
-            } else {
-              setIsFirstStepsModalOpen(true);
-            }
+            window.scrollTo({ top: 0, behavior: "smooth" });
           }}
           onOpenBillingModal={() => setIsBillingModalOpen(true)}
         />
