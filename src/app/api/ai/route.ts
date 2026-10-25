@@ -3,14 +3,12 @@ import { prisma } from "@/lib/db";
 import { requireSession, requireBusinessMembership } from "@/server/authorize";
 import { callGemini } from "@/server/gemini";
 import { logServerError } from "@/server/observability";
+import { enforceRateLimit } from "@/server/rate-limit";
 
 export async function POST(request: Request) {
   let businessId: string | undefined;
 
   try {
-    const session = await requireSession(request);
-    if (!session.ok) return session.response;
-
     const body = await request.json().catch(() => null);
     if (!body || typeof body !== "object") {
       return NextResponse.json({ error: "Cuerpo de solicitud inválido" }, { status: 400 });
@@ -23,7 +21,7 @@ export async function POST(request: Request) {
     }
 
     const business = await prisma.business.findUnique({
-      where: { slug },
+      where: { slug: slug.trim() },
       include: {
         services: { select: { id: true, name: true, price: true, duration: true } },
         professionals: { select: { id: true, name: true } },
@@ -35,10 +33,82 @@ export async function POST(request: Request) {
     }
 
     businessId = business.id;
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://agendalink.cl";
+
+    // ----------------------------------------------------
+    // ACCIÓN PÚBLICA: CHAT CON LINKI SECRETARY PARA CLIENTES
+    // ----------------------------------------------------
+    if (action === "public-secretary-chat" || action === "secretary-chat") {
+      const rateLimitResponse = await enforceRateLimit(request, "BOOKING_RATE_LIMITER", "linki-chat");
+      if (rateLimitResponse) return rateLimitResponse;
+
+      const { userMessage, chatHistory } = body as {
+        userMessage?: string;
+        chatHistory?: Array<{ role: "user" | "assistant"; text: string }>;
+      };
+
+      if (!userMessage || typeof userMessage !== "string" || !userMessage.trim()) {
+        return NextResponse.json({ error: "Falta el mensaje del usuario" }, { status: 400 });
+      }
+
+      if (userMessage.length > 500) {
+        return NextResponse.json({ error: "El mensaje es demasiado extenso (máximo 500 caracteres)" }, { status: 400 });
+      }
+
+      const servicesSummary = business.services
+        .map((s) => `• ${s.name}: $${s.price.toLocaleString("es-CL")} CLP (Duración: ${s.duration} min)`)
+        .join("\n");
+      const professionalsSummary = business.professionals.map((p) => p.name).join(", ");
+
+      const systemInstruction = `Eres Linki, la asistente virtual y recepcionista oficial de reservas de "${business.name}" (${business.category || "Servicios"}).
+Tu misión es atender con calidez, rapidez y profesionalismo a los clientes y visitantes de nuestra página web, respondiendo dudas sobre precios, servicios, horarios y ubicación, y animándolos a agendar su cita de inmediato en esta misma página.
+
+Información oficial y real de "${business.name}":
+- Catálogo de servicios y precios:
+${servicesSummary || "Consulta directa por WhatsApp"}
+- Equipo de profesionales: ${professionalsSummary || "Atención personalizada"}
+- Horario de atención: ${business.landingHours || "Lunes a Sábado de 09:00 a 19:00 hrs"}
+- Dirección / Ubicación: ${business.landingAddress || "Consultar directamente"}
+- Teléfono / WhatsApp: ${business.landingPhone || "No especificado"}
+- Enlace para agendar en línea: ${appUrl}/${business.slug}
+
+Reglas estrictas de atención:
+1. Responde de forma concisa (máximo 2 a 3 oraciones cortas), cálida y directa en español chileno/latinoamericano.
+2. Si preguntan por precios, duración o servicios, entrega la información exacta y clara con los valores en CLP.
+3. Invita siempre amablemente al cliente a agendar directamente haciendo clic en el botón de reservar que tiene en pantalla.
+4. Si preguntan algo que no está en la información, indícales con amabilidad que pueden contactar directamente al negocio por WhatsApp o teléfono.
+5. NUNCA inventes precios, promociones ni horarios que no estén en la lista oficial.
+6. No uses un lenguaje robótico ni digas que eres un simulador de pruebas; eres la asistente oficial de reservas en línea del negocio.`;
+
+      let historyContext = "";
+      if (Array.isArray(chatHistory) && chatHistory.length > 0) {
+        historyContext = "Historial reciente de la conversación:\n" +
+          chatHistory.slice(-6).map((m) => `${m.role === "user" ? "Cliente" : "Linki"}: ${m.text}`).join("\n") +
+          "\n\n";
+      }
+
+      const prompt = `${historyContext}Cliente: ${userMessage.trim()}\nLinki:`;
+
+      const aiResponse = await callGemini({
+        systemInstruction,
+        prompt,
+        temperature: 0.6,
+        maxOutputTokens: 500,
+      });
+
+      return NextResponse.json({
+        success: aiResponse.ok,
+        reply: aiResponse.text || `¡Hola! Con gusto te ayudo a agendar tu cita en ${business.name}. Puedes elegir tu servicio y horario directamente aquí en la página.`,
+        error: aiResponse.error,
+      });
+    }
+
+    // ACCIONES ADMINISTRATIVAS PRIVADAS (Requieren sesión y membresía de negocio)
+    const session = await requireSession(request);
+    if (!session.ok) return session.response;
+
     const auth = await requireBusinessMembership(session.user, business.id);
     if (!auth.ok) return auth.response;
-
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://agendalink.cl";
 
     // ----------------------------------------------------
     // ACCIÓN 1: REPORTE ESTRATÉGICO DE LINKI BUSINESS
@@ -232,65 +302,6 @@ Devuelve la respuesta en formato JSON con la siguiente estructura:
         campaigns: parsedCampaigns,
         clients: clientList.slice(0, 50),
         totalClients: clientList.length,
-      });
-    }
-
-    // ----------------------------------------------------
-    // ACCIÓN 3: CHAT CON LINKI SECRETARY
-    // ----------------------------------------------------
-    if (action === "secretary-chat") {
-      const { userMessage, chatHistory } = body as {
-        userMessage?: string;
-        chatHistory?: Array<{ role: "user" | "assistant"; text: string }>;
-      };
-
-      if (!userMessage || typeof userMessage !== "string") {
-        return NextResponse.json({ error: "Falta el mensaje del usuario" }, { status: 400 });
-      }
-
-      const servicesSummary = business.services
-        .map((s) => `• ${s.name}: $${s.price.toLocaleString("es-CL")} CLP (Duración: ${s.duration} min)`)
-        .join("\n");
-      const professionalsSummary = business.professionals.map((p) => p.name).join(", ");
-
-      const systemInstruction = `Eres Linki Secretary, la asistente virtual oficial de reservas de "${business.name}" (${business.category || "Servicios"}).
-Tu misión es atender a los clientes con amabilidad, rapidez y profesionalismo, respondiendo dudas sobre el negocio y guiándolos a reservar.
-
-Información oficial de "${business.name}":
-- Catálogo de servicios y precios:
-${servicesSummary || "Consulta directa por WhatsApp"}
-- Equipo de profesionales: ${professionalsSummary || "Atención personalizada"}
-- Horario de atención: ${business.landingHours || "Lunes a Sábado de 09:00 a 19:00 hrs"}
-- Dirección / Ubicación: ${business.landingAddress || "Consultar directamente"}
-- Enlace para agendar en línea: ${appUrl}/${business.slug}
-
-Reglas obligatorias:
-1. Responde de forma concisa, cálida y directa en español chileno/latinoamericano.
-2. Si preguntan por precios o duración, da la información exacta de la lista anterior.
-3. Si el cliente quiere reservar, anímalo a hacer clic en el enlace oficial de reservas: ${appUrl}/${business.slug}.
-4. Si preguntan algo que no está en la información, diles amablemente que pueden contactar directamente al negocio.`;
-
-      // Formatear historial
-      let historyContext = "";
-      if (Array.isArray(chatHistory) && chatHistory.length > 0) {
-        historyContext = "Historial reciente de la conversación:\n" +
-          chatHistory.map((m) => `${m.role === "user" ? "Cliente" : "Linki Secretary"}: ${m.text}`).join("\n") +
-          "\n\n";
-      }
-
-      const prompt = `${historyContext}Cliente: ${userMessage.trim()}\nLinki Secretary:`;
-
-      const aiResponse = await callGemini({
-        systemInstruction,
-        prompt,
-        temperature: 0.7,
-        maxOutputTokens: 500,
-      });
-
-      return NextResponse.json({
-        success: aiResponse.ok,
-        reply: aiResponse.text || "¡Hola! Estoy lista para ayudarte a reservar en AgendaLink.",
-        error: aiResponse.error,
       });
     }
 

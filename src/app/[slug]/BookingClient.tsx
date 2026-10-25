@@ -8,6 +8,7 @@ import type { PublicBusinessDTO } from "@/features/booking/public-business-dto";
 import { dateStringAtTimeZone } from "@/features/schedule/time";
 import BookingFlow from "./components/BookingFlow";
 import PublicLanding from "./components/PublicLanding";
+import PublicSecretaryChat from "./components/PublicSecretaryChat";
 import { FEATURES } from "@/lib/features";
 
 type Professional = PublicBusinessDTO["professionals"][number];
@@ -298,6 +299,17 @@ export default function BookingClient({
             setModalError(null);
           }}
           onSubmit={handleBookingSubmit}
+        />
+      )}
+
+      {FEATURES.linkiIA && (
+        <PublicSecretaryChat
+          slug={slug}
+          business={business}
+          onStartBooking={(srv) => {
+            if (srv) setSelectedService(srv);
+            setViewMode("booking");
+          }}
         />
       )}
     </main>

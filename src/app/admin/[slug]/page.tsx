@@ -16,7 +16,6 @@ import ClientsTab from "./tabs/ClientsTab";
 import DashboardTab from "./tabs/DashboardTab";
 import BusinessAiTab from "./tabs/BusinessAiTab";
 import MarketingAiTab from "./tabs/MarketingAiTab";
-import SecretaryAiTab from "./tabs/SecretaryAiTab";
 import ReservationsTab from "./tabs/ReservationsTab";
 import SalesTab from "./tabs/SalesTab";
 import SettingsTab from "./tabs/SettingsTab";
@@ -975,12 +974,27 @@ export default function AdminDashboard({ params }: { params: Promise<{ slug: str
         )}
 
         {activeTab === "secretary" && (
-          <SecretaryAiTab
-            slug={slug}
-            businessName={business.name}
-            serviceCount={business.services.length}
-            services={business.services}
-          />
+          <section className={styles.glassCard} style={{ padding: "32px", textAlign: "center" }}>
+            <div style={{ width: 48, height: 48, borderRadius: "50%", background: "linear-gradient(135deg, #10b981 0%, #059669 100%)", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px", fontWeight: 800, fontSize: 18 }}>
+              LS
+            </div>
+            <h2 style={{ fontSize: "20px", fontWeight: 800, color: "#0f172a", marginBottom: "8px" }}>
+              Linki Secretary está activa en tu página pública
+            </h2>
+            <p style={{ color: "#64748b", fontSize: "14px", maxWidth: "520px", margin: "0 auto 20px", lineHeight: "1.6" }}>
+              Tu asistente virtual inteligente atiende directamente a tus clientes en <strong>agendalink.cl/{slug}</strong>, respondiendo dudas sobre precios, servicios y horarios en tiempo real para guiarlos a reservar.
+            </p>
+            <a
+              href={`/${slug}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={styles.btnPrimary}
+              style={{ display: "inline-flex", alignItems: "center", gap: "6px", textDecoration: "none" }}
+            >
+              <span>Probar Linki en tu página pública</span>
+              <span>↗</span>
+            </a>
+          </section>
         )}
 
         {activeTab === "marketing" && (

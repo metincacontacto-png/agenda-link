@@ -42,7 +42,6 @@ export default function AdminSidebar({ activeTab, onTabChange, onSettingsTabChan
         Asistentes Linki IA {!FEATURES.linkiIA && <ProximamenteBadge style={{ marginLeft: 6 }} />}
       </span>
       <nav className={styles.navList}>
-        {navButton("secretary", "Linki Secretary", <svg className={styles.sidebarIcon} width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>)}
         {navButton("marketing", "Linki Marketing", <svg className={styles.sidebarIcon} width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M23 6l-8.5 8.5-5-5L1 18" /><polyline points="17 6 23 6 23 12" /></svg>)}
         {navButton("business", "Linki Business", <svg className={styles.sidebarIcon} width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9.5 2a2.5 2.5 0 0 1 2.5 2.5v15a2.5 2.5 0 0 1-4.96-.44 2.5 2.5 0 0 1 0-4.12 2.5 2.5 0 0 1 0-4.12A2.5 2.5 0 0 0 14.5 2z" /></svg>)}
       </nav>
