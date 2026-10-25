@@ -15,7 +15,7 @@ export type UserIdentity = {
 };
 
 export type AuthorizationResult =
-  | { ok: true; user: UserIdentity }
+  | { ok: true; user: UserIdentity; role?: string }
   | { ok: false; response: NextResponse };
 
 export async function requireSession(request: Request): Promise<AuthorizationResult> {
@@ -59,7 +59,7 @@ export async function requireBusinessMembership(
   user: UserIdentity,
   businessId: string,
 ): Promise<AuthorizationResult> {
-  if (user.globalRole === "SUPER_ADMIN") return { ok: true, user };
+  if (user.globalRole === "SUPER_ADMIN") return { ok: true, user, role: "SUPER_ADMIN" };
 
   const membership = await prisma.businessMember.findUnique({
     where: {
@@ -68,7 +68,7 @@ export async function requireBusinessMembership(
         userId: user.id,
       },
     },
-    select: { businessId: true },
+    select: { businessId: true, role: true },
   });
   if (!membership) {
     return {
@@ -77,7 +77,7 @@ export async function requireBusinessMembership(
     };
   }
 
-  return { ok: true, user };
+  return { ok: true, user, role: membership.role };
 }
 
 export async function requireSuperAdmin(request: Request): Promise<AuthorizationResult> {

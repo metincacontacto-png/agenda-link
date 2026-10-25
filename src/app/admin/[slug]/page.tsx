@@ -32,6 +32,8 @@ export default function AdminDashboard({ params }: { params: Promise<{ slug: str
   const {
     business,
     accessDenied,
+    notFound,
+    loadError,
     appointmentPagination,
     loadingMoreAppointments,
     loading,
@@ -274,7 +276,26 @@ export default function AdminDashboard({ params }: { params: Promise<{ slug: str
     );
   }
 
-  if (!business) {
+  if (loadError && !business) {
+    return (
+      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh", color: "var(--foreground)", padding: "20px" }}>
+        <div className={styles.glassCard} style={{ textAlign: "center", maxWidth: "420px" }}>
+          <h1 style={{ fontSize: "20px", fontWeight: "800", marginBottom: "12px" }}>Problema de conexión</h1>
+          <p style={{ fontSize: "14px", color: "var(--text-secondary)", marginBottom: "20px" }}>{loadError}</p>
+          <button
+            type="button"
+            onClick={() => void loadAdminData()}
+            className={styles.submitButton}
+            style={{ display: "inline-block", width: "auto", padding: "10px 20px", cursor: "pointer" }}
+          >
+            Reintentar
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (notFound || !business) {
     return (
       <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh", color: "var(--foreground)", padding: "20px" }}>
         <div className={styles.glassCard} style={{ textAlign: "center", maxWidth: "400px" }}>

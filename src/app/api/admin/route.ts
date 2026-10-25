@@ -21,33 +21,31 @@ export async function GET(request: Request) {
     if (!session.ok) return session.response;
 
     const { searchParams } = new URL(request.url);
-    const slug = searchParams.get("slug");
+    const rawSlug = searchParams.get("slug");
     const cursor = searchParams.get("cursor");
     const requestedLimit = searchParams.get("limit");
     const limit = requestedLimit === null ? 50 : Number(requestedLimit);
 
-    if (!slug) {
+    if (!rawSlug || !rawSlug.trim()) {
       return NextResponse.json({ error: "Falta el parámetro slug" }, { status: 400 });
     }
+    const slug = rawSlug.trim();
     if (!Number.isInteger(limit) || limit < 1 || limit > 100 || (cursor !== null && cursor.length > 100)) {
       return NextResponse.json({ error: "Parámetros de paginación inválidos" }, { status: 400 });
     }
 
-    const businessRef = await prisma.business.findUnique({ where: { slug }, select: { id: true } });
+    let businessRef = await prisma.business.findUnique({ where: { slug }, select: { id: true } });
+    if (!businessRef && slug.toLowerCase() !== slug) {
+      businessRef = await prisma.business.findUnique({ where: { slug: slug.toLowerCase() }, select: { id: true } });
+    }
     if (!businessRef) {
       return NextResponse.json({ error: "Negocio no encontrado" }, { status: 404 });
     }
     businessId = businessRef.id;
     const authorization = await requireBusinessMembership(session.user, businessRef.id);
     if (!authorization.ok) return authorization.response;
-    const membership = session.user.globalRole === "SUPER_ADMIN"
-      ? null
-      : await prisma.businessMember.findUnique({
-          where: { businessId_userId: { businessId: businessRef.id, userId: session.user.id } },
-          select: { role: true },
-        });
     const canViewSensitive = session.user.globalRole === "SUPER_ADMIN" ||
-      membership?.role === "OWNER" || membership?.role === "ADMIN";
+      authorization.role === "OWNER" || authorization.role === "ADMIN";
 
     const [business, totalAppointments, appointmentRows] = await Promise.all([
       prisma.business.findUnique({
@@ -181,21 +179,18 @@ export async function POST(request: Request) {
     const parsed = parseBusinessProfileInput(body);
     if (!parsed.ok) return NextResponse.json({ error: parsed.error }, { status: 400 });
 
-    const businessRef = await prisma.business.findUnique({ where: { slug }, select: { id: true } });
+    let businessRef = await prisma.business.findUnique({ where: { slug }, select: { id: true } });
+    if (!businessRef && slug.toLowerCase() !== slug) {
+      businessRef = await prisma.business.findUnique({ where: { slug: slug.toLowerCase() }, select: { id: true } });
+    }
     if (!businessRef) {
       return NextResponse.json({ error: "Negocio no encontrado" }, { status: 404 });
     }
     businessId = businessRef.id;
     const authorization = await requireBusinessMembership(session.user, businessRef.id);
     if (!authorization.ok) return authorization.response;
-    const membership = session.user.globalRole === "SUPER_ADMIN"
-      ? null
-      : await prisma.businessMember.findUnique({
-          where: { businessId_userId: { businessId: businessRef.id, userId: session.user.id } },
-          select: { role: true },
-        });
     const canViewSensitive = session.user.globalRole === "SUPER_ADMIN" ||
-      membership?.role === "OWNER" || membership?.role === "ADMIN";
+      authorization.role === "OWNER" || authorization.role === "ADMIN";
     if (parsed.value.plan !== undefined && !canViewSensitive) {
       return NextResponse.json({ error: "Tu rol no puede cambiar el plan del negocio" }, { status: 403 });
     }

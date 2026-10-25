@@ -9,19 +9,26 @@ export async function GET(request: Request) {
   if (!session.ok) return session.response;
 
   const { searchParams } = new URL(request.url);
-  const slug = searchParams.get("slug");
-  if (!slug) {
+  const rawSlug = searchParams.get("slug");
+  if (!rawSlug || !rawSlug.trim()) {
     return NextResponse.json({ error: "Falta el parámetro slug" }, { status: 400 });
   }
+  const slug = rawSlug.trim();
 
   const startDate = searchParams.get("startDate");
   const endDate = searchParams.get("endDate");
 
   try {
-    const business = await prisma.business.findUnique({
+    let business = await prisma.business.findUnique({
       where: { slug },
       select: { id: true, timezone: true },
     });
+    if (!business && slug.toLowerCase() !== slug) {
+      business = await prisma.business.findUnique({
+        where: { slug: slug.toLowerCase() },
+        select: { id: true, timezone: true },
+      });
+    }
     if (!business) {
       return NextResponse.json({ error: "Negocio no encontrado" }, { status: 404 });
     }
@@ -122,10 +129,17 @@ export async function POST(request: Request) {
   };
 
   try {
-    const business = await prisma.business.findUnique({
-      where: { slug },
+    const cleanSlug = slug.trim();
+    let business = await prisma.business.findUnique({
+      where: { slug: cleanSlug },
       select: { id: true, timezone: true },
     });
+    if (!business && cleanSlug.toLowerCase() !== cleanSlug) {
+      business = await prisma.business.findUnique({
+        where: { slug: cleanSlug.toLowerCase() },
+        select: { id: true, timezone: true },
+      });
+    }
     if (!business) {
       return NextResponse.json({ error: "Negocio no encontrado" }, { status: 404 });
     }
@@ -259,17 +273,24 @@ export async function DELETE(request: Request) {
 
   const { searchParams } = new URL(request.url);
   const id = searchParams.get("id");
-  const slug = searchParams.get("slug");
+  const rawSlug = searchParams.get("slug");
 
-  if (!id || !slug) {
+  if (!id || !rawSlug || !rawSlug.trim()) {
     return NextResponse.json({ error: "Faltan parámetros id o slug" }, { status: 400 });
   }
+  const slug = rawSlug.trim();
 
   try {
-    const business = await prisma.business.findUnique({
+    let business = await prisma.business.findUnique({
       where: { slug },
       select: { id: true },
     });
+    if (!business && slug.toLowerCase() !== slug) {
+      business = await prisma.business.findUnique({
+        where: { slug: slug.toLowerCase() },
+        select: { id: true },
+      });
+    }
     if (!business) {
       return NextResponse.json({ error: "Negocio no encontrado" }, { status: 404 });
     }

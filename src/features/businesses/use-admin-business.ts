@@ -15,6 +15,8 @@ const emptyPagination: AdminAppointmentsPaginationDTO = {
 export function useAdminBusiness(slug: string) {
   const [business, setBusiness] = useState<BusinessAdminDTO | null>(null);
   const [accessDenied, setAccessDenied] = useState(false);
+  const [notFound, setNotFound] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [appointmentPagination, setAppointmentPagination] = useState(emptyPagination);
   const [loadingMoreAppointments, setLoadingMoreAppointments] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -22,20 +24,44 @@ export function useAdminBusiness(slug: string) {
 
   const prevAppointmentsTotal = useRef<number | null>(null);
   const isFetchingRef = useRef(false);
+  const businessRef = useRef<BusinessAdminDTO | null>(null);
+
+  useEffect(() => {
+    businessRef.current = business;
+  }, [business]);
 
   const loadAdminData = useCallback(async () => {
     if (isFetchingRef.current) return;
     isFetchingRef.current = true;
 
     try {
-      const response = await fetch(`/api/admin?slug=${slug}`);
+      const response = await fetch(`/api/admin?slug=${encodeURIComponent(slug.trim())}`);
       if (!response.ok) {
-        setAccessDenied(response.status === 401 || response.status === 403);
-        setBusiness(null);
+        if (response.status === 401 || response.status === 403) {
+          setAccessDenied(true);
+          return;
+        }
+
+        if (response.status === 404) {
+          if (!businessRef.current) {
+            setNotFound(true);
+            setBusiness(null);
+          } else {
+            console.warn("Received 404 during background sync; keeping active business.");
+          }
+          return;
+        }
+
+        console.warn(`Admin request returned status ${response.status}. Retaining current state.`);
+        if (!businessRef.current) {
+          setLoadError("No pudimos conectar con el servidor. Por favor revisa tu conexión o intenta nuevamente.");
+        }
         return;
       }
 
       setAccessDenied(false);
+      setNotFound(false);
+      setLoadError(null);
       const data = await response.json();
       if (data.success && data.business) {
         const newTotal = data.appointmentsPagination?.total ?? data.business.appointments?.length ?? 0;
@@ -54,6 +80,9 @@ export function useAdminBusiness(slug: string) {
       }
     } catch (error) {
       console.error("Error loading admin data:", error);
+      if (!businessRef.current) {
+        setLoadError("Error de conexión al cargar el panel administrativo.");
+      }
     } finally {
       setLoading(false);
       isFetchingRef.current = false;
@@ -63,12 +92,12 @@ export function useAdminBusiness(slug: string) {
   useEffect(() => {
     void loadAdminData();
 
-    // Auto-refresco silencioso cada 10 segundos si la pestaña está activa
+    // Auto-refresco silencioso cada 30 segundos si la pestaña está activa
     const intervalId = setInterval(() => {
       if (typeof document !== "undefined" && document.visibilityState === "visible") {
         void loadAdminData();
       }
-    }, 10000);
+    }, 30000);
 
     // Refresco inmediato al volver a la pestaña o enfocar ventana
     const handleSync = () => {
@@ -98,7 +127,7 @@ export function useAdminBusiness(slug: string) {
     setLoadingMoreAppointments(true);
     try {
       const query = new URLSearchParams({
-        slug,
+        slug: slug.trim(),
         limit: String(appointmentPagination.limit),
         cursor: appointmentPagination.nextCursor,
       });
@@ -121,6 +150,8 @@ export function useAdminBusiness(slug: string) {
     business,
     setBusiness,
     accessDenied,
+    notFound,
+    loadError,
     appointmentPagination,
     loadingMoreAppointments,
     loading,
