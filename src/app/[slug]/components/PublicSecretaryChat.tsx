@@ -3,12 +3,14 @@
 import React, { useState, useRef, useEffect } from "react";
 import { buildDirectWhatsAppUrl } from "@/lib/whatsapp";
 import type { PublicBusinessDTO } from "@/features/booking/public-business-dto";
+import styles from "./PublicSecretaryChat.module.css";
 
 type Service = PublicBusinessDTO["services"][number];
 
 interface PublicSecretaryChatProps {
   slug: string;
   business: PublicBusinessDTO;
+  isBookingFlow?: boolean;
   onStartBooking: (service?: Service) => void;
 }
 
@@ -22,6 +24,7 @@ interface ChatMessage {
 export default function PublicSecretaryChat({
   slug,
   business,
+  isBookingFlow,
   onStartBooking,
 }: PublicSecretaryChatProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -147,35 +150,10 @@ export default function PublicSecretaryChat({
           type="button"
           onClick={() => setIsOpen(true)}
           aria-label="Abrir chat de atención y reservas"
-          style={{
-            position: "fixed",
-            bottom: "22px",
-            right: "22px",
-            zIndex: 990,
-            display: "flex",
-            alignItems: "center",
-            gap: "10px",
-            background: "#ffffff",
-            color: "#0f172a",
-            padding: "10px 18px 10px 12px",
-            borderRadius: "9999px",
-            border: "1px solid rgba(0, 0, 0, 0.08)",
-            boxShadow: "0 10px 30px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.06)",
-            cursor: "pointer",
-            transition: "all 0.25s cubic-bezier(0.16, 1, 0.3, 1)",
-            fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif",
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.transform = "translateY(-3px) scale(1.02)";
-            e.currentTarget.style.boxShadow = "0 14px 35px rgba(0, 0, 0, 0.16), 0 4px 10px rgba(0, 0, 0, 0.08)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = "translateY(0) scale(1)";
-            e.currentTarget.style.boxShadow = "0 10px 30px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.06)";
-          }}
+          className={`${styles.floatingTrigger} ${isBookingFlow ? styles.floatingTriggerBooking : styles.floatingTriggerLanding}`}
         >
           {/* Avatar con pulso verde */}
-          <div style={{ position: "relative", width: "34px", height: "34px" }}>
+          <div style={{ position: "relative", width: "34px", height: "34px", flexShrink: 0 }}>
             <div
               style={{
                 width: "100%",
@@ -208,11 +186,11 @@ export default function PublicSecretaryChat({
             />
           </div>
 
-          <div style={{ textAlign: "left", lineHeight: "1.2" }}>
-            <div style={{ fontSize: "13px", fontWeight: 700, color: "#0f172a" }}>
+          <div className={styles.triggerText}>
+            <div className={styles.triggerTitle}>
               ¿Dudas? Pregúntale a Linki
             </div>
-            <div style={{ fontSize: "11px", color: "#16a34a", fontWeight: 600 }}>
+            <div className={styles.triggerSubtitle}>
               Asistente en línea · Responde al instante
             </div>
           </div>
@@ -226,24 +204,7 @@ export default function PublicSecretaryChat({
         <div
           role="dialog"
           aria-label="Chat con Linki"
-          style={{
-            position: "fixed",
-            bottom: "20px",
-            right: "20px",
-            zIndex: 1000,
-            width: "380px",
-            maxWidth: "calc(100vw - 32px)",
-            height: "560px",
-            maxHeight: "calc(100vh - 40px)",
-            background: "#ffffff",
-            borderRadius: "22px",
-            boxShadow: "0 20px 50px rgba(0, 0, 0, 0.18), 0 4px 15px rgba(0, 0, 0, 0.08)",
-            border: "1px solid rgba(0, 0, 0, 0.08)",
-            display: "flex",
-            flexDirection: "column",
-            overflow: "hidden",
-            fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif",
-          }}
+          className={styles.chatWindow}
         >
           {/* Encabezado estilo Apple Blur */}
           <div

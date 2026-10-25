@@ -306,6 +306,7 @@ export default function BookingClient({
         <PublicSecretaryChat
           slug={slug}
           business={business}
+          isBookingFlow={viewMode === "booking"}
           onStartBooking={(srv) => {
             if (srv) setSelectedService(srv);
             setViewMode("booking");
