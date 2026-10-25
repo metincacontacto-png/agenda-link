@@ -75,7 +75,8 @@ export async function GET(request: Request) {
       if (availableSlots.length === 0) {
         const [year, month, day] = date.split("-").map(Number);
         const currentDate = new Date(Date.UTC(year, month - 1, day));
-        for (let i = 1; i <= 14; i++) {
+        // Search at most 2 days ahead to prevent subrequest / CPU exhaustion on Cloudflare Workers
+        for (let i = 1; i <= 2; i++) {
           const nextDateObj = new Date(currentDate);
           nextDateObj.setUTCDate(nextDateObj.getUTCDate() + i);
           const nextDateStr = nextDateObj.toISOString().slice(0, 10);

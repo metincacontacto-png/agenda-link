@@ -78,8 +78,10 @@ export default function AdminDashboard({ params }: { params: Promise<{ slug: str
   }, [slug]);
 
   React.useEffect(() => {
-    void fetchScheduleBlocks();
-  }, [fetchScheduleBlocks, calendar.weekDates, business, activeTab]);
+    if (activeTab === "calendario" || activeTab === "administracion") {
+      void fetchScheduleBlocks();
+    }
+  }, [fetchScheduleBlocks, calendar.weekDates, business?.id, activeTab]);
 
   const handleBlockSlot = async (date: Date, hour: string) => {
     const tz = business?.timezone || "America/Santiago";
