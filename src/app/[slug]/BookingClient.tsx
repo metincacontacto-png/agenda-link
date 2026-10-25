@@ -224,7 +224,7 @@ export default function BookingClient({
   }
 
   return (
-    <main className={styles.container}>
+    <main className={viewMode === "landing" ? styles.landingMainWrapper : styles.container}>
       {isDemo && (
         <div
           style={{
