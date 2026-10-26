@@ -59,7 +59,7 @@ export default function PublicLanding({ business, formatPrice, onStartBooking }:
           </div>
 
           <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-            <span style={{ display: "inline-flex", alignItems: "center", gap: "6px", fontSize: "12px", color: "#86868b", fontWeight: 500 }}>
+            <span className={styles.appleNavStatus} style={{ display: "inline-flex", alignItems: "center", gap: "6px", fontSize: "12px", color: "#86868b", fontWeight: 500 }}>
               <span className={styles.pulseDot} style={{ background: "#34c759" }}></span>
               <span>Disponible hoy</span>
             </span>
@@ -399,17 +399,6 @@ export default function PublicLanding({ business, formatPrice, onStartBooking }:
           </div>
         </div>
       </section>
-
-      {/* Floating CTA for Mobile Only (hidden on desktop) */}
-      <div className={styles.floatingCTA}>
-        <button
-          type="button"
-          className={styles.ctaBtn}
-          onClick={() => onStartBooking()}
-        >
-          ⚡ Agenda tu Cita Online
-        </button>
-      </div>
     </div>
   );
 }

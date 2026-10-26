@@ -2196,7 +2196,112 @@
 
 @media (max-width: 640px) {
   .landingMainWrapper {
-    padding: 0 0 80px 0;
+    padding: 0 0 40px 0;
+  }
+
+  .floatingCTA {
+    display: none !important;
+  }
+
+  /* 1. Header: limpio, sin apretar elementos */
+  .appleNavInner {
+    padding: 0 16px;
+    height: 52px;
+  }
+
+  .appleNavStatus {
+    display: none !important;
+  }
+
+  .appleNavBtn {
+    padding: 6px 14px;
+    font-size: 12px;
+  }
+
+  /* 2. Hero: compacto, enfocado 100% en el agendamiento */
+  .appleHeroSection {
+    padding: 24px 16px 28px 16px;
+  }
+
+  .appleHeroBadge {
+    display: none !important; /* Quitar badge redundante en móvil */
+  }
+
+  .appleHeroTitle {
+    font-size: 26px;
+    line-height: 1.15;
+    margin: 0 0 8px 0;
+  }
+
+  .appleHeroSubtitle {
+    font-size: 14.5px;
+    line-height: 1.45;
+    margin: 0 0 14px 0;
+  }
+
+  .appleHeroMetaRow {
+    gap: 8px;
+    font-size: 12px;
+    margin-bottom: 16px;
+  }
+
+  /* 3. Botones del Hero: una sola acción clara y destacada */
+  .appleHeroCtas {
+    margin-bottom: 14px;
+    width: 100%;
+    gap: 10px;
+  }
+
+  .applePrimaryBtn {
+    width: 100%;
+    padding: 13px 20px;
+    font-size: 15px;
+    justify-content: center;
+  }
+
+  .appleSecondaryBtn {
+    display: none !important; /* Evitar 2 botones gigantes apilados en el hero móvil */
+  }
+
+  .appleMicroTrust {
+    font-size: 11px;
+    gap: 8px;
+  }
+
+  /* 4. Showcase Banner compacto en móvil para que los servicios aparezcan de inmediato */
+  .appleShowcaseBanner {
+    margin-top: 18px;
+    border-radius: 16px;
+    max-height: 200px;
+  }
+
+  .appleShowcaseImg {
+    max-height: 200px;
+  }
+
+  /* 5. Sección de Servicios: protagonismo total al catálogo */
+  .appleServicesSection {
+    padding: 28px 16px 40px 16px;
+  }
+
+  .appleSectionHeader {
+    margin-bottom: 20px;
+  }
+
+  .appleSectionHeader button {
+    display: none !important; /* Cada tarjeta ya tiene su botón Reservar */
+  }
+
+  .appleServicesGrid {
+    gap: 16px;
+  }
+
+  .appleServiceCard {
+    border-radius: 18px;
+  }
+
+  .appleServiceImageWrapper {
+    height: 180px;
   }
 
   .bentoNav {
@@ -2212,6 +2317,7 @@
     padding: 28px 20px;
   }
 }
+
 
 
 
