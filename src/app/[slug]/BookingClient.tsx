@@ -36,7 +36,53 @@ export default function BookingClient({
   const [showBookingContact, setShowBookingContact] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [modalError, setModalError] = useState<string | null>(null);
-  const [viewMode, setViewMode] = useState<"landing" | "booking">("landing");
+  const [viewMode, setViewMode] = useState<"landing" | "booking">(() => {
+    if (typeof window !== "undefined") {
+      const searchParams = new URLSearchParams(window.location.search);
+      const hash = window.location.hash.toLowerCase();
+      if (
+        searchParams.get("reservar") === "1" ||
+        searchParams.get("reservar") === "true" ||
+        searchParams.get("agendar") === "1" ||
+        searchParams.get("agendar") === "true" ||
+        searchParams.get("horario") === "1" ||
+        searchParams.get("horarios") === "1" ||
+        searchParams.get("book") === "1" ||
+        hash === "#reservar" ||
+        hash === "#horarios" ||
+        hash === "#agendar"
+      ) {
+        return "booking";
+      }
+    }
+    return "landing";
+  });
+
+  // Escuchar cambios de hash o navegación directa al horario
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const checkDirectBooking = () => {
+      const searchParams = new URLSearchParams(window.location.search);
+      const hash = window.location.hash.toLowerCase();
+      if (
+        searchParams.get("reservar") === "1" ||
+        searchParams.get("reservar") === "true" ||
+        searchParams.get("agendar") === "1" ||
+        searchParams.get("agendar") === "true" ||
+        searchParams.get("horario") === "1" ||
+        searchParams.get("horarios") === "1" ||
+        searchParams.get("book") === "1" ||
+        hash === "#reservar" ||
+        hash === "#horarios" ||
+        hash === "#agendar"
+      ) {
+        setViewMode("booking");
+      }
+    };
+    checkDirectBooking();
+    window.addEventListener("hashchange", checkDirectBooking);
+    return () => window.removeEventListener("hashchange", checkDirectBooking);
+  }, []);
 
   useEffect(() => {
     if (!slug) return;
@@ -73,7 +119,13 @@ export default function BookingClient({
           setSelectedProfessional(bizProfs[0]);
         }
         if (data.business?.services?.length > 0 && !selectedService) {
-          setSelectedService(data.business.services[0]);
+          const paramServiceId = typeof window !== "undefined"
+            ? new URLSearchParams(window.location.search).get("serviceId")
+            : null;
+          const matchedService = paramServiceId
+            ? data.business.services.find((s: Service) => s.id === paramServiceId)
+            : null;
+          setSelectedService(matchedService || data.business.services[0]);
         }
         if (!userInteractedWithDate.current && data.availableSlots?.length === 0 && data.nextAvailableDate) {
           setSelectedDate(data.nextAvailableDate);

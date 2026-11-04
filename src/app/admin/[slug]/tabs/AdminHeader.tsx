@@ -35,6 +35,7 @@ export default function AdminHeader({
   onOpenBillingModal,
 }: AdminHeaderProps) {
   const [copiedLink, setCopiedLink] = useState(false);
+  const [copiedScheduleLink, setCopiedScheduleLink] = useState(false);
 
   const handleCopyLink = async () => {
     try {
@@ -44,6 +45,19 @@ export default function AdminHeader({
       await navigator.clipboard.writeText(url);
       setCopiedLink(true);
       setTimeout(() => setCopiedLink(false), 2500);
+    } catch {
+      // fallback
+    }
+  };
+
+  const handleCopyScheduleLink = async () => {
+    try {
+      const url = typeof window !== "undefined"
+        ? `${window.location.origin}/${business.slug}?reservar=1`
+        : `https://agendalink.cl/${business.slug}?reservar=1`;
+      await navigator.clipboard.writeText(url);
+      setCopiedScheduleLink(true);
+      setTimeout(() => setCopiedScheduleLink(false), 2500);
     } catch {
       // fallback
     }
@@ -125,30 +139,65 @@ export default function AdminHeader({
             background: copiedLink ? "rgba(34, 197, 94, 0.12)" : "rgba(0, 102, 255, 0.08)",
             color: copiedLink ? "#16a34a" : "var(--primary)",
             border: `1.5px solid ${copiedLink ? "rgba(34, 197, 94, 0.4)" : "rgba(0, 102, 255, 0.25)"}`,
-            padding: "8px 14px",
+            padding: "8px 13px",
             borderRadius: 999,
-            fontSize: 13,
+            fontSize: 12.5,
             fontWeight: 700,
             cursor: "pointer",
             transition: "all 0.2s cubic-bezier(0.16, 1, 0.3, 1)",
             whiteSpace: "nowrap",
           }}
-          title="Copiar link público para compartir con clientes"
+          title="Copiar enlace a tu página web de presentación"
         >
           {copiedLink ? (
             <>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                 <polyline points="20 6 9 17 4 12" />
               </svg>
-              ¡Link Copiado!
+              ¡Web Copiada!
             </>
           ) : (
             <>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
                 <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
               </svg>
-              Copiar Link
+              Copiar Web
+            </>
+          )}
+        </button>
+
+        <button
+          type="button"
+          onClick={handleCopyScheduleLink}
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 6,
+            background: copiedScheduleLink ? "rgba(34, 197, 94, 0.12)" : "#eff6ff",
+            color: copiedScheduleLink ? "#16a34a" : "#0284c7",
+            border: `1.5px solid ${copiedScheduleLink ? "rgba(34, 197, 94, 0.4)" : "rgba(2, 132, 199, 0.3)"}`,
+            padding: "8px 13px",
+            borderRadius: 999,
+            fontSize: 12.5,
+            fontWeight: 700,
+            cursor: "pointer",
+            transition: "all 0.2s cubic-bezier(0.16, 1, 0.3, 1)",
+            whiteSpace: "nowrap",
+          }}
+          title="Copiar enlace directo al horario para que tus clientes agenden sin pasar por la portada"
+        >
+          {copiedScheduleLink ? (
+            <>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+              ¡Horario Copiado!
+            </>
+          ) : (
+            <>
+              <span>⚡</span>
+              Link al Horario
             </>
           )}
         </button>

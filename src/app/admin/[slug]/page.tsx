@@ -169,6 +169,7 @@ export default function AdminDashboard({ params }: { params: Promise<{ slug: str
   const [isFirstStepsCollapsed, setIsFirstStepsCollapsed] = useState(true);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [copiedShareLink, setCopiedShareLink] = useState(false);
+  const [copiedDirectShareLink, setCopiedDirectShareLink] = useState(false);
 
   const [firstStepsChecked, setFirstStepsChecked] = useState<{
     profile: boolean;
@@ -1146,10 +1147,10 @@ export default function AdminDashboard({ params }: { params: Promise<{ slug: str
               </div>
 
               <div className={styles.modalBody} style={{ display: "flex", flexDirection: "column", gap: "18px" }}>
-                {/* Enlace directo */}
+                {/* Enlace directo a la web */}
                 <div>
                   <label style={{ fontSize: "12px", fontWeight: "700", color: "#475569", textTransform: "uppercase", letterSpacing: "0.5px", display: "block", marginBottom: "6px" }}>
-                    Tu enlace público de reservas:
+                    1. Enlace a tu Web de Presentación:
                   </label>
                   <div style={{ display: "flex", gap: "8px" }}>
                     <input
@@ -1180,7 +1181,56 @@ export default function AdminDashboard({ params }: { params: Promise<{ slug: str
                       className={styles.submitButton}
                       style={{ width: "auto", padding: "10px 18px", whiteSpace: "nowrap", fontSize: "13px" }}
                     >
-                      {copiedShareLink ? "✓ ¡Copiado!" : "Copiar Link"}
+                      {copiedShareLink ? "✓ ¡Copiado!" : "Copiar Web"}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Enlace directo a los horarios */}
+                <div>
+                  <label style={{ fontSize: "12px", fontWeight: "700", color: "#0284c7", textTransform: "uppercase", letterSpacing: "0.5px", display: "flex", alignItems: "center", gap: 5, marginBottom: "6px" }}>
+                    <span>⚡</span> 2. Enlace Directo a Horarios (Abre directo el calendario):
+                  </label>
+                  <div style={{ display: "flex", gap: "8px" }}>
+                    <input
+                      type="text"
+                      readOnly
+                      value={typeof window !== "undefined" ? `${window.location.origin}/${business.slug}?reservar=1` : `https://agendalink.cl/${business.slug}?reservar=1`}
+                      style={{
+                        flex: 1,
+                        padding: "10px 14px",
+                        borderRadius: "10px",
+                        border: "1.5px solid #bae6fd",
+                        fontSize: "13.5px",
+                        fontWeight: "600",
+                        color: "#0369a1",
+                        background: "#f0f9ff",
+                      }}
+                      onFocus={e => e.target.select()}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const url = `${window.location.origin}/${business.slug}?reservar=1`;
+                        navigator.clipboard.writeText(url);
+                        setCopiedDirectShareLink(true);
+                        setTimeout(() => setCopiedDirectShareLink(false), 2500);
+                        if (!firstStepsChecked.share) toggleStep("share");
+                      }}
+                      style={{
+                        width: "auto",
+                        padding: "10px 18px",
+                        whiteSpace: "nowrap",
+                        fontSize: "13px",
+                        fontWeight: 700,
+                        borderRadius: "10px",
+                        border: "none",
+                        background: copiedDirectShareLink ? "#22c55e" : "#0284c7",
+                        color: "#ffffff",
+                        cursor: "pointer",
+                      }}
+                    >
+                      {copiedDirectShareLink ? "✓ ¡Copiado!" : "Copiar Horario"}
                     </button>
                   </div>
                 </div>
