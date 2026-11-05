@@ -117,6 +117,23 @@ test("filters out past slots when minDateTime is provided", () => {
   assert.ok(!slots.includes("14:00"));
   assert.ok(slots.includes("14:30"));
   assert.ok(slots.includes("15:00"));
+
+  // In generateSlots, past slots are retained in bookedSlots (red/occupied) so all hours appear
+  const fullResult = generateSlots({
+    date: "2026-01-05",
+    timeZone: "America/Santiago",
+    serviceDurationMinutes: 60,
+    businessWindows: [{ startMinute: 540, endMinute: 1080 }],
+    professionalWindows: [{ startMinute: 540, endMinute: 1080 }],
+    breaks: [],
+    blocks: [],
+    appointments: [],
+    minDateTime,
+  });
+  assert.ok(fullResult.bookedSlots.includes("09:00"));
+  assert.ok(fullResult.bookedSlots.includes("14:00"));
+  assert.ok(!fullResult.availableSlots.includes("14:00"));
+  assert.ok(fullResult.availableSlots.includes("14:30"));
 });
 
 test("parses strict local dates, times, and weekdays", () => {

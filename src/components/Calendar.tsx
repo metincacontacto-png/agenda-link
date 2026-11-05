@@ -55,6 +55,47 @@ export default function Calendar({
     return Array.from(new Set([...slots, ...bookedSlots])).sort();
   }, [slots, bookedSlots]);
 
+  const morningSlots = React.useMemo(() => {
+    return allSlots.filter((slot) => {
+      const hour = Number.parseInt(slot.split(":")[0], 10);
+      return hour < 13;
+    });
+  }, [allSlots]);
+
+  const afternoonSlots = React.useMemo(() => {
+    return allSlots.filter((slot) => {
+      const hour = Number.parseInt(slot.split(":")[0], 10);
+      return hour >= 13;
+    });
+  }, [allSlots]);
+
+  const renderSlotButton = (slot: string) => {
+    const isBooked = bookedSlots.includes(slot);
+    return (
+      <button
+        key={slot}
+        type="button"
+        disabled={isBooked}
+        onClick={() => {
+          if (isBooked) return;
+          onSelectTime(slot);
+        }}
+        className={`${styles.slotBtn} ${
+          isBooked
+            ? styles.slotBtnBooked
+            : selectedTime === slot
+            ? styles.slotBtnActive
+            : ""
+        }`}
+      >
+        <span className={styles.slotTime}>{slot}</span>
+        <span className={styles.slotStatus}>
+          {isBooked ? "Ocupado" : "Libre"}
+        </span>
+      </button>
+    );
+  };
+
   return (
     <div className={styles.container}>
       <div className={styles.daysRow}>
@@ -101,33 +142,42 @@ export default function Calendar({
             No hay horarios disponibles para este día.
           </p>
         ) : (
-          <div className={styles.slotsGrid}>
-            {allSlots.map((slot) => {
-              const isBooked = bookedSlots.includes(slot);
-              return (
-                <button
-                  key={slot}
-                  type="button"
-                  disabled={isBooked}
-                  onClick={() => {
-                    if (isBooked) return;
-                    onSelectTime(slot);
-                  }}
-                  className={`${styles.slotBtn} ${
-                    isBooked
-                      ? styles.slotBtnBooked
-                      : selectedTime === slot
-                      ? styles.slotBtnActive
-                      : ""
-                  }`}
-                >
-                  <span className={styles.slotTime}>{slot}</span>
-                  <span className={styles.slotStatus}>
-                    {isBooked ? "Ocupado" : "Libre"}
-                  </span>
-                </button>
-              );
-            })}
+          <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+            {morningSlots.length > 0 && (
+              <div>
+                <div className={styles.groupHeader}>
+                  <span>🌅 Mañana</span>
+                  {morningSlots.some((s) => !bookedSlots.includes(s)) ? (
+                    <span className={styles.groupCount}>
+                      {morningSlots.filter((s) => !bookedSlots.includes(s)).length} disponibles
+                    </span>
+                  ) : (
+                    <span className={styles.groupCountEmpty}>Agotado</span>
+                  )}
+                </div>
+                <div className={styles.slotsGrid}>
+                  {morningSlots.map(renderSlotButton)}
+                </div>
+              </div>
+            )}
+
+            {afternoonSlots.length > 0 && (
+              <div>
+                <div className={styles.groupHeader}>
+                  <span>☀️ Tarde</span>
+                  {afternoonSlots.some((s) => !bookedSlots.includes(s)) ? (
+                    <span className={styles.groupCount}>
+                      {afternoonSlots.filter((s) => !bookedSlots.includes(s)).length} disponibles
+                    </span>
+                  ) : (
+                    <span className={styles.groupCountEmpty}>Agotado</span>
+                  )}
+                </div>
+                <div className={styles.slotsGrid}>
+                  {afternoonSlots.map(renderSlotButton)}
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>

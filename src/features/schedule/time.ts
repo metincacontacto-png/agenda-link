@@ -272,8 +272,9 @@ export function generateSlots(input: {
 
       if (overlapsAppointment) {
         booked.add(slotStr);
+      } else if (minDateTime && startsAt.getTime() <= minDateTime.getTime()) {
+        booked.add(slotStr);
       } else {
-        if (minDateTime && startsAt.getTime() <= minDateTime.getTime()) continue;
         available.add(slotStr);
       }
     }
