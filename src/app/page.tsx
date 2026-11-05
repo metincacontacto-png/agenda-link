@@ -1267,9 +1267,9 @@ export default function HomePage() {
           <span className={styles.eyebrow}>Preguntas frecuentes</span>
           <h2 className={styles.h2}>Resolvamos tus dudas.</h2>
         </div>
-        <div className={`${styles.wrap} ${styles.faq}`}>
+        <div className={`${styles.wrap} ${styles.faq} ${styles.rv}`}>
           {faqs.map((item, idx) => (
-            <div key={idx} className={`${styles.q} ${openFaq === idx ? styles.qOpen : ""} ${styles.rv}`}>
+            <div key={idx} className={`${styles.q} ${openFaq === idx ? styles.qOpen : ""}`}>
               <button
                 type="button"
                 aria-expanded={openFaq === idx}

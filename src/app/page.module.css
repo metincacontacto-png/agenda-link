@@ -2030,15 +2030,19 @@
 }
 
 .q .a {
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.35s ease;
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .q .a p {
-  padding: 0 24px 22px;
+  overflow: hidden;
+  padding: 0 24px 0;
   color: var(--muted);
   font-size: 15px;
+  line-height: 1.6;
+  margin: 0;
+  transition: padding 0.3s ease;
 }
 
 .qOpen button span {
@@ -2046,7 +2050,11 @@
 }
 
 .qOpen .a {
-  max-height: 300px;
+  grid-template-rows: 1fr;
+}
+
+.qOpen .a p {
+  padding: 0 24px 22px;
 }
 
 /* --- FINAL CTA --- */
