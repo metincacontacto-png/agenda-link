@@ -51,6 +51,44 @@ export default function Calendar({
     }
   }, [selectedDate, onSelectDate, days]);
 
+  const currentMonthLabel = React.useMemo(() => {
+    if (!days.length) return "";
+    const [y, m, d] = days[0].dateStr.split("-").map(Number);
+    const dateObj = new Date(Date.UTC(y, m - 1, d, 12));
+    const month = dateObj.toLocaleDateString("es-ES", { month: "long", timeZone: "UTC" });
+    const year = dateObj.getUTCFullYear();
+    return `${month.charAt(0).toUpperCase() + month.slice(1)} ${year}`;
+  }, [days]);
+
+  const selectedDayInfo = React.useMemo(() => {
+    if (!selectedDate) return { label: "", shortLabel: "", isToday: false, isTomorrow: false };
+    const todayStr = dateStringAtTimeZone(new Date(), timeZone);
+    const [todayY, todayM, todayD] = todayStr.split("-").map(Number);
+    const tomorrowObj = new Date(Date.UTC(todayY, todayM - 1, todayD + 1, 12));
+    const tomorrowStr = tomorrowObj.toISOString().slice(0, 10);
+
+    const [y, m, d] = selectedDate.split("-").map(Number);
+    const dateObj = new Date(Date.UTC(y, m - 1, d, 12));
+    const weekday = dateObj.toLocaleDateString("es-ES", { weekday: "long", timeZone: "UTC" });
+    const month = dateObj.toLocaleDateString("es-ES", { month: "long", timeZone: "UTC" });
+    const capWeekday = weekday.charAt(0).toUpperCase() + weekday.slice(1);
+    const capMonth = month.charAt(0).toUpperCase() + month.slice(1);
+
+    const isToday = selectedDate === todayStr;
+    const isTomorrow = selectedDate === tomorrowStr;
+
+    let prefix = "";
+    if (isToday) prefix = "Hoy · ";
+    else if (isTomorrow) prefix = "Mañana · ";
+
+    return {
+      label: `${prefix}${capWeekday} ${d} de ${capMonth}`,
+      shortLabel: `${capWeekday} ${d}`,
+      isToday,
+      isTomorrow,
+    };
+  }, [selectedDate, timeZone]);
+
   const allSlots = React.useMemo(() => {
     return Array.from(new Set([...slots, ...bookedSlots])).sort();
   }, [slots, bookedSlots]);
@@ -71,6 +109,7 @@ export default function Calendar({
 
   const renderSlotButton = (slot: string) => {
     const isBooked = bookedSlots.includes(slot);
+    const isSelected = selectedTime === slot;
     return (
       <button
         key={slot}
@@ -83,14 +122,14 @@ export default function Calendar({
         className={`${styles.slotBtn} ${
           isBooked
             ? styles.slotBtnBooked
-            : selectedTime === slot
+            : isSelected
             ? styles.slotBtnActive
             : ""
         }`}
       >
         <span className={styles.slotTime}>{slot}</span>
         <span className={styles.slotStatus}>
-          {isBooked ? "Ocupado" : "Libre"}
+          {isBooked ? "Ocupado" : isSelected ? "✓ Elegido" : "Libre"}
         </span>
       </button>
     );
@@ -98,61 +137,95 @@ export default function Calendar({
 
   return (
     <div className={styles.container}>
-      <div className={styles.daysRow}>
-        {days.map((item) => (
-          <button
-            key={item.dateStr}
-            type="button"
-            disabled={item.isDayClosed}
-            onClick={() => {
-              if (item.isDayClosed) return;
-              onSelectDate(item.dateStr);
-              onSelectTime("");
-            }}
-            className={`${styles.dayBtn} ${selectedDate === item.dateStr ? styles.dayBtnActive : ""} ${item.isDayClosed ? styles.dayBtnClosed : ""}`}
-          >
-            <span className={styles.dayName}>{item.dayName}</span>
-            <span className={styles.dayNumber}>{item.dayNum}</span>
-            {item.isDayClosed && <span className={styles.closedLabel}>Cerrado</span>}
-          </button>
-        ))}
+      {/* 1. Selector de fecha (Paso 1) */}
+      <div className={styles.datePickerSection}>
+        <div className={styles.monthHeaderRow}>
+          <div className={styles.monthTitle}>
+            <span className={styles.calendarIcon}>📅</span>
+            <span>{currentMonthLabel}</span>
+          </div>
+          <span className={styles.stepBadge}>1. Elige Fecha</span>
+        </div>
+
+        <div className={styles.daysRow}>
+          {days.map((item, idx) => {
+            const isSelected = selectedDate === item.dateStr;
+            const isToday = idx === 0;
+            return (
+              <button
+                key={item.dateStr}
+                type="button"
+                disabled={item.isDayClosed}
+                onClick={() => {
+                  if (item.isDayClosed) return;
+                  onSelectDate(item.dateStr);
+                  onSelectTime("");
+                }}
+                className={`${styles.dayBtn} ${isSelected ? styles.dayBtnActive : ""} ${item.isDayClosed ? styles.dayBtnClosed : ""}`}
+              >
+                {isToday && !item.isDayClosed && (
+                  <span className={styles.todayPill}>HOY</span>
+                )}
+                {item.isDayClosed && (
+                  <span className={styles.closedPill}>Cerrado</span>
+                )}
+                <span className={styles.dayName}>{item.dayName}</span>
+                <span className={styles.dayNumber}>{item.dayNum}</span>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
-      <div style={{ marginTop: "8px" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
-          <p style={{ fontSize: "12px", fontWeight: "700", color: "var(--text-secondary)", margin: 0 }}>
-            Horarios de Atención
-          </p>
-          <div style={{ display: "flex", gap: "12px", fontSize: "11px", fontWeight: "600" }}>
-            <span style={{ display: "inline-flex", alignItems: "center", gap: "5px", color: "var(--foreground)" }}>
-              <span style={{ width: "7px", height: "7px", borderRadius: "50%", background: "#22c55e" }} /> Disponible
+      {/* 2. Horarios del día seleccionado en tarjeta dedicada (Paso 2) */}
+      <div className={styles.hoursCard}>
+        <div className={styles.hoursCardHeader}>
+          <div className={styles.hoursCardTitleBlock}>
+            <div className={styles.hoursCardStep}>2. Elige Horario</div>
+            <h3 className={styles.hoursCardTitle}>
+              ⏰ Horarios para {selectedDayInfo.label}
+            </h3>
+            <p className={styles.hoursCardSubtitle}>
+              {selectedTime
+                ? `Horario elegido: ${selectedTime} hrs`
+                : "Elige la hora que más te acomode para agendar:"}
+            </p>
+          </div>
+
+          <div className={styles.legend}>
+            <span className={styles.legendItem}>
+              <span className={styles.legendDotAvailable} /> Libre
             </span>
-            <span style={{ display: "inline-flex", alignItems: "center", gap: "5px", color: "#ef4444" }}>
-              <span style={{ width: "7px", height: "7px", borderRadius: "50%", background: "#ef4444" }} /> Reservado
+            <span className={styles.legendItem}>
+              <span className={styles.legendDotBooked} /> Ocupado
             </span>
           </div>
         </div>
 
         {isClosed ? (
-          <p style={{ fontSize: "13px", color: "#ef4444", marginTop: "12px", textAlign: "center", fontWeight: "600" }}>
-            El negocio se encuentra cerrado en este día.
-          </p>
+          <div className={styles.emptyNotice}>
+            <span>🏖️</span>
+            <p>El negocio se encuentra cerrado en este día. Selecciona otro día en el calendario de arriba.</p>
+          </div>
         ) : allSlots.length === 0 ? (
-          <p style={{ fontSize: "13px", color: "var(--text-secondary)", marginTop: "12px", textAlign: "center" }}>
-            No hay horarios disponibles para este día.
-          </p>
+          <div className={styles.emptyNotice}>
+            <span>⏳</span>
+            <p>No hay horarios configurados para este día.</p>
+          </div>
         ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+          <div className={styles.periodsWrapper}>
             {morningSlots.length > 0 && (
-              <div>
-                <div className={styles.groupHeader}>
-                  <span>🌅 Mañana</span>
+              <div className={styles.periodBlock}>
+                <div className={styles.periodHeader}>
+                  <span className={styles.periodTitle}>
+                    <span>🌅</span> Mañana (09:00 – 12:30)
+                  </span>
                   {morningSlots.some((s) => !bookedSlots.includes(s)) ? (
-                    <span className={styles.groupCount}>
+                    <span className={styles.periodBadge}>
                       {morningSlots.filter((s) => !bookedSlots.includes(s)).length} disponibles
                     </span>
                   ) : (
-                    <span className={styles.groupCountEmpty}>Agotado</span>
+                    <span className={styles.periodBadgeEmpty}>Agotado</span>
                   )}
                 </div>
                 <div className={styles.slotsGrid}>
@@ -162,19 +235,35 @@ export default function Calendar({
             )}
 
             {afternoonSlots.length > 0 && (
-              <div>
-                <div className={styles.groupHeader}>
-                  <span>☀️ Tarde</span>
+              <div className={styles.periodBlock}>
+                <div className={styles.periodHeader}>
+                  <span className={styles.periodTitle}>
+                    <span>☀️</span> Tarde (13:00 – 18:30)
+                  </span>
                   {afternoonSlots.some((s) => !bookedSlots.includes(s)) ? (
-                    <span className={styles.groupCount}>
+                    <span className={styles.periodBadge}>
                       {afternoonSlots.filter((s) => !bookedSlots.includes(s)).length} disponibles
                     </span>
                   ) : (
-                    <span className={styles.groupCountEmpty}>Agotado</span>
+                    <span className={styles.periodBadgeEmpty}>Agotado</span>
                   )}
                 </div>
                 <div className={styles.slotsGrid}>
                   {afternoonSlots.map(renderSlotButton)}
+                </div>
+              </div>
+            )}
+
+            {selectedTime && (
+              <div className={styles.selectionBanner}>
+                <span className={styles.selectionBannerIcon}>✓</span>
+                <div>
+                  <div className={styles.selectionBannerTitle}>
+                    Hora seleccionada: <strong>{selectedTime} hrs</strong>
+                  </div>
+                  <div className={styles.selectionBannerSub}>
+                    Para {selectedDayInfo.shortLabel} · Presiona &quot;Enviar Solicitud&quot; abajo para continuar
+                  </div>
                 </div>
               </div>
             )}
