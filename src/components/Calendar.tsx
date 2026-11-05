@@ -129,7 +129,18 @@ export default function Calendar({
       >
         <span className={styles.slotTime}>{slot}</span>
         <span className={styles.slotStatus}>
-          {isBooked ? "Ocupado" : isSelected ? "✓ Elegido" : "Libre"}
+          {isBooked ? (
+            "Ocupado"
+          ) : isSelected ? (
+            <span style={{ display: "inline-flex", alignItems: "center", gap: "3px" }}>
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+              Elegido
+            </span>
+          ) : (
+            "Libre"
+          )}
         </span>
       </button>
     );
@@ -141,7 +152,14 @@ export default function Calendar({
       <div className={styles.datePickerSection}>
         <div className={styles.monthHeaderRow}>
           <div className={styles.monthTitle}>
-            <span className={styles.calendarIcon}>📅</span>
+            <span className={styles.calendarIcon}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                <line x1="16" y1="2" x2="16" y2="6" />
+                <line x1="8" y1="2" x2="8" y2="6" />
+                <line x1="3" y1="10" x2="21" y2="10" />
+              </svg>
+            </span>
             <span>{currentMonthLabel}</span>
           </div>
           <span className={styles.stepBadge}>1. Elige Fecha</span>
@@ -183,7 +201,13 @@ export default function Calendar({
           <div className={styles.hoursCardTitleBlock}>
             <div className={styles.hoursCardStep}>2. Elige Horario</div>
             <h3 className={styles.hoursCardTitle}>
-              ⏰ Horarios para {selectedDayInfo.label}
+              <span className={styles.hoursTitleIcon}>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <circle cx="12" cy="12" r="10" />
+                  <polyline points="12 6 12 12 16 14" />
+                </svg>
+              </span>
+              <span>Horarios para {selectedDayInfo.label}</span>
             </h3>
             <p className={styles.hoursCardSubtitle}>
               {selectedTime
@@ -204,12 +228,22 @@ export default function Calendar({
 
         {isClosed ? (
           <div className={styles.emptyNotice}>
-            <span>🏖️</span>
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+              <line x1="16" y1="2" x2="16" y2="6" />
+              <line x1="8" y1="2" x2="8" y2="6" />
+              <line x1="3" y1="10" x2="21" y2="10" />
+              <line x1="10" y1="14" x2="14" y2="18" />
+              <line x1="14" y1="14" x2="10" y2="18" />
+            </svg>
             <p>El negocio se encuentra cerrado en este día. Selecciona otro día en el calendario de arriba.</p>
           </div>
         ) : allSlots.length === 0 ? (
           <div className={styles.emptyNotice}>
-            <span>⏳</span>
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="10" />
+              <polyline points="12 6 12 12 16 14" />
+            </svg>
             <p>No hay horarios configurados para este día.</p>
           </div>
         ) : (
@@ -218,7 +252,14 @@ export default function Calendar({
               <div className={styles.periodBlock}>
                 <div className={styles.periodHeader}>
                   <span className={styles.periodTitle}>
-                    <span>🌅</span> Mañana (09:00 – 12:30)
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#d97706" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <path d="M12 2v6" />
+                      <path d="M4.93 10.93l1.41 1.41" />
+                      <path d="M20 10l-1.41 1.41" />
+                      <path d="M2 18h20" />
+                      <path d="M6 18a6 6 0 0 1 12 0" />
+                    </svg>
+                    <span>Mañana (09:00 – 12:30)</span>
                   </span>
                   {morningSlots.some((s) => !bookedSlots.includes(s)) ? (
                     <span className={styles.periodBadge}>
@@ -238,7 +279,18 @@ export default function Calendar({
               <div className={styles.periodBlock}>
                 <div className={styles.periodHeader}>
                   <span className={styles.periodTitle}>
-                    <span>☀️</span> Tarde (13:00 – 18:30)
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <circle cx="12" cy="12" r="4" />
+                      <path d="M12 2v2" />
+                      <path d="M12 20v2" />
+                      <path d="m4.93 4.93 1.41 1.41" />
+                      <path d="m17.66 17.66 1.41 1.41" />
+                      <path d="M2 12h2" />
+                      <path d="M20 12h2" />
+                      <path d="m6.34 17.66-1.41 1.41" />
+                      <path d="m19.07 4.93-1.41 1.41" />
+                    </svg>
+                    <span>Tarde (13:00 – 18:30)</span>
                   </span>
                   {afternoonSlots.some((s) => !bookedSlots.includes(s)) ? (
                     <span className={styles.periodBadge}>
@@ -256,7 +308,11 @@ export default function Calendar({
 
             {selectedTime && (
               <div className={styles.selectionBanner}>
-                <span className={styles.selectionBannerIcon}>✓</span>
+                <span className={styles.selectionBannerIcon}>
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                </span>
                 <div>
                   <div className={styles.selectionBannerTitle}>
                     Hora seleccionada: <strong>{selectedTime} hrs</strong>
