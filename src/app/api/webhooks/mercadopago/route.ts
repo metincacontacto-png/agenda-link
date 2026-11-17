@@ -57,10 +57,12 @@ export async function POST(request: Request) {
         next_payment_date?: string;
       };
 
-      const businessId = subData.external_reference;
-      if (!businessId) {
+      const rawRef = subData.external_reference;
+      if (!rawRef) {
         return NextResponse.json({ received: true, no_reference: true }, { status: 200 });
       }
+
+      const [businessId, targetPlan] = rawRef.includes("_") ? rawRef.split("_") : [rawRef, undefined];
 
       const business = await prisma.business.findUnique({ where: { id: businessId }, select: { id: true } });
       if (!business) {
@@ -78,6 +80,7 @@ export async function POST(request: Request) {
             subscriptionStatus: "ACTIVE",
             subscriptionId: subData.id || resourceId,
             currentPeriodEnd: nextPayment,
+            ...(targetPlan ? { subscriptionPlan: targetPlan } : {}),
           },
         });
         console.log(`[Mercado Pago Webhook] Negocio ${businessId} suscripción marcada como ACTIVE.`);
@@ -121,23 +124,33 @@ export async function POST(request: Request) {
         external_reference?: string;
       };
 
-      const businessId = paymentData.external_reference;
-      if (businessId) {
-        if (paymentData.status === "approved") {
-          await prisma.business.update({
-            where: { id: businessId },
-            data: {
-              subscriptionStatus: "ACTIVE",
-              currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-            },
-          });
-        } else if (paymentData.status === "rejected") {
-          await prisma.business.update({
-            where: { id: businessId },
-            data: {
-              subscriptionStatus: "PAST_DUE",
-            },
-          });
+      const rawRef = paymentData.external_reference;
+      if (rawRef) {
+        const [businessId, targetPlan] = rawRef.includes("_") ? rawRef.split("_") : [rawRef, undefined];
+
+        const business = await prisma.business.findUnique({
+          where: { id: businessId },
+          select: { id: true },
+        });
+
+        if (business) {
+          if (paymentData.status === "approved") {
+            await prisma.business.update({
+              where: { id: businessId },
+              data: {
+                subscriptionStatus: "ACTIVE",
+                currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+                ...(targetPlan ? { subscriptionPlan: targetPlan } : {}),
+              },
+            });
+          } else if (paymentData.status === "rejected") {
+            await prisma.business.update({
+              where: { id: businessId },
+              data: {
+                subscriptionStatus: "PAST_DUE",
+              },
+            });
+          }
         }
       }
 
@@ -183,18 +196,44 @@ export async function POST(request: Request) {
       }
 
       if (external_reference?.startsWith("annual_")) {
-        const actualBusinessId = external_reference.replace("annual_", "");
+        const parts = external_reference.split("_");
+        const actualBusinessId = parts[1];
+        const targetPlan = parts[2];
+
+        if (!actualBusinessId) {
+          return NextResponse.json({ received: true, error: "invalid_annual_reference" }, { status: 200 });
+        }
+
+        const business = await prisma.business.findUnique({
+          where: { id: actualBusinessId },
+          select: { id: true },
+        });
+
+        if (!business) {
+          return NextResponse.json({ received: true, business_not_found: true }, { status: 200 });
+        }
+
         if (status === "approved") {
           const oneYearFromNow = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
           await prisma.business.update({
             where: { id: actualBusinessId },
             data: {
               subscriptionStatus: "ACTIVE",
+              ...(targetPlan ? { subscriptionPlan: targetPlan } : {}),
               currentPeriodEnd: oneYearFromNow,
             },
           });
           console.log(`[Mercado Pago Webhook] Negocio ${actualBusinessId} pago anual acreditado.`);
+        } else if (status === "refunded" || status === "cancelled") {
+          await prisma.business.update({
+            where: { id: actualBusinessId },
+            data: {
+              subscriptionStatus: "CANCELLED",
+            },
+          });
+          console.log(`[Mercado Pago Webhook] Negocio ${actualBusinessId} suscripción anual cancelada/reembolsada (${status}).`);
         }
+
         return NextResponse.json({ success: true, type: "annual_payment", status }, { status: 200 });
       }
 

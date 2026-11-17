@@ -3,6 +3,7 @@ import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { prisma } from "@/lib/db";
 import { requireBusinessMembership, requireSession, type UserIdentity } from "@/server/authorize";
 import { getSessionCookie } from "@/server/auth";
+import { enforceRateLimit } from "@/server/rate-limit";
 import { SUBSCRIPTION_PLANS, type PlanConfig } from "@/features/businesses/subscription-policy";
 
 function getCloudflareSecrets() {
@@ -27,6 +28,9 @@ function getCloudflareSecrets() {
 
 export async function POST(request: Request) {
   try {
+    const rateLimitResponse = await enforceRateLimit(request, "BOOKING_RATE_LIMITER", "checkout");
+    if (rateLimitResponse) return rateLimitResponse;
+
     const body: unknown = await request.json().catch(() => ({}));
     if (typeof body !== "object" || body === null) {
       return NextResponse.json({ error: "Solicitud inválida" }, { status: 400 });
@@ -60,6 +64,7 @@ export async function POST(request: Request) {
     // If no session cookie exists, allow proceeding with the found business.
     const sessionCookie = getSessionCookie(request);
     let sessionUser: UserIdentity | undefined;
+    let isAuthorizedMember = false;
 
     if (sessionCookie) {
       const session = await requireSession(request);
@@ -69,6 +74,7 @@ export async function POST(request: Request) {
       if (!auth.ok) return auth.response;
 
       sessionUser = session.user;
+      isAuthorizedMember = true;
     }
 
     const secrets = getCloudflareSecrets();
@@ -108,7 +114,7 @@ export async function POST(request: Request) {
           pending: `${origin}/admin/${business.slug}?subscription=pending`,
         },
         auto_return: "approved",
-        external_reference: `annual_${business.id}`,
+        external_reference: `annual_${business.id}_${planKey}`,
         notification_url: `${origin}/api/webhooks/mercadopago`,
       };
 
@@ -133,13 +139,22 @@ export async function POST(request: Request) {
       const mpData = (await mpRes.json()) as { id?: string; init_point?: string; sandbox_init_point?: string };
       const initPoint = mpData.init_point || mpData.sandbox_init_point || "";
 
-      // Save selected target plan on business
-      await prisma.business.update({
-        where: { id: business.id },
-        data: {
-          subscriptionPlan: planKey,
-        },
-      });
+      if (!initPoint || !initPoint.trim()) {
+        return NextResponse.json(
+          { error: "Mercado Pago no devolvió un punto de inicio para el pago" },
+          { status: 502 }
+        );
+      }
+
+      // Save selected target plan on business ONLY if authenticated member
+      if (isAuthorizedMember) {
+        await prisma.business.update({
+          where: { id: business.id },
+          data: {
+            subscriptionPlan: planKey,
+          },
+        });
+      }
 
       return NextResponse.json({
         success: true,
@@ -171,7 +186,7 @@ export async function POST(request: Request) {
         payer_email: payerEmail,
         back_url: `${origin}/admin/${business.slug}?subscription=success`,
         reason: `Agenda Link - Plan ${planConfig.name}`,
-        external_reference: business.id,
+        external_reference: `${business.id}_${planKey}`,
         auto_recurring: {
           frequency: 1,
           frequency_type: "months",
@@ -203,13 +218,22 @@ export async function POST(request: Request) {
       console.warn("[MercadoPago Subscription Checkout] Error calling preapproval API, falling back to hosted plan URL:", err);
     }
 
-    // Save selected target plan on business
-    await prisma.business.update({
-      where: { id: business.id },
-      data: {
-        subscriptionPlan: planKey,
-      },
-    });
+    if (!initPoint || !initPoint.trim()) {
+      return NextResponse.json(
+        { error: "Mercado Pago no devolvió un punto de inicio para la suscripción" },
+        { status: 502 }
+      );
+    }
+
+    // Save selected target plan on business ONLY if authenticated member
+    if (isAuthorizedMember) {
+      await prisma.business.update({
+        where: { id: business.id },
+        data: {
+          subscriptionPlan: planKey,
+        },
+      });
+    }
 
     return NextResponse.json({
       success: true,

@@ -509,3 +509,50 @@ test("client payment claims are ignored and concurrent requests cannot double-bo
   ]);
   assert.deepEqual(simultaneous.map((response) => response.status).sort(), [200, 409]);
 });
+
+test("subscription checkout validates input and does not mutate subscriptionPlan for unauthenticated requests", async () => {
+  // Missing or invalid slug
+  const missingSlugRes = await fetch(`${baseUrl}/api/subscriptions/checkout`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ plan: "INDIVIDUAL" }),
+  });
+  assert.equal(missingSlugRes.status, 400);
+
+  // Invalid plan
+  const invalidPlanRes = await fetch(`${baseUrl}/api/subscriptions/checkout`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ slug: "booking-test-a", plan: "INVALID_PLAN" }),
+  });
+  assert.equal(invalidPlanRes.status, 400);
+
+  // Non-existent business
+  const notFoundRes = await fetch(`${baseUrl}/api/subscriptions/checkout`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ slug: "nonexistent-business-xyz", plan: "INDIVIDUAL" }),
+  });
+  assert.equal(notFoundRes.status, 404);
+
+  // Check initial subscriptionPlan of businessA
+  const checkInitialRes = await fetch(`${baseUrl}/api/admin?slug=booking-test-a`, {
+    headers: { cookie: authCookie },
+  });
+  const checkInitialData = await checkInitialRes.json();
+  const initialPlan = checkInitialData.business?.subscriptionPlan;
+
+  // Unauthenticated checkout attempt for businessA
+  await fetch(`${baseUrl}/api/subscriptions/checkout`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ slug: "booking-test-a", plan: "EQUIPO", billingPeriod: "yearly" }),
+  });
+
+  // Verify DB business.subscriptionPlan was NOT changed by unauthenticated request
+  const checkAfterRes = await fetch(`${baseUrl}/api/admin?slug=booking-test-a`, {
+    headers: { cookie: authCookie },
+  });
+  const checkAfterData = await checkAfterRes.json();
+  assert.equal(checkAfterData.business?.subscriptionPlan, initialPlan);
+});
