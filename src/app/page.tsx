@@ -140,15 +140,11 @@ export default function HomePage() {
           setLoginModalOpen(false);
           triggerRef.current?.focus();
         }
-        if (checkoutModalOpen) {
-          setCheckoutModalOpen(false);
-          triggerRef.current?.focus();
-        }
       }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [registerModalOpen, loginModalOpen, checkoutModalOpen]);
+  }, [registerModalOpen, loginModalOpen]);
 
   // Open register modal with optional prefill
   const openRegister = (plan?: string, initialSlug?: string) => {
@@ -160,6 +156,11 @@ export default function HomePage() {
   const openCheckout = (plan: "INDIVIDUAL" | "EQUIPO" | "NEGOCIO") => {
     setCheckoutPlan(plan);
     setCheckoutModalOpen(true);
+  };
+
+  const closeCheckoutModal = () => {
+    setCheckoutModalOpen(false);
+    triggerRef.current?.focus();
   };
 
   const closeRegisterModal = () => {
@@ -1194,6 +1195,7 @@ export default function HomePage() {
               <button
                 type="button"
                 className={styles.btnTrialSecondary}
+                aria-label="Probar 14 días gratis del plan Individual"
                 onClick={(e) => {
                   triggerRef.current = e.currentTarget;
                   openRegister("individual");
@@ -1241,6 +1243,7 @@ export default function HomePage() {
               <button
                 type="button"
                 className={styles.btnTrialSecondary}
+                aria-label="Probar 14 días gratis del plan Básico"
                 onClick={(e) => {
                   triggerRef.current = e.currentTarget;
                   openRegister("basico");
@@ -1290,6 +1293,7 @@ export default function HomePage() {
               <button
                 type="button"
                 className={styles.btnTrialSecondary}
+                aria-label="Probar 14 días gratis del plan Premium"
                 onClick={(e) => {
                   triggerRef.current = e.currentTarget;
                   openRegister("premium");
@@ -1562,7 +1566,7 @@ export default function HomePage() {
       {/* ===== MODAL DE CHECKOUT SUSCRIPCIÓN ===== */}
       <SubscriptionCheckoutModal
         isOpen={checkoutModalOpen}
-        onClose={() => setCheckoutModalOpen(false)}
+        onClose={closeCheckoutModal}
         plan={checkoutPlan}
         billingPeriod={billingPeriod}
       />
