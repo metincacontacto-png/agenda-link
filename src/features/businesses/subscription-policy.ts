@@ -48,8 +48,9 @@ export const SUBSCRIPTION_PLANS: Record<"INDIVIDUAL" | "EQUIPO" | "NEGOCIO", Pla
   },
 };
 
-export function getPlanMaxProfessionals(planId: "INDIVIDUAL" | "EQUIPO" | "NEGOCIO"): number {
-  return SUBSCRIPTION_PLANS[planId]?.maxProfessionals ?? 1;
+export function getPlanMaxProfessionals(planId?: string | null): number {
+  if (!planId) return 1;
+  return SUBSCRIPTION_PLANS[planId as keyof typeof SUBSCRIPTION_PLANS]?.maxProfessionals ?? 1;
 }
 
 export function getPlanPricing(planId: "INDIVIDUAL" | "EQUIPO" | "NEGOCIO", period: "monthly" | "yearly" = "monthly") {
