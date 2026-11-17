@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent, type ChangeEvent } from "react";
+import { useState, useRef, useEffect, type FormEvent, type ChangeEvent } from "react";
 import type { BusinessAdminDTO } from "@/features/businesses/contracts";
 import styles from "../admin.module.css";
 
@@ -33,6 +33,13 @@ export default function ServicesTab({
   const [isSavingMaxServices, setIsSavingMaxServices] = useState(false);
   const [maxServicesSuccess, setMaxServicesSuccess] = useState(false);
   const [maxServicesError, setMaxServicesError] = useState<string | null>(null);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, []);
 
   const currentMaxServices = pendingMaxServices ?? maxServicesPerBooking;
 
@@ -42,6 +49,7 @@ export default function ServicesTab({
     setIsSavingMaxServices(true);
     setMaxServicesSuccess(false);
     setMaxServicesError(null);
+    if (timerRef.current) clearTimeout(timerRef.current);
 
     try {
       const response = await fetch("/api/admin", {
@@ -60,14 +68,15 @@ export default function ServicesTab({
         return;
       }
 
-      setMaxServicesSuccess(true);
       await onServicesChanged();
       setPendingMaxServices(null);
-      setTimeout(() => {
+      setMaxServicesSuccess(true);
+      timerRef.current = setTimeout(() => {
         setMaxServicesSuccess(false);
       }, 3000);
     } catch (error) {
       console.error("Error updating max services per booking:", error);
+      setMaxServicesSuccess(false);
       setMaxServicesError("Error de conexión al guardar");
       setPendingMaxServices(null);
     } finally {
@@ -139,7 +148,7 @@ export default function ServicesTab({
             <h3 style={{ fontSize: "16px", fontWeight: "700", margin: "0 0 6px 0" }}>
               Límite de servicios por cita
             </h3>
-            <p style={{ fontSize: "13px", color: "var(--text-secondary)", margin: 0, lineHeight: 1.5 }}>
+            <p id="max-services-description" style={{ fontSize: "13px", color: "var(--text-secondary)", margin: 0, lineHeight: 1.5 }}>
               Define cuántos servicios distintos puede seleccionar un cliente en una misma reserva. El calendario reservará automáticamente la suma del tiempo de todos los servicios elegidos.
             </p>
           </div>
@@ -154,6 +163,7 @@ export default function ServicesTab({
               <select
                 id="max-services-select"
                 aria-label="Límite de servicios por cita"
+                aria-describedby="max-services-description"
                 value={currentMaxServices}
                 onChange={handleMaxServicesChange}
                 disabled={isSavingMaxServices}
