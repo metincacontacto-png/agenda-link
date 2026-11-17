@@ -13,11 +13,11 @@ test("subscription policy: plan configurations match business requirements", () 
 
   assert.equal(SUBSCRIPTION_PLANS.EQUIPO.price, 28990);
   assert.equal(SUBSCRIPTION_PLANS.EQUIPO.envPlanKey, "MERCADOPAGO_PLAN_ID_EQUIPO");
-  assert.equal(SUBSCRIPTION_PLANS.EQUIPO.maxProfessionals, 5);
+  assert.equal(SUBSCRIPTION_PLANS.EQUIPO.maxProfessionals, 2);
 
   assert.equal(SUBSCRIPTION_PLANS.NEGOCIO.price, 48990);
   assert.equal(SUBSCRIPTION_PLANS.NEGOCIO.envPlanKey, "MERCADOPAGO_PLAN_ID_NEGOCIO");
-  assert.ok(SUBSCRIPTION_PLANS.NEGOCIO.maxProfessionals > 5);
+  assert.equal(SUBSCRIPTION_PLANS.NEGOCIO.maxProfessionals, 5);
 });
 
 test("subscription policy: billingBypass grants unconditional access", () => {

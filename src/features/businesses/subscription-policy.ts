@@ -31,8 +31,8 @@ export const SUBSCRIPTION_PLANS: Record<"INDIVIDUAL" | "EQUIPO" | "NEGOCIO", Pla
     priceFormatted: "$28.990 CLP/mes",
     annualPrice: 289900,
     annualPriceFormatted: "$289.900 CLP/año",
-    description: "Para salones o centros de 2 a 5 profesionales.",
-    maxProfessionals: 5,
+    description: "Para salones o centros de hasta 2 profesionales.",
+    maxProfessionals: 2,
     envPlanKey: "MERCADOPAGO_PLAN_ID_EQUIPO",
   },
   NEGOCIO: {
@@ -42,11 +42,15 @@ export const SUBSCRIPTION_PLANS: Record<"INDIVIDUAL" | "EQUIPO" | "NEGOCIO", Pla
     priceFormatted: "$48.990 CLP/mes",
     annualPrice: 489900,
     annualPriceFormatted: "$489.900 CLP/año",
-    description: "Para centros grandes con profesionales ilimitados.",
-    maxProfessionals: 999,
+    description: "Para centros grandes de hasta 5 profesionales.",
+    maxProfessionals: 5,
     envPlanKey: "MERCADOPAGO_PLAN_ID_NEGOCIO",
   },
 };
+
+export function getPlanMaxProfessionals(planId: "INDIVIDUAL" | "EQUIPO" | "NEGOCIO"): number {
+  return SUBSCRIPTION_PLANS[planId]?.maxProfessionals ?? 1;
+}
 
 export function getPlanPricing(planId: "INDIVIDUAL" | "EQUIPO" | "NEGOCIO", period: "monthly" | "yearly" = "monthly") {
   const plan = SUBSCRIPTION_PLANS[planId];
