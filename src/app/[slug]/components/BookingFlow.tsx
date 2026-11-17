@@ -91,7 +91,9 @@ export default function BookingFlow({
       </div>
 
       <div style={{ marginBottom: "24px" }}>
-        <h2 className={styles.sectionTitle}>1. Selecciona un Servicio</h2>
+        <h2 className={styles.sectionTitle}>
+          1. {business.maxServicesPerBooking > 1 ? "Selecciona tus Servicios" : "Selecciona un Servicio"}
+        </h2>
 
         {maxServices > 1 && (
           <div
@@ -116,6 +118,7 @@ export default function BookingFlow({
         {serviceLimitWarning && (
           <div
             role="alert"
+            aria-live="assertive"
             style={{
               display: "flex",
               alignItems: "center",
@@ -135,7 +138,7 @@ export default function BookingFlow({
           </div>
         )}
 
-        <div className={styles.serviceList}>
+        <div className={styles.serviceList} role="group" aria-label="Servicios disponibles">
           {business.services.map((service) => {
             const isSelected = activeServices.some((s) => s.id === service.id);
             return (
@@ -196,6 +199,8 @@ export default function BookingFlow({
 
         {activeServices.length > 0 && (
           <div
+            role="status"
+            aria-live="polite"
             style={{
               marginTop: "-12px",
               marginBottom: "8px",
@@ -235,6 +240,7 @@ export default function BookingFlow({
                 type="button"
                 onClick={() => onSelectProfessional(professional)}
                 className={`${styles.profItem} ${selectedProfessional?.id === professional.id ? styles.profItemActive : ""}`}
+                aria-pressed={selectedProfessional?.id === professional.id}
               >
                 <div className={styles.profAvatar}>
                   {professional.avatar || professional.name.substring(0, 2).toUpperCase()}

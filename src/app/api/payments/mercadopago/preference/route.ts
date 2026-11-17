@@ -67,7 +67,15 @@ export async function POST(request: Request) {
       ? appointment.services
       : [{ id: parsed.value.serviceId, ...appointment.service }];
 
-    const items = bookedServices.map((svc) => ({
+    const payableServices = bookedServices.filter((svc) => svc.price > 0);
+    if (payableServices.length === 0) {
+      return NextResponse.json(
+        { error: "Los servicios seleccionados no requieren pago online (monto total $0)." },
+        { status: 400 }
+      );
+    }
+
+    const items = payableServices.map((svc) => ({
       id: svc.id,
       title: `${svc.name} — ${business.name}`,
       description: `Atención con ${professional.name}`,

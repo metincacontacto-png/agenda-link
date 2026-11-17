@@ -128,7 +128,7 @@ export function parseAvailabilityQuery(params: URLSearchParams): AvailabilityQue
   const date = boundedString(params.get("date"), 10, 10);
   const professionalId = boundedString(params.get("professionalId"), 1, 100);
 
-  const rawServiceIdsList = params.getAll("serviceIds");
+  const rawServiceIdsList = params.getAll("serviceIds").slice(0, 5);
   const rawServiceIdParam = params.get("serviceId");
 
   const parsedServiceIds: string[] = [];
@@ -170,13 +170,14 @@ export function parseAvailabilityQuery(params: URLSearchParams): AvailabilityQue
         return { ok: false, error: "Selecciona un servicio y profesional válidos" };
       }
     }
+    const cappedServiceIds = parsedServiceIds.slice(0, 5);
     return {
       ok: true,
       value: {
         slug,
         date,
-        serviceId: parsedServiceIds[0],
-        serviceIds: parsedServiceIds,
+        serviceId: cappedServiceIds[0],
+        serviceIds: cappedServiceIds,
         professionalId,
       },
     };

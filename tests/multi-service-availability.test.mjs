@@ -296,6 +296,21 @@ test("parseAvailabilityQuery accepts serviceIds and serviceId and returns normal
     assert.equal(bothRes.value.serviceId, "svc-1");
   }
 
+  // Limits serviceIds to at most 5 items
+  const manyParams = new URLSearchParams();
+  manyParams.set("slug", "demo-biz");
+  manyParams.set("date", "2026-05-10");
+  manyParams.set("professionalId", "pro-1");
+  for (let i = 1; i <= 8; i++) {
+    manyParams.append("serviceIds", `svc-${i}`);
+  }
+  const limitedRes = parseAvailabilityQuery(manyParams);
+  assert.equal(limitedRes.ok, true);
+  if (limitedRes.ok) {
+    assert.equal(limitedRes.value.serviceIds.length, 5);
+    assert.deepEqual(limitedRes.value.serviceIds, ["svc-1", "svc-2", "svc-3", "svc-4", "svc-5"]);
+  }
+
   // Query with no services and no professional (valid for business info fetching)
   const noProRes = parseAvailabilityQuery(new URLSearchParams({
     slug: "demo-biz",

@@ -31,6 +31,7 @@ export default function BookingClient({
   const [bookedSlots, setBookedSlots] = useState<string[]>([]);
   const [serviceLimitWarning, setServiceLimitWarning] = useState<string | null>(null);
   const initializedBusinessTimeZone = useRef(false);
+  const initializedServices = useRef(false);
   const userInteractedWithDate = useRef(false);
 
   const selectedService = selectedServices[0] || null;
@@ -92,25 +93,36 @@ export default function BookingClient({
 
   useEffect(() => {
     if (!slug) return;
+    let isCancelled = false;
 
     async function loadData() {
       try {
         const query = new URLSearchParams({ slug, date: selectedDate });
-        if (selectedServices.length > 0) {
+        if (selectedServices.length > 0 && selectedProfessional?.id) {
           query.set("serviceIds", selectedServices.map((s) => s.id).join(","));
           query.set("serviceId", selectedServices[0].id);
-          if (selectedProfessional?.id) query.set("professionalId", selectedProfessional.id);
+          query.set("professionalId", selectedProfessional.id);
         }
         const res = await fetch(`/api/availability?${query.toString()}`);
         if (!res.ok) {
-          if (res.status === 404) setBusiness(null);
-          else {
+          if (res.status === 404) {
+            const errData = await res.json().catch(() => null);
+            if (isCancelled) return;
+            if (errData?.error === "Negocio no encontrado") {
+              setBusiness(null);
+            } else {
+              setSlots([]);
+              setBookedSlots([]);
+            }
+          } else {
+            if (isCancelled) return;
             setSlots([]);
             setBookedSlots([]);
           }
           return;
         }
         const data = await res.json();
+        if (isCancelled) return;
 
         setBusiness(data.business);
         setSlots(data.availableSlots || []);
@@ -125,7 +137,7 @@ export default function BookingClient({
         if (bizProfs.length > 0 && !selectedProfessional) {
           setSelectedProfessional(bizProfs[0]);
         }
-        if (data.business?.services?.length > 0 && selectedServices.length === 0) {
+        if (!initializedServices.current && data.business?.services?.length > 0) {
           const searchParams = typeof window !== "undefined"
             ? new URLSearchParams(window.location.search)
             : null;
@@ -143,20 +155,27 @@ export default function BookingClient({
             initialServices = [data.business.services[0]];
           }
           setSelectedServices(initialServices);
+          initializedServices.current = true;
         }
         if (!userInteractedWithDate.current && data.availableSlots?.length === 0 && data.nextAvailableDate) {
           setSelectedDate(data.nextAvailableDate);
         }
       } catch (err) {
+        if (isCancelled) return;
         console.error(err);
         setSlots([]);
         setBookedSlots([]);
       } finally {
-        setLoading(false);
+        if (!isCancelled) {
+          setLoading(false);
+        }
       }
     }
 
     loadData();
+    return () => {
+      isCancelled = true;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [slug, selectedDate, selectedServiceIdsKey, selectedProfessional?.id]);
 
@@ -167,11 +186,10 @@ export default function BookingClient({
     const maxServices = business?.maxServicesPerBooking ?? 1;
 
     if (isSelected) {
-      if (selectedServices.length === 1) {
-        setSelectedServices([]);
-      } else {
-        setSelectedServices((prev) => prev.filter((s) => s.id !== service.id));
+      if (selectedServices.length <= 1) {
+        return;
       }
+      setSelectedServices((prev) => prev.filter((s) => s.id !== service.id));
     } else {
       if (maxServices === 1) {
         setSelectedServices([service]);
@@ -343,7 +361,10 @@ export default function BookingClient({
           business={business}
           formatPrice={formatPrice}
           onStartBooking={(service) => {
-            if (service) setSelectedServices([service]);
+            if (service) {
+              setSelectedServices([service]);
+              initializedServices.current = true;
+            }
             setViewMode("booking");
           }}
         />
@@ -401,7 +422,10 @@ export default function BookingClient({
           business={business}
           isBookingFlow={viewMode === "booking"}
           onStartBooking={(srv) => {
-            if (srv) setSelectedServices([srv]);
+            if (srv) {
+              setSelectedServices([srv]);
+              initializedServices.current = true;
+            }
             setViewMode("booking");
           }}
         />
