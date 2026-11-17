@@ -101,7 +101,14 @@ export function parseBusinessProfileInput(input: unknown): BusinessProfileInputR
     result.minNoticeHours = hours;
   }
   if (record.maxServicesPerBooking !== undefined) {
-    const maxServices = Number(record.maxServicesPerBooking);
+    const rawMax = record.maxServicesPerBooking;
+    if (
+      (typeof rawMax !== "number" && typeof rawMax !== "string") ||
+      (typeof rawMax === "string" && rawMax.trim() === "")
+    ) {
+      return { ok: false, error: "El límite de servicios debe ser un número entero entre 1 y 5" };
+    }
+    const maxServices = Number(rawMax);
     if (!Number.isInteger(maxServices) || maxServices < 1 || maxServices > 5) {
       return { ok: false, error: "El límite de servicios debe ser un número entero entre 1 y 5" };
     }

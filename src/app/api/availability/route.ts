@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getSlotsForProfessional } from "@/features/booking/availability";
-import type { PublicBusinessDTO } from "@/features/booking/public-business-dto";
+import { toPublicBusinessDTO } from "@/features/booking/public-business-dto";
 import { parseAvailabilityQuery } from "@/features/booking/validation";
 import { logServerError } from "@/server/observability";
 
@@ -46,12 +46,7 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: "Negocio no encontrado" }, { status: 404 });
     }
     businessId = business.id;
-    const { mercadoPagoAccessToken, ...businessFields } = business;
-    const publicBusiness: PublicBusinessDTO = {
-      ...businessFields,
-      maxServicesPerBooking: business.maxServicesPerBooking ?? 1,
-      acceptsOnlinePayments: Boolean(mercadoPagoAccessToken),
-    };
+    const publicBusiness = toPublicBusinessDTO(business);
 
     let availableSlots: string[] = [];
     let bookedSlots: string[] = [];
