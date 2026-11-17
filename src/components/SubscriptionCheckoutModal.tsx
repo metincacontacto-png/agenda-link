@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import styles from "./SubscriptionCheckoutModal.module.css";
 import TurnstileCaptcha from "@/components/TurnstileCaptcha";
@@ -57,7 +57,7 @@ function SubscriptionCheckoutModalContent({
   const [captchaVerified, setCaptchaVerified] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState("");
   const [honeypot, setHoneypot] = useState("");
-  const [formStartedAt] = useState(() => Date.now() - 2000);
+  const [formStartedAt] = useState(() => Date.now());
 
   // Tab 2: Existing Business
   const [existingSlug, setExistingSlug] = useState(() => (initialSlug ? cleanSlugInput(initialSlug) : ""));
@@ -66,27 +66,72 @@ function SubscriptionCheckoutModalContent({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  const modalRef = useRef<HTMLDivElement>(null);
   const firstInputRef = useRef<HTMLInputElement>(null);
 
+  // Lock body scroll while modal is mounted
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        onClose();
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
     const prevOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prevOverflow;
+    };
+  }, []);
 
+  // Set initial focus once on mount (desktop only)
+  useEffect(() => {
     if (typeof window !== "undefined" && window.innerWidth > 640) {
       firstInputRef.current?.focus();
     }
+  }, []);
 
+  // Keyboard navigation (Escape & Focus Trap)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        if (!loading) {
+          onClose();
+        }
+        return;
+      }
+
+      // Focus trap within modal
+      if (e.key === "Tab" && modalRef.current) {
+        const focusables = modalRef.current.querySelectorAll<HTMLElement>(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        );
+        const visibleFocusables = Array.from(focusables).filter(
+          (el) => !el.hasAttribute("disabled") && el.offsetParent !== null
+        );
+        if (visibleFocusables.length === 0) return;
+
+        const firstElement = visibleFocusables[0];
+        const lastElement = visibleFocusables[visibleFocusables.length - 1];
+
+        if (e.shiftKey) {
+          if (document.activeElement === firstElement) {
+            e.preventDefault();
+            lastElement.focus();
+          }
+        } else {
+          if (document.activeElement === lastElement) {
+            e.preventDefault();
+            firstElement.focus();
+          }
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
-      document.body.style.overflow = prevOverflow;
     };
-  }, [onClose]);
+  }, [loading, onClose]);
+
+  const handleTurnstileVerify = useCallback((verified: boolean, token?: string) => {
+    setCaptchaVerified(verified);
+    setTurnstileToken(token || "");
+  }, []);
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newName = e.target.value;
@@ -289,11 +334,12 @@ function SubscriptionCheckoutModalContent({
     <div
       className={styles.overlay}
       onClick={(e) => {
-        if (e.target === e.currentTarget) onClose();
+        if (e.target === e.currentTarget && !loading) onClose();
       }}
       role="presentation"
     >
       <div
+        ref={modalRef}
         className={styles.modal}
         role="dialog"
         aria-modal="true"
@@ -313,7 +359,10 @@ function SubscriptionCheckoutModalContent({
             <button
               type="button"
               className={styles.closeBtn}
-              onClick={onClose}
+              onClick={() => {
+                if (!loading) onClose();
+              }}
+              disabled={loading}
               aria-label="Cerrar modal"
             >
               ✕
@@ -534,12 +583,7 @@ function SubscriptionCheckoutModalContent({
               </div>
 
               <div className={styles.captchaSection}>
-                <TurnstileCaptcha
-                  onVerify={(verified, token) => {
-                    setCaptchaVerified(verified);
-                    setTurnstileToken(token || "");
-                  }}
-                />
+                <TurnstileCaptcha onVerify={handleTurnstileVerify} />
               </div>
 
               <button
@@ -577,7 +621,7 @@ function SubscriptionCheckoutModalContent({
 
               <div className={styles.formGroup}>
                 <label htmlFor="checkout-existing-slug" className={styles.label}>
-                  Link de tu negocio o correo registrado <span className={styles.required}>*</span>
+                  Link de tu agenda <span className={styles.required}>*</span>
                 </label>
                 <div className={styles.slugWrapper}>
                   <span className={styles.slugPrefix}>agendalink.cl/</span>
