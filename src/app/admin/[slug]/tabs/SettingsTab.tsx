@@ -141,6 +141,7 @@ export default function SettingsTab({
           currency={business.currency}
           formatPrice={formatPrice}
           onServicesChanged={onServicesChanged}
+          maxServicesPerBooking={business.maxServicesPerBooking ?? 1}
         />
       )}
 

@@ -12,14 +12,68 @@ interface ServicesTabProps {
   currency: string;
   formatPrice: (price: number, currency: string) => string;
   onServicesChanged: () => Promise<void>;
+  maxServicesPerBooking?: number;
 }
 
-export default function ServicesTab({ slug, services, currency, formatPrice, onServicesChanged }: ServicesTabProps) {
+export default function ServicesTab({
+  slug,
+  services,
+  currency,
+  formatPrice,
+  onServicesChanged,
+  maxServicesPerBooking = 1,
+}: ServicesTabProps) {
   const [serviceName, setServiceName] = useState("");
   const [servicePrice, setServicePrice] = useState("");
   const [serviceDuration, setServiceDuration] = useState("30");
   const [serviceImage, setServiceImage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const [pendingMaxServices, setPendingMaxServices] = useState<number | null>(null);
+  const [isSavingMaxServices, setIsSavingMaxServices] = useState(false);
+  const [maxServicesSuccess, setMaxServicesSuccess] = useState(false);
+  const [maxServicesError, setMaxServicesError] = useState<string | null>(null);
+
+  const currentMaxServices = pendingMaxServices ?? maxServicesPerBooking;
+
+  const handleMaxServicesChange = async (event: ChangeEvent<HTMLSelectElement>) => {
+    const nextLimit = Number(event.target.value);
+    setPendingMaxServices(nextLimit);
+    setIsSavingMaxServices(true);
+    setMaxServicesSuccess(false);
+    setMaxServicesError(null);
+
+    try {
+      const response = await fetch("/api/admin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          slug,
+          maxServicesPerBooking: nextLimit,
+        }),
+      });
+
+      const data = await response.json().catch(() => null);
+      if (!response.ok || (data && data.success === false)) {
+        setMaxServicesError(data?.error || "Error al actualizar el límite de servicios");
+        setPendingMaxServices(null);
+        return;
+      }
+
+      setMaxServicesSuccess(true);
+      await onServicesChanged();
+      setPendingMaxServices(null);
+      setTimeout(() => {
+        setMaxServicesSuccess(false);
+      }, 3000);
+    } catch (error) {
+      console.error("Error updating max services per booking:", error);
+      setMaxServicesError("Error de conexión al guardar");
+      setPendingMaxServices(null);
+    } finally {
+      setIsSavingMaxServices(false);
+    }
+  };
 
   const handleImageFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -78,7 +132,63 @@ export default function ServicesTab({ slug, services, currency, formatPrice, onS
   };
 
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "1fr 1.2fr", gap: "32px" }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+      <section className={styles.glassCard} style={{ textAlign: "left" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "20px" }}>
+          <div style={{ flex: "1 1 340px", maxWidth: "600px" }}>
+            <h3 style={{ fontSize: "16px", fontWeight: "700", margin: "0 0 6px 0" }}>
+              Límite de servicios por cita
+            </h3>
+            <p style={{ fontSize: "13px", color: "var(--text-secondary)", margin: 0, lineHeight: 1.5 }}>
+              Define cuántos servicios distintos puede seleccionar un cliente en una misma reserva. El calendario reservará automáticamente la suma del tiempo de todos los servicios elegidos.
+            </p>
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: "8px", minWidth: "220px" }}>
+            <label
+              htmlFor="max-services-select"
+              style={{ fontSize: "12px", fontWeight: "600", color: "var(--text-secondary)", textTransform: "uppercase", letterSpacing: "0.5px" }}
+            >
+              Límite de servicios por cita
+            </label>
+            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+              <select
+                id="max-services-select"
+                aria-label="Límite de servicios por cita"
+                value={currentMaxServices}
+                onChange={handleMaxServicesChange}
+                disabled={isSavingMaxServices}
+                className={styles.formInput}
+                style={{ minWidth: "220px", cursor: isSavingMaxServices ? "not-allowed" : "pointer" }}
+              >
+                <option value={1}>1 servicio (por defecto)</option>
+                <option value={2}>Hasta 2 servicios</option>
+                <option value={3}>Hasta 3 servicios</option>
+                <option value={4}>Hasta 4 servicios</option>
+                <option value={5}>Hasta 5 servicios</option>
+              </select>
+            </div>
+            <div aria-live="polite" style={{ minHeight: "18px", fontSize: "12px" }}>
+              {isSavingMaxServices && (
+                <span style={{ color: "var(--text-secondary)", fontStyle: "italic" }}>
+                  Guardando cambios...
+                </span>
+              )}
+              {!isSavingMaxServices && maxServicesSuccess && (
+                <span style={{ color: "var(--success, #34c759)", fontWeight: "600" }}>
+                  Guardado ✓
+                </span>
+              )}
+              {!isSavingMaxServices && maxServicesError && (
+                <span style={{ color: "var(--danger, #ef4444)", fontWeight: "600" }}>
+                  {maxServicesError}
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1.2fr", gap: "32px" }}>
       <div>
         <h3 style={{ fontSize: "15px", fontWeight: "700", marginBottom: "16px" }}>Agregar Servicio / Actividad</h3>
         <form onSubmit={handleAddService} className={styles.adminForm}>
@@ -176,5 +286,6 @@ export default function ServicesTab({ slug, services, currency, formatPrice, onS
         )}
       </div>
     </div>
+  </div>
   );
 }
