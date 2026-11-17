@@ -1,8 +1,9 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { generateSlots } from "../src/features/schedule/time.ts";
-import { parseCreateBookingInput } from "../src/features/booking/validation.ts";
+import { parseCreateBookingInput, parseAvailabilityQuery } from "../src/features/booking/validation.ts";
 import { createBooking } from "../src/features/booking/create-booking.ts";
+import { buildWhatsAppReminderUrl } from "../src/lib/whatsapp.ts";
 
 test("generateSlots with 180 min duration checks consecutive window and omits conflicting slots", () => {
   const result = generateSlots({
@@ -251,4 +252,109 @@ test("createBooking aggregates multi-service duration and price and enforces max
     assert.equal(overLimitResult.status, 400);
     assert.match(overLimitResult.error, /El negocio solo permite hasta 1 servicio/);
   }
+});
+
+test("parseAvailabilityQuery accepts serviceIds and serviceId and returns normalized serviceIds array", () => {
+  // Comma-separated serviceIds
+  const multiRes = parseAvailabilityQuery(new URLSearchParams({
+    slug: "demo-biz",
+    date: "2026-05-10",
+    serviceIds: "svc-1,svc-2",
+    professionalId: "pro-1",
+  }));
+  assert.equal(multiRes.ok, true);
+  if (multiRes.ok) {
+    assert.deepEqual(multiRes.value.serviceIds, ["svc-1", "svc-2"]);
+    assert.equal(multiRes.value.serviceId, "svc-1");
+    assert.equal(multiRes.value.professionalId, "pro-1");
+  }
+
+  // Backwards compatibility with single serviceId
+  const singleRes = parseAvailabilityQuery(new URLSearchParams({
+    slug: "demo-biz",
+    date: "2026-05-10",
+    serviceId: "svc-only",
+    professionalId: "pro-1",
+  }));
+  assert.equal(singleRes.ok, true);
+  if (singleRes.ok) {
+    assert.deepEqual(singleRes.value.serviceIds, ["svc-only"]);
+    assert.equal(singleRes.value.serviceId, "svc-only");
+  }
+
+  // Both serviceIds and serviceId
+  const bothRes = parseAvailabilityQuery(new URLSearchParams({
+    slug: "demo-biz",
+    date: "2026-05-10",
+    serviceIds: "svc-1,svc-2",
+    serviceId: "svc-1",
+    professionalId: "pro-1",
+  }));
+  assert.equal(bothRes.ok, true);
+  if (bothRes.ok) {
+    assert.deepEqual(bothRes.value.serviceIds, ["svc-1", "svc-2"]);
+    assert.equal(bothRes.value.serviceId, "svc-1");
+  }
+
+  // Query with no services and no professional (valid for business info fetching)
+  const noProRes = parseAvailabilityQuery(new URLSearchParams({
+    slug: "demo-biz",
+    date: "2026-05-10",
+  }));
+  assert.equal(noProRes.ok, true);
+  if (noProRes.ok) {
+    assert.equal(noProRes.value.serviceIds, null);
+    assert.equal(noProRes.value.serviceId, null);
+    assert.equal(noProRes.value.professionalId, null);
+  }
+
+  // Reject when serviceIds provided without professionalId
+  const missingPro = parseAvailabilityQuery(new URLSearchParams({
+    slug: "demo-biz",
+    date: "2026-05-10",
+    serviceIds: "svc-1,svc-2",
+  }));
+  assert.equal(missingPro.ok, false);
+
+  // Reject when professionalId provided without service
+  const missingSvc = parseAvailabilityQuery(new URLSearchParams({
+    slug: "demo-biz",
+    date: "2026-05-10",
+    professionalId: "pro-1",
+  }));
+  assert.equal(missingSvc.ok, false);
+});
+
+test("buildWhatsAppReminderUrl formats multiple services and total duration", () => {
+  const multiUrl = buildWhatsAppReminderUrl({
+    clientName: "Valentina Cliente",
+    clientWhatsApp: "+56987654321",
+    serviceName: "Corte",
+    serviceNames: ["Corte", "Barba", "Perfilado"],
+    durationMinutes: 90,
+    professionalName: "Rodrigo Barbero",
+    dateTime: "2026-05-10T14:00:00.000Z",
+    businessName: "Barbería Central",
+    price: 35000,
+    currency: "CLP",
+  });
+
+  const decodedMulti = decodeURIComponent(multiUrl);
+  assert.match(decodedMulti, /✂️ \*Servicios:\* Corte \+ Barba \+ Perfilado/);
+  assert.match(decodedMulti, /⏱️ \*Duración total:\* 90 min/);
+  assert.match(decodedMulti, /💰 \*Total:\* \$35\.000/);
+  assert.match(decodedMulti, /wa\.me\/56987654321/);
+
+  // Single service fallback
+  const singleUrl = buildWhatsAppReminderUrl({
+    clientName: "Juan Perez",
+    clientWhatsApp: "912345678",
+    serviceName: "Corte Clásico",
+    professionalName: "Ana Peluquera",
+    dateTime: "2026-05-10T15:00:00.000Z",
+  });
+
+  const decodedSingle = decodeURIComponent(singleUrl);
+  assert.match(decodedSingle, /✂️ \*Servicio:\* Corte Clásico/);
+  assert.doesNotMatch(decodedSingle, /Duración total/);
 });

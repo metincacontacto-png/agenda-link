@@ -23,14 +23,20 @@ export default function BookingClient({
 }) {
   const [business, setBusiness] = useState<PublicBusinessDTO | null>(null);
   const [professionals, setProfessionals] = useState<Professional[]>([]);
-  const [selectedService, setSelectedService] = useState<Service | null>(null);
+  const [selectedServices, setSelectedServices] = useState<Service[]>([]);
   const [selectedProfessional, setSelectedProfessional] = useState<Professional | null>(null);
   const [selectedDate, setSelectedDate] = useState(() => dateStringAtTimeZone(new Date(), "America/Santiago"));
   const [selectedTime, setSelectedTime] = useState("");
   const [slots, setSlots] = useState<string[]>([]);
   const [bookedSlots, setBookedSlots] = useState<string[]>([]);
+  const [serviceLimitWarning, setServiceLimitWarning] = useState<string | null>(null);
   const initializedBusinessTimeZone = useRef(false);
   const userInteractedWithDate = useRef(false);
+
+  const selectedService = selectedServices[0] || null;
+  const totalDuration = selectedServices.reduce((acc, s) => acc + s.duration, 0);
+  const totalPrice = selectedServices.reduce((acc, s) => acc + s.price, 0);
+  const selectedServiceIdsKey = selectedServices.map((s) => s.id).join(",");
 
   const [loading, setLoading] = useState(true);
   const [showBookingContact, setShowBookingContact] = useState(false);
@@ -90,8 +96,9 @@ export default function BookingClient({
     async function loadData() {
       try {
         const query = new URLSearchParams({ slug, date: selectedDate });
-        if (selectedService?.id) {
-          query.set("serviceId", selectedService.id);
+        if (selectedServices.length > 0) {
+          query.set("serviceIds", selectedServices.map((s) => s.id).join(","));
+          query.set("serviceId", selectedServices[0].id);
           if (selectedProfessional?.id) query.set("professionalId", selectedProfessional.id);
         }
         const res = await fetch(`/api/availability?${query.toString()}`);
@@ -118,14 +125,24 @@ export default function BookingClient({
         if (bizProfs.length > 0 && !selectedProfessional) {
           setSelectedProfessional(bizProfs[0]);
         }
-        if (data.business?.services?.length > 0 && !selectedService) {
-          const paramServiceId = typeof window !== "undefined"
-            ? new URLSearchParams(window.location.search).get("serviceId")
+        if (data.business?.services?.length > 0 && selectedServices.length === 0) {
+          const searchParams = typeof window !== "undefined"
+            ? new URLSearchParams(window.location.search)
             : null;
-          const matchedService = paramServiceId
-            ? data.business.services.find((s: Service) => s.id === paramServiceId)
-            : null;
-          setSelectedService(matchedService || data.business.services[0]);
+          const paramServiceIds = searchParams?.get("serviceIds")?.split(",").map((id) => id.trim()).filter(Boolean);
+          const paramServiceId = searchParams?.get("serviceId");
+
+          let initialServices: Service[] = [];
+          if (paramServiceIds && paramServiceIds.length > 0) {
+            initialServices = data.business.services.filter((s: Service) => paramServiceIds.includes(s.id));
+          } else if (paramServiceId) {
+            const matched = data.business.services.find((s: Service) => s.id === paramServiceId);
+            if (matched) initialServices = [matched];
+          }
+          if (initialServices.length === 0 && data.business.services.length > 0) {
+            initialServices = [data.business.services[0]];
+          }
+          setSelectedServices(initialServices);
         }
         if (!userInteractedWithDate.current && data.availableSlots?.length === 0 && data.nextAvailableDate) {
           setSelectedDate(data.nextAvailableDate);
@@ -141,10 +158,33 @@ export default function BookingClient({
 
     loadData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [slug, selectedDate, selectedService?.id, selectedProfessional?.id]);
+  }, [slug, selectedDate, selectedServiceIdsKey, selectedProfessional?.id]);
+
+  const handleToggleService = (service: Service) => {
+    setSelectedTime("");
+    setServiceLimitWarning(null);
+    const isSelected = selectedServices.some((s) => s.id === service.id);
+    const maxServices = business?.maxServicesPerBooking ?? 1;
+
+    if (isSelected) {
+      if (selectedServices.length === 1) {
+        setSelectedServices([]);
+      } else {
+        setSelectedServices((prev) => prev.filter((s) => s.id !== service.id));
+      }
+    } else {
+      if (maxServices === 1) {
+        setSelectedServices([service]);
+      } else if (selectedServices.length < maxServices) {
+        setSelectedServices((prev) => [...prev, service]);
+      } else {
+        setServiceLimitWarning(`Has alcanzado el límite de ${maxServices} servicios por cita`);
+      }
+    }
+  };
 
   const handleBookClick = () => {
-    if (!selectedService || !selectedProfessional || !selectedDate || !selectedTime) return;
+    if (selectedServices.length === 0 || !selectedProfessional || !selectedDate || !selectedTime) return;
     setModalError(null);
     setShowBookingContact(true);
   };
@@ -155,14 +195,15 @@ export default function BookingClient({
     clientEmail: string,
     paymentChoice: "mercadopago" | "local" = "mercadopago"
   ) => {
-    if (!selectedService || !selectedProfessional) return;
+    if (selectedServices.length === 0 || !selectedProfessional) return;
     setSubmitting(true);
     setModalError(null);
 
     try {
       const payload = {
         slug,
-        serviceId: selectedService.id,
+        serviceId: selectedServices[0].id,
+        serviceIds: selectedServices.map((s) => s.id),
         professionalId: selectedProfessional.id,
         clientName,
         clientWhatsApp,
@@ -302,7 +343,7 @@ export default function BookingClient({
           business={business}
           formatPrice={formatPrice}
           onStartBooking={(service) => {
-            if (service) setSelectedService(service);
+            if (service) setSelectedServices([service]);
             setViewMode("booking");
           }}
         />
@@ -311,7 +352,9 @@ export default function BookingClient({
           slug={slug}
           business={business}
           professionals={professionals}
+          selectedServices={selectedServices}
           selectedService={selectedService}
+          serviceLimitWarning={serviceLimitWarning}
           selectedProfessional={selectedProfessional}
           selectedDate={selectedDate}
           selectedTime={selectedTime}
@@ -320,10 +363,8 @@ export default function BookingClient({
           submitting={submitting}
           formatPrice={formatPrice}
           onBackToLanding={() => setViewMode("landing")}
-          onSelectService={(service) => {
-            setSelectedService(service);
-            setSelectedTime("");
-          }}
+          onToggleService={handleToggleService}
+          onSelectService={handleToggleService}
           onSelectProfessional={(professional) => {
             setSelectedProfessional(professional);
             setSelectedTime("");
@@ -342,7 +383,7 @@ export default function BookingClient({
           businessName={business.name}
           isDemo={isDemo}
           acceptsOnlinePayments={Boolean(business.acceptsOnlinePayments)}
-          servicePrice={selectedService?.price ?? 0}
+          servicePrice={totalPrice}
           cancellationPolicy={business.cancellationPolicy}
           submitting={submitting}
           errorMessage={modalError || undefined}
@@ -360,7 +401,7 @@ export default function BookingClient({
           business={business}
           isBookingFlow={viewMode === "booking"}
           onStartBooking={(srv) => {
-            if (srv) setSelectedService(srv);
+            if (srv) setSelectedServices([srv]);
             setViewMode("booking");
           }}
         />

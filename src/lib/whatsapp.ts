@@ -22,7 +22,9 @@ export function formatChileanWhatsApp(phone: string): string {
 export interface WhatsAppReminderParams {
   clientName: string;
   clientWhatsApp: string;
-  serviceName: string;
+  serviceName?: string;
+  serviceNames?: string[];
+  durationMinutes?: number;
   professionalName: string;
   dateTime: string | Date;
   businessName?: string;
@@ -34,7 +36,9 @@ export interface WhatsAppReminderParams {
 export function buildWhatsAppReminderUrl({
   clientName,
   clientWhatsApp,
-  serviceName,
+  serviceName = "",
+  serviceNames,
+  durationMinutes,
   professionalName,
   dateTime,
   businessName,
@@ -61,6 +65,11 @@ export function buildWhatsAppReminderUrl({
 
   const business = businessName ? ` de *${businessName}*` : "";
 
+  const serviceLine =
+    serviceNames && serviceNames.length > 1
+      ? `✂️ *Servicios:* ${serviceNames.join(" + ")}`
+      : `✂️ *Servicio:* ${serviceNames && serviceNames.length === 1 ? serviceNames[0] : serviceName}`;
+
   const lines = [
     `¡Hola ${clientName}! 👋`,
     "",
@@ -68,7 +77,8 @@ export function buildWhatsAppReminderUrl({
     "",
     `📅 *Fecha:* ${formattedDate}`,
     `⏰ *Hora:* ${formattedTime} hrs`,
-    `✂️ *Servicio:* ${serviceName}`,
+    serviceLine,
+    ...(durationMinutes ? [`⏱️ *Duración total:* ${durationMinutes} min`] : []),
     `👤 *Profesional:* ${professionalName}`,
   ];
 

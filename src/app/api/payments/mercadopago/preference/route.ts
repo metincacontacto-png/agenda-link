@@ -63,17 +63,21 @@ export async function POST(request: Request) {
     const notificationUrl = `${origin}/api/webhooks/mercadopago?bizId=${encodeURIComponent(business.id)}`;
 
     // 4. Crear la preferencia en la API de Mercado Pago
+    const bookedServices = appointment.services && appointment.services.length > 0
+      ? appointment.services
+      : [{ id: parsed.value.serviceId, ...appointment.service }];
+
+    const items = bookedServices.map((svc) => ({
+      id: svc.id,
+      title: `${svc.name} — ${business.name}`,
+      description: `Atención con ${professional.name}`,
+      quantity: 1,
+      currency_id: business.currency || "CLP",
+      unit_price: Math.round(svc.price),
+    }));
+
     const mpPayload = {
-      items: [
-        {
-          id: parsed.value.serviceId,
-          title: `${service.name} — ${business.name}`,
-          description: `Atención con ${professional.name}`,
-          quantity: 1,
-          currency_id: business.currency || "CLP",
-          unit_price: Math.round(service.price),
-        },
-      ],
+      items,
       payer: {
         name: clientName,
         email: clientEmail && clientEmail.includes("@") ? clientEmail : "cliente@agendalink.cl",
