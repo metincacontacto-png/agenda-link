@@ -44,7 +44,7 @@ export async function POST(request: Request) {
     }
 
     const { appointment } = bookingResult;
-    const { business, service, professional } = appointment;
+    const { business, professional } = appointment;
 
     // 3. URLs de retorno para el cliente
     const origin =

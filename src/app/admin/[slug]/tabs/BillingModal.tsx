@@ -60,7 +60,7 @@ export default function BillingModal({
 
       // Redirigir al checkout oficial de Mercado Pago
       window.location.href = data.initPoint;
-    } catch (err) {
+    } catch {
       setErrorMessage("Ocurrió un error de conexión. Por favor verifica tu internet.");
       setLoadingCheckout(false);
     }

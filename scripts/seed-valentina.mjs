@@ -1,5 +1,4 @@
 import crypto from "node:crypto";
-import { execFileSync } from "node:child_process";
 
 export function generateValentinaSQL() {
   const userId = crypto.randomUUID();

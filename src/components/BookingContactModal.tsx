@@ -41,9 +41,6 @@ export default function BookingContactModal({
   const cleanPhone = phone.replace(/\D/g, "").replace(/^(56)?/, "");
   const isPhoneValid = /^9\d{8}$/.test(cleanPhone);
   const hasTypedPhone = phone.trim().length > 0;
-  const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
-  const isNameValid = name.trim().length > 0;
-  const isFormValid = isNameValid && isPhoneValid && isEmailValid;
 
   let livePhoneMessage: { text: string; isError: boolean } | null = null;
   if (hasTypedPhone) {

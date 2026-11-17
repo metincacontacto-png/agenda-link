@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { getPlanMaxProfessionals, SUBSCRIPTION_PLANS } from "../src/features/businesses/subscription-policy.ts";
+import { getPlanMaxProfessionals } from "../src/features/businesses/subscription-policy.ts";
 
 test("quota logic prevents exceeding plan capacity", () => {
   assert.equal(1 >= getPlanMaxProfessionals("INDIVIDUAL"), true); // Individual at 1 cannot add

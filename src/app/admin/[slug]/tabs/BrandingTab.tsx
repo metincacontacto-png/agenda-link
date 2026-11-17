@@ -117,7 +117,7 @@ export default function BrandingTab({ business, state, isSaving, onSave, onImage
                     className={styles.formInput}
                   />
                   <small style={{ color: "var(--text-secondary)", fontSize: "11px", marginTop: "4px" }}>
-                    Por defecto: "Cancelaciones con al menos 24 h de anticipación."
+                    Por defecto: &quot;Cancelaciones con al menos 24 h de anticipación.&quot;
                   </small>
                 </div>
                 <div className={styles.formGroup}>

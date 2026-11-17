@@ -65,7 +65,6 @@ export default function AdminHeader({
 
   const daysRemaining = getTrialDaysRemaining(business.trialEndsAt);
   const isTrial = business.subscriptionStatus === "TRIALING" && !business.billingBypass;
-  const isActive = business.subscriptionStatus === "ACTIVE" || business.billingBypass;
 
   return (
     <header className={styles.dashboardHeader}>

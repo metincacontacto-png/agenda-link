@@ -24,7 +24,7 @@ interface MarketingAiTabProps {
   businessName: string;
 }
 
-export default function MarketingAiTab({ slug, businessName }: MarketingAiTabProps) {
+export default function MarketingAiTab({ slug, businessName: _businessName }: MarketingAiTabProps) {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [clients, setClients] = useState<InactiveClient[]>([]);
   const [selectedCampaignId, setSelectedCampaignId] = useState<string>("1");

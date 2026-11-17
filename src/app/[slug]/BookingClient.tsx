@@ -35,7 +35,6 @@ export default function BookingClient({
   const userInteractedWithDate = useRef(false);
 
   const selectedService = selectedServices[0] || null;
-  const totalDuration = selectedServices.reduce((acc, s) => acc + s.duration, 0);
   const totalPrice = selectedServices.reduce((acc, s) => acc + s.price, 0);
   const selectedServiceIdsKey = selectedServices.map((s) => s.id).join(",");
 

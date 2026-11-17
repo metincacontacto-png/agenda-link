@@ -28,8 +28,6 @@ declare global {
   }
 }
 
-const DEFAULT_TEST_SITE_KEY = "1x00000000000000000000AA";
-
 export default function TurnstileCaptcha({ onVerify }: TurnstileCaptchaProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const widgetIdRef = useRef<string | null>(null);
