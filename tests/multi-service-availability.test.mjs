@@ -130,6 +130,16 @@ test("parseCreateBookingInput accepts and normalizes serviceIds and serviceId", 
     serviceIds: ["s1", ""],
   });
   assert.equal(invalidItem.ok, false);
+
+  // Rejects duplicate serviceIds
+  const duplicates = parseCreateBookingInput({
+    ...base,
+    serviceIds: ["svc-1", "svc-1"],
+  });
+  assert.equal(duplicates.ok, false);
+  if (!duplicates.ok) {
+    assert.equal(duplicates.error, "No se permiten servicios duplicados en una misma cita");
+  }
 });
 
 test("createBooking aggregates multi-service duration and price and enforces maxServicesPerBooking", async () => {

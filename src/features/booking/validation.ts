@@ -77,6 +77,9 @@ export function parseCreateBookingInput(input: unknown): BookingInputResult {
   if (serviceIds.length === 0 || !professionalId) {
     return { ok: false, error: "Selecciona un servicio y un profesional" };
   }
+  if (new Set(serviceIds).size !== serviceIds.length) {
+    return { ok: false, error: "No se permiten servicios duplicados en una misma cita" };
+  }
   if (serviceIds.length > 5) {
     return { ok: false, error: "Selecciona como máximo 5 servicios" };
   }
