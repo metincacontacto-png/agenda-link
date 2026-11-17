@@ -113,6 +113,7 @@ export default function TeamTab({
             onClick={() => setErrorMessage(null)}
             className={styles.teamCloseAlertBtn}
             title="Cerrar aviso"
+            aria-label="Cerrar aviso"
           >
             ✕
           </button>
@@ -164,6 +165,8 @@ export default function TeamTab({
             <input
               type="text"
               placeholder="Nombre del nuevo profesional..."
+              aria-label="Nombre del nuevo profesional"
+              maxLength={80}
               value={name}
               onChange={(e) => setName(e.target.value)}
               className={styles.formInput}
@@ -208,7 +211,8 @@ export default function TeamTab({
                   disabled={isOnlyOne || isDeleting}
                   onClick={() => void handleDeleteProfessional(professional.id)}
                   title={isOnlyOne ? "El negocio debe tener al menos un profesional" : "Eliminar profesional"}
-                  aria-label={isOnlyOne ? "El negocio debe tener al menos un profesional" : `Eliminar a ${professional.name}`}
+                  aria-label={isOnlyOne ? "El negocio debe tener al menos un profesional" : isDeleting ? `Eliminando a ${professional.name}...` : `Eliminar a ${professional.name}`}
+                  aria-busy={isDeleting}
                 >
                   {isDeleting ? "..." : "✕"}
                 </button>
