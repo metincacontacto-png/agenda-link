@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getSlotsForProfessional } from "@/features/booking/availability";
-import type { PublicBusinessDTO } from "@/features/booking/public-business-dto";
+import { toPublicBusinessDTO } from "@/features/booking/public-business-dto";
 import { parseAvailabilityQuery } from "@/features/booking/validation";
 import { logServerError } from "@/server/observability";
 
@@ -11,7 +11,7 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const parsed = parseAvailabilityQuery(searchParams);
     if (!parsed.ok) return NextResponse.json({ error: parsed.error }, { status: 400 });
-    const { slug, date, serviceId, professionalId } = parsed.value;
+    const { slug, date, serviceId, serviceIds, professionalId } = parsed.value;
 
     const business = await prisma.business.findUnique({
       where: { slug },
@@ -36,6 +36,7 @@ export async function GET(request: Request) {
         landingTestimonialsJson: true,
         cancellationPolicy: true,
         minNoticeHours: true,
+        maxServicesPerBooking: true,
         mercadoPagoAccessToken: true,
         professionals: { select: { id: true, name: true, avatar: true } },
         services: { select: { id: true, name: true, duration: true, price: true, imageUrl: true } },
@@ -45,28 +46,40 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: "Negocio no encontrado" }, { status: 404 });
     }
     businessId = business.id;
-    const { mercadoPagoAccessToken, ...businessFields } = business;
-    const publicBusiness: PublicBusinessDTO = {
-      ...businessFields,
-      acceptsOnlinePayments: Boolean(mercadoPagoAccessToken),
-    };
+    const publicBusiness = toPublicBusinessDTO(business);
 
     let availableSlots: string[] = [];
     let bookedSlots: string[] = [];
     let nextAvailableDate: string | null = null;
-    if (serviceId && professionalId) {
-      const service = publicBusiness.services.find((item) => item.id === serviceId);
+    const requestedServiceIds = serviceIds && serviceIds.length > 0
+      ? serviceIds
+      : serviceId
+        ? [serviceId]
+        : [];
+
+    if (requestedServiceIds.length > 0 && professionalId) {
       const professional = publicBusiness.professionals.find((item) => item.id === professionalId);
-      if (!service || !professional) {
+      if (!professional) {
         return NextResponse.json({ error: "Servicio o profesional no encontrado" }, { status: 404 });
       }
+
+      const services: typeof publicBusiness.services = [];
+      for (const id of requestedServiceIds) {
+        const found = publicBusiness.services.find((item) => item.id === id);
+        if (!found) {
+          return NextResponse.json({ error: "Servicio o profesional no encontrado" }, { status: 404 });
+        }
+        services.push(found);
+      }
+
+      const totalDuration = services.reduce((acc, s) => acc + s.duration, 0);
 
       const slotData = await getSlotsForProfessional({
         businessId: publicBusiness.id,
         professionalId,
         date,
         timeZone: publicBusiness.timezone,
-        serviceDurationMinutes: service.duration,
+        serviceDurationMinutes: totalDuration,
         minNoticeHours: business.minNoticeHours ?? 2,
       });
       availableSlots = slotData.availableSlots;
@@ -85,7 +98,7 @@ export async function GET(request: Request) {
             professionalId,
             date: nextDateStr,
             timeZone: publicBusiness.timezone,
-            serviceDurationMinutes: service.duration,
+            serviceDurationMinutes: totalDuration,
             minNoticeHours: business.minNoticeHours ?? 2,
           });
           if (checkSlots.availableSlots.length > 0) {

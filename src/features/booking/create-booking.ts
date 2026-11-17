@@ -1,7 +1,7 @@
 import type { Clock } from "../schedule/clock.ts";
 import { systemClock } from "../schedule/clock.ts";
 import { localMinuteToUtc, parseLocalTime } from "../schedule/time.ts";
-import type { BookingRepository } from "./ports.ts";
+import type { BookingBusiness, BookingRepository, BookingService } from "./ports.ts";
 import type { CreateBookingInput } from "./validation.ts";
 
 export interface BookingReceipt {
@@ -12,8 +12,9 @@ export interface BookingReceipt {
   paymentAmount: null;
   paymentMethod: null;
   service: { name: string; duration: number; price: number };
+  services?: Array<{ id: string; name: string; duration: number; price: number }>;
   professional: { name: string };
-  business: { id: string; slug: string; name: string; currency: string; timezone: string; email?: string };
+  business: BookingBusiness;
 }
 
 export type CreateBookingResult =
@@ -41,16 +42,47 @@ export async function createBooking(
   const business = await repository.findBusinessBySlug(input.slug);
   if (!business) return rejected(404, "Negocio no encontrado");
 
-  const [service, professional] = await Promise.all([
-    repository.findServiceById(input.serviceId),
+  const serviceIds =
+    input.serviceIds && input.serviceIds.length > 0
+      ? input.serviceIds
+      : input.serviceId
+        ? [input.serviceId]
+        : [];
+
+  const maxServices = business.maxServicesPerBooking ?? 1;
+  if (serviceIds.length === 0) {
+    return rejected(400, "Selecciona un servicio y un profesional");
+  }
+  if (serviceIds.length > maxServices) {
+    return rejected(
+      400,
+      `El negocio solo permite hasta ${maxServices} servicio${maxServices === 1 ? "" : "s"} por reserva`,
+    );
+  }
+
+  const [professional, rawServices] = await Promise.all([
     repository.findProfessionalById(input.professionalId),
+    repository.findServicesByIds
+      ? repository.findServicesByIds(serviceIds)
+      : Promise.all(serviceIds.map((id) => repository.findServiceById(id))),
   ]);
-  if (
-    !service ||
-    !professional ||
-    service.businessId !== business.id ||
-    professional.businessId !== business.id
-  ) {
+
+  if (!professional || professional.businessId !== business.id) {
+    return rejected(400, "Servicio o profesional no pertenece a este negocio");
+  }
+
+  const serviceMap = new Map(
+    (rawServices.filter(Boolean) as BookingService[]).map((s) => [s.id, s]),
+  );
+  const services: BookingService[] = [];
+  for (const id of serviceIds) {
+    const s = serviceMap.get(id);
+    if (s && s.businessId === business.id) {
+      services.push(s);
+    }
+  }
+
+  if (services.length !== serviceIds.length) {
     return rejected(400, "Servicio o profesional no pertenece a este negocio");
   }
 
@@ -65,12 +97,24 @@ export async function createBooking(
     return rejected(400, `Las reservas requieren al menos ${minNoticeHours} hora${minNoticeHours === 1 ? "" : "s"} de anticipación`);
   }
 
+  const totalDuration = services.reduce((acc, s) => acc + s.duration, 0);
+  const totalPrice = services.reduce((acc, s) => acc + s.price, 0);
+  const servicesJson = JSON.stringify(
+    services.map((s) => ({
+      id: s.id,
+      name: s.name,
+      duration: s.duration,
+      price: s.price,
+    })),
+  );
+  const primaryService = services[0];
+
   const availableSlots = await repository.getAvailableSlots({
     businessId: business.id,
     professionalId: professional.id,
     date: input.date,
     timeZone: business.timezone,
-    serviceDurationMinutes: service.duration,
+    serviceDurationMinutes: totalDuration,
     minDateTime: new Date(minRequiredTime),
     minNoticeHours,
   });
@@ -83,14 +127,21 @@ export async function createBooking(
   const inserted = await repository.insertIfAvailable({
     id: appointmentId,
     businessId: business.id,
-    serviceId: service.id,
+    serviceId: primaryService.id,
     professionalId: professional.id,
     clientName: input.clientName,
     clientWhatsApp: input.clientWhatsApp,
     dateTime: dateTimeIso,
-    serviceDurationMinutes: service.duration,
+    serviceDurationMinutes: totalDuration,
+    durationMinutes: totalDuration,
+    servicesJson,
   });
   if (!inserted) return rejected(409, "El horario acaba de dejar de estar disponible");
+
+  const combinedName =
+    services.length > 1
+      ? services.map((s) => s.name).join(" + ")
+      : primaryService.name;
 
   return {
     ok: true,
@@ -101,7 +152,17 @@ export async function createBooking(
       paymentStatus: "PENDING",
       paymentAmount: null,
       paymentMethod: null,
-      service: { name: service.name, duration: service.duration, price: service.price },
+      service: {
+        name: combinedName,
+        duration: totalDuration,
+        price: totalPrice,
+      },
+      services: services.map((s) => ({
+        id: s.id,
+        name: s.name,
+        duration: s.duration,
+        price: s.price,
+      })),
       professional: { name: professional.name },
       business,
     },

@@ -22,6 +22,7 @@ export interface PublicBusinessDTO {
   landingTestimonialsJson: string | null;
   cancellationPolicy?: string | null;
   minNoticeHours?: number | null;
+  maxServicesPerBooking: number;
   acceptsOnlinePayments?: boolean;
   services: Array<{
     id: string;
@@ -31,4 +32,19 @@ export interface PublicBusinessDTO {
     imageUrl: string | null;
   }>;
   professionals: ProfessionalDTO[];
+}
+
+export function toPublicBusinessDTO(
+  business: Omit<PublicBusinessDTO, "maxServicesPerBooking" | "acceptsOnlinePayments"> & {
+    maxServicesPerBooking?: number | null;
+    mercadoPagoAccessToken?: string | null;
+    acceptsOnlinePayments?: boolean;
+  }
+): PublicBusinessDTO {
+  const { mercadoPagoAccessToken, maxServicesPerBooking, ...rest } = business;
+  return {
+    ...rest,
+    maxServicesPerBooking: maxServicesPerBooking ?? 1,
+    acceptsOnlinePayments: business.acceptsOnlinePayments ?? Boolean(mercadoPagoAccessToken),
+  };
 }

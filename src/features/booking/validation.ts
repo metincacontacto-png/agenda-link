@@ -3,6 +3,7 @@ import { isValidDateOnly, parseLocalTime } from "../schedule/time.ts";
 export interface CreateBookingInput {
   slug: string;
   serviceId: string;
+  serviceIds?: string[];
   professionalId: string;
   clientName: string;
   clientWhatsApp: string;
@@ -19,6 +20,7 @@ export interface AvailabilityQuery {
   slug: string;
   date: string;
   serviceId: string | null;
+  serviceIds: string[] | null;
   professionalId: string | null;
 }
 
@@ -42,7 +44,6 @@ export function parseCreateBookingInput(input: unknown): BookingInputResult {
   }
   const record = input as Record<string, unknown>;
   const slug = boundedString(record.slug, 1, 100);
-  const serviceId = boundedString(record.serviceId, 1, 100);
   const professionalId = boundedString(record.professionalId, 1, 100);
   const clientName = boundedString(record.clientName, 1, 100);
   const clientWhatsApp = boundedString(record.clientWhatsApp, 1, 32);
@@ -50,11 +51,38 @@ export function parseCreateBookingInput(input: unknown): BookingInputResult {
   const date = boundedString(record.date, 10, 10);
   const time = boundedString(record.time, 5, 5);
 
+  let rawServiceIds: unknown[] = [];
+  if (Array.isArray(record.serviceIds)) {
+    rawServiceIds = [...record.serviceIds];
+  } else if (record.serviceIds !== undefined && record.serviceIds !== null) {
+    return { ok: false, error: "Selecciona un servicio y un profesional" };
+  }
+
+  const singleServiceId = boundedString(record.serviceId, 1, 100);
+  if (singleServiceId && !rawServiceIds.includes(singleServiceId)) {
+    rawServiceIds = [singleServiceId, ...rawServiceIds];
+  }
+
+  const serviceIds: string[] = [];
+  for (const item of rawServiceIds) {
+    const s = boundedString(item, 1, 100);
+    if (!s) {
+      return { ok: false, error: "Selecciona un servicio y un profesional" };
+    }
+    serviceIds.push(s);
+  }
+
   if (!slug || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) {
     return { ok: false, error: "Slug de negocio inválido" };
   }
-  if (!serviceId || !professionalId) {
+  if (serviceIds.length === 0 || !professionalId) {
     return { ok: false, error: "Selecciona un servicio y un profesional" };
+  }
+  if (new Set(serviceIds).size !== serviceIds.length) {
+    return { ok: false, error: "No se permiten servicios duplicados en una misma cita" };
+  }
+  if (serviceIds.length > 5) {
+    return { ok: false, error: "Selecciona como máximo 5 servicios" };
   }
   if (!clientName || /[\u0000-\u001f\u007f]/.test(clientName)) {
     return { ok: false, error: "Nombre de cliente inválido" };
@@ -83,7 +111,8 @@ export function parseCreateBookingInput(input: unknown): BookingInputResult {
     ok: true,
     value: {
       slug,
-      serviceId,
+      serviceId: serviceIds[0],
+      serviceIds,
       professionalId,
       clientName,
       clientWhatsApp: normalizedWhatsApp,
@@ -97,8 +126,26 @@ export function parseCreateBookingInput(input: unknown): BookingInputResult {
 export function parseAvailabilityQuery(params: URLSearchParams): AvailabilityQueryResult {
   const slug = boundedString(params.get("slug"), 1, 100);
   const date = boundedString(params.get("date"), 10, 10);
-  const serviceId = params.get("serviceId");
-  const professionalId = params.get("professionalId");
+  const professionalId = boundedString(params.get("professionalId"), 1, 100);
+
+  const rawServiceIdsList = params.getAll("serviceIds").slice(0, 5);
+  const rawServiceIdParam = params.get("serviceId");
+
+  const parsedServiceIds: string[] = [];
+  for (const item of rawServiceIdsList) {
+    const split = item.split(",").map((s) => s.trim()).filter(Boolean);
+    for (const s of split) {
+      if (!parsedServiceIds.includes(s)) {
+        parsedServiceIds.push(s);
+      }
+    }
+  }
+  if (rawServiceIdParam) {
+    const single = rawServiceIdParam.trim();
+    if (single && !parsedServiceIds.includes(single)) {
+      parsedServiceIds.push(single);
+    }
+  }
 
   if (!slug || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) {
     return { ok: false, error: "Slug de negocio inválido" };
@@ -106,15 +153,46 @@ export function parseAvailabilityQuery(params: URLSearchParams): AvailabilityQue
   if (!date || !isValidDateOnly(date)) {
     return { ok: false, error: "Fecha inválida" };
   }
-  if (
-    (serviceId !== null && (!serviceId || serviceId.length > 100)) ||
-    (professionalId !== null && (!professionalId || professionalId.length > 100)) ||
-    Boolean(serviceId) !== Boolean(professionalId)
-  ) {
+
+  const hasServicesParam = rawServiceIdsList.length > 0 || rawServiceIdParam !== null;
+  const hasProfessionalParam = params.get("professionalId") !== null;
+
+  if (hasServicesParam !== hasProfessionalParam) {
     return { ok: false, error: "Selecciona un servicio y profesional válidos" };
   }
 
-  return { ok: true, value: { slug, date, serviceId, professionalId } };
+  if (hasServicesParam && hasProfessionalParam) {
+    if (!professionalId || parsedServiceIds.length === 0) {
+      return { ok: false, error: "Selecciona un servicio y profesional válidos" };
+    }
+    for (const id of parsedServiceIds) {
+      if (!boundedString(id, 1, 100)) {
+        return { ok: false, error: "Selecciona un servicio y profesional válidos" };
+      }
+    }
+    const cappedServiceIds = parsedServiceIds.slice(0, 5);
+    return {
+      ok: true,
+      value: {
+        slug,
+        date,
+        serviceId: cappedServiceIds[0],
+        serviceIds: cappedServiceIds,
+        professionalId,
+      },
+    };
+  }
+
+  return {
+    ok: true,
+    value: {
+      slug,
+      date,
+      serviceId: null,
+      serviceIds: null,
+      professionalId: null,
+    },
+  };
 }
 
 export function parseAppointmentChangeInput(input: unknown):

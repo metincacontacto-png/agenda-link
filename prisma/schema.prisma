@@ -41,6 +41,7 @@ model Business {
   customDomain             String?            @unique
   cancellationPolicy       String?            @default("Cancelaciones con al menos 24 h de anticipación.")
   minNoticeHours           Int                @default(2)
+  maxServicesPerBooking    Int                @default(1)
   mercadoPagoAccessToken   String?
   mercadoPagoPublicKey     String?
   createdAt                DateTime           @default(now())
@@ -167,6 +168,8 @@ model Appointment {
   paymentStatus  String             @default("PENDING")
   paymentMethod  String?
   paymentAmount  Float?
+  durationMinutes Int?
+  servicesJson    String?
   createdAt      DateTime           @default(now())
   updatedAt      DateTime?
   lastModifiedBy String?

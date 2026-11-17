@@ -93,12 +93,14 @@ export async function PATCH(
       return NextResponse.json({ error: "La cita ya está en ese horario" }, { status: 400 });
     }
 
+    const appointmentDuration = appointment.durationMinutes ?? appointment.service.duration;
+
     const availableSlots = await getAvailableSlotsForProfessional({
       businessId: appointment.businessId,
       professionalId: appointment.professionalId,
       date: parsed.value.date,
       timeZone: appointment.business.timezone,
-      serviceDurationMinutes: appointment.service.duration,
+      serviceDurationMinutes: appointmentDuration,
       excludeAppointmentId: appointment.id,
     });
     if (!availableSlots.includes(parsed.value.time)) {
@@ -118,20 +120,20 @@ export async function PATCH(
         AND NOT EXISTS (
           SELECT 1
           FROM "Appointment" AS existing
-          INNER JOIN "Service" AS existingService ON existingService."id" = existing."serviceId"
+          LEFT JOIN "Service" AS existingService ON existingService."id" = existing."serviceId"
           WHERE existing."id" <> ${appointment.id}
             AND existing."businessId" = ${appointment.businessId}
             AND existing."professionalId" = ${appointment.professionalId}
             AND existing."status" NOT IN ('CANCELLED', 'CANCELED')
-            AND julianday(existing."dateTime") < julianday(${instant}) + (${appointment.service.duration} / 1440.0)
-            AND julianday(existing."dateTime") + (existingService."duration" / 1440.0) > julianday(${instant})
+            AND julianday(existing."dateTime") < julianday(${instant}) + (${appointmentDuration} / 1440.0)
+            AND julianday(existing."dateTime") + (COALESCE(existing."durationMinutes", existingService."duration") / 1440.0) > julianday(${instant})
         )
         AND NOT EXISTS (
           SELECT 1
           FROM "ScheduleBlock" AS block
           WHERE block."businessId" = ${appointment.businessId}
             AND (block."professionalId" IS NULL OR block."professionalId" = ${appointment.professionalId})
-            AND julianday(block."startsAt") < julianday(${instant}) + (${appointment.service.duration} / 1440.0)
+            AND julianday(block."startsAt") < julianday(${instant}) + (${appointmentDuration} / 1440.0)
             AND julianday(block."endsAt") > julianday(${instant})
         )
       RETURNING "id"
