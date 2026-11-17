@@ -5,6 +5,8 @@ export interface PlanConfig {
   name: string;
   price: number;
   priceFormatted: string;
+  annualPrice: number;
+  annualPriceFormatted: string;
   description: string;
   maxProfessionals: number;
   envPlanKey: string;
@@ -16,6 +18,8 @@ export const SUBSCRIPTION_PLANS: Record<"INDIVIDUAL" | "EQUIPO" | "NEGOCIO", Pla
     name: "Individual",
     price: 9990,
     priceFormatted: "$9.990 CLP/mes",
+    annualPrice: 99900,
+    annualPriceFormatted: "$99.900 CLP/año",
     description: "Para profesionales independientes.",
     maxProfessionals: 1,
     envPlanKey: "MERCADOPAGO_PLAN_ID_INDIVIDUAL",
@@ -25,6 +29,8 @@ export const SUBSCRIPTION_PLANS: Record<"INDIVIDUAL" | "EQUIPO" | "NEGOCIO", Pla
     name: "Básico",
     price: 28990,
     priceFormatted: "$28.990 CLP/mes",
+    annualPrice: 289900,
+    annualPriceFormatted: "$289.900 CLP/año",
     description: "Para salones o centros de 2 a 5 profesionales.",
     maxProfessionals: 5,
     envPlanKey: "MERCADOPAGO_PLAN_ID_EQUIPO",
@@ -34,11 +40,28 @@ export const SUBSCRIPTION_PLANS: Record<"INDIVIDUAL" | "EQUIPO" | "NEGOCIO", Pla
     name: "Premium",
     price: 48990,
     priceFormatted: "$48.990 CLP/mes",
+    annualPrice: 489900,
+    annualPriceFormatted: "$489.900 CLP/año",
     description: "Para centros grandes con profesionales ilimitados.",
     maxProfessionals: 999,
     envPlanKey: "MERCADOPAGO_PLAN_ID_NEGOCIO",
   },
 };
+
+export function getPlanPricing(planId: "INDIVIDUAL" | "EQUIPO" | "NEGOCIO", period: "monthly" | "yearly" = "monthly") {
+  const plan = SUBSCRIPTION_PLANS[planId];
+  if (!plan) throw new Error(`Unknown plan ${planId}`);
+  if (period === "yearly") {
+    return {
+      amount: plan.annualPrice,
+      formatted: plan.annualPriceFormatted,
+    };
+  }
+  return {
+    amount: plan.price,
+    formatted: plan.priceFormatted,
+  };
+}
 
 export function isSubscriptionActive(business: {
   billingBypass?: boolean;
