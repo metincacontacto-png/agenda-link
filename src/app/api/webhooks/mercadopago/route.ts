@@ -182,6 +182,22 @@ export async function POST(request: Request) {
         return NextResponse.json({ received: true, no_reference: true }, { status: 200 });
       }
 
+      if (external_reference?.startsWith("annual_")) {
+        const actualBusinessId = external_reference.replace("annual_", "");
+        if (status === "approved") {
+          const oneYearFromNow = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
+          await prisma.business.update({
+            where: { id: actualBusinessId },
+            data: {
+              subscriptionStatus: "ACTIVE",
+              currentPeriodEnd: oneYearFromNow,
+            },
+          });
+          console.log(`[Mercado Pago Webhook] Negocio ${actualBusinessId} pago anual acreditado.`);
+        }
+        return NextResponse.json({ success: true, type: "annual_payment", status }, { status: 200 });
+      }
+
       if (status === "approved") {
         await prisma.appointment.update({
           where: { id: external_reference },

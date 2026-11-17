@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { prisma } from "@/lib/db";
-import { requireBusinessMembership, requireSession } from "@/server/authorize";
+import { requireBusinessMembership, requireSession, type UserIdentity } from "@/server/authorize";
+import { getSessionCookie } from "@/server/auth";
 import { SUBSCRIPTION_PLANS, type PlanConfig } from "@/features/businesses/subscription-policy";
 
 function getCloudflareSecrets() {
@@ -26,15 +27,16 @@ function getCloudflareSecrets() {
 
 export async function POST(request: Request) {
   try {
-    const session = await requireSession(request);
-    if (!session.ok) return session.response;
-
     const body: unknown = await request.json().catch(() => ({}));
     if (typeof body !== "object" || body === null) {
       return NextResponse.json({ error: "Solicitud inválida" }, { status: 400 });
     }
 
-    const { slug, plan } = body as { slug?: string; plan?: string };
+    const { slug, plan, billingPeriod: rawBillingPeriod } = body as {
+      slug?: string;
+      plan?: string;
+      billingPeriod?: string;
+    };
     if (!slug || typeof slug !== "string") {
       return NextResponse.json({ error: "Falta el identificador del negocio" }, { status: 400 });
     }
@@ -54,8 +56,20 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Negocio no encontrado" }, { status: 404 });
     }
 
-    const auth = await requireBusinessMembership(session.user, business.id);
-    if (!auth.ok) return auth.response;
+    // Check if a session exists. If it exists, verify session and business membership.
+    // If no session cookie exists, allow proceeding with the found business.
+    const sessionCookie = getSessionCookie(request);
+    let sessionUser: UserIdentity | undefined;
+
+    if (sessionCookie) {
+      const session = await requireSession(request);
+      if (!session.ok) return session.response;
+
+      const auth = await requireBusinessMembership(session.user, business.id);
+      if (!auth.ok) return auth.response;
+
+      sessionUser = session.user;
+    }
 
     const secrets = getCloudflareSecrets();
     if (!secrets.accessToken) {
@@ -65,6 +79,77 @@ export async function POST(request: Request) {
       );
     }
 
+    const origin =
+      request.headers.get("origin") ||
+      process.env.NEXT_PUBLIC_APP_URL ||
+      "https://agendalink.cl";
+
+    const payerEmail = sessionUser?.email || business.email || "contacto@agendalink.cl";
+    const billingPeriod: "monthly" | "yearly" = rawBillingPeriod === "yearly" ? "yearly" : "monthly";
+
+    if (billingPeriod === "yearly") {
+      const mpPayload = {
+        items: [
+          {
+            id: `${planConfig.id}_YEARLY`,
+            title: `Agenda Link - Plan ${planConfig.name} (1 Año de Servicio)`,
+            description: `Suscripción anual con 2 meses gratis incluidos`,
+            quantity: 1,
+            currency_id: "CLP",
+            unit_price: planConfig.annualPrice,
+          },
+        ],
+        payer: {
+          email: payerEmail,
+        },
+        back_urls: {
+          success: `${origin}/admin/${business.slug}?subscription=annual_success`,
+          failure: `${origin}/admin/${business.slug}?subscription=failure`,
+          pending: `${origin}/admin/${business.slug}?subscription=pending`,
+        },
+        auto_return: "approved",
+        external_reference: `annual_${business.id}`,
+        notification_url: `${origin}/api/webhooks/mercadopago`,
+      };
+
+      const mpRes = await fetch("https://api.mercadopago.com/checkout/preferences", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${secrets.accessToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(mpPayload),
+      });
+
+      if (!mpRes.ok) {
+        const errText = await mpRes.text();
+        console.warn("[MercadoPago Annual Checkout] Preference creation failed:", errText);
+        return NextResponse.json(
+          { error: "Error al generar la preferencia de Mercado Pago" },
+          { status: 502 }
+        );
+      }
+
+      const mpData = (await mpRes.json()) as { id?: string; init_point?: string; sandbox_init_point?: string };
+      const initPoint = mpData.init_point || mpData.sandbox_init_point || "";
+
+      // Save selected target plan on business
+      await prisma.business.update({
+        where: { id: business.id },
+        data: {
+          subscriptionPlan: planKey,
+        },
+      });
+
+      return NextResponse.json({
+        success: true,
+        initPoint,
+        preferenceId: mpData.id,
+        billingPeriod: "yearly",
+      });
+    }
+
+    // Monthly flow via Preapproval API
     let preapprovalPlanId: string | undefined;
     if (planKey === "INDIVIDUAL") preapprovalPlanId = secrets.planIdIndividual;
     else if (planKey === "EQUIPO") preapprovalPlanId = secrets.planIdEquipo;
@@ -76,13 +161,6 @@ export async function POST(request: Request) {
         { status: 500 }
       );
     }
-
-    const origin =
-      request.headers.get("origin") ||
-      process.env.NEXT_PUBLIC_APP_URL ||
-      "https://agendalink.cl";
-
-    const payerEmail = session.user.email || business.email;
 
     const fallbackHostedUrl = `https://www.mercadopago.cl/subscriptions/checkout?preapproval_plan_id=${preapprovalPlanId}`;
     let initPoint = fallbackHostedUrl;
@@ -137,6 +215,7 @@ export async function POST(request: Request) {
       success: true,
       initPoint,
       subscriptionId,
+      billingPeriod: "monthly",
     });
   } catch (error) {
     console.error("[Subscription Checkout Error]", error);
