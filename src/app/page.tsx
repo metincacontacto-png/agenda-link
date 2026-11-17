@@ -6,6 +6,7 @@ import styles from "./page.module.css";
 import { FEATURES } from "@/lib/features";
 import ProximamenteBadge from "@/components/ProximamenteBadge";
 import RegistroForm from "@/components/RegistroForm";
+import SubscriptionCheckoutModal from "@/components/SubscriptionCheckoutModal";
 import { LEGAL } from "@/lib/legal";
 
 const convos = [
@@ -76,6 +77,8 @@ export default function HomePage() {
   const [registerModalPlan, setRegisterModalPlan] = useState<string | undefined>(undefined);
   const [registerModalSlug, setRegisterModalSlug] = useState<string | undefined>(undefined);
   const [loginModalOpen, setLoginModalOpen] = useState(false);
+  const [checkoutModalOpen, setCheckoutModalOpen] = useState(false);
+  const [checkoutPlan, setCheckoutPlan] = useState<"INDIVIDUAL" | "EQUIPO" | "NEGOCIO">("INDIVIDUAL");
 
   // Focus reference for accessibility
   const triggerRef = useRef<HTMLElement | null>(null);
@@ -137,17 +140,26 @@ export default function HomePage() {
           setLoginModalOpen(false);
           triggerRef.current?.focus();
         }
+        if (checkoutModalOpen) {
+          setCheckoutModalOpen(false);
+          triggerRef.current?.focus();
+        }
       }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [registerModalOpen, loginModalOpen]);
+  }, [registerModalOpen, loginModalOpen, checkoutModalOpen]);
 
   // Open register modal with optional prefill
   const openRegister = (plan?: string, initialSlug?: string) => {
     setRegisterModalPlan(plan);
     setRegisterModalSlug(initialSlug);
     setRegisterModalOpen(true);
+  };
+
+  const openCheckout = (plan: "INDIVIDUAL" | "EQUIPO" | "NEGOCIO") => {
+    setCheckoutPlan(plan);
+    setCheckoutModalOpen(true);
   };
 
   const closeRegisterModal = () => {
@@ -1168,15 +1180,28 @@ export default function HomePage() {
             <div className={styles.planPill}>
               👤 1 profesional
             </div>
-            <button
-              className={`${styles.btn} ${styles.btnPurple}`}
-              onClick={(e) => {
-                triggerRef.current = e.currentTarget;
-                openRegister("individual");
-              }}
-            >
-              Prueba Gratis
-            </button>
+            <div className={styles.planActions}>
+              <button
+                type="button"
+                className={`${styles.btn} ${styles.btnPayPlan}`}
+                onClick={(e) => {
+                  triggerRef.current = e.currentTarget;
+                  openCheckout("INDIVIDUAL");
+                }}
+              >
+                Pagar {billingPeriod === "monthly" ? "$9.990 CLP/mes" : "$99.900 CLP/año"} →
+              </button>
+              <button
+                type="button"
+                className={styles.btnTrialSecondary}
+                onClick={(e) => {
+                  triggerRef.current = e.currentTarget;
+                  openRegister("individual");
+                }}
+              >
+                O prueba 14 días gratis
+              </button>
+            </div>
             <ul style={{ marginTop: 24 }}>
               <li>1 profesional</li>
               <li>Link y landing personalizada</li>
@@ -1202,15 +1227,28 @@ export default function HomePage() {
             <div className={styles.planPill}>
               👥 2 profesionales
             </div>
-            <button
-              className={`${styles.btn} ${styles.btnPurple}`}
-              onClick={(e) => {
-                triggerRef.current = e.currentTarget;
-                openRegister("basico");
-              }}
-            >
-              Prueba Gratis
-            </button>
+            <div className={styles.planActions}>
+              <button
+                type="button"
+                className={`${styles.btn} ${styles.btnPayPlan}`}
+                onClick={(e) => {
+                  triggerRef.current = e.currentTarget;
+                  openCheckout("EQUIPO");
+                }}
+              >
+                Pagar {billingPeriod === "monthly" ? "$28.990 CLP/mes" : "$289.900 CLP/año"} →
+              </button>
+              <button
+                type="button"
+                className={styles.btnTrialSecondary}
+                onClick={(e) => {
+                  triggerRef.current = e.currentTarget;
+                  openRegister("basico");
+                }}
+              >
+                O prueba 14 días gratis
+              </button>
+            </div>
             <ul style={{ marginTop: 24 }}>
               <li>Hasta 2 profesionales</li>
               <li>Todo lo del plan Individual</li>
@@ -1238,15 +1276,28 @@ export default function HomePage() {
             <div className={styles.planPill}>
               🏢 5 profesionales
             </div>
-            <button
-              className={`${styles.btn} ${styles.btnPurple}`}
-              onClick={(e) => {
-                triggerRef.current = e.currentTarget;
-                openRegister("premium");
-              }}
-            >
-              Prueba Gratis
-            </button>
+            <div className={styles.planActions}>
+              <button
+                type="button"
+                className={`${styles.btn} ${styles.btnPayPlan}`}
+                onClick={(e) => {
+                  triggerRef.current = e.currentTarget;
+                  openCheckout("NEGOCIO");
+                }}
+              >
+                Pagar {billingPeriod === "monthly" ? "$48.990 CLP/mes" : "$489.900 CLP/año"} →
+              </button>
+              <button
+                type="button"
+                className={styles.btnTrialSecondary}
+                onClick={(e) => {
+                  triggerRef.current = e.currentTarget;
+                  openRegister("premium");
+                }}
+              >
+                O prueba 14 días gratis
+              </button>
+            </div>
             <ul style={{ marginTop: 24 }}>
               <li>Hasta 5 profesionales</li>
               <li>Todo lo del plan Básico</li>
@@ -1507,6 +1558,14 @@ export default function HomePage() {
           </div>
         </div>
       )}
+
+      {/* ===== MODAL DE CHECKOUT SUSCRIPCIÓN ===== */}
+      <SubscriptionCheckoutModal
+        isOpen={checkoutModalOpen}
+        onClose={() => setCheckoutModalOpen(false)}
+        plan={checkoutPlan}
+        billingPeriod={billingPeriod}
+      />
     </div>
   );
 }
