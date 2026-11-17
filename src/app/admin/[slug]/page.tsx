@@ -952,7 +952,15 @@ export default function AdminDashboard({ params }: { params: Promise<{ slug: str
           />
         )}
 
-        {activeTab === "team" && <TeamTab professionals={business.professionals} />}
+        {activeTab === "team" && (
+          <TeamTab
+            slug={slug}
+            professionals={business.professionals}
+            subscriptionPlan={business.subscriptionPlan || business.plan}
+            onTeamChanged={loadAdminData}
+            onOpenBilling={() => setIsBillingModalOpen(true)}
+          />
+        )}
 
         {activeTab === "ventas" && (
           <SalesTab

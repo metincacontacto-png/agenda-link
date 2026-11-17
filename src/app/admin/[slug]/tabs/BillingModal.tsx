@@ -260,10 +260,10 @@ export default function BillingModal({
                   $28.990 <span style={{ fontSize: 12, fontWeight: 500, color: "var(--text-secondary)" }}>/mes</span>
                 </div>
                 <p style={{ fontSize: 12, color: "var(--text-secondary)", marginBottom: 14 }}>
-                  Para equipos de 2 a 5 profesionales
+                  Para equipos de hasta 2 profesionales
                 </p>
                 <ul style={{ margin: 0, paddingLeft: 18, fontSize: 12, color: "var(--foreground)", lineHeight: 1.6 }}>
-                  <li><strong>Hasta 5 profesionales</strong></li>
+                  <li><strong>Hasta 2 profesionales</strong></li>
                   <li>Calendario por profesional</li>
                   <li>Control de caja y ventas</li>
                   <li>Base de clientes y fichas</li>
@@ -311,10 +311,10 @@ export default function BillingModal({
                   $48.990 <span style={{ fontSize: 12, fontWeight: 500, color: "var(--text-secondary)" }}>/mes</span>
                 </div>
                 <p style={{ fontSize: 12, color: "var(--text-secondary)", marginBottom: 14 }}>
-                  Para negocios de más de 5 personas
+                  Para negocios de hasta 5 profesionales
                 </p>
                 <ul style={{ margin: 0, paddingLeft: 18, fontSize: 12, color: "var(--foreground)", lineHeight: 1.6 }}>
-                  <li><strong>Profesionales ilimitados</strong></li>
+                  <li><strong>Hasta 5 profesionales</strong></li>
                   <li>Soporte preferencial prioritario</li>
                   <li>Configuración multi-servicio</li>
                   <li>Reportes avanzados</li>
