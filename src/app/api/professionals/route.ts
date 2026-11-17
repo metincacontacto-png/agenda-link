@@ -15,16 +15,15 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Solicitud inválida" }, { status: 400 });
   }
 
-  if (
-    typeof body !== "object" ||
-    body === null ||
-    !("slug" in body) ||
-    typeof (body as { slug: unknown }).slug !== "string"
-  ) {
+  if (typeof body !== "object" || body === null) {
+    return NextResponse.json({ error: "Solicitud inválida" }, { status: 400 });
+  }
+
+  const slug = typeof (body as { slug?: unknown })?.slug === "string" ? (body as { slug: string }).slug : undefined;
+  if (!slug?.trim()) {
     return NextResponse.json({ error: "Falta el slug del negocio" }, { status: 400 });
   }
 
-  const slug = (body as { slug: string }).slug;
   const rawName = (body as { name?: unknown }).name;
 
   if (typeof rawName !== "string" || rawName.trim().length < 1 || rawName.trim().length > 80) {
@@ -39,7 +38,7 @@ export async function POST(request: Request) {
 
   try {
     const business = await prisma.business.findUnique({
-      where: { slug },
+      where: { slug: slug.trim() },
       select: { id: true, plan: true, subscriptionPlan: true },
     });
     if (!business) {
@@ -68,32 +67,23 @@ export async function POST(request: Request) {
       );
     }
 
-    const professionalId = crypto.randomUUID();
     const cleanName = name.trim();
     const avatar = cleanName.substring(0, 2).toUpperCase();
 
     const professional = await prisma.professional.create({
       data: {
-        id: professionalId,
         businessId: business.id,
         name: cleanName,
         avatar,
+        schedules: {
+          create: [1, 2, 3, 4, 5].map((dayOfWeek) => ({
+            dayOfWeek,
+            startMinute: 540,
+            endMinute: 1080,
+          })),
+        },
       },
     });
-
-    // Create default schedule (Mon-Fri 09:00 - 18:00, Sat/Sun disabled)
-    const schedulePromises = [1, 2, 3, 4, 5].map((dayOfWeek) =>
-      prisma.professionalSchedule.create({
-        data: {
-          id: crypto.randomUUID(),
-          professionalId,
-          dayOfWeek,
-          startMinute: 540,
-          endMinute: 1080,
-        },
-      })
-    );
-    await Promise.all(schedulePromises);
 
     return NextResponse.json({ success: true, professional }, { status: 201 });
   } catch (error) {
@@ -107,13 +97,15 @@ export async function DELETE(request: Request) {
   if (!session.ok) return session.response;
 
   const { searchParams } = new URL(request.url);
-  const id = searchParams.get("id");
-  const slug = searchParams.get("slug");
+  let id = searchParams.get("id");
+  let slug = searchParams.get("slug");
 
-  if (!id || !slug) {
+  if (!id?.trim() || !slug?.trim()) {
     return NextResponse.json({ error: "Falta el id del profesional o el slug del negocio" }, { status: 400 });
   }
 
+  id = id.trim();
+  slug = slug.trim();
   let businessId: string | undefined;
 
   try {
@@ -145,9 +137,21 @@ export async function DELETE(request: Request) {
       );
     }
 
-    await prisma.professionalSchedule.deleteMany({ where: { professionalId: id } });
-    await prisma.professionalBreak.deleteMany({ where: { professionalId: id } });
-    await prisma.professional.delete({ where: { id } });
+    const appointmentCount = await prisma.appointment.count({
+      where: { professionalId: id },
+    });
+    if (appointmentCount > 0) {
+      return NextResponse.json(
+        { error: "No es posible eliminar el profesional porque tiene citas asociadas en el sistema. Reasigna o cancela sus citas antes de eliminarlo." },
+        { status: 400 }
+      );
+    }
+
+    await prisma.$transaction([
+      prisma.professionalSchedule.deleteMany({ where: { professionalId: id } }),
+      prisma.professionalBreak.deleteMany({ where: { professionalId: id } }),
+      prisma.professional.delete({ where: { id } }),
+    ]);
 
     return NextResponse.json({ success: true });
   } catch (error) {
