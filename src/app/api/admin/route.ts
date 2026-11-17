@@ -81,6 +81,7 @@ export async function GET(request: Request) {
           landingTestimonialsJson: true,
           cancellationPolicy: true,
           minNoticeHours: true,
+          maxServicesPerBooking: true,
           mercadoPagoAccessToken: true,
           mercadoPagoPublicKey: true,
           services: {
@@ -132,6 +133,7 @@ export async function GET(request: Request) {
     const { mercadoPagoAccessToken, ...businessFields } = business;
     const businessDTO = {
       ...businessFields,
+      maxServicesPerBooking: business.maxServicesPerBooking ?? 1,
       billingBypass: canViewSensitive ? business.billingBypass : false,
       subscriptionStatus: business.subscriptionStatus ?? "TRIALING",
       trialEndsAt: business.trialEndsAt ? business.trialEndsAt.toISOString() : null,
@@ -202,6 +204,7 @@ export async function POST(request: Request) {
       success: true,
       business: {
         ...businessFields,
+        maxServicesPerBooking: business.maxServicesPerBooking ?? 1,
         billingBypass: canViewSensitive ? business.billingBypass : false,
         subscriptionStatus: business.subscriptionStatus ?? "TRIALING",
         trialEndsAt: business.trialEndsAt ? business.trialEndsAt.toISOString() : null,

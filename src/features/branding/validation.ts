@@ -17,6 +17,7 @@ export interface UpdateBusinessProfileInput {
   landingTestimonialsJson?: string | null;
   cancellationPolicy?: string | null;
   minNoticeHours?: number;
+  maxServicesPerBooking?: number;
   mercadoPagoAccessToken?: string | null;
   mercadoPagoPublicKey?: string | null;
   plan?: "INDIVIDUAL" | "EQUIPO" | "NEGOCIO";
@@ -98,6 +99,13 @@ export function parseBusinessProfileInput(input: unknown): BusinessProfileInputR
       return { ok: false, error: "La anticipación mínima debe ser un número entero entre 0 y 72 horas" };
     }
     result.minNoticeHours = hours;
+  }
+  if (record.maxServicesPerBooking !== undefined) {
+    const maxServices = Number(record.maxServicesPerBooking);
+    if (!Number.isInteger(maxServices) || maxServices < 1 || maxServices > 5) {
+      return { ok: false, error: "El límite de servicios debe ser un número entero entre 1 y 5" };
+    }
+    result.maxServicesPerBooking = maxServices;
   }
   if (record.mercadoPagoAccessToken !== undefined) {
     if (record.mercadoPagoAccessToken === null || record.mercadoPagoAccessToken === "") {

@@ -36,6 +36,7 @@ export async function GET(request: Request) {
         landingTestimonialsJson: true,
         cancellationPolicy: true,
         minNoticeHours: true,
+        maxServicesPerBooking: true,
         mercadoPagoAccessToken: true,
         professionals: { select: { id: true, name: true, avatar: true } },
         services: { select: { id: true, name: true, duration: true, price: true, imageUrl: true } },
@@ -48,6 +49,7 @@ export async function GET(request: Request) {
     const { mercadoPagoAccessToken, ...businessFields } = business;
     const publicBusiness: PublicBusinessDTO = {
       ...businessFields,
+      maxServicesPerBooking: business.maxServicesPerBooking ?? 1,
       acceptsOnlinePayments: Boolean(mercadoPagoAccessToken),
     };
 

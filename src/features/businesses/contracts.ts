@@ -44,6 +44,7 @@ export interface BusinessAdminDTO {
   landingTestimonialsJson: string | null;
   cancellationPolicy?: string | null;
   minNoticeHours?: number;
+  maxServicesPerBooking: number;
   mercadoPagoConnected?: boolean;
   mercadoPagoPublicKey?: string | null;
   mercadoPagoTokenMasked?: string | null;
