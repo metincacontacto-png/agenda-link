@@ -19,7 +19,7 @@
 - Modify: `src/features/booking/public-business-dto.ts`
 - Modify: `src/app/api/admin/route.ts`
 
-- [ ] **Step 1: Update `prisma/schema.prisma`**
+- [x] **Step 1: Update `prisma/schema.prisma`**
 
 In `Business`:
 ```prisma
@@ -32,7 +32,7 @@ durationMinutes Int?
 servicesJson    String?
 ```
 
-- [ ] **Step 2: Create D1 migration file**
+- [x] **Step 2: Create D1 migration file**
 
 Create `prisma/migrations/20261117120000_multi_service_bookings/migration.sql`:
 ```sql
@@ -41,26 +41,26 @@ ALTER TABLE "Appointment" ADD COLUMN "durationMinutes" INTEGER;
 ALTER TABLE "Appointment" ADD COLUMN "servicesJson" TEXT;
 ```
 
-- [ ] **Step 3: Update local SQLite database schema and generate Prisma client**
+- [x] **Step 3: Update local SQLite database schema and generate Prisma client**
 
 Run:
 ```bash
 npx prisma generate
 ```
 
-- [ ] **Step 4: Update Contracts and Admin DTO**
+- [x] **Step 4: Update Contracts and Admin DTO**
 
 In `src/features/businesses/contracts.ts` and `src/features/booking/public-business-dto.ts`:
 - Add `maxServicesPerBooking: number;` to `BusinessAdminDTO` and `PublicBusinessDTO`.
 In `src/app/api/admin/route.ts`:
 - Include `maxServicesPerBooking` in select and update payloads.
 
-- [ ] **Step 5: Verify Typecheck**
+- [x] **Step 5: Verify Typecheck**
 
 Run: `npx tsc --noEmit`
 Expected: PASS with 0 errors.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 Run:
 ```bash
@@ -80,7 +80,7 @@ git commit -m "feat(schema): add maxServicesPerBooking and appointment duration 
 - Modify: `src/features/booking/create-booking.ts`
 - Create: `tests/multi-service-availability.test.mjs`
 
-- [ ] **Step 1: Write test for multi-service slot calculation and total duration blocking**
+- [x] **Step 1: Write test for multi-service slot calculation and total duration blocking**
 
 Create `tests/multi-service-availability.test.mjs`:
 ```javascript
@@ -135,12 +135,12 @@ test("appointment with 180 min duration blocks full 3 hours in availability", ()
 });
 ```
 
-- [ ] **Step 2: Run test to verify it passes or fails**
+- [x] **Step 2: Run test to verify it passes or fails**
 
 Run: `node --experimental-strip-types --test tests/multi-service-availability.test.mjs`
 Expected: PASS (verifies time slot math foundation)
 
-- [ ] **Step 3: Update `availability.ts` to read `durationMinutes` from appointments**
+- [x] **Step 3: Update `availability.ts` to read `durationMinutes` from appointments**
 
 In `src/features/booking/availability.ts`:
 Select `durationMinutes: true` in appointments query:
@@ -151,7 +151,7 @@ appointments: appointments.map((appointment) => ({
 })),
 ```
 
-- [ ] **Step 4: Update `AtomicBookingInput` and `prismaBookingRepository.insertIfAvailable`**
+- [x] **Step 4: Update `AtomicBookingInput` and `prismaBookingRepository.insertIfAvailable`**
 
 In `src/features/booking/ports.ts`:
 Add `servicesJson?: string | null;` and `durationMinutes?: number | null;` to `AtomicBookingInput`.
@@ -180,7 +180,7 @@ Update raw query to store `durationMinutes` and `servicesJson`, and use `COALESC
       )
 ```
 
-- [ ] **Step 5: Support multiple `serviceIds` in `parseCreateBookingInput` and `createBooking`**
+- [x] **Step 5: Support multiple `serviceIds` in `parseCreateBookingInput` and `createBooking`**
 
 In `src/features/booking/validation.ts`:
 Accept `serviceIds?: string[]` (array of 1 to 5 service IDs) alongside `serviceId`.
@@ -191,13 +191,13 @@ In `src/features/booking/create-booking.ts`:
 - Calculate `totalPrice = services.reduce((acc, s) => acc + s.price, 0)`.
 - Pass `serviceDurationMinutes: totalDuration` to `getAvailableSlots` and `insertIfAvailable`.
 
-- [ ] **Step 6: Run tests and typecheck**
+- [x] **Step 6: Run tests and typecheck**
 
 Run: `node --experimental-strip-types --test tests/multi-service-availability.test.mjs`
 Run: `npx tsc --noEmit`
 Expected: PASS
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 Run:
 ```bash
@@ -214,7 +214,7 @@ git commit -m "feat(booking): support multi-service duration aggregation and ato
 - Modify: `src/app/admin/[slug]/tabs/SettingsTab.tsx`
 - Modify: `src/app/api/admin/route.ts`
 
-- [ ] **Step 1: Add `maxServicesPerBooking` control in `ServicesTab.tsx`**
+- [x] **Step 1: Add `maxServicesPerBooking` control in `ServicesTab.tsx`**
 
 In `src/app/admin/[slug]/tabs/ServicesTab.tsx`:
 Add a control block above the service catalog:
@@ -223,18 +223,18 @@ Add a control block above the service catalog:
 - Informative helper: "Define cuántos servicios distintos puede seleccionar un cliente en una misma reserva. El calendario reservará automáticamente la suma del tiempo de todos los servicios elegidos."
 - Updates via `POST /api/admin` with `{ slug, maxServicesPerBooking: Number(value) }`.
 
-- [ ] **Step 2: Update `POST /api/admin` to handle `maxServicesPerBooking`**
+- [x] **Step 2: Update `POST /api/admin` to handle `maxServicesPerBooking`**
 
 In `src/app/api/admin/route.ts`:
 Parse `maxServicesPerBooking`: number between 1 and 5.
 Update `prisma.business.update({ where: { slug }, data: { maxServicesPerBooking } })`.
 
-- [ ] **Step 3: Run typecheck and lint**
+- [x] **Step 3: Run typecheck and lint**
 
 Run: `npx tsc --noEmit && npx eslint src/app/admin/[slug]/tabs/ServicesTab.tsx`
 Expected: PASS
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 Run:
 ```bash
@@ -254,7 +254,7 @@ git commit -m "feat(admin): add maxServicesPerBooking setting in services manage
 - Modify: `src/app/api/payments/mercadopago/preference/route.ts`
 - Modify: `src/lib/whatsapp.ts`
 
-- [ ] **Step 1: Update `BookingFlow.tsx` for multi-service selection**
+- [x] **Step 1: Update `BookingFlow.tsx` for multi-service selection**
 
 Props:
 - `selectedServices: Service[]`
@@ -270,13 +270,13 @@ UI:
   - "{count} servicios seleccionados · {totalMinutes} min · {formattedTotal}"
   - Button: "Continuar ({totalMinutes} min) →"
 
-- [ ] **Step 2: Update `/api/availability` to accept `serviceIds` (comma separated) or `duration`**
+- [x] **Step 2: Update `/api/availability` to accept `serviceIds` (comma separated) or `duration`**
 
 In `src/app/api/availability/route.ts`:
 Accept `serviceIds` query parameter (e.g. `serviceIds=id1,id2`).
 Fetch durations and pass `serviceDurationMinutes: sum(durations)` to `getSlotsForProfessional`.
 
-- [ ] **Step 3: Update `preference/route.ts` (Mercado Pago)**
+- [x] **Step 3: Update `preference/route.ts` (Mercado Pago)**
 
 In `src/app/api/payments/mercadopago/preference/route.ts`:
 Map each service to `mpPayload.items`:
@@ -290,7 +290,7 @@ items: selectedServices.map((svc) => ({
 }))
 ```
 
-- [ ] **Step 4: Update `buildWhatsAppReminderUrl` in `src/lib/whatsapp.ts`**
+- [x] **Step 4: Update `buildWhatsAppReminderUrl` in `src/lib/whatsapp.ts`**
 
 Format services list:
 ```typescript
@@ -299,14 +299,14 @@ Format services list:
 `💰 *Total:* ${formattedPrice}`
 ```
 
-- [ ] **Step 5: Run tests and typecheck**
+- [x] **Step 5: Run tests and typecheck**
 
 Run: `node --experimental-strip-types --test tests/multi-service-availability.test.mjs`
 Run: `npx tsc --noEmit`
 Run: `npm test`
 Expected: PASS
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 Run:
 ```bash
@@ -318,18 +318,18 @@ git commit -m "feat(booking): enable client multi-service selection, aggregated 
 
 ### Task 5: Migración Remota D1, Verificación Integral y Despliegue a Producción
 
-- [ ] **Step 1: Apply D1 migration on remote production**
+- [x] **Step 1: Apply D1 migration on remote production**
 Run: `npx wrangler d1 migrations apply agenda-link-db --remote`
 Expected: Migration applied successfully.
 
-- [ ] **Step 2: Run complete test suite**
+- [x] **Step 2: Run complete test suite**
 Run: `npm test`
 Expected: PASS
 
-- [ ] **Step 3: Run Cloudflare build and deployment**
+- [x] **Step 3: Run Cloudflare build and deployment**
 Run: `npm run deploy`
 Expected: Deployed to `agendalink.cl`.
 
-- [ ] **Step 4: Push main to origin**
+- [x] **Step 4: Push main to origin**
 Run: `git push origin main`
 Expected: Synchronized with GitHub repository.
