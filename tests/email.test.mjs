@@ -57,6 +57,44 @@ test("renderBusinessNotificationHtml includes client contact and booking details
   assert.match(html, /wa\.me\/56987654321/);
 });
 
+test("renderClientBookingHtml formats multiple services, total duration, and consolidated price", () => {
+  const multiBookingData = {
+    ...mockBookingData,
+    services: [
+      { name: "Corte de Cabello", duration: 45, price: 18000 },
+      { name: "Perfilado de Barba", duration: 30, price: 10000 },
+    ],
+    totalDuration: 75,
+    totalPrice: 28000,
+  };
+
+  const html = renderClientBookingHtml(multiBookingData);
+
+  assert.match(html, /Corte de Cabello/);
+  assert.match(html, /Perfilado de Barba/);
+  assert.match(html, /75 min/);
+  assert.match(html, /\$28\.000/);
+});
+
+test("renderBusinessNotificationHtml formats multiple services for the admin notification", () => {
+  const multiBookingData = {
+    ...mockBookingData,
+    services: [
+      { name: "Corte de Cabello", duration: 45, price: 18000 },
+      { name: "Perfilado de Barba", duration: 30, price: 10000 },
+    ],
+    totalDuration: 75,
+    totalPrice: 28000,
+  };
+
+  const html = renderBusinessNotificationHtml(multiBookingData);
+
+  assert.match(html, /Corte de Cabello/);
+  assert.match(html, /Perfilado de Barba/);
+  assert.match(html, /75 min/);
+  assert.match(html, /\$28\.000/);
+});
+
 test("sendEmail returns simulated: true without failing when no apiKey is active", async () => {
   const originalKey = process.env.RESEND_API_KEY;
   delete process.env.RESEND_API_KEY;

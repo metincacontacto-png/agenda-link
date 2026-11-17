@@ -82,6 +82,13 @@ export interface BookingEmailData {
     duration: number;
     price: number;
   };
+  services?: Array<{
+    name: string;
+    duration: number;
+    price: number;
+  }>;
+  totalDuration?: number;
+  totalPrice?: number;
   professional: {
     name: string;
   };
@@ -122,9 +129,52 @@ function formatChileanLongDate(dateStr: string): string {
   return dateStr;
 }
 
+function renderServicesRow(data: BookingEmailData): string {
+  const services = data.services && data.services.length > 0 ? data.services : [data.service];
+  const isMulti = services.length > 1;
+  const label = isMulti ? "Servicios" : "Servicio";
+
+  if (isMulti) {
+    const listHtml = services
+      .map(
+        (s) =>
+          `<div style="margin-bottom:4px;">${s.name} <span style="color:#64748b;font-weight:normal;font-size:12px;">(${s.duration} min · ${formatPrice(s.price, data.business.currency)})</span></div>`
+      )
+      .join("");
+    const totalMinutes = data.totalDuration ?? services.reduce((acc, s) => acc + s.duration, 0);
+
+    return `<tr>
+            <td style="padding:13px 18px;border-bottom:1px solid #f1f5f9;color:#64748b;font-size:12.5px;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;vertical-align:top;">
+              ${label}
+            </td>
+            <td align="right" style="padding:13px 18px;border-bottom:1px solid #f1f5f9;color:#0f172a;font-size:13.5px;font-weight:700;">
+              ${listHtml}
+              <div style="font-size:11.5px;color:#0066FF;margin-top:6px;font-weight:700;">
+                ⏱️ ${totalMinutes} min totales
+              </div>
+            </td>
+          </tr>`;
+  }
+
+  return `<tr>
+            <td style="padding:13px 18px;border-bottom:1px solid #f1f5f9;color:#64748b;font-size:12.5px;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;">
+              ${label}
+            </td>
+            <td align="right" style="padding:13px 18px;border-bottom:1px solid #f1f5f9;color:#0f172a;font-size:14px;font-weight:700;">
+              ${data.service.name} <span style="color:#64748b;font-weight:normal;font-size:13px;">(${data.service.duration} min)</span>
+            </td>
+          </tr>`;
+}
+
 export function renderClientBookingHtml(data: BookingEmailData): string {
-  const formattedPrice = formatPrice(data.service.price, data.business.currency);
+  const effectivePrice =
+    data.totalPrice ??
+    (data.services && data.services.length > 0
+      ? data.services.reduce((acc, s) => acc + s.price, 0)
+      : data.service.price);
+  const formattedPrice = formatPrice(effectivePrice, data.business.currency);
   const formattedDate = formatChileanLongDate(data.date);
+  const servicesRowHtml = renderServicesRow(data);
 
   return `<!DOCTYPE html>
 <html lang="es">
@@ -185,14 +235,7 @@ export function renderClientBookingHtml(data: BookingEmailData): string {
               </span>
             </td>
           </tr>
-          <tr>
-            <td style="padding:13px 18px;border-bottom:1px solid #f1f5f9;color:#64748b;font-size:12.5px;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;">
-              Servicio
-            </td>
-            <td align="right" style="padding:13px 18px;border-bottom:1px solid #f1f5f9;color:#0f172a;font-size:14px;font-weight:700;">
-              ${data.service.name} <span style="color:#64748b;font-weight:normal;font-size:13px;">(${data.service.duration} min)</span>
-            </td>
-          </tr>
+          ${servicesRowHtml}
           <tr>
             <td style="padding:13px 18px;border-bottom:1px solid #f1f5f9;color:#64748b;font-size:12.5px;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;">
               Profesional
@@ -254,8 +297,14 @@ export function renderClientBookingHtml(data: BookingEmailData): string {
 }
 
 export function renderBusinessNotificationHtml(data: BookingEmailData): string {
-  const formattedPrice = formatPrice(data.service.price, data.business.currency);
+  const effectivePrice =
+    data.totalPrice ??
+    (data.services && data.services.length > 0
+      ? data.services.reduce((acc, s) => acc + s.price, 0)
+      : data.service.price);
+  const formattedPrice = formatPrice(effectivePrice, data.business.currency);
   const formattedDate = formatChileanLongDate(data.date);
+  const servicesRowHtml = renderServicesRow(data);
   const cleanPhone = data.clientWhatsApp.replace(/[^0-9+]/g, "");
   const waUrl = `https://wa.me/${cleanPhone.replace("+", "")}`;
 
@@ -344,14 +393,7 @@ export function renderBusinessNotificationHtml(data: BookingEmailData): string {
               </span>
             </td>
           </tr>
-          <tr>
-            <td style="padding:13px 18px;border-bottom:1px solid #f1f5f9;color:#64748b;font-size:12.5px;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;">
-              Servicio
-            </td>
-            <td align="right" style="padding:13px 18px;border-bottom:1px solid #f1f5f9;color:#0f172a;font-size:14px;font-weight:700;">
-              ${data.service.name} <span style="color:#64748b;font-weight:normal;font-size:13px;">(${data.service.duration} min)</span>
-            </td>
-          </tr>
+          ${servicesRowHtml}
           <tr>
             <td style="padding:13px 18px;border-bottom:1px solid #f1f5f9;color:#64748b;font-size:12.5px;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;">
               Profesional
@@ -403,6 +445,8 @@ export function renderBusinessNotificationHtml(data: BookingEmailData): string {
 
 export async function sendBookingNotifications(data: BookingEmailData): Promise<void> {
   const promises: Promise<SendEmailResult>[] = [];
+  const services = data.services && data.services.length > 0 ? data.services : [data.service];
+  const serviceSummary = services.map((s) => s.name).join(" + ");
 
   // 1. Email al cliente (si indicó correo)
   if (data.clientEmail) {
@@ -410,7 +454,7 @@ export async function sendBookingNotifications(data: BookingEmailData): Promise<
       sendEmail({
         to: data.clientEmail,
         from: "AgendaLink <notificaciones@agendalink.cl>",
-        subject: `Confirmación de cita: ${data.service.name} en ${data.business.name}`,
+        subject: `Confirmación de cita: ${serviceSummary} en ${data.business.name}`,
         html: renderClientBookingHtml(data),
       }),
     );
@@ -422,7 +466,7 @@ export async function sendBookingNotifications(data: BookingEmailData): Promise<
     sendEmail({
       to: businessDest,
       from: "AgendaLink <pagos@agendalink.cl>",
-      subject: `Nueva cita: ${data.clientName} - ${data.service.name} (${data.time})`,
+      subject: `Nueva cita: ${data.clientName} - ${serviceSummary} (${data.time})`,
       html: renderBusinessNotificationHtml(data),
     }),
   );

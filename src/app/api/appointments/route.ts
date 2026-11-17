@@ -36,6 +36,9 @@ export async function POST(request: Request) {
         date: parsed.value.date,
         time: parsed.value.time,
         service: result.appointment.service,
+        services: result.appointment.services,
+        totalDuration: result.appointment.service.duration,
+        totalPrice: result.appointment.service.price,
         professional: result.appointment.professional,
         business: result.appointment.business,
       });
