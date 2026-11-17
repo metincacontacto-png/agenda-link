@@ -51,7 +51,11 @@ export async function getSlotsForProfessional(
         status: "CONFIRMED",
         dateTime: { gte: dayRange.startsAt, lt: dayRange.endsAt },
       },
-      include: { service: { select: { duration: true } } },
+      select: {
+        dateTime: true,
+        durationMinutes: true,
+        service: { select: { duration: true } },
+      },
     }),
   ]);
 
@@ -65,7 +69,7 @@ export async function getSlotsForProfessional(
     blocks,
     appointments: appointments.map((appointment) => ({
       dateTime: appointment.dateTime,
-      durationMinutes: appointment.service.duration,
+      durationMinutes: appointment.durationMinutes ?? appointment.service.duration,
     })),
     minDateTime,
   });

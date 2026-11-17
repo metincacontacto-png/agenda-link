@@ -7,6 +7,7 @@ export interface BookingBusiness {
   email?: string;
   cancellationPolicy?: string | null;
   minNoticeHours?: number;
+  maxServicesPerBooking?: number;
 }
 
 export interface BookingService {
@@ -42,11 +43,14 @@ export interface AtomicBookingInput {
   clientWhatsApp: string;
   dateTime: string;
   serviceDurationMinutes: number;
+  servicesJson?: string | null;
+  durationMinutes?: number | null;
 }
 
 export interface BookingRepository {
   findBusinessBySlug(slug: string): Promise<BookingBusiness | null>;
   findServiceById(serviceId: string): Promise<BookingService | null>;
+  findServicesByIds?(serviceIds: string[]): Promise<BookingService[]>;
   findProfessionalById(professionalId: string): Promise<BookingProfessional | null>;
   getAvailableSlots(query: BookingAvailabilityQuery): Promise<string[]>;
   insertIfAvailable(input: AtomicBookingInput): Promise<boolean>;

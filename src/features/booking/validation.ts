@@ -3,6 +3,7 @@ import { isValidDateOnly, parseLocalTime } from "../schedule/time.ts";
 export interface CreateBookingInput {
   slug: string;
   serviceId: string;
+  serviceIds?: string[];
   professionalId: string;
   clientName: string;
   clientWhatsApp: string;
@@ -42,7 +43,6 @@ export function parseCreateBookingInput(input: unknown): BookingInputResult {
   }
   const record = input as Record<string, unknown>;
   const slug = boundedString(record.slug, 1, 100);
-  const serviceId = boundedString(record.serviceId, 1, 100);
   const professionalId = boundedString(record.professionalId, 1, 100);
   const clientName = boundedString(record.clientName, 1, 100);
   const clientWhatsApp = boundedString(record.clientWhatsApp, 1, 32);
@@ -50,11 +50,35 @@ export function parseCreateBookingInput(input: unknown): BookingInputResult {
   const date = boundedString(record.date, 10, 10);
   const time = boundedString(record.time, 5, 5);
 
+  let rawServiceIds: unknown[] = [];
+  if (Array.isArray(record.serviceIds)) {
+    rawServiceIds = [...record.serviceIds];
+  } else if (record.serviceIds !== undefined && record.serviceIds !== null) {
+    return { ok: false, error: "Selecciona un servicio y un profesional" };
+  }
+
+  const singleServiceId = boundedString(record.serviceId, 1, 100);
+  if (singleServiceId && !rawServiceIds.includes(singleServiceId)) {
+    rawServiceIds = [singleServiceId, ...rawServiceIds];
+  }
+
+  const serviceIds: string[] = [];
+  for (const item of rawServiceIds) {
+    const s = boundedString(item, 1, 100);
+    if (!s) {
+      return { ok: false, error: "Selecciona un servicio y un profesional" };
+    }
+    serviceIds.push(s);
+  }
+
   if (!slug || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) {
     return { ok: false, error: "Slug de negocio inválido" };
   }
-  if (!serviceId || !professionalId) {
+  if (serviceIds.length === 0 || !professionalId) {
     return { ok: false, error: "Selecciona un servicio y un profesional" };
+  }
+  if (serviceIds.length > 5) {
+    return { ok: false, error: "Selecciona como máximo 5 servicios" };
   }
   if (!clientName || /[\u0000-\u001f\u007f]/.test(clientName)) {
     return { ok: false, error: "Nombre de cliente inválido" };
@@ -83,7 +107,8 @@ export function parseCreateBookingInput(input: unknown): BookingInputResult {
     ok: true,
     value: {
       slug,
-      serviceId,
+      serviceId: serviceIds[0],
+      serviceIds,
       professionalId,
       clientName,
       clientWhatsApp: normalizedWhatsApp,

@@ -6,13 +6,30 @@ export const prismaBookingRepository: BookingRepository = {
   findBusinessBySlug(slug) {
     return prisma.business.findUnique({
       where: { slug },
-      select: { id: true, slug: true, name: true, currency: true, timezone: true, email: true, cancellationPolicy: true, minNoticeHours: true },
+      select: {
+        id: true,
+        slug: true,
+        name: true,
+        currency: true,
+        timezone: true,
+        email: true,
+        cancellationPolicy: true,
+        minNoticeHours: true,
+        maxServicesPerBooking: true,
+      },
     });
   },
 
   findServiceById(serviceId) {
     return prisma.service.findUnique({
       where: { id: serviceId },
+      select: { id: true, businessId: true, name: true, duration: true, price: true },
+    });
+  },
+
+  findServicesByIds(serviceIds) {
+    return prisma.service.findMany({
+      where: { id: { in: serviceIds } },
       select: { id: true, businessId: true, name: true, duration: true, price: true },
     });
   },
@@ -31,12 +48,12 @@ export const prismaBookingRepository: BookingRepository = {
       INSERT INTO "Appointment" (
         "id", "businessId", "serviceId", "professionalId", "clientName",
         "clientWhatsApp", "dateTime", "status", "paymentStatus",
-        "paymentMethod", "paymentAmount"
+        "paymentMethod", "paymentAmount", "durationMinutes", "servicesJson"
       )
       SELECT
         ${input.id}, ${input.businessId}, ${input.serviceId}, ${input.professionalId},
         ${input.clientName}, ${input.clientWhatsApp}, ${input.dateTime},
-        'CONFIRMED', 'PENDING', NULL, NULL
+        'CONFIRMED', 'PENDING', NULL, NULL, ${input.durationMinutes ?? input.serviceDurationMinutes}, ${input.servicesJson ?? null}
       WHERE NOT EXISTS (
         SELECT 1
         FROM "Appointment" AS existing
@@ -45,7 +62,7 @@ export const prismaBookingRepository: BookingRepository = {
           AND existing."professionalId" = ${input.professionalId}
           AND existing."status" NOT IN ('CANCELLED', 'CANCELED')
           AND julianday(existing."dateTime") < julianday(${input.dateTime}) + (${input.serviceDurationMinutes} / 1440.0)
-          AND julianday(existing."dateTime") + (existingService."duration" / 1440.0) > julianday(${input.dateTime})
+          AND julianday(existing."dateTime") + (COALESCE(existing."durationMinutes", existingService."duration") / 1440.0) > julianday(${input.dateTime})
       )
       AND NOT EXISTS (
         SELECT 1
