@@ -38,3 +38,36 @@ export function parseCreateServiceInput(input: unknown): CreateServiceResult {
     },
   };
 }
+
+export interface UpdateServiceInput {
+  id: string;
+  name: string;
+  price: number;
+  duration: number;
+  imageUrl?: string | null;
+}
+
+export type UpdateServiceResult =
+  | { ok: true; value: UpdateServiceInput }
+  | { ok: false; error: string };
+
+export function parseUpdateServiceInput(input: unknown): UpdateServiceResult {
+  if (typeof input !== "object" || input === null) {
+    return { ok: false, error: "Datos de servicio inválidos" };
+  }
+  const record = input as Record<string, unknown>;
+  if (typeof record.id !== "string" || record.id.trim().length === 0 || record.id.length > 100) {
+    return { ok: false, error: "ID de servicio inválido" };
+  }
+  const createResult = parseCreateServiceInput(input);
+  if (!createResult.ok) {
+    return createResult;
+  }
+  return {
+    ok: true,
+    value: {
+      id: record.id.trim(),
+      ...createResult.value,
+    },
+  };
+}

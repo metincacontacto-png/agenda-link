@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/db";
 import { uploadBase64ToR2, deleteFromR2 } from "@/features/media/storage";
-import type { CreateServiceInput } from "@/features/catalog/validation";
+import type { CreateServiceInput, UpdateServiceInput } from "@/features/catalog/validation";
 
 export async function createCatalogService(
   businessId: string,
@@ -15,6 +15,54 @@ export async function createCatalogService(
       price: input.price,
       duration: input.duration,
       imageUrl: imageUrl || null,
+    },
+    select: { id: true, name: true, price: true, duration: true, imageUrl: true },
+  });
+}
+
+export async function updateCatalogService(
+  businessId: string,
+  businessSlug: string,
+  input: UpdateServiceInput,
+) {
+  const existing = await prisma.service.findFirst({
+    where: { id: input.id, businessId },
+    select: { id: true, imageUrl: true },
+  });
+  if (!existing) return null;
+
+  let finalImageUrl: string | null = existing.imageUrl;
+
+  if (input.imageUrl !== undefined) {
+    if (!input.imageUrl || input.imageUrl.trim() === "") {
+      if (existing.imageUrl) {
+        try {
+          await deleteFromR2(existing.imageUrl);
+        } catch (err) {
+          console.warn("Failed to delete previous service image from R2:", err);
+        }
+      }
+      finalImageUrl = null;
+    } else if (input.imageUrl !== existing.imageUrl) {
+      const uploaded = await uploadBase64ToR2(input.imageUrl, `service_${businessSlug}`);
+      if (existing.imageUrl && existing.imageUrl !== uploaded) {
+        try {
+          await deleteFromR2(existing.imageUrl);
+        } catch (err) {
+          console.warn("Failed to delete previous service image from R2:", err);
+        }
+      }
+      finalImageUrl = uploaded || null;
+    }
+  }
+
+  return prisma.service.update({
+    where: { id: input.id },
+    data: {
+      name: input.name,
+      price: input.price,
+      duration: input.duration,
+      imageUrl: finalImageUrl,
     },
     select: { id: true, name: true, price: true, duration: true, imageUrl: true },
   });

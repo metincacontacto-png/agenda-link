@@ -37,6 +37,11 @@ export const metadata: Metadata = {
     description: "La forma más simple de recibir reservas y organizar tu negocio en Chile.",
     images: ["https://agendalink.cl/og.png"],
   },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "AgendaLink",
+  },
 };
 
 export default function RootLayout({

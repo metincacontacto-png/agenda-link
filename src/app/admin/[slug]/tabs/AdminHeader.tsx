@@ -1,11 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import type { BusinessAdminDTO } from "@/features/businesses/contracts";
 import { getTrialDaysRemaining } from "@/features/businesses/subscription-policy";
 import styles from "../admin.module.css";
 import type { AdminSettingsSubTab, AdminTabKey } from "./types";
+import InstallAppModal from "./InstallAppModal";
+
+export interface BeforeInstallPromptEvent extends Event {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
+}
 
 interface AdminHeaderProps {
   business: BusinessAdminDTO;
@@ -36,6 +42,28 @@ export default function AdminHeader({
 }: AdminHeaderProps) {
   const [copiedLink, setCopiedLink] = useState(false);
   const [copiedScheduleLink, setCopiedScheduleLink] = useState(false);
+  const [isInstallModalOpen, setIsInstallModalOpen] = useState(false);
+  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (e: Event) => {
+      e.preventDefault();
+      setDeferredPrompt(e as BeforeInstallPromptEvent);
+    };
+    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+    return () => window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+  }, []);
+
+  const handleDirectInstall = async () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const choiceResult = await deferredPrompt.userChoice;
+      if (choiceResult?.outcome === "accepted") {
+        setDeferredPrompt(null);
+        setIsInstallModalOpen(false);
+      }
+    }
+  };
 
   const handleCopyLink = async () => {
     try {
@@ -200,6 +228,31 @@ export default function AdminHeader({
             </>
           )}
         </button>
+
+        <button
+          type="button"
+          onClick={() => setIsInstallModalOpen(true)}
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 6,
+            background: "linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(168, 85, 247, 0.1) 100%)",
+            color: "#6366f1",
+            border: "1.5px solid rgba(99, 102, 241, 0.35)",
+            padding: "8px 13px",
+            borderRadius: 999,
+            fontSize: 12.5,
+            fontWeight: 700,
+            cursor: "pointer",
+            transition: "all 0.2s cubic-bezier(0.16, 1, 0.3, 1)",
+            whiteSpace: "nowrap",
+          }}
+          title="Descargar o instalar la aplicación en tu celular"
+        >
+          <span>📲</span>
+          Instalar App
+        </button>
+
         <Link href={`/${business.slug}`} target="_blank" className={styles.publicLinkBtn}>Ver link público ↗</Link>
         <button
           type="button"
@@ -241,7 +294,12 @@ export default function AdminHeader({
             <button className={styles.profileDropdownItem} onClick={() => { onOpenFirstSteps(); onProfileDropdownChange(false); }}>
               Primeros pasos
             </button>
-            <button className={styles.profileDropdownItem} disabled title="No hay recursos descargables disponibles">Descargas no disponibles</button>
+            <button
+              className={styles.profileDropdownItem}
+              onClick={() => { setIsInstallModalOpen(true); onProfileDropdownChange(false); }}
+            >
+              📲 Instalar app en el celular
+            </button>
             <button className={styles.profileDropdownItem} disabled title="El programa de referidos no está habilitado">Referidos no disponibles</button>
             <button className={styles.profileDropdownItem} disabled title="No hay tutoriales publicados todavía">Tutoriales no disponibles</button>
             <button className={styles.profileDropdownItem} onClick={() => { onTabChange("administracion"); onSettingsTabChange("pagos"); onProfileDropdownChange(false); }}>Cobros con Mercado Pago</button>
@@ -250,6 +308,14 @@ export default function AdminHeader({
           </div>
         )}
       </div>
+
+      <InstallAppModal
+        slug={business.slug}
+        isOpen={isInstallModalOpen}
+        onClose={() => setIsInstallModalOpen(false)}
+        deferredPrompt={deferredPrompt}
+        onDirectInstall={handleDirectInstall}
+      />
     </header>
   );
 }

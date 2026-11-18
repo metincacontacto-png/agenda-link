@@ -23,11 +23,13 @@ export default function ServicesTab({
   onServicesChanged,
   maxServicesPerBooking = 1,
 }: ServicesTabProps) {
+  const [editingServiceId, setEditingServiceId] = useState<string | null>(null);
   const [serviceName, setServiceName] = useState("");
   const [servicePrice, setServicePrice] = useState("");
   const [serviceDuration, setServiceDuration] = useState("30");
   const [serviceImage, setServiceImage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const formRef = useRef<HTMLDivElement>(null);
 
   const [pendingMaxServices, setPendingMaxServices] = useState<number | null>(null);
   const [isSavingMaxServices, setIsSavingMaxServices] = useState(false);
@@ -42,6 +44,23 @@ export default function ServicesTab({
   }, []);
 
   const currentMaxServices = pendingMaxServices ?? maxServicesPerBooking;
+
+  const handleStartEdit = (service: ServiceDTO) => {
+    setEditingServiceId(service.id);
+    setServiceName(service.name);
+    setServicePrice(service.price.toString());
+    setServiceDuration(service.duration.toString());
+    setServiceImage(service.imageUrl || "");
+    formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  const handleCancelEdit = () => {
+    setEditingServiceId(null);
+    setServiceName("");
+    setServicePrice("");
+    setServiceDuration("30");
+    setServiceImage("");
+  };
 
   const handleMaxServicesChange = async (event: ChangeEvent<HTMLSelectElement>) => {
     const nextLimit = Number(event.target.value);
@@ -92,33 +111,48 @@ export default function ServicesTab({
     reader.readAsDataURL(file);
   };
 
-  const handleAddService = async (event: FormEvent<HTMLFormElement>) => {
+  const handleSaveService = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!serviceName || !servicePrice) return;
     setIsSubmitting(true);
     try {
-      const response = await fetch("/api/services", {
-        method: "POST",
+      const isEditing = Boolean(editingServiceId);
+      const url = "/api/services";
+      const method = isEditing ? "PUT" : "POST";
+      const payload = isEditing
+        ? {
+            id: editingServiceId,
+            slug,
+            name: serviceName,
+            price: Number.parseFloat(servicePrice),
+            duration: Number.parseInt(serviceDuration, 10),
+            imageUrl: serviceImage || null,
+          }
+        : {
+            slug,
+            name: serviceName,
+            price: Number.parseFloat(servicePrice),
+            duration: Number.parseInt(serviceDuration, 10),
+            imageUrl: serviceImage || null,
+          };
+
+      const response = await fetch(url, {
+        method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          slug,
-          name: serviceName,
-          price: Number.parseFloat(servicePrice),
-          duration: Number.parseInt(serviceDuration, 10),
-          imageUrl: serviceImage || null,
-        }),
+        body: JSON.stringify(payload),
       });
+
       if (!response.ok) {
-        alert("Error al agregar servicio");
+        const data = await response.json().catch(() => null);
+        alert(data?.error || `Error al ${isEditing ? "actualizar" : "agregar"} servicio`);
         return;
       }
-      setServiceName("");
-      setServicePrice("");
-      setServiceDuration("30");
-      setServiceImage("");
+
+      handleCancelEdit();
       await onServicesChanged();
     } catch (error) {
-      console.error("Error adding service:", error);
+      console.error("Error saving service:", error);
+      alert("Error de conexión al guardar servicio");
     } finally {
       setIsSubmitting(false);
     }
@@ -199,9 +233,31 @@ export default function ServicesTab({
       </section>
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1.2fr", gap: "32px" }}>
-      <div>
-        <h3 style={{ fontSize: "15px", fontWeight: "700", marginBottom: "16px" }}>Agregar Servicio / Actividad</h3>
-        <form onSubmit={handleAddService} className={styles.adminForm}>
+      <div ref={formRef}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px", flexWrap: "wrap", gap: "8px" }}>
+          <h3 style={{ fontSize: "15px", fontWeight: "700", margin: 0 }}>
+            {editingServiceId ? "Editar Servicio" : "Agregar Servicio / Actividad"}
+          </h3>
+          {editingServiceId && (
+            <button
+              type="button"
+              onClick={handleCancelEdit}
+              style={{
+                background: "rgba(239, 68, 68, 0.08)",
+                border: "1px solid rgba(239, 68, 68, 0.25)",
+                borderRadius: "6px",
+                padding: "3px 8px",
+                fontSize: "11.5px",
+                fontWeight: 600,
+                color: "#dc2626",
+                cursor: "pointer",
+              }}
+            >
+              ✕ Cancelar edición
+            </button>
+          )}
+        </div>
+        <form onSubmit={handleSaveService} className={styles.adminForm}>
           <div className={styles.formGroup}>
             <label>Nombre del Servicio</label>
             <input
@@ -233,6 +289,8 @@ export default function ServicesTab({
               <option value="60">60 minutos</option>
               <option value="90">90 minutos</option>
               <option value="120">120 minutos</option>
+              <option value="150">150 minutos</option>
+              <option value="180">180 minutos</option>
             </select>
           </div>
           <div className={styles.formGroup}>
@@ -250,13 +308,36 @@ export default function ServicesTab({
             {serviceImage && (
               <div style={{ marginTop: "8px", display: "flex", alignItems: "center", gap: "8px" }}>
                 <img src={serviceImage} alt="Vista previa del servicio" style={{ width: "40px", height: "40px", borderRadius: "8px", objectFit: "cover" }} />
-                <button type="button" onClick={() => setServiceImage("")} style={{ border: "none", background: "none", color: "var(--danger)", fontSize: "11px", fontWeight: "bold", cursor: "pointer" }}>Eliminar</button>
+                <button type="button" onClick={() => setServiceImage("")} style={{ border: "none", background: "none", color: "var(--danger)", fontSize: "11px", fontWeight: "bold", cursor: "pointer" }}>Eliminar Foto</button>
               </div>
             )}
           </div>
-          <button type="submit" disabled={isSubmitting} className={styles.submitButton}>
-            {isSubmitting ? "Creando..." : "Crear Servicio"}
-          </button>
+          <div style={{ display: "flex", gap: "10px" }}>
+            <button type="submit" disabled={isSubmitting} className={styles.submitButton} style={{ flex: 1 }}>
+              {isSubmitting
+                ? (editingServiceId ? "Guardando..." : "Creando...")
+                : (editingServiceId ? "Guardar Cambios" : "Crear Servicio")}
+            </button>
+            {editingServiceId && (
+              <button
+                type="button"
+                onClick={handleCancelEdit}
+                disabled={isSubmitting}
+                style={{
+                  padding: "10px 16px",
+                  borderRadius: "10px",
+                  border: "1px solid rgba(0, 0, 0, 0.12)",
+                  background: "#ffffff",
+                  color: "var(--text-secondary)",
+                  fontSize: "13.5px",
+                  fontWeight: 600,
+                  cursor: "pointer",
+                }}
+              >
+                Cancelar
+              </button>
+            )}
+          </div>
         </form>
       </div>
 
@@ -269,10 +350,18 @@ export default function ServicesTab({
         ) : (
           <div className={styles.menuItemList}>
             {services.map((service) => (
-              <div key={service.id} className={styles.menuItemCard}>
+              <div
+                key={service.id}
+                className={styles.menuItemCard}
+                style={editingServiceId === service.id ? { borderColor: "var(--primary, #0066ff)", background: "rgba(0, 102, 255, 0.04)" } : undefined}
+              >
                 <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
-                  {service.imageUrl && (
+                  {service.imageUrl ? (
                     <img src={service.imageUrl} alt={service.name} style={{ width: "40px", height: "40px", borderRadius: "8px", objectFit: "cover" }} />
+                  ) : (
+                    <div style={{ width: "40px", height: "40px", borderRadius: "8px", background: "rgba(0, 102, 255, 0.06)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "16px" }}>
+                      ✨
+                    </div>
                   )}
                   <div className={styles.menuItemInfo}>
                     <div className={styles.menuItemName}>{service.name}</div>
@@ -282,6 +371,15 @@ export default function ServicesTab({
                 <div className={styles.menuItemActions}>
                   <span className={styles.menuItemPrice}>{formatPrice(service.price, currency)}</span>
                   <button
+                    type="button"
+                    className={styles.editServiceBtn}
+                    onClick={() => handleStartEdit(service)}
+                    title="Editar datos y foto del servicio"
+                  >
+                    ✏️ Editar
+                  </button>
+                  <button
+                    type="button"
                     className={styles.deleteBtn}
                     style={{ position: "relative", top: 0, right: 0, opacity: 0.6 }}
                     onClick={() => void handleDeleteService(service.id)}
